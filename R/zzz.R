@@ -23,3 +23,5 @@ lg = NULL
 # - how to handle noisy functions? Re-evaluate every generation?
 # - how to handle "alive" individuals?
 # - maybe handle individuals as data.table
+# - multicrit
+# - multi type operators
