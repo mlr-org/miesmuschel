@@ -1,0 +1,6 @@
+man/* linguist-generated
+man-roxygen/* linguist-documentation
+inst/doc/* linguist-generated
+vignettes/* linguist-documentation
+notes/*.html linguist-generated
+notes/*.org linguist-documentation

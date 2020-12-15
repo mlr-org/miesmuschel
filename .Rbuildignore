@@ -1,0 +1,11 @@
+^benchmark$
+^experiments$
+^docs$
+^\.gitattributes$
+^\.gitignore$
+^todo-files$
+^notes$
+^pkgdown$
+^\.travis\.yml$
+^.*\.Rproj$
+^\.Rproj\.user$

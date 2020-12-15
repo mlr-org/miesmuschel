@@ -1,0 +1,20 @@
+Package: Miesmuschel
+Title: Mixed Integer Evolutionary Strategies.
+Description: 
+Authors@R: c(
+  person("Martin", "Binder", email = "developer.mb706@mb706.com", role = c("aut", "cre"))
+  )
+URL: https://github.com/mlr-org/miesmuschel
+BugReports: https://github.com/mlr-org/miesmuschel/issues
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+ByteCompile: yes
+Version: 0.0.0-9000
+Depends:
+  paradox
+Imports:
+  mlr3misc (>= 0.5.0),
+  checkmate (>= 1.9.0),
+  bbotk
+RoxygenNote: 7.1.0
