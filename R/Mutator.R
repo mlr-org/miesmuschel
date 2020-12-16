@@ -6,24 +6,16 @@
 #' @include MiesOperator.R
 Mutator = R6Class("Mutator",
   inherit = MiesOperator,
-  public = list(
-    mutate = function(value, param_set) {
-      assert_subset(param_set$class, self$param_classes)
-      param_set$assert(value)  # TODO: this may be overkill, should only happen for debugging
-      value = private$.mutate(value, param_set)
-      param_set$assert(value)  # TODO: this may be overkill, should only happen for debugging
-      value
-    }
-  ),
   private = list(
-    .mutate = function(value, param_set) stop(".mutate needs to be implemented by inheriting class.")
+    .operate = function(values) private$.mutate(values)
+    .mutate = function(values) stop(".mutate needs to be implemented by inheriting class.")
   )
 )
 
 MutatorNull = R6Class("Mutator",
   inherit = Mutator,
   private = list(
-    .mutate = function(value, param_set) value
+    .mutate = function(values) values
   )
 )
 
@@ -37,9 +29,10 @@ MutatorNumeric = R6Class("MutatorNumeric",
     }
   ),
   private = list(
-    .mutate = function(value, param_set) {
-      mutated <- private$.mutate_numeric(unlist(value), param_set$lower, param_set$upper)
-      structure(as.list(mutated), names = names(param_set$ids()))
+    .mutate = function(values) {
+      mutated <- t(apply(values, 1, private$.mutate_numeric, private$.primed_ps$lower, private$.primed_ps$$upper))
+      colnames(mutated) <- colnames(values)
+      as.data.table(mutated)
     },
     .mutate_numeric = function(values, lowers, uppers) stop(".mutate_numeric needs to be implemented by inheriting class.")
   )
@@ -55,10 +48,13 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     }
   ),
   private = list(
-    .mutate = function(value, param_set) {
-      vals = private$.mutate_numeric(as.character(unlist(value)), map(param_set$levels, as.character))
-      vals = pmap(list(vals, param_set$class), function(val, class) if (class == "ParamLgl") as.logical(val) else val)  # TODO maybe this can be done more elegantly
-      structure(vals, names = names(param_set$ids()))
+    .mutate = function(values) {
+      vals = as.matrix(values)
+      mode(vals) <- "character"
+      vals = as.data.table(t(apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character)))
+
+      vals = vals[, pmap(list(.SD, private$.primed_ps$class), function(val, class) if (class == "ParamLgl") as.logical(val) else val)]  # TODO maybe this can be done more elegantly
+      setnames(vals, private$.primed_ps$ids())
     },
     .mutate_discrete = function(values, levels) stop(".mutate_discrete needs to be implemented by inheriting class.")
   )

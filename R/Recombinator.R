@@ -14,15 +14,6 @@ Recombinator = R6Class("Recombinator",
       private$.n_indivs_in = n_indivs_in
       private$.n_indivs_out = n_indivs_out
       super$initialize(param_classes, param_set)
-    },
-    recombine = function(values, param_set) {
-      assert_subset(param_set$class, self$param_classes)
-      assert_list(values, len = self$n_indivs_in)
-      map(values, param_set$assert)  # TODO: this may be overkill, should only happen for debugging
-      values = private$.recombine(values, param_set)
-      map(values, param_set$assert)  # TODO: this may be overkill, should only happen for debugging
-      assert_list(values, len = self$n_indivs_out)
-      values
     }
   ),
   active = list(
@@ -38,7 +29,15 @@ Recombinator = R6Class("Recombinator",
   private = list(
     .n_indivs_in = NULL,
     .n_indivs_out = NULL,
-    .recombine = function(values, param_set) stop(".recombine needs to be implemented by inheriting class.")
+    .operate = function(values) {
+      assert_true(nrow(values) %% self$n_indivs_in == 0)
+      rbindlist(
+        lapply(split(values, rep(nrow(values / self$n_indivs_in), each = self$n_indivs_in)), function(vs) {
+          vs = private$.recombine(vs)
+          assert_data_table(values, nrows = self$n_indivs_out)
+        }), use.names = TRUE)
+    },
+    .recombine = function(values) stop(".recombine needs to be implemented by inheriting class.")
   )
 )
 
@@ -50,7 +49,7 @@ RecombinatorNull = R6Class("RecombinatorNull",
     }
   ),
   private = list(
-    .recombine = function(values, param_set) values
+    .recombine = function(values) values
   )
 )
 
@@ -67,14 +66,10 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     }
   ),
   private = list(
-    .recombine = function(values, param_set) {
+    .recombine = function(values) {
       params = self$param_set$get_values()
       index = sample(1:2, length(values), TRUE, c(1 - params$p, params$p))
-      ret = list(pmap(list(transpose_list(values), index), `[[`))
-      if (self$n_indivs_out == 2) {
-        ret[[2]] = pmap(list(transpose_list(values), 3 - index), `[[`)
-      }
-      ret
+      values[, pmap(list(.SD, index), `[`)][seq_len(self$n_indivs_out)]
     }
   )
 )

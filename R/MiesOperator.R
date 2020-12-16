@@ -13,6 +13,17 @@ MiesOperator = R6Class("MiesOperator",
         private$.param_set_source = param_set
       }
       private$.param_classes = param_classes
+    },
+    prime = function(param_set) {
+      assert_subset(param_set$class, self$param_classes)
+      private$.primed_ps = param_set
+      invisible(self)
+    },
+    operate = function(values, ...) {
+      ids = private$.primed_ps$ids()
+      private$.primed_ps$assert_dt(values)
+      values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ...)
+      private$.primed_ps$assert_dt(values)[, match(ids, colnames(values), 0), with = FALSE]
     }
   ),
   active = list(
@@ -36,7 +47,11 @@ MiesOperator = R6Class("MiesOperator",
     }
   ),
   private = list(
+      # TODO: cloning
     .param_set = NULL,
+    .primed_ps = NULL,
     .param_classes = NULL,
+    .param_set_source = NULL,
+    .operate = function(values, ...) stop(".operate needs to be implemented by inheriting class.")
   )
 )
