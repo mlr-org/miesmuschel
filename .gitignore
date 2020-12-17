@@ -15,6 +15,5 @@ vignettes/*.html
 /doc/
 /docs/
 /data/
-/man/
 *.rds
 *.Rproj
