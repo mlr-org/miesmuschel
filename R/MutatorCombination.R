@@ -1,3 +1,4 @@
+#' @export
 OperatorCombination = R6Class("OperatorCombination",
   inherit = Operator,
   public = list(
@@ -178,6 +179,7 @@ OperatorCombination = R6Class("OperatorCombination",
   )
 )
 
+#' @export
 MutatorCombination = R6Class("MutatorCombination",
   inherit = OperatorCombination,
   public = list(
@@ -189,6 +191,7 @@ MutatorCombination = R6Class("MutatorCombination",
   )
 )
 
+#' @export
 RecombinatorCombination = R6Class("RecombinatorCombination",
   inherit = OperatorCombination,
   public = list(

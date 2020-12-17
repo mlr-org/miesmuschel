@@ -5,6 +5,7 @@
 
 #' @title Selector
 #' @include MiesOperator
+#' @export
 Selector = R6Class("Selector",
   inherit = MiesOperator,
   public = list(
@@ -41,6 +42,7 @@ Selector = R6Class("Selector",
   )
 )
 
+#' @export
 SelectorRandom = R6Class("SelectorRandom",
   inherit = Selector,
   public = list(
@@ -57,7 +59,9 @@ SelectorRandom = R6Class("SelectorRandom",
     }
   )
 )
+mlr_selectors$add("random", SelectorRandom)
 
+#' @export
 SelectorBest = R6Class("SelectorBest",
   inherit = Selector,
   public = list(
@@ -71,3 +75,4 @@ SelectorBest = R6Class("SelectorBest",
     }
   )
 )
+mlr_best$add("best", SelectorBest)

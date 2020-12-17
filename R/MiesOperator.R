@@ -1,6 +1,7 @@
 
 
 #' @title MiesOperator
+#' @export
 MiesOperator = R6Class("MiesOperator",
   public = list(
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps()) {

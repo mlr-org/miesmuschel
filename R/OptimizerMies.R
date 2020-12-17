@@ -71,6 +71,7 @@ check_fidelity_schedule = function(x) {
   }
 }
 
+#' @export
 mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
   assert_data_table(offspring)
   assert_choice(budget_id, inst$search_space$ids(), null.ok = is.null(fidelity_schedule))
@@ -87,6 +88,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   inst$eval_batch(cbind(offspring, dob = ..(generation), eol = NA_real_))
 }
 
+#' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_gen = FALSE) {
   assert_flag(only_latest_gen)
   data = inst$archive$data
@@ -109,7 +111,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_ge
 }
 
 
-
+#' @export
 mies_survival_plus = function(inst, mu, survival_selector, ...) {
   data = inst$archive$data
   assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
@@ -121,6 +123,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
   data[died, eol := max(dob)]
 }
 
+#' @export
 mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selector, ...) {
   data = inst$archive$data
   assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
@@ -140,6 +143,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   data[died, eol := max(dob)]
 }
 
+#' @export
 mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL) {
   assert_int(mu, lower = 1)
   assert_function(initializer, nargs = 2)
@@ -178,6 +182,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   inst
 }
 
+#' @export
 mies_get_fitnesses = function(inst, rows) {
   multiplier = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
   fitnesses = as.matrix(inst$archive$data[rows, ..(multiplier) != 0, with = FALSE])
@@ -185,6 +190,7 @@ mies_get_fitnesses = function(inst, rows) {
   sweep(fitnesses, 2L, multiplier, `*`)
 }
 
+#' @export
 mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new(), get_indivs = TRUE) {
   assert_r6(selector, "Selector")
   assert_int(n_select, lower = 0, tol = 1e-100)
@@ -201,6 +207,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
   }
 }
 
+#' @export
 mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new(), mutator = MutatorNull$new(), recombinator = RecombinatorNull$new()) {
   assert_int(lambda, lower = 1, tol = 1e-100)
   assert_r6(mutator, "Mutator")

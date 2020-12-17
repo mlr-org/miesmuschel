@@ -4,6 +4,7 @@
 
 #' @title Mutator
 #' @include MiesOperator.R
+#' @export
 Mutator = R6Class("Mutator",
   inherit = MiesOperator,
   private = list(
@@ -12,13 +13,16 @@ Mutator = R6Class("Mutator",
   )
 )
 
+#' @export
 MutatorNull = R6Class("MutatorNull",
   inherit = Mutator,
   private = list(
     .mutate = function(values) values
   )
 )
+mlr_mutators$add("null", MutatorNull)
 
+#' @export
 MutatorMaybe = R6Class("MutatorMaybe",
   inherit = Mutator,
   public = list(
@@ -53,9 +57,10 @@ MutatorMaybe = R6Class("MutatorMaybe",
     .maybe_param_set = NULL
   )
 )
-
+mlr_mutators$add("maybe", MutatorMaybe)
 
 # mutator that has a .mutate_numeric method that gets vector + lower and upper bounds
+#' @export
 MutatorNumeric = R6Class("MutatorNumeric",
   inherit = Mutator,
   public = list(
@@ -75,6 +80,8 @@ MutatorNumeric = R6Class("MutatorNumeric",
 )
 
 # mutator that has a .mutate_discrete method
+
+#' @export
 MutatorDiscrete = R6Class("MutatorDiscrete",
   inherit = Mutator,
   public = list(
@@ -96,6 +103,7 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
   )
 )
 
+#' @export
 MutatorGauss = R6Class("MutatorGauss",
   inherit = MutatorNumeric,
   public = list(
@@ -126,7 +134,9 @@ MutatorGauss = R6Class("MutatorGauss",
     }
   )
 )
+mlr_mutators$add("gauss", MutatorGauss)
 
+#' @export
 MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
   inherit = MutatorDiscrete,
   public = list(
@@ -150,3 +160,4 @@ MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
     }
   )
 )
+mlr_mutators$add("unif", MutatorDiscreteUniform)

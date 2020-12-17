@@ -4,7 +4,9 @@
 
 
 #' @title Recombinator
-#' @include MiesOperator
+#' @include MiesOperator.R
+#' @include dictionaries.R
+#' @export
 Recombinator = R6Class("Recombinator",
   inherit = MiesOperator,
   public = list(
@@ -41,6 +43,7 @@ Recombinator = R6Class("Recombinator",
   )
 )
 
+#' @export
 RecombinatorNull = R6Class("RecombinatorNull",
   inherit = Recombinator,
   public = list(
@@ -54,7 +57,9 @@ RecombinatorNull = R6Class("RecombinatorNull",
     .recombine = function(values) first(values, self$n_indivs_out)
   )
 )
+mlr_recombinators$add("null", RecombinatorNull)
 
+#' @export
 RecombinatorMaybe = R6Class("RecombinatorMaybe",
   inherit = Mutator,
   public = list(
@@ -98,7 +103,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     .maybe_param_set = NULL
   )
 )
-
+mlr_recombinators$add("maybe", RecombinatorMaybe)
 
 
 #' @title Crossover Recombinator
@@ -120,4 +125,4 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     }
   )
 )
-
+mlr_recombinators$add("xounif", RecombinatorCrossoverUniform)
