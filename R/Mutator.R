@@ -12,12 +12,48 @@ Mutator = R6Class("Mutator",
   )
 )
 
-MutatorNull = R6Class("Mutator",
+MutatorNull = R6Class("MutatorNull",
   inherit = Mutator,
   private = list(
     .mutate = function(values) values
   )
 )
+
+MutatorMaybe = R6Class("MutatorMaybe",
+  inherit = Mutator,
+  public = list(
+    initialize = function(mutator, mutator_not = MutatorNull$new()) {
+      private$.wrapped = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
+      private$.wrapped_not = assert_r6(mutator_not, "Mutator")$clone(deep = TRUE)
+
+      private$.wrapped$param_set$set_id = "maybe"
+      private$.wrapped_not$param_set$set_id = "maybe_not"
+      private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
+      private$.maybe_param_set$values = list(p = 1)
+      super$initialize(mutator$param_classes,
+        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set))
+    },
+    prime = function(param_set) {
+      private$.wrapped$prime(param_set)
+      private$.wrapped_not$prime(param_set)
+      super$prime(param_set)
+    }
+  ),
+  private = list(
+    .mutate = function(values) {
+      mutating = runif(nrow(values)) < self$param_set$get_values()$p
+      mutated = private$.wrapped$operate(values[mutating])
+      mutated_not = private$.wrapped_not$operate(values[!mutating])
+      rownumbers = seq_len(nrow(values))
+      rowoder = order(c(rownumbers[mutating], rownumbers[!mutating]))
+      rbind(mutated, mutated_not)[rowoder]
+    },
+    .wrapped = NULL,
+    .wrapped_not = NULL,
+    .maybe_param_set = NULL
+  )
+)
+
 
 # mutator that has a .mutate_numeric method that gets vector + lower and upper bounds
 MutatorNumeric = R6Class("MutatorNumeric",

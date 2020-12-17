@@ -29,29 +29,76 @@ Recombinator = R6Class("Recombinator",
   private = list(
     .n_indivs_in = NULL,
     .n_indivs_out = NULL,
+    .recombine = function(values) stop(".recombine needs to be implemented by inheriting class."),
     .operate = function(values) {
       assert_true(nrow(values) %% self$n_indivs_in == 0)
       rbindlist(
         lapply(split(values, rep(nrow(values / self$n_indivs_in), each = self$n_indivs_in)), function(vs) {
           vs = private$.recombine(vs)
-          assert_data_table(values, nrows = self$n_indivs_out)
+          assert_data_table(vs, nrows = self$n_indivs_out)
         }), use.names = TRUE)
-    },
-    .recombine = function(values) stop(".recombine needs to be implemented by inheriting class.")
+    }
   )
 )
 
 RecombinatorNull = R6Class("RecombinatorNull",
   inherit = Recombinator,
   public = list(
-    initialize = function() {
-      super$initialize(n_indivs_in = 1)
+    initialize = function(n_indivs_in = 1, n_indivs_out = 1) {
+      assert_int(n_indivs_out, lower = 1, tol = 1e-100)
+      assert_int(n_indivs_in, lower = n_indivs_out, tol = 1e-100)
+      super$initialize(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out)
     }
   ),
   private = list(
-    .recombine = function(values) values
+    .recombine = function(values) first(values, self$n_indivs_out)
   )
 )
+
+RecombinatorMaybe = R6Class("RecombinatorMaybe",
+  inherit = Mutator,
+  public = list(
+    initialize = function(recombinator, recombinator_not = NULL) {
+      private$.wrapped = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
+      if (is.null(recombinator_not)) {
+        private$.wrapped_not = RecombinatorNull$new(recombinator$n_indivs_in, recombinator$n_indivs_out)
+      } else {
+        private$.wrapped_not = assert_r6(recombinator_not, "Mutator")$clone(deep = TRUE)
+      }
+      if (private$.wrapped$n_indivs_in != private$.wrapped_not$n_indivs_in ||
+          private$.wrapped$n_indivs_out != private$.wrapped_not$n_indivs_out) {
+        stop("recombinator and recombinator_not must have the same number of in / out individuals.")
+      }
+
+      private$.wrapped$param_set$set_id = "maybe"
+      private$.wrapped_not$param_set$set_id = "maybe_not"
+
+      private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
+      private$.maybe_param_set$values = list(p = 1)
+      super$initialize(recombinator$param_classes,
+        alist(private$.maybe_param_set, private$.wrapped$param_set),
+        recombinator$n_indivs_in, recombinator$n_indivs_out)
+    },
+    prime = function(param_set) {
+      private$.wrapped$prime(param_set)
+      private$.wrapped_not$prime(param_set)
+      super$prime(param_set)
+    }
+  ),
+  private = list(
+    .recombine = function(values) {
+      if (runif(1) < self$param_set$get_values()$p) {
+        private$.wrapped$operate(values)
+      } else {
+        private$.wrapped_not$operate(values)
+      }
+    },
+    .wrapped = NULL,
+    .wrapped_not = NULL,
+    .maybe_param_set = NULL
+  )
+)
+
 
 
 #' @title Crossover Recombinator
