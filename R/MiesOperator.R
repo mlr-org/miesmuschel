@@ -35,6 +35,7 @@ MiesOperator = R6Class("MiesOperator",
         } else {
           private$.param_set = sourcelist[[1]]
         }
+        if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
       }
       if (!missing(val) && !identical(val, private$.param_set)) {
         stop("param_set is read-only.")
@@ -47,8 +48,23 @@ MiesOperator = R6Class("MiesOperator",
     }
   ),
   private = list(
-      # TODO: cloning
+    deep_clone = function(name, value) {
+      if (!is.null(private$.param_set_source)) {
+        private$.param_set_id = private$.param_set$set_id
+        private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
+        if (name == ".param_set_source") {
+          value = lapply(value, function(x) {
+            if (inherits(x, "R6")) x$clone(deep = TRUE) else x
+          })
+        }
+      }
+      if (is.environment(value) && !is.null(value[[".__enclos_env__"]])) {
+        return(value$clone(deep = TRUE))
+      }
+      value
+    },
     .param_set = NULL,
+    .param_set_id = NULL,
     .primed_ps = NULL,
     .param_classes = NULL,
     .param_set_source = NULL,
