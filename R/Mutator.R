@@ -4,11 +4,12 @@
 
 #' @title Mutator
 #' @include MiesOperator.R
+#' @include dictionaries.R
 #' @export
 Mutator = R6Class("Mutator",
   inherit = MiesOperator,
   private = list(
-    .operate = function(values) private$.mutate(values)
+    .operate = function(values) private$.mutate(values),
     .mutate = function(values) stop(".mutate needs to be implemented by inheriting class.")
   )
 )
@@ -71,7 +72,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
   ),
   private = list(
     .mutate = function(values) {
-      mutated <- t(apply(values, 1, private$.mutate_numeric, private$.primed_ps$lower, private$.primed_ps$$upper))
+      mutated <- t(apply(values, 1, private$.mutate_numeric, private$.primed_ps$lower, private$.primed_ps$upper))
       colnames(mutated) <- colnames(values)
       as.data.table(mutated)
     },
@@ -94,7 +95,7 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     .mutate = function(values) {
       vals = as.matrix(values)
       mode(vals) <- "character"
-      vals = as.data.table(t(apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character)))
+      vals = as.data.table(t(apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character))))
 
       vals = vals[, pmap(list(.SD, private$.primed_ps$class), function(val, class) if (class == "ParamLgl") as.logical(val) else val)]  # TODO maybe this can be done more elegantly
       setnames(vals, private$.primed_ps$ids())

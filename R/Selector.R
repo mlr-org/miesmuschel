@@ -4,7 +4,8 @@
 
 
 #' @title Selector
-#' @include MiesOperator
+#' @include MiesOperator.R
+#' @include dictionaries.R
 #' @export
 Selector = R6Class("Selector",
   inherit = MiesOperator,
@@ -75,4 +76,4 @@ SelectorBest = R6Class("SelectorBest",
     }
   )
 )
-mlr_best$add("best", SelectorBest)
+mlr_selectors$add("best", SelectorBest)

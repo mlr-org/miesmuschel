@@ -98,7 +98,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_ge
   assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
 
-  if (!any(is.na(data$eol)) stop("No alive individuals. Need to run mies_init_population()?")
+  if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
 
   next_fidelity = fidelity_schedule[data.table(generation = generation + 1), "budget_survivors", on = generation, roll = TRUE, with = FALSE]
 

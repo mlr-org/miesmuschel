@@ -1,6 +1,6 @@
 #' @export
 OperatorCombination = R6Class("OperatorCombination",
-  inherit = Operator,
+  inherit = MiesOperator,
   public = list(
     initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "error", granularity = 1) {
       private$.granularity = assert_int(granularity, lower = 1, tol = 1e-100)
@@ -168,13 +168,15 @@ OperatorCombination = R6Class("OperatorCombination",
       granularity = if (!length(private$.strategies)) nrow(values) else private$.granularity
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
-        lapply(split(values, rep(nrow(values / granularity, each = granularity)), function(vs) {
+        lapply(split(values, rep(nrow(values / granularity, each = granularity))), function(vs) {
           strategy_values = lapply(private$.strategies, function(f) lapply(vs, f))
           self$param_set$origin$values = insert_named(self$param_set$origin$values, strategy_values)
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
             self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE])
           })))
-        }), use.names = TRUE)
+        }),
+        use.names = TRUE
+      )
     }
   )
 )
@@ -231,8 +233,6 @@ RecombinatorCombination = R6Class("RecombinatorCombination",
       assert_true(nrow(values) == self$n_indivs_in)  # combinator handles granularity
       values = private$.recombine(values)
       assert_data_table(values, nrows = self$n_indivs_out)
-    },
-
+    }
   )
-
 )
