@@ -3,6 +3,7 @@
 #' @import bbotk
 #' @import paradox
 #' @import R6
+#' @import data.table
 "_PACKAGE"
 
 lg = NULL
@@ -16,3 +17,4 @@ lg = NULL
 }
 
 
+.datatable.aware = TRUE  # WTF

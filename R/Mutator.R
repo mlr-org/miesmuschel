@@ -42,6 +42,7 @@ MutatorMaybe = R6Class("MutatorMaybe",
       private$.wrapped$prime(param_set)
       private$.wrapped_not$prime(param_set)
       super$prime(param_set)
+      invisible(self)
     }
   ),
   private = list(
@@ -117,10 +118,11 @@ MutatorGauss = R6Class("MutatorGauss",
   private = list(
     .mutate_numeric = function(values, lowers, uppers) {
       params = self$param_set$get_values()
+      sdev = params$sdev
       if (params$sdev_is_relative) {
         assert_numeric(lowers, finite = TRUE, any.missing = FALSE)
         assert_numeric(uppers, finite = TRUE, any.missing = FALSE)
-        sdev = params$sdev * (uppers - lowers)
+        sdev = sdev * (uppers - lowers)
       }
       if (params$truncated_normal) {
         # TODO: this truncated normal has rounding issues
@@ -150,14 +152,14 @@ MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
   private = list(
     .mutate_discrete = function(values, levels) {
       params = self$param_set$get_values()
-      pmap(list(values, levels, runif(length(values)) < params$p), function(v, l, m) {
+      unlist(pmap(list(values, levels, runif(length(values)) < params$p), function(v, l, m) {
         if (m) {
           if (!params$can_mutate_to_same) l = setdiff(l, v)
           sample(l, 1)
         } else {
           v
         }
-      })
+      }))
     }
   )
 )

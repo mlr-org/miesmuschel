@@ -11,8 +11,8 @@ Recombinator = R6Class("Recombinator",
   inherit = MiesOperator,
   public = list(
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), n_indivs_in = 2, n_indivs_out = n_indivs_in) {
-      assert_int(n_indivs_in, lower = 1, col = 1e-100)
-      assert_int(n_indivs_out, lower = 1, col = 1e-100)
+      assert_int(n_indivs_in, lower = 1, tol = 1e-100)
+      assert_int(n_indivs_out, lower = 1, tol = 1e-100)
       private$.n_indivs_in = n_indivs_in
       private$.n_indivs_out = n_indivs_out
       super$initialize(param_classes, param_set)
@@ -35,7 +35,7 @@ Recombinator = R6Class("Recombinator",
     .operate = function(values) {
       assert_true(nrow(values) %% self$n_indivs_in == 0)
       rbindlist(
-        lapply(split(values, rep(nrow(values / self$n_indivs_in), each = self$n_indivs_in)), function(vs) {
+        lapply(split(values, rep(seq_len(nrow(values) / self$n_indivs_in), each = self$n_indivs_in)), function(vs) {
           vs = private$.recombine(vs)
           assert_data_table(vs, nrows = self$n_indivs_out)
         }), use.names = TRUE)
@@ -88,6 +88,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       private$.wrapped$prime(param_set)
       private$.wrapped_not$prime(param_set)
       super$prime(param_set)
+      invisible(self)
     }
   ),
   private = list(
@@ -120,8 +121,8 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
   private = list(
     .recombine = function(values) {
       params = self$param_set$get_values()
-      index = sample(1:2, length(values), TRUE, c(1 - params$p, params$p))
-      values[, pmap(list(.SD, index), `[`)][seq_len(self$n_indivs_out)]
+      index = lapply(sample(1:2, length(values), TRUE, c(1 - params$p, params$p)), function(x) c(x, 3 - x))
+      setnames(values[, pmap(list(.SD, index), `[`)][seq_len(self$n_indivs_out)], names(values))
     }
   )
 )

@@ -21,6 +21,7 @@ MiesOperator = R6Class("MiesOperator",
       invisible(self)
     },
     operate = function(values, ...) {
+      if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       ids = private$.primed_ps$ids()
       private$.primed_ps$assert_dt(values)
       values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ...)

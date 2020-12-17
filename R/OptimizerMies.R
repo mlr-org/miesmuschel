@@ -40,14 +40,14 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       fidelity_schedule = NULL
       if (!is.null(params$fidelity_schedule)) {
         budget_id = search_space$ids(tags = "budget")
-        if (length(budget_id) != 1) stopf("Only allowing one budget parameter, but found %s: %s", length(budget_id), str_collapse(budget_id))
+        if (length(budget_id) != 1) stopf("Only allowing one budget parameter, but found %s: %s",
+          length(budget_id), str_collapse(budget_id))
         search_space = ParamSetShadow$new(search_space, budget_id)
       }
       params = lapply(params, function(x) if (inherits(x, "Operator")) x$clone(deep = TRUE)$prime(search_space) else x)
       invoke(mies_init_population, inst, .args = self$param_set$get_values(tags = "init"))
 
       repeat {
-
         offspring = invoke(mies_generate_offspring, inst, .args = self$param_set$get_values(tags = "offspring"))
         mies_evaluate_offspring(inst, offspring, fidelity_schedule, budget_id)
         invoke(switch(params$survival_strategy,
