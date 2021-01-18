@@ -19,6 +19,8 @@ Imports:
   R6,
   bbotk,
   data.table
+Suggests:
+  tinytest
 RoxygenNote: 7.1.0
 Collate: 
     'MiesOperator.R'
