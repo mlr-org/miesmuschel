@@ -11,7 +11,6 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     initialize = function(set, shadowed) {
       private$.set = assert_r6(set, "ParamSet")
       private$.shadowed = assert_subset(shadowed, set$ids())
-
     },
     add = function(p) stop("Not Allowed."),
     subset = function(p) stop("Not Allowed."),
@@ -45,6 +44,12 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       values = private$.set$values
       values[private$.shadowed] = NULL
       values
+    },
+    set_id = function(v) {
+      if (!missing(v)) {
+        private$.set$set_id = v
+      }
+      private$.set$set_id
     },
     origin = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.set)) {

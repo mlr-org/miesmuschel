@@ -3,7 +3,7 @@
 OperatorCombination = R6Class("OperatorCombination",
   inherit = MiesOperator,
   public = list(
-    initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "error", granularity = 1) {
+    initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop", granularity = 1) {
       private$.granularity = assert_int(granularity, lower = 1, tol = 1e-100)
       private$.on_name_not_present = assert_choice(on_name_not_present, c("quiet", "warn", "stop"))
       private$.on_type_not_present = assert_choice(on_type_not_present, c("quiet", "warn", "stop"))
@@ -99,7 +99,7 @@ OperatorCombination = R6Class("OperatorCombination",
       }
       captured_types = classes[ids %nin% capturing]
       type_captured_ids = ids[ids %nin% capturing]
-      type_mapping = sapply(unique(captured_types), function(x) type_captured_ids[captured_types == x])
+      type_mapping = sapply(unique(captured_types), function(x) type_captured_ids[captured_types == x], simplify = FALSE)
       if (any(intersect(capturing, types) %nin% captured_types)) {
         switch(self$on_type_not_present,
           "quiet" = function(...) NULL,
@@ -115,8 +115,8 @@ OperatorCombination = R6Class("OperatorCombination",
           str_collapse(badtypes))
       }
       mapping = c(
-        keep(type_mapping[names(self$operators)], length),
-        sapply(self$groups, function(g) intersect(c(setdiff(g, types), unlist(type_mappings[g], use.names = FALSE)), ids))
+        keep(type_mapping[names(self$operators)], function(x) length(x) > 0),
+        sapply(self$groups, function(g) intersect(c(setdiff(g, types), unlist(type_mapping[g], use.names = FALSE)), ids), simplify = FALSE)
       )
       subsettable = ParamSet$new(param_set$params)
       imap(mapping, function(pars, op) {
@@ -169,7 +169,7 @@ OperatorCombination = R6Class("OperatorCombination",
       granularity = if (!length(private$.strategies)) nrow(values) else private$.granularity
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
-        lapply(split(values, rep(nrow(values / granularity, each = granularity))), function(vs) {
+        lapply(split(values, rep(nrow(values) / granularity, each = granularity)), function(vs) {
           strategy_values = lapply(private$.strategies, function(f) lapply(vs, f))
           self$param_set$origin$values = insert_named(self$param_set$origin$values, strategy_values)
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
