@@ -1,3 +1,4 @@
+#' @include ParamSetShadow.R
 #' @export
 OperatorCombination = R6Class("OperatorCombination",
   inherit = MiesOperator,
@@ -7,7 +8,7 @@ OperatorCombination = R6Class("OperatorCombination",
       private$.on_name_not_present = assert_choice(on_name_not_present, c("quiet", "warn", "stop"))
       private$.on_type_not_present = assert_choice(on_type_not_present, c("quiet", "warn", "stop"))
       private$.binary_fct_as_logical = assert_flag(binary_fct_as_logical)
-      private$.operators = assert_list(operators, types = "Operator", any.missing = FALSE, names = "unique", min.len = 1)
+      private$.operators = assert_list(operators, types = "MiesOperator", any.missing = FALSE, names = "unique", min.len = 1)
       private$.groups = assert_list(groups, types = "character", names = "unique", any.missing = FALSE)
       private$.strategies = assert_list(strategies, types = "function", names = "unique", any.missing = FALSE)
 
@@ -28,7 +29,7 @@ OperatorCombination = R6Class("OperatorCombination",
       if (any(names(groups) %nin% names(operators))) {
         stopf("No operator for group(s) %s", str_collapse(setdiff(names(operators), names(groups))))
       }
-      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")  # TODO shorter?
+      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")
       if (any(names(groups) %in% types)) {
         stop('Special group names "ParamInt", "ParamDbl", "ParamFct", "ParamLgl" may not be used.')
       }
@@ -59,7 +60,7 @@ OperatorCombination = R6Class("OperatorCombination",
           pcl = op$param_classes
         }
 
-        param_classes_list[[length(param_classes_list)]] = pcl
+        param_classes_list[[length(param_classes_list) + 1]] = pcl
       }
       params = ParamSetCollection$new(map(self$operators, "param_set"))$ids()
       if (any(names(strategies) %nin% params)) {
@@ -79,7 +80,7 @@ OperatorCombination = R6Class("OperatorCombination",
     },
     prime = function(param_set) {
       super$prime(param_set)
-      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")  # TODO shorter?
+      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")
       groupnames = c(types, names(self$groups))
       if (any(groupnames %in% param_set$ids())) {
         stop("groupnames / Param class names and ids of param_set must be disjoint")
@@ -185,8 +186,8 @@ OperatorCombination = R6Class("OperatorCombination",
 MutatorCombination = R6Class("MutatorCombination",
   inherit = OperatorCombination,
   public = list(
-    initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "error") {
-      assert_list(operators, class = "Mutator")
+    initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop") {
+      assert_list(operators, types = "Mutator")
       super$initialize(operators = operators, groups = groups, strategies = strategies, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present)
       class(self) = c("Mutator", class(self))
     }
@@ -197,8 +198,8 @@ MutatorCombination = R6Class("MutatorCombination",
 RecombinatorCombination = R6Class("RecombinatorCombination",
   inherit = OperatorCombination,
   public = list(
-    initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "error") {
-      assert_list(operators, class = "Recombinator")
+    initialize = function(operators = list(), groups = list(), strategies = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop") {
+      assert_list(operators, types = "Recombinator")
       inout = map_dtr(operators, function(o) list(nin = o$n_indivs_in, nout = o$n_indivs_out))
       if (nrow(unique(inout)) == 1) {
         private$.n_indivs_in = inout$nin
