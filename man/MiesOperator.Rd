@@ -24,7 +24,8 @@ MiesOperator
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
-  param_set = ps()
+  param_set = ps(),
+  endomorphism = TRUE
 )}\if{html}{\out{</div>}}
 }
 

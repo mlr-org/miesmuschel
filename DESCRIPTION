@@ -26,6 +26,7 @@ Collate:
     'MiesOperator.R'
     'dictionaries.R'
     'Mutator.R'
+    'ParamSetShadow.R'
     'MutatorCombination.R'
     'OptimizerMies.R'
     'Recombinator.R'
