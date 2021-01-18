@@ -1,8 +1,4 @@
 
-
-# TODO: dictionary & quick access function
-
-
 #' @title Recombinator
 #' @include MiesOperator.R
 #' @include dictionaries.R

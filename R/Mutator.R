@@ -1,7 +1,4 @@
 
-# TODO: dictionary & quick access function
-
-
 #' @title Mutator
 #' @include MiesOperator.R
 #' @include dictionaries.R
@@ -75,7 +72,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
   inherit = Mutator,
   public = list(
     initialize = function(param_classes, param_set = ps()) {
-      assert_subset(param_classes, c("ParamInt", "ParamDbl"))  # TODO: do we have a list of things with lower / upper bound?
+      assert_subset(param_classes, c("ParamInt", "ParamDbl"))
       super$initialize(param_classes, param_set)
     }
   ),
@@ -101,7 +98,7 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
   inherit = Mutator,
   public = list(
     initialize = function(param_classes, param_set = ps()) {
-      assert_subset(param_classes, c("ParamLgl", "ParamFct"))  # TODO: do we have a list of things here?
+      assert_subset(param_classes, c("ParamLgl", "ParamFct"))
       super$initialize(param_classes, param_set)
     }
   ),
@@ -144,7 +141,6 @@ MutatorGauss = R6Class("MutatorGauss",
         sdev = sdev * (uppers - lowers)
       }
       if (params$truncated_normal) {
-        # TODO: this truncated normal has rounding issues
         mutated <- qnorm(runif(length(values),
           pnorm(lowers, values, sdev),
           pnorm(uppers, values, sdev)),

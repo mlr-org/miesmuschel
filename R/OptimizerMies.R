@@ -27,7 +27,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         recombinator = RecombinatorCrossoverUniform$new(FALSE), parent_selector = SelectorRandom$new(),
         survival_selector = SelectorBest$new(), survival_strategy = "plus")
       super$initialize(
-        param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), # TODO: do we have a list?
+        param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
         properties = c("dependencies", "single-crit", "multi-crit")
       )
     }

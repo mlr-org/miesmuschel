@@ -1,8 +1,4 @@
 
-
-# TODO: dictionary & quick access function
-
-
 #' @title Selector
 #' @include MiesOperator.R
 #' @include dictionaries.R
@@ -10,7 +6,7 @@
 Selector = R6Class("Selector",
   inherit = MiesOperator,
   public = list(
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {  # TODO: how to do this?
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported

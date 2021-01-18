@@ -1,11 +1,9 @@
-# TODO: how do we handle bounded / unbounded parameters?
-
 #' @title MiesOperator
 #' @export
 MiesOperator = R6Class("MiesOperator",
   public = list(
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), endomorphism = TRUE) {
-      assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE) # TODO: do we have a list?
+      assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
         private$.param_set = assert_param_set(param_set)
         private$.param_set_source = NULL
