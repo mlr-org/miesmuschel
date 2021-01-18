@@ -14,7 +14,7 @@ Selector = R6Class("Selector",
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
-      super$initialize(param_classes, param_set)
+      super$initialize(param_classes, param_set, endomorphism = FALSE)
     }
   ),
   active = list(
@@ -54,7 +54,7 @@ SelectorRandom = R6Class("SelectorRandom",
     }
   ),
   private = list(
-    .select = function(values, param_set, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select) {
       params = self$param_set$get_values()
       sample(nrow(values), n_select, replace = params$replace)
     }
@@ -72,7 +72,7 @@ SelectorBest = R6Class("SelectorBest",
   ),
   private = list(
     .select = function(values, fitnesses, n_select) {
-      order(fitnesses, decreasing = TRUE)[(seq_len(n_select) - 1) %% length(values) + 1]
+      order(fitnesses, decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
     }
   )
 )

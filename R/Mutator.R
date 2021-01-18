@@ -48,8 +48,16 @@ MutatorMaybe = R6Class("MutatorMaybe",
   private = list(
     .mutate = function(values) {
       mutating = runif(nrow(values)) < self$param_set$get_values()$p
-      mutated = private$.wrapped$operate(values[mutating])
-      mutated_not = private$.wrapped_not$operate(values[!mutating])
+      if (any(mutating)) {
+        mutated = private$.wrapped$operate(values[mutating])
+      } else {
+        mutated = values[mutating]
+      }
+      if (any(!mutating)) {
+        mutated_not = private$.wrapped_not$operate(values[!mutating])
+      } else {
+        mutated_not = values[!mutating]
+      }
       rownumbers = seq_len(nrow(values))
       rowoder = order(c(rownumbers[mutating], rownumbers[!mutating]))
       rbind(mutated, mutated_not)[rowoder]
@@ -73,7 +81,12 @@ MutatorNumeric = R6Class("MutatorNumeric",
   ),
   private = list(
     .mutate = function(values) {
-      mutated <- t(apply(values, 1, private$.mutate_numeric, private$.primed_ps$lower, private$.primed_ps$upper))
+      mutated <- apply(values, 1, private$.mutate_numeric, private$.primed_ps$lower, private$.primed_ps$upper)
+      if (is.matrix(mutated)) {
+        mutated <- t(mutated)
+      } else {
+        mutated <- as.matrix(mutated)
+      }
       colnames(mutated) <- colnames(values)
       as.data.table(mutated)
     },
@@ -96,7 +109,13 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     .mutate = function(values) {
       vals = as.matrix(values)
       mode(vals) <- "character"
-      vals = as.data.table(t(apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character))))
+      vals = apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character))
+      if (is.matrix(vals)) {
+        vals = t(vals)
+      } else {
+        vals = as.matrix(vals)
+      }
+      vals = as.data.table(vals)
 
       vals = vals[, pmap(list(.SD, private$.primed_ps$class), function(val, class) if (class == "ParamLgl") as.logical(val) else val)]  # TODO maybe this can be done more elegantly
       setnames(vals, private$.primed_ps$ids())

@@ -61,14 +61,14 @@ mlr_recombinators$add("null", RecombinatorNull)
 
 #' @export
 RecombinatorMaybe = R6Class("RecombinatorMaybe",
-  inherit = Mutator,
+  inherit = Recombinator,
   public = list(
     initialize = function(recombinator, recombinator_not = NULL) {
       private$.wrapped = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       if (is.null(recombinator_not)) {
         private$.wrapped_not = RecombinatorNull$new(recombinator$n_indivs_in, recombinator$n_indivs_out)
       } else {
-        private$.wrapped_not = assert_r6(recombinator_not, "Mutator")$clone(deep = TRUE)
+        private$.wrapped_not = assert_r6(recombinator_not, "Recombinator")$clone(deep = TRUE)
       }
       if (private$.wrapped$n_indivs_in != private$.wrapped_not$n_indivs_in ||
           private$.wrapped$n_indivs_out != private$.wrapped_not$n_indivs_out) {
@@ -81,7 +81,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
       private$.maybe_param_set$values = list(p = 1)
       super$initialize(recombinator$param_classes,
-        alist(private$.maybe_param_set, private$.wrapped$param_set),
+        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         recombinator$n_indivs_in, recombinator$n_indivs_out)
     },
     prime = function(param_set) {
