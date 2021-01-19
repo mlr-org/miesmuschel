@@ -17,7 +17,7 @@ OperatorCombination = R6Class("OperatorCombination",
       lapply(groups, assertCharacter, min.chars = 1, any.missing = FALSE, unique = TRUE)
       allgroups = unlist(groups, use.names = FALSE)
       if (anyDuplicated(allgroups)) {
-        stopf("Duplicate group references: %s", str_collapse(unique(allgroups[duplicated(allgroups)])))
+        stopf("Dimension referenced in more than one group: %s", str_collapse(unique(allgroups[duplicated(allgroups)])))
       }
       if (any(allgroups %in% names(groups))) {
         stopf("No recursive groups allowed: %s", str_collapse(intersect(allgroups, names(groups))))
@@ -29,15 +29,15 @@ OperatorCombination = R6Class("OperatorCombination",
       if (any(names(groups) %nin% names(operators))) {
         stopf("No operator for group(s) %s", str_collapse(setdiff(names(operators), names(groups))))
       }
-      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")
+      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "*")
       if (any(names(groups) %in% types)) {
-        stop('Special group names "ParamInt", "ParamDbl", "ParamFct", "ParamLgl" may not be used.')
+        stop('Special group names "ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "*" may not be used.')
       }
 
       param_classes_list = list()
       for (on in names(operators)) {
-        operators[[on]] = operators[[on]]$clone(deep = TRUE)
-        op = operators[[on]]
+        private$.operators[[on]] = private$.operators[[on]]$clone(deep = TRUE)
+        op = private$.operators[[on]]
         op$param_set$set_id = on
 
         if (on %in% types) {
@@ -80,43 +80,53 @@ OperatorCombination = R6Class("OperatorCombination",
     },
     prime = function(param_set) {
       super$prime(param_set)
-      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")
-      groupnames = c(types, names(self$groups))
-      if (any(groupnames %in% param_set$ids())) {
-        stop("groupnames / Param class names and ids of param_set must be disjoint")
-      }
+      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")  # special types
+      specialgroups = c(types, "*")  # pseudogroups
+      groupnames = c(specialgroups, names(self$groups))  # names of groups, including type-pseudogroups
+
       ids = param_set$ids()
       classes = param_set$class
 
-      capturing = c(setdiff(names(self$operators), names(self$groups)), unlist(self$groups))
-      if (any(setdiff(capturing, types)  %nin% ids)) {
+      if (any(groupnames %in% ids)) {
+        stop("groupnames / Param class names and ids of param_set must be disjoint")
+      }
+
+      capturing = c(setdiff(names(self$operators), names(self$groups)), unlist(self$groups))  # dimensions that are captured either directly or through groups
+      if (any(setdiff(capturing, specialgroups)  %nin% ids)) {
         switch(self$on_name_not_present,
           "quiet" = function(...) NULL,
-          "warn" = warnf,
+          "warn" = warningf,
           "stop" = stopf)(
           "Named operators %s have no corresponding dimension.",
-          str_collapse(setdiff(capturing, c(types, ids))))
+          str_collapse(setdiff(capturing, c(specialgroups, ids))))
       }
-      captured_types = classes[ids %nin% capturing]
-      type_captured_ids = ids[ids %nin% capturing]
-      type_mapping = sapply(unique(captured_types), function(x) type_captured_ids[captured_types == x], simplify = FALSE)
-      if (any(intersect(capturing, types) %nin% captured_types)) {
+      type_captured_ids = ids[ids %nin% capturing]  # dimensions that are captured through types
+      captured_types = classes[ids %nin% capturing]  # ... and their types
+      if ("*" %in% capturing) {  # if we have a "*"-group, then it gets all the leftovers
+        captured_types[captured_types %nin% capturing] = "*"
+      }
+      type_mapping = sapply(unique(captured_types), function(x) type_captured_ids[captured_types == x], simplify = FALSE)  # named list: type -> uncaptured dimensions of that type
+
+      if (any(intersect(capturing, specialgroups) %nin% captured_types)) {
         switch(self$on_type_not_present,
           "quiet" = function(...) NULL,
-          "warn" = warnf,
+          "warn" = warningf,
           "stop" = stopf)(
-          "Operators for types %s have no corresponding dimensions (or dimensions are overriden).",
+          "Operators for types / special groups %s have no corresponding dimensions (or dimensions are overriden).",
           str_collapse(setdiff(intersect(capturing, types), captured_types)))
       }
-      if (any(captured_types %nin% capturing)) {
+      if (any(captured_types %nin% capturing)) {  # uncaptured dimension is not captured through pseudogroup
         badtypes = setdiff(unique(captured_types), capturing)
         stopf("No operators for dimensions %s of types %s",
           str_collapse(type_captured_ids[captured_types %in% badtypes]),
           str_collapse(badtypes))
       }
+
+      # mapping: name of operator in self$operators --> name of dimensions this operator captures
       mapping = c(
-        keep(type_mapping[names(self$operators)], function(x) length(x) > 0),
-        sapply(self$groups, function(g) intersect(c(setdiff(g, types), unlist(type_mapping[g], use.names = FALSE)), ids), simplify = FALSE)
+        keep(type_mapping[names(self$operators)], function(x) length(x) > 0),  # type (i.e. pseudogroup) capture
+        sapply(self$groups, function(g) intersect(c(setdiff(g, types), unlist(type_mapping[g], use.names = FALSE)), ids), simplify = FALSE),  # group capture
+        sapply(intersect(names(self$operators), ids), identity, simplify = FALSE)  # direct capture. No groups remain here because ids and groupnames are disjoint (checked above)
       )
       subsettable = ParamSet$new(param_set$params)
       imap(mapping, function(pars, op) {

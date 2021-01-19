@@ -51,6 +51,6 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   test_alloweds(pvals_allowed_multicol, p_allowed_multicol)
   test_alloweds(pvals_allowed_multicol[1], p_allowed_multicol)
 
-
+  expect_true(mut$endomorphism)
 }
 
