@@ -27,11 +27,11 @@ OperatorCombination = R6Class("OperatorCombination",
           str_collapse(intersect(allgroups, names(operators))))
       }
       if (any(names(groups) %nin% names(operators))) {
-        stopf("No operator for group(s) %s", str_collapse(setdiff(names(operators), names(groups))))
+        stopf("No operator for group(s) %s", str_collapse(setdiff(names(groups), names(operators))))
       }
-      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "*")
+      types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "ParamAny")
       if (any(names(groups) %in% types)) {
-        stop('Special group names "ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "*" may not be used.')
+        stop('Special group names "ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "ParamAny" may not be used.')
       }
 
       param_classes_list = list()
@@ -41,23 +41,36 @@ OperatorCombination = R6Class("OperatorCombination",
         op$param_set$set_id = on
 
         if (on %in% types) {
-          if (on %nin% op$param_classes) {
+          if (on == "ParamAny") {
+            # we know that the asterisk may apply to any type that is not otherwise referenced.
+            # We can therefore narrow pcl down to the supported class of the operator that is
+            # not otherwise referenced and could theory determine if this leaves an empty and if so
+            # throw an error. But that would mean we could make a valid combination invalid just by
+            # *adding* another operator, so we don't do that here.
+            on = op$param_classes
+          } else if (on %nin% op$param_classes) {
             stopf("Operator for %s does not support the type.", on)
           }
           pcl = on
         } else if (on %in% names(groups)) {
           neededtypes = intersect(types, groups[[on]])
-          if (any(neededtypes %nin% op$param_classes)) {
+          if (any(setdiff(neededtypes, "ParamAny") %nin% op$param_classes)) {
             stopf("Operator for group %s does not support type(s) %s.",
               on, str_collapse(setdiff(neededtypes, op$param_classes)))
           }
-          if (all(groups[[on]] %in% types)) {
+          if (all(groups[[on]] %in% setdiff(types, "ParamAny"))) {
             pcl = groups[[on]]
           } else {
             pcl = op$param_classes
           }
         } else {
           pcl = op$param_classes
+        }
+        if (binary_fct_as_logical && "ParamLgl" %in% pcl && "ParamFct" %in% op$param_classes) {
+          # handle the case where an operator assigned to ParamLgl handles ParamFct when binary_fct_as_logical is TRUE.
+          # Ordinarily an operator assigned to ParamX will only add ParamX to the `param_classes`, but for this case
+          # ParamLgl *and* ParamFct must be added (if the operator can handle ParamFct).
+          pcl = c(pcl, "ParamFct")
         }
 
         param_classes_list[[length(param_classes_list) + 1]] = pcl
@@ -81,18 +94,21 @@ OperatorCombination = R6Class("OperatorCombination",
     prime = function(param_set) {
       super$prime(param_set)
       types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")  # special types
-      specialgroups = c(types, "*")  # pseudogroups
+      specialgroups = c(types, "ParamAny")  # pseudogroups
       groupnames = c(specialgroups, names(self$groups))  # names of groups, including type-pseudogroups
 
       ids = param_set$ids()
       classes = param_set$class
+      if (self$binary_fct_as_logical) {
+        classes[param_set$nlevels == 2] = "ParamLgl"
+      }
 
       if (any(groupnames %in% ids)) {
         stop("groupnames / Param class names and ids of param_set must be disjoint")
       }
 
       capturing = c(setdiff(names(self$operators), names(self$groups)), unlist(self$groups))  # dimensions that are captured either directly or through groups
-      if (any(setdiff(capturing, specialgroups)  %nin% ids)) {
+      if (any(setdiff(capturing, specialgroups) %nin% ids)) {
         switch(self$on_name_not_present,
           "quiet" = function(...) NULL,
           "warn" = warningf,
@@ -102,8 +118,8 @@ OperatorCombination = R6Class("OperatorCombination",
       }
       type_captured_ids = ids[ids %nin% capturing]  # dimensions that are captured through types
       captured_types = classes[ids %nin% capturing]  # ... and their types
-      if ("*" %in% capturing) {  # if we have a "*"-group, then it gets all the leftovers
-        captured_types[captured_types %nin% capturing] = "*"
+      if ("ParamAny" %in% capturing) {  # if we have an ParamAny-group, then it gets all the leftovers
+        captured_types[captured_types %nin% capturing] = "ParamAny"
       }
       type_mapping = sapply(unique(captured_types), function(x) type_captured_ids[captured_types == x], simplify = FALSE)  # named list: type -> uncaptured dimensions of that type
 
@@ -113,7 +129,7 @@ OperatorCombination = R6Class("OperatorCombination",
           "warn" = warningf,
           "stop" = stopf)(
           "Operators for types / special groups %s have no corresponding dimensions (or dimensions are overriden).",
-          str_collapse(setdiff(intersect(capturing, types), captured_types)))
+          str_collapse(setdiff(intersect(capturing, specialgroups), captured_types)))
       }
       if (any(captured_types %nin% capturing)) {  # uncaptured dimension is not captured through pseudogroup
         badtypes = setdiff(unique(captured_types), capturing)
@@ -179,8 +195,8 @@ OperatorCombination = R6Class("OperatorCombination",
       granularity = if (!length(private$.strategies)) nrow(values) else private$.granularity
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
-        lapply(split(values, rep(nrow(values) / granularity, each = granularity)), function(vs) {
-          strategy_values = lapply(private$.strategies, function(f) lapply(vs, f))
+        lapply(split(values, rep(seq_len(nrow(values) / granularity), each = granularity)), function(vs) {
+          strategy_values = lapply(private$.strategies, function(f) f(vs))
           self$param_set$origin$values = insert_named(self$param_set$origin$values, strategy_values)
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
             self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE])

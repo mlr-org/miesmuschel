@@ -25,6 +25,14 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       params[private$.shadowed] = NULL
       params
     },
+    params_unid = function(rhs) {
+      if (!missing(rhs)) {
+        stop("params is read-only.")
+      }
+      params = private$.set$params_unid
+      params[private$.shadowed] = NULL
+      params
+    },
     deps = function(rhs) {
       if (!missing(rhs)) {
         stop("deps is read-only")

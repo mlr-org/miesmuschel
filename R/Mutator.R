@@ -141,10 +141,12 @@ MutatorGauss = R6Class("MutatorGauss",
         sdev = sdev * (uppers - lowers)
       }
       if (params$truncated_normal) {
-        mutated <- qnorm(runif(length(values),
-          pnorm(lowers, values, sdev),
-          pnorm(uppers, values, sdev)),
-          values, sdev)
+        mutated <- ifelse(sdev == 0, values,
+          qnorm(runif(length(values),
+            pnorm(lowers, values, sdev),
+            pnorm(uppers, values, sdev)),
+            values, sdev)
+        )
       } else {
         mutated <- rnorm(length(values), values, sdev)
       }
