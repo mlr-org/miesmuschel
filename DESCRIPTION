@@ -1,4 +1,4 @@
-Package: Miesmuschel
+Package: miesmuschel
 Title: Mixed Integer Evolutionary Strategies.
 Description: 
 Authors@R: c(
