@@ -3,60 +3,142 @@
 
 #' @title OptimizerMies
 #'
+#' @include Selector.R
+#'
 #' @description
 #' Mixed Integer Evolutionary Strategies
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(
-    initialize = function() {
-      param_set = ps(
-        lambda = p_int(1, tags = c("required", "offspring")),
-        mu = p_int(1, tags = c("required", "init", "survival")),
-        initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), default = generate_design_random, tags = "init"),  # arguments: param_set, n
-        mutator = p_uty(tags = "offspring", default = RecombinatorNull$new()),  # TODO custom check ...
-        recombinator = p_uty(tags = "offspring", default = MutatorNull$new()),
-        parent_selector = p_uty(tags = "offspring", default = SelectorBest$new()),
-        survival_strategy = p_fct(c("plus", "comma"), tags = "required"),
-        survival_selector = p_uty(tags = "required", tags = "survival"),
-        n_elite = p_int(0, requires = survival_strategy == "comma", tags = "survival"),
-        elite_selector = p_uty(requires = survival_strategy == "comma", tags = "survival"),
-        fidelity_schedule = p_uty(custom_check = check_fidelity_schedule),
-        reeval_fidelity_steps = p_lgl()
+    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL) {
+      private$.mutator = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
+      private$.recombinator = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
+      private$.parent_selector = assert_r6(parent_selector, "Selector")$clone(deep = TRUE)
+      private$.survival_selector = assert_r6(survival_selector, "Selector")$clone(deep = TRUE)
+      assert_r6(elite_selector, "Selector", null.ok = TRUE)
+      if (!is.null(elite_selector)) {
+        private$.elite_selector = elite_selector$clone(deep = TRUE)
+      }
+      private$.own_param_set = do.call(ps, c(list(
+          lambda = p_int(1, tags = c("required", "offspring")),
+          mu = p_int(1, tags = c("required", "init", "survival")),
+          initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), default = generate_design_random, tags = "init"),  # arguments: param_set, n
+          fidelity_schedule = p_uty(custom_check = check_fidelity_schedule),
+          reeval_fidelity_steps = p_lgl(),
+          survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required")),
+        if (!is.null(elite_selector)) list(
+          n_elite = p_int(0, depends = survival_strategy == "comma", tags = "survival"))
+      ))
+      private$.param_set_source = c(alist(
+          private$.own_param_set,
+          mutator = self$mutator$param_set,
+          recombinator = self$recombinator$param_set,
+          parent_selector = self$parent_selector$param_set,
+          survival_selector = self$survival_selector$param_set),
+        if (!is.null(elite_selector)) alist(
+          elite_selector = self$elite_selector$param_set)
       )
-      param_set$values = list(lambda = 10, mu = 1, mutator = MutatorGauss$new(),
-        recombinator = RecombinatorCrossoverUniform$new(FALSE), parent_selector = SelectorRandom$new(),
-        survival_selector = SelectorBest$new(), survival_strategy = "plus")
+
+      self$param_set$values = list(lambda = 10, mu = 1, survival_strategy = "plus")
+
       super$initialize(
-        param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
-        properties = c("dependencies", "single-crit", "multi-crit")
+        param_set = self$param_set,  # essentially a nop, since at this point we already set private$.param_set, but we can't give NULL here.
+        param_classes = Reduce(intersect, map(discard(list(mutator, recombinator, parent_selector, survival_selector, elite_selector), is.null), "param_classes"),
+        properties = c("dependencies", Reduce(intersect, map(discard(list(parent_selector, survival_selector, elite_selector), is.null), "supported"))
       )
     }
   ),
-
+  active = list(
+    mutator = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.mutator)) {
+        stop("mutator is read-only.")
+      }
+      private$.mutator
+    },
+    recombinator = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.recombinator)) {
+        stop("recombinator is read-only.")
+      }
+      private$.recombinator
+    },
+    parent_selector = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.parent_selector)) {
+        stop("parent_selector is read-only.")
+      }
+      private$.parent_selector
+    },
+    survival_selector = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.survival_selector)) {
+        stop("survival_selector is read-only.")
+      }
+      private$.survival_selector
+    },
+    elite_selector = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.elite_selector)) {
+        stop("elite_selector is read-only.")
+      }
+      private$.elite_selector
+    },
+    param_set = function(rhs) {
+      if (is.null(private$.param_set)) {
+        sourcelist = lapply(private$.param_set_source, function(x) eval(x))
+        private$.param_set = ParamSetCollection$new(sourcelist)
+        if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
+      }
+      if (!missing(val) && !identical(val, private$.param_set)) {
+        stop("param_set is read-only.")
+      }
+      private$.param_set
+    }
+  )
   private = list(
+    deep_clone = function(name, value) {
+      if (!is.null(private$.param_set_source)) {
+        private$.param_set_id = private$.param_set$set_id
+        private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
+        if (name == ".param_set_source") {
+          value = lapply(value, function(x) {
+            if (inherits(x, "R6")) x$clone(deep = TRUE) else x
+          })
+        }
+      }
+      if (is.environment(value) && !is.null(value[[".__enclos_env__"]])) {
+        return(value$clone(deep = TRUE))
+      }
+      value
+    },
     .optimize = function(inst) {
-      params = self$param_set$get_values()
+      params = private$.own_param_set$get_values()
       search_space = inst$search_space
-      fidelity_schedule = NULL
+      budget_id = NULL
       if (!is.null(params$fidelity_schedule)) {
         budget_id = search_space$ids(tags = "budget")
         if (length(budget_id) != 1) stopf("Only allowing one budget parameter, but found %s: %s",
           length(budget_id), str_collapse(budget_id))
         search_space = ParamSetShadow$new(search_space, budget_id)
       }
-      params = lapply(params, function(x) if (inherits(x, "Operator")) x$clone(deep = TRUE)$prime(search_space) else x)
-      invoke(mies_init_population, inst, .args = self$param_set$get_values(tags = "init"))
+      mies_init_population(inst, mu = params$mu, initializer = params$initializer, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
+
+      survival = switch(params$survival_strategy,
+          plus = mies_survival_plus,
+          comma = mies_survival_comma)
 
       repeat {
-        offspring = invoke(mies_generate_offspring, inst, .args = self$param_set$get_values(tags = "offspring"))
-        mies_evaluate_offspring(inst, offspring, fidelity_schedule, budget_id)
-        invoke(switch(params$survival_strategy,
-            plus = mies_survival_plus,
-            comma = mies_survival_comma),
-          inst, .args = self$param_set$get_values(tags = "survival"))
-        mies_step_fidelity(inst, fidelity_schedule, budget_id, only_latest_gen = !params$reeval_fidelity_steps)
+        offspring = mies_generate_offspring(inst, lambda = params$lambda,
+          parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator)
+        mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
+        survival(inst, mu = params$mu, survival_selector = self$survival_selector, n_elite = params$n_elite, elite_selector = self$elite_selector)
+        mies_step_fidelity(inst, params$fidelity_schedule, budget_id, only_latest_gen = !params$reeval_fidelity_steps)
       }
-    }
+    },
+    .mutator = NULL,
+    .recombinator = NULL,
+    .parent_selector = NULL,
+    .survival_selector = NULL,
+    .elite_selector = NULL,
+    .own_param_set = NULL,
+    .param_set_id = NULL,
+    .param_set_sources = NULL
   )
 )
 
