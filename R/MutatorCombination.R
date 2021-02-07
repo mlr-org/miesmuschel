@@ -175,7 +175,7 @@ OperatorCombination = R6Class("OperatorCombination",
       }
       params = ParamSetCollection$new(map(self$operators, "param_set"))$ids()
       if (any(names(adaptions) %nin% params)) {
-        stopf("Strategy for %s which is not an operator parameter.",
+        stopf("Adaption for %s which is not an operator parameter.",
           str_collapse(setdiff(names(adaptions), params)))
       }
 
@@ -316,8 +316,8 @@ OperatorCombination = R6Class("OperatorCombination",
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
         lapply(split(values, rep(seq_len(nrow(values) / granularity), each = granularity)), function(vs) {
-          strategy_values = lapply(private$.adaptions, function(f) f(vs))
-          self$param_set$origin$values = insert_named(self$param_set$origin$values, strategy_values)
+          adaption_values = lapply(private$.adaptions, function(f) f(vs))
+          self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
             self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE])
           })))

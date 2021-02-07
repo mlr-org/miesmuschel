@@ -18,7 +18,7 @@ mcom = MutatorCombination$new(ops)
 expect_set_equal(mcom$param_classes, c("ParamDbl", "ParamFct"))
 # expect_equal(mcom$operators, ops)  $operators have different set_id
 expect_equal(mcom$groups, list())
-expect_equal(mcom$strategies, list())
+expect_equal(mcom$adaptions, list())
 expect_equal(mcom$endomorphism, TRUE)
 expect_equal(mcom$on_name_not_present, "stop")
 expect_equal(mcom$on_type_not_present, "warn")
@@ -121,11 +121,11 @@ expect_error(MutatorCombination$new(list(x = RecombinatorNull$new())), "May only
 
 expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl),
   groups = list(g1 = c("x_rep_1", "x_rep_2"), g2 = c("x_rep_3", "x_rep_4")),
-  strategies = list(g1 = 1)), "May only contain.*function.*has type.*numeric")
+  adaptions = list(g1 = 1)), "May only contain.*function.*has type.*numeric")
 
 expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl),
   groups = list(g1 = c("x_rep_1", "x_rep_2"), g2 = c("x_rep_3", "x_rep_4")),
-  strategies = list(g3.sdev = identity)), "Strategy for g3.sdev which is not an operator parameter")
+  adaptions = list(g3.sdev = identity)), "Adaption for g3.sdev which is not an operator parameter")
 
 expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl), groups = list(g1 = c("x_rep_1", "x_rep_2", "x_rep_3", "x_rep_4")))$prime(psnum), "Named operators g2 have no corresponding dimension")
 expect_warning(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl), groups = list(g1 = c("x_rep_1", "x_rep_2", "x_rep_3", "x_rep_4")), on_name_not_present = "warn")$prime(psnum), "Named operators g2 have no corresponding dimension")
@@ -304,14 +304,14 @@ expect_set_equal(mut_maybe_flip$param_classes, c("ParamLgl", "ParamFct"))
 transformed = mut_maybe_flip$prime(ps(a = p_ab))$operate(data.table(a = rep("a", 10)))
 expect_set_equal(transformed$a, c("a", "b"))
 
-# strategies
+# adaptions
 
-mut_strat = MutatorCombination$new(list(ParamDbl = mut_gauss_small), strategies = list(ParamDbl.sdev = function(x) if (x$a < 0.5) .01 else 0))
+mut_adapt = MutatorCombination$new(list(ParamDbl = mut_gauss_small), adaptions = list(ParamDbl.sdev = function(x) if (x$a < 0.5) .01 else 0))
 
 expected_params = paste0("ParamDbl.", setdiff(mut_gauss_small$param_set$ids(), "sdev"))
-expect_equal(mut_strat$param_set$values[expected_params], sapply(expected_params, function(x) mut_gauss_small$param_set$values[[substr(x, 10, 1000)]], simplify = FALSE))
-mut_strat$prime(ps(a = p_r, b = p_r))
-transformed = mut_strat$operate(data.table(a = c(rep(0, 10), rep(0.25, 10), rep(0.75, 10), rep(1, 10)), b = c(rep(1, 20), rep(0, 20))))
+expect_equal(mut_adapt$param_set$values[expected_params], sapply(expected_params, function(x) mut_gauss_small$param_set$values[[substr(x, 10, 1000)]], simplify = FALSE))
+mut_adapt$prime(ps(a = p_r, b = p_r))
+transformed = mut_adapt$operate(data.table(a = c(rep(0, 10), rep(0.25, 10), rep(0.75, 10), rep(1, 10)), b = c(rep(1, 20), rep(0, 20))))
 expect_numeric(transformed[1:10, a], len = 10, lower = 1e-10, upper = .1)
 expect_numeric(transformed[1:10, b], len = 10, lower = .9, upper = 1 - 1e-10)
 expect_numeric(transformed[11:20, a], len = 10, lower = .15, upper = .35)
