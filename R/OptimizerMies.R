@@ -43,8 +43,8 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
 
       super$initialize(
         param_set = self$param_set,  # essentially a nop, since at this point we already set private$.param_set, but we can't give NULL here.
-        param_classes = Reduce(intersect, map(discard(list(mutator, recombinator, parent_selector, survival_selector, elite_selector), is.null), "param_classes"),
-        properties = c("dependencies", Reduce(intersect, map(discard(list(parent_selector, survival_selector, elite_selector), is.null), "supported"))
+        param_classes = Reduce(intersect, map(discard(list(mutator, recombinator, parent_selector, survival_selector, elite_selector), is.null), "param_classes")),
+        properties = c("dependencies", Reduce(intersect, map(discard(list(parent_selector, survival_selector, elite_selector), is.null), "supported")))
       )
     }
   ),
@@ -90,7 +90,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       }
       private$.param_set
     }
-  )
+  ),
   private = list(
     deep_clone = function(name, value) {
       if (!is.null(private$.param_set_source)) {
