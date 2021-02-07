@@ -1,11 +1,54 @@
-
-#' @title Selector
+#' @title Selector Base Class
+#'
 #' @include MiesOperator.R
 #' @include dictionaries.R
+#'
+#' @description
+#' Base class representing selection operations, inheriting from [`MiesOperator`].
+#'
+#' A [`Selector`] gets a table of individuals as input, along with information on the individuals' performance values and the
+#' number of individuals to select, and returns a vector of integers indicating which individuals were selected.
+#'
+#' Selection operations are performed in ES algorithms to facilitate concentration towards individuals that perform well with regard to the
+#' fitness measure.
+#'
+#' Fitness values are always *maximized*, both in single- and multi-criterion optimization.
+#'
+#' Unlike most other operator types inheriting from [`MiesOperator`], the `$operate()` function has three arguments, which are passed on to `$.select()`
+#' * `values` :: `data.frame`\cr
+#'   Individuals to operate on. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   and may not have any missing components.
+#' * `fitnesses` :: `numeric` | `matrix`\cr
+#'   Fitnesses for each individual given in `values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
+#'   this is a `matrix`, if number of rows must be equal to the number of rows in `values`, and it must have one column when doing single-crit optimization
+#'   and one column each for each  "criterion" when doing multi-crit optimization.
+#' * `n_select` :: `integer(1)`\cr
+#'   Number of individuals to select. Some `Selector`s select individuals with replacement, for which this value may be greater than the number of
+#'   rows in `values`.
+#'
+#' The return value for an operation will be a numeric vector of integer values of ength `n_select` indexing the individuals that were selected. Some `Selector`s
+#' select individuals with replacement, for which the return value may contain indices more than once.
+#'
+#' @section Inheriting:
+#' `Selector` is an abstract base class and should be inherited from. Inheriting classes should implement the private `$.select()`
+#' function. The user of the object calls `$operate()`, and the arguments are passed on to private `$.select()` after checking that
+#' the operator is primed, that the `values` argument conforms to the primed domain and that other values match. Typically, the `$initialize()` function
+#' should also be overloaded, and optionally the `$prime()` function; they should call their `super` equivalents.
+#'
+#' @family base classes
+#' @family selectors
 #' @export
 Selector = R6Class("Selector",
   inherit = MiesOperator,
   public = list(
+    #' @description
+    #' Initialize base class components of the `Mutator`.
+    #' @template param_param_classes
+    #' @template param_param_set
+    #' @param supported (`character`)\cr
+    #'   Subset of `"single-crit"` and `"multi-crit"`, indicating wether single and / or multi-criterion optimization is supported.
+    #'   Default both of them.\cr
+    #'   The `$supported` field will reflect this value.
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
@@ -14,6 +57,8 @@ Selector = R6Class("Selector",
     }
   ),
   active = list(
+    #' @field supported (`character`)\cr
+    #' Optimization supported by this `Selector`, can be `"single-crit"`, `"multi-crit"`, or both.
     supported = function(val) {
       if (!missing(val)) stop("supported is read-only.")
       private$.supported
@@ -39,10 +84,31 @@ Selector = R6Class("Selector",
   )
 )
 
+#' @title Random Selector
+#'
+#' @name dict_selectors_random
+#'
+#' @description
+#' Random selector that disregards fitness and individual values and selects individuals randomly. Depending on the hyperparameter `replace`,
+#' it samples with or without replacement.
+#'
+#' @section Hyperparameters:
+#' * `replace` :: `logical(1)`\cr
+#'   Whether to sample individuals with (`TRUE`) or without (`FALSE`) replacement. When sampling is done without replacement, then
+#'   `n_select` must be less or equal the number of rows in `values` when calling `$operate()`. Initialized to `FALSE`.
+#'
+#' @templateVar id random
+#' @template autoinfo_prepare_sel
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family selectors
 #' @export
 SelectorRandom = R6Class("SelectorRandom",
   inherit = Selector,
   public = list(
+    #' @description
+    #' Initialize the `SelectorRandom` object.
     initialize = function() {
       param_set = ps(replace = p_lgl(tags = "required"))
       param_set$values = list(replace = FALSE)
@@ -56,12 +122,33 @@ SelectorRandom = R6Class("SelectorRandom",
     }
   )
 )
-mlr_selectors$add("random", SelectorRandom)
+dict_selectors$add("random", SelectorRandom)
 
+
+#' @title Best Value Selector
+#'
+#' @name dict_selectors_best
+#'
+#' @description
+#' Selector that selects the top `n_select` individuals based on the  fitness value. When `n_select` is larger than the number
+#' of individuals, the selection wraps around: All `nrow(values)` individuals are selected at least `floor(nrow(values) / n_select)`
+#' times, with the top `nrow(values) %% n_select` individuals being selected one more time.
+#'
+#' @section Hyperparameters:
+#' This operator has no hyperparameters.
+#'
+#' @templateVar id best
+#' @template autoinfo_prepare_sel
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family selectors
 #' @export
 SelectorBest = R6Class("SelectorBest",
   inherit = Selector,
   public = list(
+    #' @description
+    #' Initialize the `SelectorBest` object.
     initialize = function() {
       super$initialize(supported = "single-crit")
     }
@@ -72,4 +159,4 @@ SelectorBest = R6Class("SelectorBest",
     }
   )
 )
-mlr_selectors$add("best", SelectorBest)
+dict_selectors$add("best", SelectorBest)

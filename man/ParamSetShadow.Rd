@@ -4,10 +4,41 @@
 \alias{ParamSetShadow}
 \title{ParamSetShadow}
 \description{
-Expose only some of a ParamSet's Parameters
+Wraps another \code{\link[paradox:ParamSet]{ParamSet}} and shadows out a subset of its \code{\link[paradox:Param]{Param}}s.
+The original \code{\link[paradox:ParamSet]{ParamSet}} can still be accessed through the \verb{$origin} field;
+otherwise, the \code{ParamSetShadow} behaves like a \code{\link[paradox:ParamSet]{ParamSet}} where the shadowed
+\code{\link[paradox:Param]{Param}}s are not present.
 }
 \section{Super class}{
 \code{\link[paradox:ParamSet]{paradox::ParamSet}} -> \code{ParamSetShadow}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{params}}{(named \code{list} of \code{\link[paradox:Param]{Param}})
+List of \code{\link[paradox:Param]{Param}} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the
+shadowed \code{\link[paradox:Param]{Param}}s removed.}
+
+\item{\code{params_unid}}{(named \code{list} of \code{\link[paradox:Param]{Param}})
+List of \code{\link[paradox:Param]{Param}} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the
+shadowed \code{\link[paradox:Param]{Param}}s removed. This is a field mostly for internal usage that has the
+\verb{$id}s set to invalid values but avoids cloning overhead.}
+
+\item{\code{deps}}{(\code{\link[data.table:data.table]{data.table}})\cr
+Table of dependencies, as in \code{\link[paradox:ParamSet]{ParamSet}}. The dependencies that are related to shadowed
+parameters are not exposed. This \code{\link[data.table:data.table]{data.table}} should be seen as read-only and not
+modified in-place; instead, the \verb{$origin}'s \verb{$deps} should be modified.}
+
+\item{\code{values}}{(named \code{list})\cr
+List of values, as in \code{\link[paradox:ParamSet]{ParamSet}}, with the shadowed values removed.}
+
+\item{\code{set_id}}{(\code{\link[data.table:data.table]{data.table}})\cr
+Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value will also change the wrapped \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$set_id} accordingly.}
+
+\item{\code{origin}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+\code{\link[paradox:ParamSet]{ParamSet}} being wrapped. This object can be modified by reference to influence the \code{ParamSetShadow} object itself.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -40,37 +71,88 @@ Expose only some of a ParamSet's Parameters
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the \code{ParamSetShadow} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$new(set, shadowed)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+\code{\link[paradox:ParamSet]{ParamSet}} to wrap.}
+
+\item{\code{shadowed}}{(\code{character})\cr
+Ids of \code{\link[paradox:Param]{Param}}s to shadow from \code{sets}, must be a subset of \code{set$ids()}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-add"></a>}}
 \if{latex}{\out{\hypertarget{method-add}{}}}
 \subsection{Method \code{add()}}{
+Implemented for compatibility with \code{\link[paradox:ParamSet]{ParamSet}} superclass. However, this function is
+not implemented and will give an error.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$add(p)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{p}}{not used.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset"></a>}}
 \if{latex}{\out{\hypertarget{method-subset}{}}}
 \subsection{Method \code{subset()}}{
+Implemented for compatibility with \code{\link[paradox:ParamSet]{ParamSet}} superclass. However, this function is
+not implemented and will give an error.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$subset(p)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{p}}{not used.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-check"></a>}}
 \if{latex}{\out{\hypertarget{method-check}{}}}
 \subsection{Method \code{check()}}{
+\pkg{checkmate}-like check-function for values.
+
+Handles dependencies of the shadowed \code{\link[paradox:ParamSet]{ParamSet}} correctly even for dependencies
+that reach to shadowed values, by inserting these shadowed values into \code{xs}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$check(xs)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{xs}}{(named \code{list})\cr
+Value to be checked.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{TRUE} if successful, otherwise a string describing the error.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

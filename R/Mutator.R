@@ -1,29 +1,123 @@
-
-#' @title Mutator
+#' @title Mutator Base Class
+#'
 #' @include MiesOperator.R
 #' @include dictionaries.R
+#'
+#' @description
+#' Base class representing mutation operations, inheriting from [`MiesOperator`].
+#'
+#' Mutations get a table of individuals as input and return a table of modified individuals as output. Individuals are acted on as
+#' individuals: every line of output corresponds to the same line of input, and presence or absence of other input lines does not
+#' affect the result.
+#'
+#' Mutation operations are performed in ES algorithms to facilitate exploration of the search space around individuals.
+#'
+#' @section Inheriting:
+#' `Mutator` is an abstract base class and should be inherited from. Inheriting classes should implement the private `$.mutate()`
+#' function. The user of the object calls `$operate()`, and the arguments are passed on to private `$.mutate()` after checking that
+#' the operator is primed, and that the `values` argument conforms to the primed domain. Typically, the `$initialize()` function
+#' should also be overloaded, and optionally the `$prime()` function; they should call their `super` equivalents.
+#'
+#' In many cases, it is advisable to inherit from one of the abstract subclasses, such as [`MutatorNumeric`], or [`MutatorDiscrete`].
+#'
+#' @family base classes
+#' @family mutators
 #' @export
 Mutator = R6Class("Mutator",
   inherit = MiesOperator,
+  public = list(
+    #' @description
+    #' Initialize base class components of the `Mutator`.
+    #' @template param_param_classes
+    #' @template param_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps()) {
+      # remove `endomorphism` option
+      super$initialize(param_classes = param_classes, param_set = param_set)
+    }
+  ),
   private = list(
     .operate = function(values) private$.mutate(values),
     .mutate = function(values) stop(".mutate needs to be implemented by inheriting class.")
   )
 )
 
+#' @title Null-Mutator
+#'
+#' @name dict_mutators_null
+#'
+#' @description
+#' Null-mutator that does not perform any operation on its input. Useful in particular with operator-wrappers such as [`MutatorMaybe`] or [`MutatorCombination`].
+#'
+#' @section Hyperparameters:
+#' This operator has no hyperparameters.
+#'
+#' @templateVar id null
+#' @template autoinfo_prepare_mut
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family mutators
 #' @export
 MutatorNull = R6Class("MutatorNull",
   inherit = Mutator,
+  public = list(
+    #' @description
+    #' Initialize the `NullMutator` object.
+    initialize = function() {
+      # call initialization with standard options: allow everything etc.
+      super$initialize()
+    }
+  ),
   private = list(
     .mutate = function(values) values
   )
 )
-mlr_mutators$add("null", MutatorNull)
+dict_mutators$add("null", MutatorNull)
 
+
+#' @title Mutator Choosing Action Probabilistically
+#'
+#' @name dict_mutators_maybe
+#'
+#' @description
+#' [`Mutator`] that chooses which operation to perform probabilistically. The [`Mutator`] wraps two other [`Mutator`]s given during construction,
+#' and for each individuum, the operation to perform is sampled: with probability `p` (hyperparameter), the [`Mutator`] given to the `mutator`
+#' construction argument is applied, and with probability `p - 1` the one given to `mutator_not` is applied.
+#'
+#' @section Hyperparameters:
+#' This operator has the hyperparameters of the [`Mutator`]s that it wraps: The hyperparameters of the operator given to the `mutator` construction argument
+#' are prefixed with `"maybe."`, the hyperparameters of the operator given to the `mutator_not` construction argument are prefixed with `"maybe_not."`.
+#'
+#' Additional hyperparameters:
+#' * `p` :: `numeric(1)` \cr
+#'   Probability per individual with which to apply the operator given to the `mutator` construction argument.
+#'
+#' @templateVar id maybe
+#' @templateVar additional , <mutator> \[, <mutator_not>\]
+#' @template autoinfo_prepare_mut
+#' @section Supported Operand Types:
+#'
+#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `mutator` and `mutator_not`.
+#'
+#' @template autoinfo_dict
+#'
+#' @family mutators
+#' @family mutator wrappers
 #' @export
 MutatorMaybe = R6Class("MutatorMaybe",
   inherit = Mutator,
   public = list(
+    #' @description
+    #' Initialize the `MutatorMaybe` object.
+    #' @param mutator ([`Mutator`])\cr
+    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Hyperparameter).\cr
+    #'   The constructed object gets a *clone* of this argument.
+    #' @param mutator_not ([`Mutator`])\cr
+    #'   Another [`Mutator`] to wrap. This operator runs when `mutator` is not chosen. By
+    #'   default, this is [`MutatorNull`], i.e. no operation. With this default, the
+    #'   `MutatorMaybe` object applies the `mutator` operation with probability `p`, and
+    #'   no operation at all otherwise.\cr
+    #'   The constructed object gets a *clone* of this argument.
     initialize = function(mutator, mutator_not = MutatorNull$new()) {
       private$.wrapped = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(mutator_not, "Mutator")$clone(deep = TRUE)
@@ -32,9 +126,15 @@ MutatorMaybe = R6Class("MutatorMaybe",
       private$.wrapped_not$param_set$set_id = "maybe_not"
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
       private$.maybe_param_set$values = list(p = 1)
-      super$initialize(mutator$param_classes,
+      super$initialize(intersect(mutator$param_classes, mutator_not$param_classes),
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set))
     },
+    #' @description
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
+    #' given to `mutator` and `mutator_not` during construction.
+    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #'   Passed to [`MiesOperator`]`$prime()`.
+    #' @return `invisible(self)`.
     prime = function(param_set) {
       private$.wrapped$prime(param_set)
       private$.wrapped_not$prime(param_set)
@@ -64,14 +164,122 @@ MutatorMaybe = R6Class("MutatorMaybe",
     .maybe_param_set = NULL
   )
 )
-mlr_mutators$add("maybe", MutatorMaybe)
+dict_mutators$add("maybe", MutatorMaybe)
 
-# mutator that has a .mutate_numeric method that gets vector + lower and upper bounds
+#' @title Mutator Choosing Action Component-Wise Independently
+#'
+#' @name dict_mutators_cmpmaybe
+#'
+#' @description
+#' [`Mutator`] that chooses which operation to perform probabilistically. The [`Mutator`] wraps two other [`Mutator`]s given during construction,
+#' and both of these operators are run. The ultimate result is sampled from the results of these operations independently for each
+#' individuum and component: with probability `p` (hyperparameter), the result from the [`Mutator`] given to the `mutator`
+#' construction argument is used, and with probability `p - 1` the one given to `mutator_not` is used.
+#'
+#' @section Hyperparameters:
+#' This operator has the hyperparameters of the [`Mutator`]s that it wraps: The hyperparameters of the operator given to the `mutator` construction argument
+#' are prefixed with `"cmpmaybe."`, the hyperparameters of the operator given to the `mutator_not` construction argument are prefixed with `"cmpmaybe_not."`.
+#'
+#' Additional hyperparameters:
+#' * `p` :: `numeric(1)` \cr
+#'   Probability per component with which to apply the operator given to the `mutator` construction argument.
+#'
+#' @templateVar id cmpmaybe
+#' @templateVar additional , <mutator> \[, <mutator_not>\]
+#' @template autoinfo_prepare_mut
+#' @section Supported Operand Types:
+#'
+#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `mutator` and `mutator_not`.
+#'
+#' @template autoinfo_dict
+#'
+#' @family mutators
+#' @family mutator wrappers
+#' @export
+MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
+  inherit = Mutator,
+  public = list(
+    #' @description
+    #' Initialize the `MutatorCmpMaybe` object.
+    #' @param mutator ([`Mutator`])\cr
+    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Hyperparameter).\cr
+    #'   The constructed object gets a *clone* of this argument.
+    #' @param mutator_not ([`Mutator`])\cr
+    #'   Another [`Mutator`] to wrap. This operator runs when `mutator` is not chosen. By
+    #'   default, this is [`MutatorNull`], i.e. no operation. With this default, the
+    #'   `MutatorCmpMaybe` object applies the `mutator` operation with probability `p`, and
+    #'   no operation at all otherwise.\cr
+    #'   The constructed object gets a *clone* of this argument.
+    initialize = function(mutator, mutator_not = MutatorNull$new()) {
+      private$.wrapped = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
+      private$.wrapped_not = assert_r6(mutator_not, "Mutator")$clone(deep = TRUE)
+
+      private$.wrapped$param_set$set_id = "cmpmaybe"
+      private$.wrapped_not$param_set$set_id = "cmpmaybe_not"
+      private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
+      private$.maybe_param_set$values = list(p = 1)
+      super$initialize(intersect(mutator$param_classes, mutator_not$param_classes),
+        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set))
+    },
+    #' @description
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
+    #' given to `mutator` and `mutator_not` during construction.
+    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #'   Passed to [`MiesOperator`]`$prime()`.
+    #' @return `invisible(self)`.
+    prime = function(param_set) {
+      private$.wrapped$prime(param_set)
+      private$.wrapped_not$prime(param_set)
+      super$prime(param_set)
+      invisible(self)
+    }
+  ),
+  private = list(
+    .mutate = function(values) {
+      mutated = private$.wrapped$operate(values)
+      mutated_not = private$.wrapped_not$operate(values)
+
+      mutating = matrix(runif(nrow(values) * ncol(values)) < self$param_set$get_values()$p, nrow = nrow(values))
+      as.data.table(mapply(function(mutnot, mut, takemut) {
+        mutnot[takemut] <- mut[takemut]
+        mutnot
+      }, mutated_not, mutated, mutating, SIMPLIFY = FALSE))
+    },
+    .wrapped = NULL,
+    .wrapped_not = NULL,
+    .maybe_param_set = NULL
+  )
+)
+dict_mutators$add("cmpmaybe", MutatorCmpMaybe)
+
+
+#' @title Numeric Mutator Base Class
+#'
+#' @description
+#' Base class for mutation operations on numeric individuals, inheriting from [`Mutator`].
+#'
+#' `MutatorNumeric` operators perform mutation on numeric (integer and real valued) individuals. Inheriting
+#' operators implement the private `$.mutate_numeric()` function that is called once for each individual
+#' and is given a numeric vector.
+#'
+#' @section Inheriting:
+#' `MutatorNumeric` is an abstract base class and should be inherited from. Inheriting classes should implement the private `$.mutate_numeric()`
+#' function. During `$operate()`, the `$.mutate_numeric()` function is called once for each individual, with the parameters `values` (the
+#' individual as a single `numeric` vector), `lowers` and `uppers` (`numeric` vectors, the lower and upper bounds for each component of `values`). Typically,
+#' `$initialize()` should also be overloaded.
+#'
+#' @family base classes
+#' @family mutators
 #' @export
 MutatorNumeric = R6Class("MutatorNumeric",
   inherit = Mutator,
   public = list(
-    initialize = function(param_classes, param_set = ps()) {
+    #' @description
+    #' Initialize base class components of the `MutatorNumeric`.
+    #' @templateVar allowedparams ParamInt ParamDbl
+    #' @template param_param_classes
+    #' @template param_param_set
+    initialize = function(param_classes = c("ParamInt", "ParamDbl"), param_set = ps()) {
       assert_subset(param_classes, c("ParamInt", "ParamDbl"))
       super$initialize(param_classes, param_set)
     }
@@ -91,13 +299,33 @@ MutatorNumeric = R6Class("MutatorNumeric",
   )
 )
 
-# mutator that has a .mutate_discrete method
-
+#' @title Discrete Mutator Base Class
+#'
+#' @description
+#' Base class for mutation operations on discrete individuals, inheriting from [`Mutator`].
+#'
+#' `MutatorDiscrete` operators perform mutation on discrete (logical and factor valued) individuals. Inheriting
+#' operators implement the private `$.mutate_discrete()` function that is called once for each individual
+#' and is given a character vector.
+#'
+#' @section Inheriting:
+#' `MutatorDiscrete` is an abstract base class and should be inherited from. Inheriting classes should implement the private `$.mutate_discrete()`
+#' function. During `$operate()`, the `$.mutate_discrete()` function is called once for each individual, with the parameters `values` (the
+#' individual as a single `character` vector), and `levels` (a list of `character` containing the possible values for each element of `values`). Typically,
+#' `$initialize()` should also be overloaded.
+#'
+#' @family base classes
+#' @family mutators
 #' @export
 MutatorDiscrete = R6Class("MutatorDiscrete",
   inherit = Mutator,
   public = list(
-    initialize = function(param_classes, param_set = ps()) {
+    #' @description
+    #' Initialize base class components of the `MutatorNumeric`.
+    #' @templateVar allowedparams ParamLgl ParamFct
+    #' @template param_param_classes
+    #' @template param_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamFct"), param_set = ps()) {
       assert_subset(param_classes, c("ParamLgl", "ParamFct"))
       super$initialize(param_classes, param_set)
     }
@@ -121,10 +349,39 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
   )
 )
 
+#' @title Gaussian Distribution Mutator
+#'
+#' @name dict_mutators_gauss
+#'
+#' @description
+#' Individuals are mutated with an independent normal random variable on each component.
+#'
+#' @section Hyperparameters:
+#' * `sdev` :: `numeric(1)`\cr
+#'   Standard deviation of normal distribuion. This is absolute if `sdev_is_relative` is `FALSE`, and
+#'   multiplied with each individual component's range (upper - lower) if `sdev_is_relative` is `TRUE`.
+#'   Initialized to 1.
+#' * `sdev_is_relative` :: `logical(1)`\cr
+#'   Whether `sdev` is absolute (`FALSE`) or relative to component range (`TRUE`). Initialized to `TRUE`.
+#' * `truncated_normal` :: `logical(1)`\cr
+#'   Whether to draw individuals from a normal distribution that is truncated at the bounds of each
+#'   component (`TRUE`), or to draw from a normal distribution and then restrict to bounds afterwards
+#'   (`FALSE`). The former (`TRUE`) will lead to very few to no samples landing on the exact bounds
+#'   (analytically it would be none almost surely, but this is subject to machine precision), the latter
+#'   (`FALSE`) can lead to a substantial number of samples landing on the exact bounds. Initialized to `TRUE`.
+#'
+#' @templateVar id gauss
+#' @template autoinfo_prepare_mut
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family mutators
 #' @export
 MutatorGauss = R6Class("MutatorGauss",
   inherit = MutatorNumeric,
   public = list(
+    #' @description
+    #' Initialize the `MutatorGauss` object.
     initialize = function() {
       param_set = ps(sdev = p_dbl(0, tags = "required"), sdev_is_relative = p_lgl(tags = "required"), truncated_normal = p_lgl(tags = "required"))
       param_set$values = list(sdev = 1, sdev_is_relative = TRUE, truncated_normal = TRUE)
@@ -154,30 +411,49 @@ MutatorGauss = R6Class("MutatorGauss",
     }
   )
 )
-mlr_mutators$add("gauss", MutatorGauss)
+dict_mutators$add("gauss", MutatorGauss)
 
+#' @title Uniform Discrete Mutator
+#'
+#' @name dict_mutators_unif
+#'
+#' @description
+#' Discrete components are mutated by sampling from a uniform distribution, either from all possible
+#' values of each component, or from all values except the original value.
+#'
+#' Since the information loss is very high, this should in most cases be combined with [`MutatorCmpMaybe`].
+#'
+#' @section Hyperparameters:
+#' * `can_mutate_to_same` :: `logical(1)`\cr
+#'   Whether to sample from entire range of each parameter (`TRUE`) or from all values except the
+#'   current value (`FALSE`). Initialized to `TRUE`.
+#'
+#' @templateVar id unif
+#' @template autoinfo_prepare_mut
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family mutators
 #' @export
 MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
   inherit = MutatorDiscrete,
   public = list(
+    #' @description
+    #' Initialize the `MutatorDiscreteUniform` object.
     initialize = function() {
-      param_set = ps(p = p_dbl(0, 1, tags = "required"), can_mutate_to_same = p_lgl(tags = "required"))
-      param_set$values = list(p = 0.5, can_mutate_to_same = TRUE)
+      param_set = ps(can_mutate_to_same = p_lgl(tags = "required"))
+      param_set$values = list(can_mutate_to_same = TRUE)
       super$initialize(c("ParamLgl", "ParamFct"), param_set)
     }
   ),
   private = list(
     .mutate_discrete = function(values, levels) {
       params = self$param_set$get_values()
-      unlist(pmap(list(values, levels, runif(length(values)) < params$p), function(v, l, m) {
-        if (m) {
-          if (!params$can_mutate_to_same) l = setdiff(l, v)
-          sample(l, 1)
-        } else {
-          v
-        }
+      unlist(pmap(list(values, levels), function(v, l) {
+        if (!params$can_mutate_to_same) l = setdiff(l, v)
+        sample(l, 1)
       }))
     }
   )
 )
-mlr_mutators$add("unif", MutatorDiscreteUniform)
+dict_mutators$add("unif", MutatorDiscreteUniform)

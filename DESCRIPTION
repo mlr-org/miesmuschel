@@ -21,15 +21,15 @@ Imports:
   data.table
 Suggests:
   tinytest
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Collate: 
     'MiesOperator.R'
     'dictionaries.R'
     'Mutator.R'
     'ParamSetShadow.R'
     'MutatorCombination.R'
+    'Selector.R'
     'OptimizerMies.R'
     'Recombinator.R'
-    'Selector.R'
     'utils.R'
     'zzz.R'

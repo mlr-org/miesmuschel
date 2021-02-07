@@ -325,3 +325,5 @@ expect_equal(transformed[31:40, b], rep(0, 10))
 
 
 
+# TODO: - reordering within groups
+#       - recombinator with in 3, out 1

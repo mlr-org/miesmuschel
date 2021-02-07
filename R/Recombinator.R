@@ -1,11 +1,43 @@
-
-#' @title Recombinator
+#' @title Recombinator Base Class
+#'
 #' @include MiesOperator.R
 #' @include dictionaries.R
+#'
+#' @description
+#' Base class representing recombination operations, inheriting from [`MiesOperator`].
+#'
+#' Recombinators get a table of individuals as input and return a table of modified individuals as output. Individuals are acted on by
+#' groups: every `$n_indivs_out` lines of output corresponds to a group of `$n_indivs_in` lines of input, and presence or absence
+#' of other input groups does not affect the result.
+#'
+#' Recombination operations are performed in ES algorithms to facilitate exploration of the search space that combine partial
+#' solutions.
+#'
+#' @section Inheriting:
+#' `Recombinator` is an abstract base class and should be inherited from. Inheriting classes should implement the private `$.recombine()`
+#' function. The user of the object calls `$operate()`, which calls `$.recombine()` for each `$n_indivs_in` sized group of individuals after checking that
+#' the operator is primed, that the `values` argument conforms to the primed domain. `$.recombine()` should then return a table of
+#' `$n_indivs_out` individuals for each call. Typically, the `$initialize()` function
+#' should also be overloaded, and optionally the `$prime()` function; they should call their `super` equivalents.
+#'
+#' @family base classes
+#' @family recombinators
 #' @export
 Recombinator = R6Class("Recombinator",
   inherit = MiesOperator,
   public = list(
+    #' @description
+    #' Initialize base class components of the `Recombinator`.
+    #' @template param_param_classes
+    #' @template param_param_set
+    #' @param n_indivs_in (`integer(1)`)\cr
+    #'   Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
+    #'   Default 2.\cr
+    #'   The `$n_indivs_in` field will reflect this value.
+    #' @param n_indivs_out (`integer(1)`)\cr
+    #'   Number of individuals that result for each `n_indivs_in` lines of input. The number of results from the recombinator will be
+    #'   `nrow(values) / n_indivs_in * n_indivs_out`. Default equal to `n_indivs_in`.\cr
+    #'   The `$n_indivs_out` field will reflect this value.
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), n_indivs_in = 2, n_indivs_out = n_indivs_in) {
       assert_int(n_indivs_in, lower = 1, tol = 1e-100)
       assert_int(n_indivs_out, lower = 1, tol = 1e-100)
@@ -15,10 +47,14 @@ Recombinator = R6Class("Recombinator",
     }
   ),
   active = list(
+    #' @field n_indivs_in (`integer(1)`)\cr
+    #' Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
     n_indivs_in = function(val) {
       if (!missing(val)) stop("n_indivs_in is read-only.")
       private$.n_indivs_in
     },
+    #' @field n_indivs_out (`integer(1)`)\cr
+    #' Number of individuals produced for each group of `$n_indivs_in` individuals.
     n_indivs_out = function(val) {
       if (!missing(val)) stop("n_indivs_out is read-only.")
       private$.n_indivs_out
@@ -39,11 +75,46 @@ Recombinator = R6Class("Recombinator",
   )
 )
 
+#' @title Null-Recombinator
+#'
+#' @name dict_recombinators_null
+#'
+#' @description
+#' Null-recombinator that does not perform any operation on its input. Useful in particular with operator-wrappers such as [`RecombinatorMaybe`] or
+#' [`RecombinatorCombination`].
+#'
+#' `n_indivs_in` and `n_indivs_out` can be set during construction, where `n_indivs_out` must be less or equal `n_indivs_in`. If it is strictly less,
+#' then the operation returns only the first `n_indivs_out` individuals out of each `n_indivs_in` sized group.
+#'
+#' @section Hyperparameters:
+#' This operator has no hyperparameters.
+#'
+#' @templateVar id null
+#' @template autoinfo_prepare_rec
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family recombinators
 #' @export
 RecombinatorNull = R6Class("RecombinatorNull",
   inherit = Recombinator,
   public = list(
-    initialize = function(n_indivs_in = 1, n_indivs_out = 1) {
+    #' @description
+    #' Initialize base class components of the `Recombinator`.
+    #' @param n_indivs_in (`integer(1)`)\cr
+    #'   Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
+    #'   Setting this number to a number unequal 1 is mostly useful when incorporating this operator in wrappers such as [`RecombinatorMaybe`] or
+    #'   [`RecombinatorCombination`].
+    #'   Default 1.\cr
+    #'   The `$n_indivs_in` field will reflect this value.
+    #' @param n_indivs_out (`integer(1)`)\cr
+    #'   Number of individuals that result for each `n_indivs_in` lines of input. Must be at most `n_indivs_in`. If this is less than `n_indivs_in`,
+    #'   then only the first `n_indivs_out` individuals out of each `n_indivs_in` sized group are returned by an operation.
+    #'   Setting this number to a number unequal 1 is mostly useful when incorporating this operator in wrappers such as [`RecombinatorMaybe`] or
+    #'   [`RecombinatorCombination`].
+    #'   Default equal to `n_indivs_in`.\cr
+    #'   The `$n_indivs_out` field will reflect this value.
+    initialize = function(n_indivs_in = 1, n_indivs_out = n_indivs_in) {
       assert_int(n_indivs_out, lower = 1, tol = 1e-100)
       assert_int(n_indivs_in, lower = n_indivs_out, tol = 1e-100)
       super$initialize(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out)
@@ -53,12 +124,56 @@ RecombinatorNull = R6Class("RecombinatorNull",
     .recombine = function(values) first(values, self$n_indivs_out)
   )
 )
-mlr_recombinators$add("null", RecombinatorNull)
+dict_recombinators$add("null", RecombinatorNull)
 
+#' @title Recombinator Choosing Action Probabilistically
+#'
+#' @name dict_recombinators_maybe
+#'
+#' @description
+#' [`Recombinator`] that chooses which operation to perform probabilistically. The [`Recombinator`] wraps two other [`Recombinator`]s given during construction,
+#' and for each group of `$n_indivs_in` individuals, the operation to perform is sampled: with probability `p` (hyperparameter), the [`Recombinator`] given to
+#' the `recombinator` construction argument is applied, and with probability `p - 1` the one given to `recombinator_not` is applied.
+#'
+#' The values of `$n_indivs_in` and `$n_indivs_out` is set to the corresponding values of the wrapped [`Recombinator`]s. Both `recombinator` and `recombinator_not`
+#' must currently have the same respective `$n_indivs_in` and `$n_indivs_out` values.
+#'
+#' @section Hyperparameters:
+#' This operator has the hyperparameters of the [`Recombinator`]s that it wraps: The hyperparameters of the operator given to the `recombinator` construction argument
+#' are prefixed with `"maybe."`, the hyperparameters of the operator given to the `recombinator_not` construction argument are prefixed with `"maybe_not."`.
+#'
+#' Additional hyperparameters:
+#' * `p` :: `numeric(1)` \cr
+#'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument.
+#'
+#' @templateVar id maybe
+#' @templateVar additional , <recombinator> \[, <recombinator_not>\]
+#' @template autoinfo_prepare_rec
+#' @section Supported Operand Types:
+#'
+#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `recombinator` and `recombinator_not`.
+#'
+#' @template autoinfo_dict
+#'
+#' @family recombinators
+#' @family recombinator wrappers
 #' @export
 RecombinatorMaybe = R6Class("RecombinatorMaybe",
   inherit = Recombinator,
   public = list(
+    #' @description
+    #' Initialize the `RecombinatorMaybe` object.
+    #' @param recombinator ([`Recombinator`])\cr
+    #'   [`Recombinator`] to wrap. This operator gets run with probability `p` (Hyperparameter).\cr
+    #'   The constructed object gets a *clone* of this argument.
+    #' @param recombinator_not ([`Recombinator`])\cr
+    #'   Another [`Recombinator`] to wrap. This operator runs when `recombinator` is not chosen. By
+    #'   default, this is [`RecombinatorNull`], i.e. no operation, with both `n_indivs_in` and `n_indivs_out` set
+    #'   to match `recombinator`. This does not work when `recombinator` has `n_indivs_in < n_indivs_out`, in which
+    #'   case this argument must be set explicitly.
+    #'   With the default behaviour, the `RecombinatorMaybe` object applies the `recombinator` operation with probability `p`, and
+    #'   no operation at all otherwise.\cr
+    #'   The constructed object gets a *clone* of this argument.
     initialize = function(recombinator, recombinator_not = NULL) {
       private$.wrapped = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       if (is.null(recombinator_not)) {
@@ -80,6 +195,12 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         recombinator$n_indivs_in, recombinator$n_indivs_out)
     },
+    #' @description
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
+    #' given to `recombinator` and `recombinator_not` during construction.
+    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #'   Passed to [`MiesOperator`]`$prime()`.
+    #' @return `invisible(self)`.
     prime = function(param_set) {
       private$.wrapped$prime(param_set)
       private$.wrapped_not$prime(param_set)
@@ -100,14 +221,35 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     .maybe_param_set = NULL
   )
 )
-mlr_recombinators$add("maybe", RecombinatorMaybe)
+dict_recombinators$add("maybe", RecombinatorMaybe)
 
 
 #' @title Crossover Recombinator
+#'
+#' @name dict_recombinators_xounif
+#'
+#' @description
+#' Values between two individuals are exchanged with component-wise independent probability.
+#'
+#' @section Hyperparameters:
+#' * `p` :: `numeric(1)`\cr
+#'   Component-wise probability with which to exchange values. Initialized to 0.5.
+#'
+#' @templateVar id xounif
+#' @template autoinfo_prepare_rec
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family recombinators
 #' @export
 RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
   inherit = Recombinator,
   public = list(
+    #' @description
+    #' Initialize the `RecombinatorCrossoverUniform` object.
+    #' @param keep_complement (`logical(1)`)\cr
+    #'   Whether the operation should keep both individuals that were crossed over (`TRUE`), or only the first and discard
+    #'   the crossover complement (`FALSE`). Default `TRUE`
     initialize = function(keep_complement = TRUE) {
       param_set = ps(p = p_dbl(0, tags = "required"))
       param_set$values = list(p = 0.5)
@@ -122,4 +264,4 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     }
   )
 )
-mlr_recombinators$add("xounif", RecombinatorCrossoverUniform)
+dict_recombinators$add("xounif", RecombinatorCrossoverUniform)

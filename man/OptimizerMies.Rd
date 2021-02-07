@@ -30,7 +30,13 @@ Mixed Integer Evolutionary Strategies
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{OptimizerMies$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{OptimizerMies$new(
+  mutator,
+  recombinator,
+  parent_selector,
+  survival_selector,
+  elite_selector = NULL
+)}\if{html}{\out{</div>}}
 }
 
 }

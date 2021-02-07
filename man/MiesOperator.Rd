@@ -2,11 +2,55 @@
 % Please edit documentation in R/MiesOperator.R
 \name{MiesOperator}
 \alias{MiesOperator}
-\title{MiesOperator}
+\title{Operator Base Class}
 \description{
-MiesOperator
+Base class representing MIES-operators: \code{\link{Recombinator}}, \code{\link{Mutator}}, and \code{\link{Selector}}.
 
-MiesOperator
+Operators perform a specific function within ES algorithms, and by exchanging them, the character of ES
+algorithms can be modified. Operators operate on collections of individuals and return
+modified individuals (mutated or recombined) or indices of selected individuals. Operators can be combined using
+\code{\link{MutatorCombination}} / \code{\link{RecombinatorCombination}} and other operators wrappers.
+
+Before applying operators, they have to be \emph{primed} for the domain of the individuals which they are operating on;
+this is done using the \verb{$prime()} function. Afterwards, the \verb{$operate()} function may be called with a \code{data.frame}
+of individuals that fall into this domain. \verb{$operate()} may be called multiple times after priming, and a once
+primed operator can be primed again for a different domain by calling \verb{$prime()} agian (which forgets the old priming).
+}
+\section{Inheriting}{
+
+\code{MiesOperator} is an abstract base class and should be inherited from. Inheriting classes should implement the
+private \verb{$.operate()} function. The user of the object calls \verb{$operate()}, and the arguments are passed on to
+private \verb{$.operate()} after checking that the operator is primed, and that the \code{values} argument conforms to the
+primed domain. Typically, the \verb{$initialize()} and \verb{$prime()} functions are also overloaded, but should call their
+\code{super} equivalents.
+
+In most cases, the \code{MiesOperator} class should not be inherited from, directly; instead, the operator classes
+(\code{\link{Recombinator}}, \code{\link{Mutator}}, \code{\link{Selector}}) or their subclasses should be inherited.
+}
+
+\seealso{
+Other base classes: 
+\code{\link{MutatorDiscrete}},
+\code{\link{MutatorNumeric}},
+\code{\link{Mutator}},
+\code{\link{OperatorCombination}},
+\code{\link{Recombinator}},
+\code{\link{Selector}}
+}
+\concept{base classes}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Hyperparameters of the \code{MiesOperator} object. Read-only.}
+
+\item{\code{param_classes}}{(\code{character})\cr
+Classes of parameters that the operator can handle, contains any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}. Read-only.}
+
+\item{\code{endomorphism}}{(\code{logical(1)})\cr
+Whether the output of \verb{$operate()} is a \code{data.frame} / \code{\link[data.table:data.table]{data.table}} in the same domain as its input}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -21,6 +65,7 @@ MiesOperator
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize base class components of the \code{MiesOperator}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
@@ -29,24 +74,82 @@ MiesOperator
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_classes}}{(\code{character})\cr
+Classes of parameters that the operator can handle. May contain any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}.
+Default is all of them.\cr
+The \verb{$param_classes} field will reflect this value.}
+
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{list} of \code{expression})\cr
+Hyperparameter of the operator. This should be created by the subclass and given to \code{super$initialize()}.
+If this is a \code{\link[paradox:ParamSet]{ParamSet}}, it is used as the \code{MiesOperator}'s \code{\link[paradox:ParamSet]{ParamSet}}
+directly. Otherwise it must be a \code{list} of expressions e.g. created by \code{alist()} that evaluate to \code{\link[paradox:ParamSet]{ParamSet}}s,
+possibly referencing \code{self} and \code{private}.
+These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\link[paradox:ParamSetCollection]{ParamSetCollection}}.
+Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
+The \verb{$param_set} field will reflect this value.}
+
+\item{\code{endomorphism}}{(\code{logical(1)})\cr
+Whether the private \verb{$.operate()} operation creates a \code{\link[data.table:data.table]{data.table}} with the same columns as the input
+(i.e. conforming to the primed \code{\link[paradox:ParamSet]{ParamSet}}). If this is \code{TRUE} (default), then the return value of \verb{$.operate()}
+is checked for this and columns are put in the correct order.\cr
+The \verb{$endomorphsim} field will reflect this value.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-prime"></a>}}
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
+Prepare the \code{MiesOperator} to function on the given \code{\link[paradox:ParamSet]{ParamSet}}. This must be called before
+\verb{$operate()}. It may be called multiple times in the lifecycle of the \code{MiesOperator} object, and prior primings are
+forgotten when priming on a new \code{\link[paradox:ParamSet]{ParamSet}}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$prime(param_set)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+The \code{\link[paradox:ParamSet]{ParamSet}} to which all \code{values} tables passed to \verb{$operate()} will need to conform to.
+May only contiain \code{\link[paradox:ParamSet]{Param}} objects that conform to the classes listed in \verb{$param_classes}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{invisible(self)}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-operate"></a>}}
 \if{latex}{\out{\hypertarget{method-operate}{}}}
 \subsection{Method \code{operate()}}{
+Operate on the given individuals. This calls private \verb{$.operate()}, which must be overloaded by an inheriting class,
+passing through all function arguments after performing some checks.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$operate(values, ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{values}}{(\code{data.frame})\cr
+Individuals to operate on. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
+and may not have any missing components.}
+
+\item{\code{...}}{(any)\cr
+Depending on the concrete class, passed on to \verb{$.operate()}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{data.frame}: the result of the operation. If the input was a \code{\link[data.table:data.table]{data.table}} instead of
+a \code{data.frame}, the output is also \code{\link[data.table:data.table]{data.table}}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

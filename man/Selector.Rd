@@ -2,14 +2,68 @@
 % Please edit documentation in R/Selector.R
 \name{Selector}
 \alias{Selector}
-\title{Selector}
+\title{Selector Base Class}
 \description{
-Selector
+Base class representing selection operations, inheriting from \code{\link{MiesOperator}}.
 
-Selector
+A \code{\link{Selector}} gets a table of individuals as input, along with information on the individuals' performance values and the
+number of individuals to select, and returns a vector of integers indicating which individuals were selected.
+
+Selection operations are performed in ES algorithms to facilitate concentration towards individuals that perform well with regard to the
+fitness measure.
+
+Fitness values are always \emph{maximized}, both in single- and multi-criterion optimization.
+
+Unlike most other operator types inheriting from \code{\link{MiesOperator}}, the \verb{$operate()} function has three arguments, which are passed on to \verb{$.select()}
+\itemize{
+\item \code{values} :: \code{data.frame}\cr
+Individuals to operate on. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
+and may not have any missing components.
+\item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
+Fitnesses for each individual given in \code{values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
+this is a \code{matrix}, if number of rows must be equal to the number of rows in \code{values}, and it must have one column when doing single-crit optimization
+and one column each for each  "criterion" when doing multi-crit optimization.
+\item \code{n_select} :: \code{integer(1)}\cr
+Number of individuals to select. Some \code{Selector}s select individuals with replacement, for which this value may be greater than the number of
+rows in \code{values}.
 }
+
+The return value for an operation will be a numeric vector of integer values of ength \code{n_select} indexing the individuals that were selected. Some \code{Selector}s
+select individuals with replacement, for which the return value may contain indices more than once.
+}
+\section{Inheriting}{
+
+\code{Selector} is an abstract base class and should be inherited from. Inheriting classes should implement the private \verb{$.select()}
+function. The user of the object calls \verb{$operate()}, and the arguments are passed on to private \verb{$.select()} after checking that
+the operator is primed, that the \code{values} argument conforms to the primed domain and that other values match. Typically, the \verb{$initialize()} function
+should also be overloaded, and optionally the \verb{$prime()} function; they should call their \code{super} equivalents.
+}
+
+\seealso{
+Other base classes: 
+\code{\link{MiesOperator}},
+\code{\link{MutatorDiscrete}},
+\code{\link{MutatorNumeric}},
+\code{\link{Mutator}},
+\code{\link{OperatorCombination}},
+\code{\link{Recombinator}}
+
+Other selectors: 
+\code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_random}}
+}
+\concept{base classes}
+\concept{selectors}
 \section{Super class}{
 \code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{Selector}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{supported}}{(\code{character})\cr
+Optimization supported by this \code{Selector}, can be \code{"single-crit"}, \code{"multi-crit"}, or both.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -30,6 +84,7 @@ Selector
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize base class components of the \code{Mutator}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Selector$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
@@ -38,6 +93,30 @@ Selector
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_classes}}{(\code{character})\cr
+Classes of parameters that the operator can handle. May contain any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}.
+Default is all of them.\cr
+The \verb{$param_classes} field will reflect this value.}
+
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{list} of \code{expression})\cr
+Hyperparameter of the operator. This should be created by the subclass and given to \code{super$initialize()}.
+If this is a \code{\link[paradox:ParamSet]{ParamSet}}, it is used as the \code{MiesOperator}'s \code{\link[paradox:ParamSet]{ParamSet}}
+directly. Otherwise it must be a \code{list} of expressions e.g. created by \code{alist()} that evaluate to \code{\link[paradox:ParamSet]{ParamSet}}s,
+possibly referencing \code{self} and \code{private}.
+These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\link[paradox:ParamSetCollection]{ParamSetCollection}}.
+Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
+The \verb{$param_set} field will reflect this value.}
+
+\item{\code{supported}}{(\code{character})\cr
+Subset of \code{"single-crit"} and \code{"multi-crit"}, indicating wether single and / or multi-criterion optimization is supported.
+Default both of them.\cr
+The \verb{$supported} field will reflect this value.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

@@ -34,16 +34,16 @@ Keys passed to the respective \link[mlr3misc:Dictionary]{dictionary} to retrieve
 }
 \value{
 \itemize{
-\item \link{Mutator} for \code{mut()}
-\item list of \link{Mutator} for \code{muts()}
-\item \link{Recombinator} for \code{rec()}.
-\item list of \link{Recombinator} for \code{recs()}.
-\item \link{Selector} for \code{sel()}.
-\item list of \link{Selector} for \code{sels()}.
+\item \code{\link{Mutator}} for \code{mut()}
+\item list of \code{\link{Mutator}} for \code{muts()}
+\item \code{\link{Recombinator}} for \code{rec()}.
+\item list of \code{\link{Recombinator}} for \code{recs()}.
+\item \code{\link{Selector}} for \code{sel()}.
+\item list of \code{\link{Selector}} for \code{sels()}.
 }
 }
 \description{
-These functions complement \link{mlr_mutators}, \link{mlr_recombinators}, \link{mlr_selectors} with functions in the spirit
+These functions complement \link{dict_mutators}, \link{dict_recombinators}, \link{dict_selectors} with functions in the spirit
 of \link[mlr3:mlr_sugar]{mlr3::mlr_sugar}.
 }
 \examples{

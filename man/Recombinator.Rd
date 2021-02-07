@@ -2,14 +2,56 @@
 % Please edit documentation in R/Recombinator.R
 \name{Recombinator}
 \alias{Recombinator}
-\title{Recombinator}
+\title{Recombinator Base Class}
 \description{
-Recombinator
+Base class representing recombination operations, inheriting from \code{\link{MiesOperator}}.
 
-Recombinator
+Recombinators get a table of individuals as input and return a table of modified individuals as output. Individuals are acted on by
+groups: every \verb{$n_indivs_out} lines of output corresponds to a group of \verb{$n_indivs_in} lines of input, and presence or absence
+of other input groups does not affect the result.
+
+Recombination operations are performed in ES algorithms to facilitate exploration of the search space that combine partial
+solutions.
 }
+\section{Inheriting}{
+
+\code{Recombinator} is an abstract base class and should be inherited from. Inheriting classes should implement the private \verb{$.recombine()}
+function. The user of the object calls \verb{$operate()}, which calls \verb{$.recombine()} for each \verb{$n_indivs_in} sized group of individuals after checking that
+the operator is primed, that the \code{values} argument conforms to the primed domain. \verb{$.recombine()} should then return a table of
+\verb{$n_indivs_out} individuals for each call. Typically, the \verb{$initialize()} function
+should also be overloaded, and optionally the \verb{$prime()} function; they should call their \code{super} equivalents.
+}
+
+\seealso{
+Other base classes: 
+\code{\link{MiesOperator}},
+\code{\link{MutatorDiscrete}},
+\code{\link{MutatorNumeric}},
+\code{\link{Mutator}},
+\code{\link{OperatorCombination}},
+\code{\link{Selector}}
+
+Other recombinators: 
+\code{\link{OperatorCombination}},
+\code{\link{dict_recombinators_maybe}},
+\code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_xounif}}
+}
+\concept{base classes}
+\concept{recombinators}
 \section{Super class}{
 \code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{Recombinator}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{n_indivs_in}}{(\code{integer(1)})\cr
+Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.}
+
+\item{\code{n_indivs_out}}{(\code{integer(1)})\cr
+Number of individuals produced for each group of \verb{$n_indivs_in} individuals.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -30,6 +72,7 @@ Recombinator
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize base class components of the \code{Recombinator}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Recombinator$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
@@ -39,6 +82,35 @@ Recombinator
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_classes}}{(\code{character})\cr
+Classes of parameters that the operator can handle. May contain any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}.
+Default is all of them.\cr
+The \verb{$param_classes} field will reflect this value.}
+
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{list} of \code{expression})\cr
+Hyperparameter of the operator. This should be created by the subclass and given to \code{super$initialize()}.
+If this is a \code{\link[paradox:ParamSet]{ParamSet}}, it is used as the \code{MiesOperator}'s \code{\link[paradox:ParamSet]{ParamSet}}
+directly. Otherwise it must be a \code{list} of expressions e.g. created by \code{alist()} that evaluate to \code{\link[paradox:ParamSet]{ParamSet}}s,
+possibly referencing \code{self} and \code{private}.
+These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\link[paradox:ParamSetCollection]{ParamSetCollection}}.
+Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
+The \verb{$param_set} field will reflect this value.}
+
+\item{\code{n_indivs_in}}{(\code{integer(1)})\cr
+Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
+Default 2.\cr
+The \verb{$n_indivs_in} field will reflect this value.}
+
+\item{\code{n_indivs_out}}{(\code{integer(1)})\cr
+Number of individuals that result for each \code{n_indivs_in} lines of input. The number of results from the recombinator will be
+\code{nrow(values) / n_indivs_in * n_indivs_out}. Default equal to \code{n_indivs_in}.\cr
+The \verb{$n_indivs_out} field will reflect this value.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
