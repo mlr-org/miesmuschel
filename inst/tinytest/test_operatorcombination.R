@@ -333,3 +333,5 @@ expect_equal(transformed[31:40, b], rep(0, 10))
 #       - forbidden paramset components? dob, eol, ...?
 #       - recognize right away that additional_searchspace is not supported
 #       - selector ignore params, selector from ranker ('best'), and 'ranker' objects.
+#       - document custom sampling
+#       - test additional_component_sampler functionality and error conditions

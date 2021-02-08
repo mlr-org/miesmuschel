@@ -13,9 +13,6 @@
 #' highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
 #' as presented in `r cite_bib("li2013mixed")` can easily be implemented.
 #'
-#'
-#'
-#'
 #' @references
 #' `r format_bib("fieldsend2014rolling")`
 #'
@@ -26,13 +23,11 @@
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(
-    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL, multi_fidelity = FALSE, additional_searchspace = ParamSet$new()) {
+    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL, multi_fidelity = FALSE) {
       private$.mutator = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.recombinator = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       private$.parent_selector = assert_r6(parent_selector, "Selector")$clone(deep = TRUE)
       private$.survival_selector = assert_r6(survival_selector, "Selector")$clone(deep = TRUE)
-      private$.additional_searchspace = assert_r6(additional_searchspace, "ParamSet")$clone(deep = TRUE)
-      private$.additional_searchspace$set_id = ""
 
       assert_r6(elite_selector, "Selector", null.ok = TRUE)
       if (!is.null(elite_selector)) {
@@ -42,7 +37,8 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           lambda = p_int(1, tags = c("required", "offspring")),
           mu = p_int(1, tags = c("required", "init", "survival")),
           initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), default = generate_design_random, tags = "init"),  # arguments: param_set, n
-          survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required")),
+          survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required")
+          additional_component_sampler = p_uty(custom_check = function(x) check_r6(x, "Sampler"))),
         if (multi_fidelity) list(
           fidelity_schedule = p_uty(custom_check = check_fidelity_schedule, tags = "required"),
           reeval_fidelity_steps = p_lgl(tags = "required"))
@@ -65,17 +61,6 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           fidelity_schedule = data.table(generation = 1, budget_new = 1, budget_survivors = 1),
           reeval_fidelity_steps = TRUE)
       )
-
-      all_operators = discard(list(mutator = mutator, recombinator = recombinator, parent_selector parent_selector,
-        survival_selector = survival_selector, elite_selector = elite_selector), is.null)
-      for (opid in names(all_operators)) {
-        op = all_operators[[opid]]
-        unsupported_additional_searchspace = setdiff(additional_searchspace$class, op$param_classes)
-        if (length(unsupported_additional_searchspace)) {
-          stop("additional_searchspace contains Params of type {%s} which %s of type %s does not support.",
-            str_collapse(unsupported_additional_searchspace, quote = '"'), opid, class(op)[[1]])
-        }
-      }
 
       param_class_determinants = c(
         list(parent_selector, survival_selector),
@@ -125,12 +110,6 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       }
       private$.elite_selector
     },
-    additional_searchspace = function(rhs) {
-      if (!missing(rhs) && !identical(rhs, private$.additional_searchspace)) {
-        stop("additional_searchspace is read-only.")
-      }
-      private$.additional_searchspace
-    },
     param_set = function(rhs) {
       if (is.null(private$.param_set)) {
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))
@@ -162,8 +141,10 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .optimize = function(inst) {
       params = private$.own_param_set$get_values()
       search_space = inst$search_space$clone(deep = FALSE)
+      additional_searchspace = params$additional_component_sampler$param_set$clone(deep = FALSE)
       search_space$set_id = ""
-      search_space = ParamSetCollection$new(list(search_space, self$additional_searchspace))
+      additional_searchspace$set_id = ""
+      search_space = ParamSetCollection$new(list(search_space, additional_searchspace))
       budget_id = NULL
 
       # selectors are primed with entire searchspace
@@ -204,8 +185,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .elite_selector = NULL,
     .own_param_set = NULL,
     .param_set_id = NULL,
-    .param_set_sources = NULL,
-    .additional_searchspace = NULL
+    .param_set_sources = NULL
   )
 )
 
@@ -370,7 +350,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #'   [`Selector`] operator that selects "elites", i.e. surviving individuals from previous generations,
 #'   depending on configuration values
 #'   and objective results. When `elite_selector$operate()` is called, then objectives that
-#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.\cr
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.\cr
 #'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization.\cr
 #'   The given [`Selector`] may *not* return duplicates.
@@ -404,6 +384,17 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   data[died, eol := max(dob)]
 }
 
+
+
+
+#'   All [`MiesOperator`]s used with the resulting population must be primed on a union of `inst$search_space` and `additional_component_sampler$param_set`,
+#'   created, for example, using [`ParamSetCollection`][paradox::ParamSetCollection]. (When using multi-fidelity, the [`Mutator`] and [`Recombinator`]
+#'   operators must be
+mies_prime_operators = function(mutators = list(), recombinators = list(), selectors = list(), search_space, additional_components = NULL, budget_id = NULL) {
+
+
+}
+
 #' @title Initialize MIES Optimization
 #'
 #' @description
@@ -421,48 +412,104 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'   a custom function that ensures that only `n` individuals are produced.
 #' @template param_fidelity_schedule_maybenull
 #' @template param_budget_id_maybenull
+#' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
+#'   [`Sampler`][paradox::Sampler] for components of individuals that are not part of `inst`'s `$search_space`. These components
+#'   are never used for performance evaluation, but they may be useful for self-adaptive [`OperatorCombination`]s. See the description
+#'   of [`mies_prime_operators()`] on how operators need to be primed to respect additional components.\cr
+#'   It is possible that `additional_component_sampler` is used for *more* rows than `initializer`, which happens
+#'   when the `inst`'s `$archive` contains prior evaluations that are alive, but does not contain columns pertaining to additional columns,
+#'   or contains *all* these columns but there are rows that are `NA` valued. If only *some* of the columns are present, or if all these columns
+#'   are present but there are rows that are only `NA` valued for some columns, then an error is thrown.\cr
+#'   Default is `NULL`: no additional components.
 #' @return invisible [`OptimInstance`][bbotk::OptimInstance] | invisible [`TuningInstance`][mlr3tuning::TuningInstance]: the input
 #'   instance, modified by-reference.
 #'
 #' @family mies building blocks
 #' @export
-mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL) {
+mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL, additional_component_sampler = NULL) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
 
   assert_int(mu, lower = 1, tol = 1e-100)
   assert_function(initializer, nargs = 2)
 
-  assert_choice(budget_id, inst$search_space$ids(), null.ok = is.null(fidelity_schedule))
+  ss_ids = inst$search_space$ids()
+  ac_ids = additional_component_sampler$param_set$ids()
+  present_cols = colnames(inst$archive$data)
+
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
   if (!is.null(fidelity_schedule)) {
     assert(check_fidelity_schedule(fidelity_schedule))
   }
 
-  if (any(c("dob", "eol") %in% inst$search_space$ids())) {
+  if (any(c("dob", "eol") %in% ss_ids)) {
     stop("'dob' and 'eol' may not be search space dimensions.")
   }
+  if (any(c("dob", "eol") %in% ac_ids)) {
+    stop("'dob' and 'eol' may not be additional component dimensions.")
+  }
+  if (any(ss_ids %in% ac_ids)) {
+    stopf("Search space and additional components name clash: %s", str_collapse(intersect(ss_ids, ac_ids)))
+  }
+  if (any(ac_ids %in% present_cols) && !all(ac_ids %in% present_cols)) {
+    stopf("Some, but not all, additoinal components already in archive: %s", str_collapse(intersect(present_cols, ac_ids)))
+  }
   dob = batch_nr = NULL
-  if ("eol" %nin% colnames(inst$archive$data)) {
+  if ("eol" %nin% present_cols) {
     inst$archive$data[, eol := 0]
-  } else if ("dob" %nin% colnames(inst$archive$data)) {
+  } else if ("dob" %nin% present_cols) {
     stop("'eol' but not 'dob' column found in archive; this is an undefined state that would probably lead to bad behaviour, so stopping.")
   }
 
-  if ("dob" %nin% colnames(inst$archive$data)) {
+
+  if ("dob" %nin% present_cols) {
     inst$archive$data[, dob := 0]
   }
-  data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we only get the local copy here!
+  data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we need to be careful with copies of data!
   assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
 
-  mu_remaining = mu - sum(is.na(inst$archive$eol))
+  alive = which(is.na(inst$archive$eol))
+  n_alive = length(alive)
+  mu_remaining = mu - n_alive
+
+  # take care of additional components
+  # we need to check if / how many additional components we need to sample. If there are no alive individuals,
+  # then this is just mu. If there are alive individuals, it *may* also be mu (we will have to insert components
+  # at those rows where there are alive individuals!)
+  additional_needed = mu  # how many more rows of additional components need to be sampled. by default: mu
+  row_insert = last(alive, mu)  # at what rows of `data` the components are inserted
+  if (n_alive && all(ac_ids %in% present_cols)) {
+    # additional components already present in the archive. Let's check if there are any rows with NAs.
+    missing_info = is.na(data[row_insert, ac_ids, with = FALSE])
+    any_missing_ac = apply(missing_info, 1, all)
+    if (any(apply(missing_info, 1, any) != any_missing_ac)) {
+      stop("There are rows in inst$archive$data where some, but not all additional component values are NA.")
+    }
+    row_insert = row_insert[any_missing_ac]  # only insert at the rows where any/all values are missing
+    additional_needed = max(0, mu - n_alive) + length(row_insert)  # need to generate components for the missing rows, and for the values that get sampled new
+  }
+
+  additional_components = assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
+
+  # assert here that:
+  # we either have some individuals that need to be sampled (mu_remaining > 0)
+  #   in which case the additional_components table's first `length(row_insert)` and last `mu_remaining` rows are complementary
+  # or that we have no more individuals to sample, in which case `additional_components` are exactly equal to the number of rows where things get inserted.
+  assert_true((mu_remaining > 0 && length(row_insert) + mu_remaining == additional_needed) || (mu_remaining <= 0 && length(row_insert) == additional_needed))
+
+  # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise
+  inst$archive$data[row_insert, ac_ids] <- first(additional_components, length(row_insert))
+
+
 
   if (mu_remaining < 0) {
     # TODO: we are currently killing the earliest evals, maybe do something smarter.
     # TODO: also we are not doing anything about budget here, we just hope the user knows what he's doing.
-    data[head(which(is.na(eol)), -mu_remaining), eol := max(dob)]
+    # TODO: also also the additional component handling above depends on killing earliest now.
+    inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
   } else if (mu_remaining > 0) {
     mies_evaluate_offspring(inst,
-      remove_named(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining), budget_id),
+      cbind(remove_named(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining), budget_id), last(additional_components, mu_remaining))
       fidelity_schedule, budget_id, survivor_budget = TRUE)
   }
   invisible(inst)
@@ -508,7 +555,7 @@ mies_get_fitnesses = function(inst, rows) {
 #' @param `selector` ([`Selector`])\cr
 #'   [`Selector`] operator that selects individuals depending on configuration values
 #'   and objective results. When `selector$operate()` is called, then objectives that
-#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.
 #'   Defaults to [`SelectorBest`].\cr
 #'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization.\cr
@@ -541,7 +588,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' @title Generate Offspring Through Mutation and Recombination
 #'
 #' @description
-#' Generate new proposal individuals to be evaluated using [`mies_evaluate_offspring`].
+#' Generate new proposal individuals to be evaluated using [`mies_evaluate_offspring()`].
 #'
 #' Parent individuals are selected using `parent_selector`, then mutated using `mutator`, and thend
 #' recombined using `recombinator`. If only a subset of these operations is desired, then
@@ -555,7 +602,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' @param parent_selector ([`Selector`])\cr
 #'   [`Selector`] operator that selects parent individuals depending on configuration values
 #'   and objective results. When `parent_selector$operate()` is called, then objectives that
-#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.
 #'   Defaults to [`SelectorBest`].\cr
 #'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization.\cr
@@ -577,7 +624,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'   individuals sampled from the archive in `inst` before giving it to `mutator` and `recombinator`.
 #'   Should be `NULL` when not doing multi-fidelity.
 #' @return [`data.table`][data.table::data.table]: A table of configurations proposed as offspring to be evaluated
-#' using [`mies_evaluate_offspring`].
+#' using [`mies_evaluate_offspring()`].
 #' @family mies building blocks
 #' @export
 mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new()$prime(inst$search_space), mutator = NULL, recombinator = NULL, budget_id = NULL) {
