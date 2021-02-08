@@ -327,3 +327,6 @@ expect_equal(transformed[31:40, b], rep(0, 10))
 
 # TODO: - reordering within groups
 #       - recombinator with in 3, out 1
+#       - check if optimization with col named 'generation' works
+#       - test that mies_select_from_archive works without rows argument
+#       - selector defaults are working

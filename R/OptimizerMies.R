@@ -10,7 +10,7 @@
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(
-    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL) {
+    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL, multi_fidelity = FALSE) {
       private$.mutator = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.recombinator = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       private$.parent_selector = assert_r6(parent_selector, "Selector")$clone(deep = TRUE)
@@ -23,9 +23,10 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           lambda = p_int(1, tags = c("required", "offspring")),
           mu = p_int(1, tags = c("required", "init", "survival")),
           initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), default = generate_design_random, tags = "init"),  # arguments: param_set, n
-          fidelity_schedule = p_uty(custom_check = check_fidelity_schedule),
-          reeval_fidelity_steps = p_lgl(),
           survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required")),
+        if (multi_fidelity) list(
+          fidelity_schedule = p_uty(custom_check = check_fidelity_schedule, tags = "required"),
+          reeval_fidelity_steps = p_lgl(tags = "required"))
         if (!is.null(elite_selector)) list(
           n_elite = p_int(0, depends = survival_strategy == "comma", tags = "survival"))
       ))
@@ -39,12 +40,27 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           elite_selector = self$elite_selector$param_set)
       )
 
-      self$param_set$values = list(lambda = 10, mu = 1, survival_strategy = "plus")
+      self$param_set$values = c(
+        list(lambda = 10, mu = 1, survival_strategy = "plus"),
+        if (multi_fidelity) list(
+          fidelity_schedule = data.table(generation = 1, budget_new = 1, budget_survivors = 1),
+          reeval_fidelity_steps = TRUE)
+      )
+
+      param_class_determinants = c(
+        list(parent_selector, survival_selector),
+        if (!is.null(elite_selector)) list(elite_selector),
+
+        # don't depend on mutate and recombine when we do multi-fidelity because budget may be any unsupported Param.
+        if (!multi_fidelity) list(mutator, recombinator)
+      )
+
+      properties_determinants = discard(list(parent_selector, survival_selector, elite_selector), is.null)
 
       super$initialize(
         param_set = self$param_set,  # essentially a nop, since at this point we already set private$.param_set, but we can't give NULL here.
-        param_classes = Reduce(intersect, map(discard(list(mutator, recombinator, parent_selector, survival_selector, elite_selector), is.null), "param_classes")),
-        properties = c("dependencies", Reduce(intersect, map(discard(list(parent_selector, survival_selector, elite_selector), is.null), "supported")))
+        param_classes = Reduce(intersect, map(param_class_determinants, "param_classes")),
+        properties = c("dependencies", Reduce(intersect, map(properties_determinants, "supported")))
       )
     }
   ),
@@ -111,12 +127,24 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       params = private$.own_param_set$get_values()
       search_space = inst$search_space
       budget_id = NULL
+
+      # selectors are primed with entire searchspace
+      self$survival_selector$prime(search_space)
+      self$parent_selector$prime(search_space)
+      if (!is.null(self$elite_selector)) {
+        self$elite_selector$prime(search_space)
+      }
+
       if (!is.null(params$fidelity_schedule)) {
         budget_id = search_space$ids(tags = "budget")
         if (length(budget_id) != 1) stopf("Only allowing one budget parameter, but found %s: %s",
           length(budget_id), str_collapse(budget_id))
         search_space = ParamSetShadow$new(search_space, budget_id)
       }
+
+      self$mutator$prime(search_space)
+      self$recombinator$prime(search_space)
+
       mies_init_population(inst, mu = params$mu, initializer = params$initializer, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
 
       survival = switch(params$survival_strategy,
@@ -125,7 +153,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
 
       repeat {
         offspring = mies_generate_offspring(inst, lambda = params$lambda,
-          parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator)
+          parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
         survival(inst, mu = params$mu, survival_selector = self$survival_selector, n_elite = params$n_elite, elite_selector = self$elite_selector)
         mies_step_fidelity(inst, params$fidelity_schedule, budget_id, only_latest_gen = !params$reeval_fidelity_steps)
@@ -143,7 +171,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
 )
 
 check_fidelity_schedule = function(x) {
-  if (test_data_table(x, ncols = 2, min.rows = 1) &&
+  if (test_data_frame(x, ncols = 2, min.rows = 1) &&
       test_names(colnames(x), identical.to = c("generation", "budget_new", "budget_survivors")) &&
       test_integerish(x$generation, tol = 1e-100, any.missing = FALSE, unique = TRUE) &&
       1 %in% x$generation) {
@@ -153,14 +181,43 @@ check_fidelity_schedule = function(x) {
   }
 }
 
+#' @title Evaluate Proposed Configurations Generated in a MIES Iteration
+#'
+#' @description
+#' Calls `$eval_batch` of a given [`OptimInstance`][bbotk::OptimInstance] on a set
+#' of configurations as part of a MIES operation. The `dob` extra-info in the archive
+#' is also set properly to indicate a progressed generation.
+#'
+#' This function can be used directly, but it is easier to use it within the [`OptimizerMies`]
+#' [`Optimizer`][bbotk::Optimizer] if standard GA operation is desired.
+#'
+#' "Rolling-tide" multifidelity is supported as described in [`OptimizerMies`] or more thoroughly
+#' in `vignette("mies-multifid")`. For this,
+#' an extra component named after `budget_id` is appended to each individual, chosen from
+#' the `fidelity_schedule` depending on the value of `survivor_budget`. Both `fidelity_schedule`
+#' and `budget_id` should be the same values as given to the other `mies_*` functions.
+#'
+#' @template param_inst
+#' @param offspring (`data.frame`)\cr
+#'   Proposed configurations to be evaluated, must have columns named after the `inst`'s search space, minus `budget_id` if not `NULL`.
+#' @template param_fidelity_schedule_maybenull
+#' @template param_budget_id_maybenull
+#' @param survivor_budget (`logical(1)`)\cr
+#'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.
+#' @return invible [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
+#'   through `eval_batch`.
 #' @export
 mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
-  assert_data_table(offspring)
-  assert_choice(budget_id, inst$search_space$ids(), null.ok = is.null(fidelity_schedule))
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  offspring = as.data.table(assert_data_frame(offspring))
+  ss_ids = inst$search_space$ids()
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
   assert_flag(survivor_budget)
   generation = max(inst$archive$data$dob, 0) + 1
   if (!is.null(fidelity_schedule)) {
+    assert_names(colnames(offspring), permutation.of = ss_ids)
     assert(check_fidelity_schedule(fidelity_schedule))
+    fidelity_schedule = as.data.table(fidelity_schedule)
     fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
     fidelity_column = if (survivor_budget) "budget_survivors" else "budget_new"
     fidelity = fidelity_schedule[data.table(generation = generation), fidelity_column, on = generation, roll = TRUE, with = FALSE]
@@ -170,17 +227,47 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   inst$eval_batch(cbind(offspring, dob = ..(generation), eol = NA_real_))
 }
 
+#' @title Re-Evaluate Configurations with Higher Fidelity
+#'
+#' @description
+#' As part of the "rolling-tide" multifidelity-setup, do reevaluation of configurations with
+#' higher fidelity that have survived lower-fidelity selection. All alive individuals
+#' of the last generation (if `only_latest_gen` is `TRUE`) or of any generation (if `only_latest_gen` is `FALSE`)
+#' are re-evaluated with the `"budget_survivors"` fidelity specified in `fidelity_schedule` for the
+#' *upcoming* / next generation. The results are evaluated as part of the *current* generation (see examples).
+#'
+#' This function should only be called when doing rolling-tide multifidelity, and should not be part of the
+#' MIES cycle otherwise.
+#'
+#' @template param_inst
+#' @param fidelity_schedule (`data.frame`)\cr
+#'   `data.frame` with three columns `"generation"`, `"budget_new"`, `"budget_survivors"`, in that order. `"budget_new"` and `"budget_survivors"`
+#'   are atomic columns. The value of `"budget_survivors"` of the appropriate row is assigned to the `budget_id` component of `offspring`.
+#'   `"generation"` is an integer valued column, indicating the first generation at which a row is valid. At least one row with
+#'   `generation == 1` must be present.
+#' @param budget_id (`character(1)`)\cr
+#'   Budget component that is set to the value found in `fidelity_schedule`.
+#' @param only_latest_gen (`logical(1)`)\cr
+#'   Whether to only re-evaluate survivors individuals generated in the latest generation (`TRUE`), or re-evaluate all currently alive
+#'   individuals (`FALSE`). In any case, only individuals that were not already evaluated with the chosen fidelity are evaluated,
+#'   so this will usually only affect individuals from before the latest generation if the `"budget_survivors"` changed between
+#'   generations (i.e. when a different row from `fidelity_schedule` is used).
+#' @return invible [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
+#'   through `eval_batch`.
 #' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_gen = FALSE) {
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
   assert_flag(only_latest_gen)
   data = inst$archive$data
   generation = max(data$dob, 0)
   assert_choice(budget_id, inst$search_space$ids())
   assert(check_fidelity_schedule(fidelity_schedule))
-  assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
+  fidelity_schedule = as.data.table(fidelity_schedule)
 
   if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
+
+  assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
 
   next_fidelity = fidelity_schedule[data.table(generation = generation + 1), "budget_survivors", on = generation, roll = TRUE, with = FALSE]
 
@@ -192,21 +279,67 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_ge
   inst$eval_batch(indivs[, `:=`(dob = ..(generation), eol = NA_real_)])
 }
 
-
+#' @title Choose Survivors According to the "Plus" Strategy
+#'
+#' @description
+#' Choose survivors during a MIES iteration using the "Plus" survival strategy, i.e.
+#' combining all alive individuals from the latest and from prior generations indiscriminately and
+#' choosing survivors using a survival [`Selector`] operator.
+#'
+#' @template param_inst
+#' @template param_mu
+#' @template param_survival_survival_selector
+#' @template param_survival_dotdotdot
+#' @template param_survival_return
 #' @export
 mies_survival_plus = function(inst, mu, survival_selector, ...) {
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_int(mu, lower = 1, tol = 1e-100)
   data = inst$archive$data
-  assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
+
   alive = which(is.na(data$eol))
   if (!length(alive)) stop("No alive individuals. Need to run mies_init_population()?")
+
+  assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
+
   survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+  if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
   died = setdiff(alive, survivors)
   data[died, eol := max(dob)]
 }
 
+#' @title Choose Survivors According to the "Comma" Strategy
+#'
+#' @description
+#' Choose survivors during a MIES iteration using the "Comma" survival strategy, i.e.
+#' selecting survivors from the latest generation only, using a [`Selector`] operator, and choosing
+#' "elites" from survivors from previous generations using a different [`Selector`] operator.
+#'
+#' @template param_inst
+#' @template param_mu
+#' @template param_survival_survival_selector
+#' @param n_elite (`integer(1)`)\cr
+#'   Number of individuals to carry over from previous generations. `n_elite` individuals will be selected
+#'   by `elite_selector`, while `mu - n_elite` will be selected by `survival_selector` from the most
+#'   recent generation. `n_elite` may be 0 (no elitism), in which case only individuals from the newest
+#'   generation survive. `n_elite` must be strictly smaller than `mu` to permit any optimization progress.
+#' @param elite_selector ([`Selector`])\cr
+#'   [`Selector`] operator that selects "elites", i.e. surviving individuals from previous generations,
+#'   depending on configuration values
+#'   and objective results. When `elite_selector$operate()` is called, then objectives that
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.\cr
+#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization.\cr
+#'   The given [`Selector`] may *not* return duplicates.
+#' @template param_survival_dotdotdot
+#' @template param_survival_return
 #' @export
 mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selector, ...) {
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_int(mu, lower = 1, tol = 1e-100)
+  assert_int(n_elite, lower = 0, upper = mu - 1, tol = 1e-100)
+
   data = inst$archive$data
   assert_integerish(data$dob, lower = 1, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 1, upper = inst$archive$n_batch, tol = 1e-100)
@@ -215,19 +348,44 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 
   if (!length(alive_before)) stop("No alive individuals. Need to run mies_init_population()?")
   if (!length(current_offspring)) stop("No current offspring. Need to run mies_evaluate_offspring()?")
-  if (mu <= n_elite) stop("Mu must be > n_elite")
 
-  survivors = c(
-    mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE),
-    mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
-  )
+  survivors = if (mu > n_elite) mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
+  if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+
+  elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE),
+  if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
+
+  survivors = c(elites, survivors)
+
   died = setdiff(alive, survivors)
   data[died, eol := max(dob)]
 }
 
+#' @title Initialize MIES Optimization
+#'
+#' @description
+#' Set up an [`OptimInstance`][bbotk::OptimInstance] (or [`TuningInstance`][mlr3tuning::TuningInstance]) for MIES optimization.
+#' This adds the `dob` and `eol` columns to the instance's archive, and makes sure there are at least `mu` survivors
+#' (i.e. entries with `eol` set to `NA`) present. If there are already `>= mu` prior evaluations present, then the last
+#' `mu` of these remain alive (the other's `eol` set to 0); otherwise, up to `mu` new randomly sampled configurations
+#' are evaluated and added to the archive and have `eol` set to `NA`.
+#'
+#' @template param_inst
+#' @template param_mu
+#' @param initializer (`function`)\cr
+#'   Function that generates a [`Design`][paradox::Design] object, with arguments `param_set` and `n`, unctioning like [`paradox::generate_design_random`]
+#'   or [`paradox::generate_design_lhs`]. Note that [`paradox::generate_design_grid`] can not be used and must be wrapped with
+#'   a custom function that ensures that only `n` individuals are produced.
+#' @template param_fidelity_schedule_maybenull
+#' @template param_budget_id_maybenull
+#' @return invisible [`OptimInstance`][bbotk::OptimInstance] | invisible [`TuningInstance`][mlr3tuning::TuningInstance]: the input
+#'   instance, modified by-reference.
+#'
 #' @export
 mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL) {
-  assert_int(mu, lower = 1)
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+
+  assert_int(mu, lower = 1, tol = 1e-100)
   assert_function(initializer, nargs = 2)
 
   assert_choice(budget_id, inst$search_space$ids(), null.ok = is.null(fidelity_schedule))
@@ -259,21 +417,66 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     # TODO: also we are not doing anything about budget here, we just hope the user knows what he's doing.
     data[head(which(is.na(eol)), -mu_remaining), eol := max(dob)]
   } else if (mu_remaining > 0) {
-    mies_evaluate_offspring(inst, remove_named(initializer(inst$search_space, mu_remaining)$data, budget_id), fidelity_schedule, budget_id, survivor_budget = TRUE)
+    mies_evaluate_offspring(inst,
+      remove_named(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining), budget_id),
+      fidelity_schedule, budget_id, survivor_budget = TRUE)
   }
-  inst
+  invisible(inst)
 }
 
+#' @title Get Fitness Values from OptimInstance
+#'
+#' @description
+#' Get fitness values in the correct form as used by [`Selector`] operators from an
+#' [`OptimInstance`][bbotk::OptimInstance] (or [`TuningInstance`][mlr3tuning::TuningInstance]).
+#' This works for both single-criterion and multi-criterion optimization, and entails multiplying
+#' objectives with -1 if they are being minimized, since [`Selector`] tries to maximize fitness.
+#'
+#' @template param_inst
+#' @template param_rows
+#' @return `numeric` `matrix` with `length(rows)` (if `rows` is given, otherwise `nrow(inst$archive$data)`) rows
+#' and one column for each objective: fitnesses to be maximized.
 #' @export
 mies_get_fitnesses = function(inst, rows) {
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+
   multiplier = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
   fitnesses = as.matrix(inst$archive$data[rows, ..(multiplier) != 0, with = FALSE])
   multiplier = multiplier[multiplier != 0]
   sweep(fitnesses, 2L, multiplier, `*`)
 }
 
+#' @title Select Individuals from an OptimInstance
+#'
+#' @description
+#' Apply a [`Selector`] operator to a subset of configurations inside
+#' an [`OptimInstance`][bbotk::OptimInstance] (or [`TuningInstance`][mlr3tuning::TuningInstance])
+#' and return the index within the archive (when `get_indivs` `FALSE`) or the configurations themselves
+#' (when `get_indivs` is `TRUE`).
+#'
+#' It is not strictly necessary for the selector to select unique individuals / individuals without replacement.
+#'
+#' @template param_inst
+#' @param n_select (`integer(1)`)\cr
+#'   Number of individuals to select.
+#' @template param_rows
+#' @param `selector` ([`Selector`])\cr
+#'   [`Selector`] operator that selects individuals depending on configuration values
+#'   and objective results. When `selector$operate()` is called, then objectives that
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.
+#'   Defaults to [`SelectorBest`].\cr
+#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization.\cr
+#'   The given [`Selector`] *may* return duplicates.
+#' @param get_indivs (`logical(1)`)\cr
+#'   Whether to return configuration values from within the archive (`TRUE`) or just the indices within
+#'   the archive (`FALSE`). Default is `TRUE`.
+#' @return `integer` | [`data.table`][data.table::data.table]: Selected individuals, either index into `inst` or subset of archive table,
+#'   depending on `get_indivs`.
 #' @export
-mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new(), get_indivs = TRUE) {
+mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+
   assert_r6(selector, "Selector")
   assert_int(n_select, lower = 0, tol = 1e-100)
   if (n_select == 0) if (get_indivs) return(inst$data[0]) else return(integer(0))
@@ -285,19 +488,72 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
   if (get_indivs) {
     indivs[selected]
   } else {
-    rows[selected]
+    if (missing(rows)) selected else rows[selected]
   }
 }
 
+#' @title Generate Offspring Through Mutation and Recombination
+#'
+#' @description
+#' Generate new proposal individuals to be evaluated using [`mies_evaluate_offspring`].
+#'
+#' Parent individuals are selected using `parent_selector`, then mutated using `mutator`, and thend
+#' recombined using `recombinator`. If only a subset of these operations is desired, then
+#' it is possible to set `mutator` or `recombinator` to the respective "null"-operators.
+#'
+#' @template param_inst
+#' @param lambda (`integer(1)`)\cr
+#'   Number of new individuals to generate. This is not necessarily the number with which `parent_selector`
+#'   gets called, because `recombinator` could in principle need more than `lambda` input individuals to
+#'   generate `lambda` output individuals.
+#' @param parent_selector ([`Selector`])\cr
+#'   [`Selector`] operator that selects parent individuals depending on configuration values
+#'   and objective results. When `parent_selector$operate()` is called, then objectives that
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.
+#'   Defaults to [`SelectorBest`].\cr
+#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization.\cr
+#'   The given [`Selector`] *may* return duplicates.
+#' @param mutator ([`Mutator` | `NULL`])\cr
+#'   [`Mutator`] operation to apply to individuals selected out of `inst` using `parent_selector`.\cr
+#'   The [`Mutator`] must be primed on a [`ParamSet`][paradox::ParamSet] similar to `inst$search_space`,
+#'   but *without* the "budget" component when `budget_id` is given (multi-fidelity optimization). Such a
+#'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`ParamSetShadow`].\cr
+#'   When this is `NULL` (default), then a [`MutatorNull`] is used, effectively disabling mutation.
+#' @param recombinator ([`Recombinator` | `NULL`])\cr
+#'   [`Recombinator`] operation to apply to individuals selected out of `int` using `parent_selector` after mutation using `mutator`.
+#'   The [`Recombinator`] must be primed on a [`ParamSet`][paradox::ParamSet] similar to `inst$search_space`,
+#'   but *without* the "budget" component when `budget_id` is given (multi-fidelity optimization). Such a
+#'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`ParamSetShadow`].\cr
+#'   When this is `NULL` (default), then a [`RecombinatorNull`] is used, effectively disabling recombination.
+#' @param budget_id (`character(1)` | `NULL`)\cr
+#'   Budget compnent when doing multi-fidelity optimization. This component of the search space is removed from
+#'   individuals sampled from the archive in `inst` before giving it to `mutator` and `recombinator`.
+#'   Should be `NULL` when not doing multi-fidelity.
+#' @return [`data.table`][data.table::data.table]: A table of configurations proposed as offspring to be evaluated
+#' using [`mies_evaluate_offspring`].
 #' @export
-mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new(), mutator = MutatorNull$new(), recombinator = RecombinatorNull$new()) {
+mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new()$prime(inst$search_space), mutator = NULL, recombinator = NULL, budget_id = NULL) {
+  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+
   assert_int(lambda, lower = 1, tol = 1e-100)
-  assert_r6(mutator, "Mutator")
-  assert_r6(recombinator, "Mutator")
+  assert_r6(parent_selector, "Selector")
+  assert_r6(mutator, "Mutator", null.ok = TRUE)
+  assert_r6(recombinator, "Recombinator", null.ok = TRUE)
+  assert_choice(budget_id, inst$search_space$ids(), null.ok = TRUE)
+  if (is.null(mutator) || is.null(recombinator)) {
+    search_space = inst$search_space
+    if (!is.null(budget_id)) {
+      search_space = ParamSetShadow$new(search_space, budget_id)
+    }
+    mutator = mutator %??% MutatorNull$new()$prime(search_space)
+    recombinator = recombinator %??% RecombinatorNull$new()$prime(search_space)
+  }
   needed_recombinations = ceiling(lambda / recombinator$n_indivs_out)
   needed_parents = needed_recombinations * recombinator$n_indivs_in
 
   parents = mies_select_from_archive(inst, needed_parents, rows, parent_selector)
+  if (!is.null(budget_id)) parents[, (budget_id) := NULL]
 
   recombined = recombinator$operate(parents[sample.int(nrow(parents))])
   recombined = first(recombined, lambda)  # throw away things if we have too many (happens when n_indivs_out is not a divider of lambda)
