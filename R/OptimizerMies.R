@@ -1,20 +1,39 @@
-
-
-
-#' @title OptimizerMies
+#' @title Mixed Integer Evolutionary Strategies Optimizer
 #'
 #' @include Selector.R
+#' @include Mutator.R
+#' @include Recombinator.R
+#'
+#' @description
+#' Perform optimization using evolutionary strategies. `OptimizerMies` and `TunerMies` implement a standard ES optimization
+#' algorithm, performing initialization first, followed by a loop of performance evaluation, survival selection, parent selection, mutation, and
+#' recombination. Currently two different survival modes ("comma" and "plus") are supported. Multi-fidelity optimization, similar
+#' to the "rolling-tide" algorithm described in `r cite_bib("fieldsend2014rolling")`. The modular design and reliance on
+#' [`MiesOperator`] objects to perform central parts of the optimization algorithm makes this [`Optimizer`][bbotk::Optimizer]
+#' highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
+#' as presented in `r cite_bib("li2013mixed")` can easily be implemented.
+#'
+#'
+#'
+#'
+#' @references
+#' `r format_bib("fieldsend2014rolling")`
+#'
+#' `r format_bib("li2013mixed")`
 #'
 #' @description
 #' Mixed Integer Evolutionary Strategies
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(
-    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL, multi_fidelity = FALSE) {
+    initialize = function(mutator, recombinator, parent_selector, survival_selector, elite_selector = NULL, multi_fidelity = FALSE, additional_searchspace = ParamSet$new()) {
       private$.mutator = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.recombinator = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       private$.parent_selector = assert_r6(parent_selector, "Selector")$clone(deep = TRUE)
       private$.survival_selector = assert_r6(survival_selector, "Selector")$clone(deep = TRUE)
+      private$.additional_searchspace = assert_r6(additional_searchspace, "ParamSet")$clone(deep = TRUE)
+      private$.additional_searchspace$set_id = ""
+
       assert_r6(elite_selector, "Selector", null.ok = TRUE)
       if (!is.null(elite_selector)) {
         private$.elite_selector = elite_selector$clone(deep = TRUE)
@@ -46,6 +65,17 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           fidelity_schedule = data.table(generation = 1, budget_new = 1, budget_survivors = 1),
           reeval_fidelity_steps = TRUE)
       )
+
+      all_operators = discard(list(mutator = mutator, recombinator = recombinator, parent_selector parent_selector,
+        survival_selector = survival_selector, elite_selector = elite_selector), is.null)
+      for (opid in names(all_operators)) {
+        op = all_operators[[opid]]
+        unsupported_additional_searchspace = setdiff(additional_searchspace$class, op$param_classes)
+        if (length(unsupported_additional_searchspace)) {
+          stop("additional_searchspace contains Params of type {%s} which %s of type %s does not support.",
+            str_collapse(unsupported_additional_searchspace, quote = '"'), opid, class(op)[[1]])
+        }
+      }
 
       param_class_determinants = c(
         list(parent_selector, survival_selector),
@@ -95,6 +125,12 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       }
       private$.elite_selector
     },
+    additional_searchspace = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.additional_searchspace)) {
+        stop("additional_searchspace is read-only.")
+      }
+      private$.additional_searchspace
+    },
     param_set = function(rhs) {
       if (is.null(private$.param_set)) {
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))
@@ -125,7 +161,9 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     },
     .optimize = function(inst) {
       params = private$.own_param_set$get_values()
-      search_space = inst$search_space
+      search_space = inst$search_space$clone(deep = FALSE)
+      search_space$set_id = ""
+      search_space = ParamSetCollection$new(list(search_space, self$additional_searchspace))
       budget_id = NULL
 
       # selectors are primed with entire searchspace
@@ -166,7 +204,8 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .elite_selector = NULL,
     .own_param_set = NULL,
     .param_set_id = NULL,
-    .param_set_sources = NULL
+    .param_set_sources = NULL,
+    .additional_searchspace = NULL
   )
 )
 
@@ -206,6 +245,7 @@ check_fidelity_schedule = function(x) {
 #'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.
 #' @return invible [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
+#' @family mies building blocks
 #' @export
 mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
@@ -215,7 +255,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   assert_flag(survivor_budget)
   generation = max(inst$archive$data$dob, 0) + 1
   if (!is.null(fidelity_schedule)) {
-    assert_names(colnames(offspring), permutation.of = ss_ids)
+    assert_names(colnames(offspring), must.include = ss_ids, disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
     assert(check_fidelity_schedule(fidelity_schedule))
     fidelity_schedule = as.data.table(fidelity_schedule)
     fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
@@ -254,6 +294,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'   generations (i.e. when a different row from `fidelity_schedule` is used).
 #' @return invible [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
+#' @family mies building blocks
 #' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_gen = FALSE) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
@@ -291,6 +332,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, only_latest_ge
 #' @template param_survival_survival_selector
 #' @template param_survival_dotdotdot
 #' @template param_survival_return
+#' @family mies building blocks
 #' @export
 mies_survival_plus = function(inst, mu, survival_selector, ...) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
@@ -334,6 +376,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #'   The given [`Selector`] may *not* return duplicates.
 #' @template param_survival_dotdotdot
 #' @template param_survival_return
+#' @family mies building blocks
 #' @export
 mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selector, ...) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
@@ -381,6 +424,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #' @return invisible [`OptimInstance`][bbotk::OptimInstance] | invisible [`TuningInstance`][mlr3tuning::TuningInstance]: the input
 #'   instance, modified by-reference.
 #'
+#' @family mies building blocks
 #' @export
 mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
@@ -436,6 +480,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 #' @template param_rows
 #' @return `numeric` `matrix` with `length(rows)` (if `rows` is given, otherwise `nrow(inst$archive$data)`) rows
 #' and one column for each objective: fitnesses to be maximized.
+#' @family mies building blocks
 #' @export
 mies_get_fitnesses = function(inst, rows) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
@@ -473,13 +518,14 @@ mies_get_fitnesses = function(inst, rows) {
 #'   the archive (`FALSE`). Default is `TRUE`.
 #' @return `integer` | [`data.table`][data.table::data.table]: Selected individuals, either index into `inst` or subset of archive table,
 #'   depending on `get_indivs`.
+#' @family mies building blocks
 #' @export
 mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
 
   assert_r6(selector, "Selector")
   assert_int(n_select, lower = 0, tol = 1e-100)
-  if (n_select == 0) if (get_indivs) return(inst$data[0]) else return(integer(0))
+  if (n_select == 0) if (get_indivs) return(inst$data[0, inst$archive$cols_x, with = FALSE]) else return(integer(0))
   indivs = inst$archive$data[rows, inst$archive$cols_x, with = FALSE]
 
   fitnesses = mies_get_fitnesses(inst, rows)
@@ -532,6 +578,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'   Should be `NULL` when not doing multi-fidelity.
 #' @return [`data.table`][data.table::data.table]: A table of configurations proposed as offspring to be evaluated
 #' using [`mies_evaluate_offspring`].
+#' @family mies building blocks
 #' @export
 mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new()$prime(inst$search_space), mutator = NULL, recombinator = NULL, budget_id = NULL) {
   assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))

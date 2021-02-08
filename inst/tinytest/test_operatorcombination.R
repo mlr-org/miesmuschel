@@ -330,3 +330,6 @@ expect_equal(transformed[31:40, b], rep(0, 10))
 #       - check if optimization with col named 'generation' works
 #       - test that mies_select_from_archive works without rows argument
 #       - selector defaults are working
+#       - forbidden paramset components? dob, eol, ...?
+#       - recognize right away that additional_searchspace is not supported
+#       - selector ignore params, selector from ranker ('best'), and 'ranker' objects.
