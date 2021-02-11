@@ -44,6 +44,7 @@ dict_mutators$get("maybe", <mutator> [, <mutator_not>])
 Other mutators: 
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
+\code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
@@ -52,13 +53,14 @@ Other mutators:
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
+\code{\link{MutatorProxy}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}}
 }
 \concept{mutator wrappers}
 \concept{mutators}
 \section{Super classes}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{\link[Miesmuschel:Mutator]{Miesmuschel::Mutator}} -> \code{MutatorMaybe}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Mutator]{miesmuschel::Mutator}} -> \code{MutatorMaybe}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -71,7 +73,7 @@ Other mutator wrappers:
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -120,7 +122,7 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{invisible(self)}.
+\link{invisible} \code{self}.
 }
 }
 \if{html}{\out{<hr>}}

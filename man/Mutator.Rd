@@ -34,6 +34,7 @@ Other base classes:
 Other mutators: 
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
+\code{\link{MutatorProxy}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_gauss}},
@@ -44,7 +45,7 @@ Other mutators:
 \concept{base classes}
 \concept{mutators}
 \section{Super class}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{Mutator}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{Mutator}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -56,8 +57,8 @@ Other mutators:
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../Miesmuschel/html/MiesOperator.html#method-prime}{\code{Miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
 }
 \out{</details>}
 }

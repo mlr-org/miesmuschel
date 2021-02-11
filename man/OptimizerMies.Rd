@@ -2,9 +2,41 @@
 % Please edit documentation in R/OptimizerMies.R
 \name{OptimizerMies}
 \alias{OptimizerMies}
-\title{OptimizerMies}
+\title{Mixed Integer Evolutionary Strategies Optimizer}
 \description{
-Mixed Integer Evolutionary Strategies
+Perform optimization using evolutionary strategies. \code{OptimizerMies} and \code{TunerMies} implement a standard ES optimization
+algorithm, performing initialization first, followed by a loop of performance evaluation, survival selection, parent selection, mutation, and
+recombination. Currently two different survival modes ("comma" and "plus") are supported. Multi-fidelity optimization, similar
+to the "rolling-tide" algorithm described in Fieldsend (2014). The modular design and reliance on
+\code{\link{MiesOperator}} objects to perform central parts of the optimization algorithm makes this \code{\link[bbotk:Optimizer]{Optimizer}}
+highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
+as presented in Li (2013) can easily be implemented.
+
+\code{OptimizerMies} implements a standard evolutionary strategies loop:
+\enumerate{
+\item Prime operators, using \code{mies_prime_operators()}
+\item Initialize population, using \code{mies_init_population()}
+\item Generate offspring by selecting parents, recombining and mutating them, using \code{mies_generate_offspring()}
+\item Evaluate performance, using \code{mies_evaluate_offspring()}
+\item Select survivors, using either \code{mies_survival_plus()} or \code{mies_survival_comma()}, depending on the \code{survival_strategy} hyperparameter
+\item Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
+\item Jump to 3.
+}
+}
+\section{Multi-Fidelity}{
+
+\code{miesmuschel} provides a simple multi-fidelity optimization mechanism that both allows increasing fidelity by generation
+number, and
+}
+
+\references{
+Fieldsend, E J, Everson, M R (2014).
+\dQuote{The rolling tide evolutionary algorithm: A multiobjective optimizer for noisy optimization problems.}
+\emph{IEEE Transactions on Evolutionary Computation}, \bold{19}(1), 103--117.
+
+Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijkstra, Jouke, Reiber, HC J (2013).
+\dQuote{Mixed integer evolution strategies for parameter optimization.}
+\emph{Evolutionary computation}, \bold{21}(1), 29--64.
 }
 \section{Super class}{
 \code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerMies}
@@ -31,11 +63,12 @@ Mixed Integer Evolutionary Strategies
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{OptimizerMies$new(
-  mutator,
-  recombinator,
-  parent_selector,
-  survival_selector,
-  elite_selector = NULL
+  mutator = MutatorProxy$new(),
+  recombinator = RecombinatorProxy$new(),
+  parent_selector = SelectorProxy$new(),
+  survival_selector = SelectorProxy$new(),
+  elite_selector = NULL,
+  multi_fidelity = FALSE
 )}\if{html}{\out{</div>}}
 }
 

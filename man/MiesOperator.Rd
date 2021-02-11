@@ -48,7 +48,14 @@ Hyperparameters of the \code{MiesOperator} object. Read-only.}
 Classes of parameters that the operator can handle, contains any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}. Read-only.}
 
 \item{\code{endomorphism}}{(\code{logical(1)})\cr
-Whether the output of \verb{$operate()} is a \code{data.frame} / \code{\link[data.table:data.table]{data.table}} in the same domain as its input}
+Whether the output of \verb{$operate()} is a \code{data.frame} / \code{\link[data.table:data.table]{data.table}} in the same domain as its input. Read-only.}
+
+\item{\code{primed_ps}}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
+\code{\link[paradox:ParamSet]{ParamSet}} on which the \code{MiesOperator} is primed. Is \code{NULL} if it has not been primed.
+Writing to this acrive binding calls \verb{$prime()}.}
+
+\item{\code{is_primed}}{(\code{logical(1)})\cr
+Whether the \code{MiesOperator} was primed before. Is \code{FALSE} exactly when \verb{$primed_ps} is \code{NULL}. Read-only.}
 }
 \if{html}{\out{</div>}}
 }
@@ -106,7 +113,8 @@ The \verb{$endomorphsim} field will reflect this value.}
 \subsection{Method \code{prime()}}{
 Prepare the \code{MiesOperator} to function on the given \code{\link[paradox:ParamSet]{ParamSet}}. This must be called before
 \verb{$operate()}. It may be called multiple times in the lifecycle of the \code{MiesOperator} object, and prior primings are
-forgotten when priming on a new \code{\link[paradox:ParamSet]{ParamSet}}.
+forgotten when priming on a new \code{\link[paradox:ParamSet]{ParamSet}}. The \code{\link[paradox:ParamSet]{ParamSet}} on which
+the \code{MiesOperator} was last primed can be read from \verb{$primed_ps}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$prime(param_set)}\if{html}{\out{</div>}}
 }
@@ -121,7 +129,7 @@ May only contiain \code{\link[paradox:ParamSet]{Param}} objects that conform to 
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{invisible(self)}.
+\link{invisible} \code{self}.
 }
 }
 \if{html}{\out{<hr>}}

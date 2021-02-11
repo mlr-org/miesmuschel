@@ -46,7 +46,6 @@ Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value 
 \item \href{#method-new}{\code{ParamSetShadow$new()}}
 \item \href{#method-add}{\code{ParamSetShadow$add()}}
 \item \href{#method-subset}{\code{ParamSetShadow$subset()}}
-\item \href{#method-check}{\code{ParamSetShadow$check()}}
 \item \href{#method-clone}{\code{ParamSetShadow$clone()}}
 }
 }
@@ -56,6 +55,7 @@ Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value 
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="add_dep">}\href{../../paradox/html/ParamSet.html#method-add_dep}{\code{paradox::ParamSet$add_dep()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert">}\href{../../paradox/html/ParamSet.html#method-assert}{\code{paradox::ParamSet$assert()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert_dt">}\href{../../paradox/html/ParamSet.html#method-assert_dt}{\code{paradox::ParamSet$assert_dt()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check">}\href{../../paradox/html/ParamSet.html#method-check}{\code{paradox::ParamSet$check()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check_dt">}\href{../../paradox/html/ParamSet.html#method-check_dt}{\code{paradox::ParamSet$check_dt()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="format">}\href{../../paradox/html/ParamSet.html#method-format}{\code{paradox::ParamSet$format()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="get_values">}\href{../../paradox/html/ParamSet.html#method-get_values}{\code{paradox::ParamSet$get_values()}}\out{</span>}
@@ -128,30 +128,6 @@ not implemented and will give an error.
 }
 \subsection{Returns}{
 nothing.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-check"></a>}}
-\if{latex}{\out{\hypertarget{method-check}{}}}
-\subsection{Method \code{check()}}{
-\pkg{checkmate}-like check-function for values.
-
-Handles dependencies of the shadowed \code{\link[paradox:ParamSet]{ParamSet}} correctly even for dependencies
-that reach to shadowed values, by inserting these shadowed values into \code{xs}.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$check(xs)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{xs}}{(named \code{list})\cr
-Value to be checked.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-\code{TRUE} if successful, otherwise a string describing the error.
 }
 }
 \if{html}{\out{<hr>}}

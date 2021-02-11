@@ -38,13 +38,14 @@ dict_recombinators$get("null")
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorProxy}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{recombinators}
 \section{Super classes}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{\link[Miesmuschel:Recombinator]{Miesmuschel::Recombinator}} -> \code{RecombinatorNull}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorNull}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -56,8 +57,8 @@ Other recombinators:
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../Miesmuschel/html/MiesOperator.html#method-prime}{\code{Miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
 }
 \out{</details>}
 }

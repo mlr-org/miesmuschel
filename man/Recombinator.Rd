@@ -33,6 +33,7 @@ Other base classes:
 
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorProxy}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_xounif}}
@@ -40,7 +41,7 @@ Other recombinators:
 \concept{base classes}
 \concept{recombinators}
 \section{Super class}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{Recombinator}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{Recombinator}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -63,8 +64,8 @@ Number of individuals produced for each group of \verb{$n_indivs_in} individuals
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../Miesmuschel/html/MiesOperator.html#method-prime}{\code{Miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
 }
 \out{</details>}
 }

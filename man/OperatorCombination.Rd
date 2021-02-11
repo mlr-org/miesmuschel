@@ -81,6 +81,7 @@ Other base classes:
 Other mutators: 
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
+\code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_gauss}},
@@ -89,16 +90,19 @@ Other mutators:
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
+\code{\link{MutatorProxy}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_maybe}}
 
 Other recombinators: 
+\code{\link{RecombinatorProxy}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
+\code{\link{RecombinatorProxy}},
 \code{\link{dict_recombinators_maybe}}
 }
 \concept{base classes}
@@ -107,7 +111,7 @@ Other recombinator wrappers:
 \concept{recombinator wrappers}
 \concept{recombinators}
 \section{Super class}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{OperatorCombination}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{OperatorCombination}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -146,7 +150,7 @@ See the construction argument. Can be changed during the object's lifetime.}
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -240,7 +244,7 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{invisible(self)}.
+\link{invisible} \code{self}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -262,7 +266,7 @@ The objects of this class are cloneable with this method.
 }
 }
 \section{Super classes}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{\link[Miesmuschel:OperatorCombination]{Miesmuschel::OperatorCombination}} -> \code{MutatorCombination}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:OperatorCombination]{miesmuschel::OperatorCombination}} -> \code{MutatorCombination}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -274,8 +278,8 @@ The objects of this class are cloneable with this method.
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../Miesmuschel/html/OperatorCombination.html#method-prime}{\code{Miesmuschel::OperatorCombination$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../miesmuschel/html/OperatorCombination.html#method-prime}{\code{miesmuschel::OperatorCombination$prime()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -332,7 +336,7 @@ The objects of this class are cloneable with this method.
 }
 }
 \section{Super classes}{
-\code{\link[Miesmuschel:MiesOperator]{Miesmuschel::MiesOperator}} -> \code{\link[Miesmuschel:OperatorCombination]{Miesmuschel::OperatorCombination}} -> \code{RecombinatorCombination}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:OperatorCombination]{miesmuschel::OperatorCombination}} -> \code{RecombinatorCombination}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -355,8 +359,8 @@ Number of individuals produced for each group of \verb{$n_indivs_in} individuals
 \if{html}{
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../Miesmuschel/html/MiesOperator.html#method-operate}{\code{Miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="Miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../Miesmuschel/html/OperatorCombination.html#method-prime}{\code{Miesmuschel::OperatorCombination$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../miesmuschel/html/OperatorCombination.html#method-prime}{\code{miesmuschel::OperatorCombination$prime()}}\out{</span>}
 }
 \out{</details>}
 }
