@@ -51,7 +51,8 @@ MiesOperator = R6Class("MiesOperator",
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
     #' `$operate()`. It may be called multiple times in the lifecycle of the `MiesOperator` object, and prior primings are
-    #' forgotten when priming on a new [`ParamSet`][paradox::ParamSet].
+    #' forgotten when priming on a new [`ParamSet`][paradox::ParamSet]. The [`ParamSet`][paradox::ParamSet] on which
+    #' the `MiesOperator` was last primed can be read from `$primed_ps`.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   The [`ParamSet`][paradox::ParamSet] to which all `values` tables passed to `$operate()` will need to conform to.
     #'   May only contiain [`Param`][paradox::ParamSet] objects that conform to the classes listed in `$param_classes`.
@@ -117,10 +118,25 @@ MiesOperator = R6Class("MiesOperator",
       private$.param_classes
     },
     #' @field endomorphism (`logical(1)`)\cr
-    #' Whether the output of `$operate()` is a `data.frame` / [`data.table`][data.table::data.table] in the same domain as its input
+    #' Whether the output of `$operate()` is a `data.frame` / [`data.table`][data.table::data.table] in the same domain as its input. Read-only.
     endomorphism = function(val) {
       if (!missing(val)) stop("endomorphism is read-only.")
       private$.endomorphism
+    },
+    #' @field primed_ps ([`ParamSet`][paradox::ParamSet] | `NULL`)\cr
+    #' [`ParamSet`][paradox::ParamSet] on which the `MiesOperator` is primed. Is `NULL` if it has not been primed.
+    #' Writing to this acrive binding calls `$prime()`.
+    primed_ps = function(val) {
+      if (!missing(val)) {
+        self$prime(val)
+      }
+      private$.primed_ps
+    },
+    #' @field is_primed (`logical(1)`)\cr
+    #' Whether the `MiesOperator` was primed before. Is `FALSE` exactly when `$primed_ps` is `NULL`. Read-only.
+    is_primed = function(val) {
+      if (!missing(val)) stop("is_primed is read-only.")
+      is.null(self$primed_ps)
     }
   ),
   private = list(
