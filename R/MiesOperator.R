@@ -55,10 +55,10 @@ MiesOperator = R6Class("MiesOperator",
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   The [`ParamSet`][paradox::ParamSet] to which all `values` tables passed to `$operate()` will need to conform to.
     #'   May only contiain [`Param`][paradox::ParamSet] objects that conform to the classes listed in `$param_classes`.
-    #' @return `invisible(self)`.
+    #' @return [invisible] `self`.
     prime = function(param_set) {
       assert_subset(param_set$class, self$param_classes)
-      private$.primed_ps = param_set
+      private$.primed_ps = ps_flatten(param_set)
       invisible(self)
     },
     #' @description

@@ -195,7 +195,7 @@ OperatorCombination = R6Class("OperatorCombination",
     #' to component assignments to wrapped operators.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   Passed to [`MiesOperator`]`$prime()`.
-    #' @return `invisible(self)`.
+    #' @return [invisible] `self`.
     prime = function(param_set) {
       super$prime(param_set)
       types = c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl")  # special types
