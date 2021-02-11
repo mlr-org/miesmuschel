@@ -52,7 +52,7 @@ TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,
     is_terminated = function(archive) {
       max(archive$data$dob, 0) >= self$param_set$get_values()$generations
     }
-  },
+  ),
 
   private = list(
     .status = function(archive) {

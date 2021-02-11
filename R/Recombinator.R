@@ -162,7 +162,7 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
         }
         sprintf("Must be a 'Recombinator' where n_indivs_in is a divisor of %s, and where n_indivs_in / n_indivs_out must be %s / %s",
           n_indivs_in, n_indivs_in, n_indivs_out)
-      }, n_indivs_in, n_indivs_out))
+      }, n_indivs_in, n_indivs_out)))
       param_set$values = list(operation = RecombinatorNew$new(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out))
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set)

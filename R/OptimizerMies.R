@@ -49,13 +49,13 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           lambda = p_int(1, tags = c("required", "offspring")),
           mu = p_int(1, tags = c("required", "init", "survival")),
           initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), default = generate_design_random, tags = "init"),  # arguments: param_set, n
-          survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required")
+          survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required"),
           additional_component_sampler = p_uty(custom_check = function(x) check_r6(x, "Sampler"))),
         if (multi_fidelity) list(
           fidelity_schedule = p_uty(custom_check = check_fidelity_schedule, tags = "required"),
           fidelity_generation_lookahead = p_lgl(tags = "required"),
           fidelity_current_gen_only = p_lgl(tags = "required"),
-          fidelity_monotonic = p_lgl(tags = "required"))
+          fidelity_monotonic = p_lgl(tags = "required")),
         if (!is.null(elite_selector)) list(
           n_elite = p_int(0, depends = survival_strategy == "comma", tags = "survival"))
       ))
@@ -404,7 +404,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   survivors = if (mu > n_elite) mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
   if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
 
-  elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE),
+  elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
   if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
 
   survivors = c(elites, survivors)
@@ -590,7 +590,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
   } else if (mu_remaining > 0) {
     mies_evaluate_offspring(inst,
-      cbind(remove_named(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining), budget_id), last(additional_components, mu_remaining))
+      cbind(remove_named(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining), budget_id), last(additional_components, mu_remaining)),
       fidelity_schedule, budget_id, survivor_budget = TRUE)
   }
   invisible(inst)

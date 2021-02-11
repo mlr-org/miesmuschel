@@ -54,8 +54,7 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
         length(budget_id), str_collapse(budget_id))
       params$aggregate(archive$data[[budget_id]]) >= params$budget
     }
-  },
-
+  ),
   private = list(
     .status = function(archive) {
       params = self$param_set$get_values()

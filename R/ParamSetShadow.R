@@ -33,7 +33,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' not implemented and will give an error.
     #' @param p not used.
     #' @return nothing.
-    subset = function(p) stop("Not Allowed."),
+    subset = function(p) stop("Not Allowed.")
 
     # TODO: see if using the original 'check' function suffices
     ## #' @description
