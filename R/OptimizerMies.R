@@ -13,13 +13,13 @@
 #' highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
 #' as presented in `r cite_bib("li2013mixed")` can easily be implemented.
 #'
+#'
+#'
 #' @references
 #' `r format_bib("fieldsend2014rolling")`
 #'
 #' `r format_bib("li2013mixed")`
 #'
-#' @description
-#' Mixed Integer Evolutionary Strategies
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(
@@ -140,31 +140,21 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     },
     .optimize = function(inst) {
       params = private$.own_param_set$get_values()
-      search_space = inst$search_space$clone(deep = FALSE)
-      additional_searchspace = params$additional_component_sampler$param_set$clone(deep = FALSE)
-      search_space$set_id = ""
-      additional_searchspace$set_id = ""
-      search_space = ParamSetCollection$new(list(search_space, additional_searchspace))
+
       budget_id = NULL
-
-      # selectors are primed with entire searchspace
-      self$survival_selector$prime(search_space)
-      self$parent_selector$prime(search_space)
-      if (!is.null(self$elite_selector)) {
-        self$elite_selector$prime(search_space)
-      }
-
       if (!is.null(params$fidelity_schedule)) {
         budget_id = search_space$ids(tags = "budget")
         if (length(budget_id) != 1) stopf("Only allowing one budget parameter, but found %s: %s",
           length(budget_id), str_collapse(budget_id))
-        search_space = ParamSetShadow$new(search_space, budget_id)
       }
 
-      self$mutator$prime(search_space)
-      self$recombinator$prime(search_space)
+      mies_prime_operators(mutators = list(self$mutator), recombinators = list(self$recombinator),
+        selectors = discard(list(self$survival_selector, self$parent_selector, self$elite_selector), is.null),
+        search_space = inst$search_space, additional_components = params$additional_component_sampler$param_set,
+        budget_id = budget_id)
 
-      mies_init_population(inst, mu = params$mu, initializer = params$initializer, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
+      mies_init_population(inst, mu = params$mu, initializer = params$initializer, fidelity_schedule = params$fidelity_schedule,
+        budget_id = budget_id, additional_component_sampler = params$additional_component_sampler)
 
       survival = switch(params$survival_strategy,
           plus = mies_survival_plus,
@@ -384,15 +374,70 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   data[died, eol := max(dob)]
 }
 
-
-
-
-#'   All [`MiesOperator`]s used with the resulting population must be primed on a union of `inst$search_space` and `additional_component_sampler$param_set`,
-#'   created, for example, using [`ParamSetCollection`][paradox::ParamSetCollection]. (When using multi-fidelity, the [`Mutator`] and [`Recombinator`]
-#'   operators must be
+#' @title Prime MIES Operators
+#'
+#' @description
+#' Prime the given [`MiesOperator`]s for an optimization run with the given search space.
+#'
+#' In its simplest form, MIES optimization only optimizes the search space of the [`Objective`][bbotk::Objective] to be optimized. However,
+#' more advanced optimization may handle a "budget" parameter for multi-fidelity optimization differently: It is still selected by [`Selector`]s,
+#' but not mutated or recombined and instead handled separately. It is also possible to add additional components to the search space that are
+#' not evaluated by the objective function, but that are used for self-adaption by other operators.
+#'
+#' The `mies_prime_operators()` function uses the information that the user usually has readily at hand -- the [`Objective`][bbotk::Objective]`s search space,
+#' the budget parameter, and additional components -- and primes [`Mutator`], [`Recombinator`], and [`Selector`] objects in the right way:
+#' * [`Selector`]s are primed on a union of `search_space` and `additional_components`
+#' * [`Mutator`]s and [`Recombinator`]s are primed on the [`Selector`]'s space with the `budget_id` [`Param`][paradox::Param] removed.
+#'
+#' `mies_prime_operators()` is called with an arbitrary number of [`MiesOperator`] arguments; typically one [`Mutator`], one [`Recombinator`] and
+#' at least two [`Selector`]: one for survival selection, and one parent selection. Supplied [`MiesOperator`]s are primed by-reference, but
+#' they are also returned as [invisible] `list`.
+#'
+#' If neither additional components nor multi-fidelity optimization is used, it is also possible to use the `$prime()` function of hte [`MiesOperator`]s
+#' directly, although using `mies_prime_operators()` gives flexibility for future extension.
+#' @param mutators (`list` of [`Mutator`])\cr
+#'   [`Mutator`] objects to prime. May be empty (default).
+#' @param recombinators (`list` of [`Recombinator`])\cr
+#'   [`Recombinator`] objects to prime. May be empty (default).
+#' @param selectors (`list` of [`Selector`])\cr
+#'   [`Selector`] objects to prime. May be empty (default).
+#' @param search_space ([`ParamSet`][paradox::ParamSet])\cr
+#'   Search space of the [`Objective`][bbotk::Objective] or [`OptimInstance`][bbotk::OptimInstance] to be optimized.
+#' @param additional_components ([`ParamSet`][paradox::ParamSet] | `NULL`)\cr
+#'   Additional components to optimize over, not included in `search_space`, but possibly used for self-adaption. This must be the [`ParamSet`][paradox::ParamSet]
+#'   of `mies_init_population()`'s `additional_component_sampler` argument.
+#' @param budget_id (`character(1)` | `NULL`)\cr
+#'   Budget component used for multi-fidelity optimization.
+#' @return `invisible` named `list` with entries `$mutators` (`list` of [`Mutator`], primed `mutators`), `$recombinators` (`list` of [`Recombinator`], primed `recombinators`),
+#'   and `$selectors` (`list` of [`Selector`], primed `selectors`).
 mies_prime_operators = function(mutators = list(), recombinators = list(), selectors = list(), search_space, additional_components = NULL, budget_id = NULL) {
+  assert_list(mutators, types = "Mutator", any.missing = FALSE)
+  assert_list(recombinators, types = "Recombinator", any.missing = FALSE)
+  assert_list(selectors, types = "Selector", any.missing = FALSE)
+  assert_r6(search_space, "ParamSet")
+  assert_r6(additional_components, "ParamSet", null.ok = TRUE)
+  assert_choice(budget_id, search_space$ids(), null.ok = TRUE)
 
+  if (is.null(additional_components)) {
+    full_search_space = search_space
+  } else {
+    search_space = search_space$clone(deep = FALSE)
+    additional_components = additional_components$clone(deep = FALSE)
+    search_space$set_id = ""
+    additional_components$set_id = ""
+    full_search_space = ps_union(list(search_space, additional_components))
+  }
 
+  # selectors are primed with entire searchspace
+  selectors = lapply(selectors, function(x) x$prime(full_search_space))
+
+  nobudget_search_space = ParamSetShadow$new(full_search_space, budget_id)
+
+  # mutators, recombinators are primed with search space minus budget_id
+  mutators = lapply(mutators, function(x) x$prime(nobudget_search_space))
+  recombinators = lapply(recombinators, function(x) x$prime(nobudget_search_space))
+
+  invisible(list(mutators = mutaotrs, recombinators = recombinators, selectors = selectors))
 }
 
 #' @title Initialize MIES Optimization
@@ -421,7 +466,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #'   or contains *all* these columns but there are rows that are `NA` valued. If only *some* of the columns are present, or if all these columns
 #'   are present but there are rows that are only `NA` valued for some columns, then an error is thrown.\cr
 #'   Default is `NULL`: no additional components.
-#' @return invisible [`OptimInstance`][bbotk::OptimInstance] | invisible [`TuningInstance`][mlr3tuning::TuningInstance]: the input
+#' @return [invisible] [`OptimInstance`][bbotk::OptimInstance] | [invisible] [`TuningInstance`][mlr3tuning::TuningInstance]: the input
 #'   instance, modified by-reference.
 #'
 #' @family mies building blocks
@@ -500,8 +545,6 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise
   inst$archive$data[row_insert, ac_ids] <- first(additional_components, length(row_insert))
 
-
-
   if (mu_remaining < 0) {
     # TODO: we are currently killing the earliest evals, maybe do something smarter.
     # TODO: also we are not doing anything about budget here, we just hope the user knows what he's doing.
@@ -557,8 +600,8 @@ mies_get_fitnesses = function(inst, rows) {
 #'   and objective results. When `selector$operate()` is called, then objectives that
 #'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.
 #'   Defaults to [`SelectorBest`].\cr
-#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
-#'   when performing multi-fidelity optimization.\cr
+#'   The [`Selector`] must be primed on a superset of `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization. All components on which `selector` is primed on must occur in the archive.\cr
 #'   The given [`Selector`] *may* return duplicates.
 #' @param get_indivs (`logical(1)`)\cr
 #'   Whether to return configuration values from within the archive (`TRUE`) or just the indices within
@@ -572,8 +615,12 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 
   assert_r6(selector, "Selector")
   assert_int(n_select, lower = 0, tol = 1e-100)
-  if (n_select == 0) if (get_indivs) return(inst$data[0, inst$archive$cols_x, with = FALSE]) else return(integer(0))
-  indivs = inst$archive$data[rows, inst$archive$cols_x, with = FALSE]
+  selector_params <- selector$param_set$ids()
+  assert_subset(inst$search_space$ids(), selector_params)
+  assert_subset(selector_params, colnames(inst$data))
+
+  if (n_select == 0) if (get_indivs) return(inst$data[0, selector_params, with = FALSE]) else return(integer(0))
+  indivs = inst$archive$data[rows, selector_params, with = FALSE]
 
   fitnesses = mies_get_fitnesses(inst, rows)
 
@@ -604,20 +651,20 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'   and objective results. When `parent_selector$operate()` is called, then objectives that
 #'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.
 #'   Defaults to [`SelectorBest`].\cr
-#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
-#'   when performing multi-fidelity optimization.\cr
+#'   The [`Selector`] must be primed on a superset of `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization. All components on which `selector` is primed on must occur in the archive.\cr
 #'   The given [`Selector`] *may* return duplicates.
 #' @param mutator ([`Mutator` | `NULL`])\cr
 #'   [`Mutator`] operation to apply to individuals selected out of `inst` using `parent_selector`.\cr
 #'   The [`Mutator`] must be primed on a [`ParamSet`][paradox::ParamSet] similar to `inst$search_space`,
 #'   but *without* the "budget" component when `budget_id` is given (multi-fidelity optimization). Such a
-#'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`ParamSetShadow`].\cr
+#'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`mies_prime_operators`].\cr
 #'   When this is `NULL` (default), then a [`MutatorNull`] is used, effectively disabling mutation.
 #' @param recombinator ([`Recombinator` | `NULL`])\cr
 #'   [`Recombinator`] operation to apply to individuals selected out of `int` using `parent_selector` after mutation using `mutator`.
 #'   The [`Recombinator`] must be primed on a [`ParamSet`][paradox::ParamSet] similar to `inst$search_space`,
 #'   but *without* the "budget" component when `budget_id` is given (multi-fidelity optimization). Such a
-#'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`ParamSetShadow`].\cr
+#'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`mies_prime_operators`].\cr
 #'   When this is `NULL` (default), then a [`RecombinatorNull`] is used, effectively disabling recombination.
 #' @param budget_id (`character(1)` | `NULL`)\cr
 #'   Budget compnent when doing multi-fidelity optimization. This component of the search space is removed from
@@ -634,15 +681,26 @@ mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$
   assert_r6(parent_selector, "Selector")
   assert_r6(mutator, "Mutator", null.ok = TRUE)
   assert_r6(recombinator, "Recombinator", null.ok = TRUE)
-  assert_choice(budget_id, inst$search_space$ids(), null.ok = TRUE)
+
+  ps_ids <- parent_selector$param_set$ids()
+  ss_ids <- inst$search_space$ids()
+
+  assert_subset(ss_ids, ps_ids)
+  assert_subset(ps_ids, colnames(inst$data))
+
+  assert_choice(budget_id, ss_ids, null.ok = TRUE)
   if (is.null(mutator) || is.null(recombinator)) {
-    search_space = inst$search_space
+    selector_space= parent_selector$param_set
     if (!is.null(budget_id)) {
-      search_space = ParamSetShadow$new(search_space, budget_id)
+      selector_space = ParamSetShadow$new(selector_space, budget_id)
     }
-    mutator = mutator %??% MutatorNull$new()$prime(search_space)
-    recombinator = recombinator %??% RecombinatorNull$new()$prime(search_space)
+    mutator = mutator %??% MutatorNull$new()$prime(selector_space)
+    recombinator = recombinator %??% RecombinatorNull$new()$prime(selector_space)
   }
+
+  assert_set_equal(mutator$param_set$ids(), setdiff(ss_ids, budget_id))
+  assert_set_equal(recombinator$param_set$ids(), setdiff(ss_ids, budget_id))
+
   needed_recombinations = ceiling(lambda / recombinator$n_indivs_out)
   needed_parents = needed_recombinations * recombinator$n_indivs_in
 
