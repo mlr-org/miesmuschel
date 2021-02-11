@@ -17,6 +17,10 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     initialize = function(set, shadowed) {
       private$.set = assert_r6(set, "ParamSet")
       private$.shadowed = assert_subset(shadowed, set$ids())
+      baddeps = set$deps[(id %in% private$.shadowed) != (on %in% private$.shadowed), id]
+      if (length(baddeps)) {
+        stop("Params %s have dependencies that reach across shadow bounds", str_collapse(baddeps))
+      }
     },
     #' @description
     #' Implemented for compatibility with [`ParamSet`][paradox::ParamSet] superclass. However, this function is
@@ -30,30 +34,28 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' @param p not used.
     #' @return nothing.
     subset = function(p) stop("Not Allowed."),
-    #' @description
-    #' \pkg{checkmate}-like check-function for values.
-    #'
-    #'
-    #' Handles dependencies of the shadowed [`ParamSet`][paradox::ParamSet] correctly even for dependencies
-    #' that reach to shadowed values, by inserting these shadowed values into `xs`.
-    #'
-    #' @param xs (named `list`)\cr
-    #'   Value to be checked.
-    #' @return `TRUE` if successful, otherwise a string describing the error.
-    check = function(xs) {
-      # We insert the $values of the shadowed ParamSet into xs, so that dependency checks work the way they should.
-      # For this, we have to first make sure that xs is a named list that doesn't contain any shadowed values; then
-      # we can delegate to the wrapped `ParamSet`.
-      ok = check_list(xs, names = "unique")
-      if (!isTRUE(ok)) return(ok)
-      if (any(names(rhs) %in% private$.shadowed)) {
-        return(sprintf("Params %s are shadowed and must not be present in values.", str_collapse(intersect(names(rhs), private$.shadowed), quote = '"')))
-      }
-      shadow_vals = private$.set$values
-      shadow_vals = shadow_vals[intersect(names(shadow_vals), private$.shadowed)]
 
-      private$.set$check(insert_named(xs, shadow_vals))
-    }
+    # TODO: see if using the original 'check' function suffices
+    ## #' @description
+    ## #' \pkg{checkmate}-like check-function for values.
+    ## #'
+    ## #' @param xs (named `list`)\cr
+    ## #'   Value to be checked.
+    ## #' @return `TRUE` if successful, otherwise a string describing the error.
+    ## check = function(xs) {
+    ##   # We insert the $values of the shadowed ParamSet into xs, so that dependency checks work the way they should.
+    ##   # For this, we have to first make sure that xs is a named list that doesn't contain any shadowed values; then
+    ##   # we can delegate to the wrapped `ParamSet`.
+    ##   ok = check_list(xs, names = "unique")
+    ##   if (!isTRUE(ok)) return(ok)
+    ##   if (any(names(rhs) %in% private$.shadowed)) {
+    ##     return(sprintf("Params %s are shadowed and must not be present in values.", str_collapse(intersect(names(rhs), private$.shadowed), quote = '"')))
+    ##   }
+    ##   shadow_vals = private$.set$values
+    ##   shadow_vals = shadow_vals[intersect(names(shadow_vals), private$.shadowed)]
+
+    ##   private$.set$check(insert_named(xs, shadow_vals))
+    ## }
   ),
   active = list(
     #' @field params (named `list` of [`Param`][paradox::Param])
