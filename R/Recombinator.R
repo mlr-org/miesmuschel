@@ -126,6 +126,77 @@ RecombinatorNull = R6Class("RecombinatorNull",
 )
 dict_recombinators$add("null", RecombinatorNull)
 
+#' @title Proxy-Recombinator that Recombines According to its Hyperparameter
+#'
+#' @description
+#' Recombinator that performs the operation in its `operation` hyperparameter. This is useful, e.g., to make
+#' [`OptimizerMies`]'s recombination operation fully parametrizable.
+#'
+#' Changes in the `operation` hyperparameter are only realized whenever `$prime()` is called, so `$prime()`
+#' must be called every time when `operation` is changed.
+#'
+#' @section Hyperparameters
+#' * `operation` :: [`Recombinator`]\cr
+#'   Operation to perform. Initialized to [`RecombinatorNull`] with appropriate `n_indivs_in` and `n_indivs_out` values.
+#'
+#' @templateVar id proxy
+#' @template autoinfo_prepare_rec
+#' @template autoinfo_operands
+#' @template autoinfo_dict
+#'
+#' @family recombinators
+#' @family recombinator wrappers
+#' @export
+RecombinatorProxy = R6Class("RecombinatorProxy",
+  inherit = Recombinator,
+  public = list(
+    #' @description
+    #' Initialize the `RecombinatorProxy` object.
+    initialize = function(n_indivs_in = 2, n_indivs_out = n_indivs_in) {
+      assert_int(n_indivs_out, lower = 1, tol = 1e-100)
+      assert_int(n_indivs_in, lower = n_indivs_out, tol = 1e-100)
+
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) {
+        if (test_r6(x, "Recombinator") && (n_indivs_in %% x$n_indivs_in == 0) && (n_indivs_out * x$n_indivs_in == x$n_indivs_out * n_indivs_in)) {
+          return(TRUE)
+        }
+        sprintf("Must be a 'Recombinator' where n_indivs_in is a divisor of %s, and where n_indivs_in / n_indivs_out must be %s / %s",
+          n_indivs_in, n_indivs_in, n_indivs_out)
+      }, n_indivs_in, n_indivs_out))
+      param_set$values = list(operation = RecombinatorNew$new(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out))
+      # call initialization with standard options: allow everything etc.
+      super$initialize(param_set = param_set)
+    },
+    prime = function(param_set) {
+      primed_with = self$param_set$get_vlaues()$operation
+      operatio = primed_with$clone(deep = TRUE)
+      operation$prime(param_set)
+      super$prime(param_set)
+      private$.operation = operation  # only change operation once everything else succeeded
+      private$.primed_with = primed_with  # keep uncloned copy of hyperparameter value for check in `.recombine()`
+      invisible(self)
+    }
+  ),
+  private = list(
+    .recombine = function(values) {
+      if (!is.null(private$.primed_with) && !identical(self$param_set$get_values()$operation, private$.primed_with)) {
+        # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
+        # In that case we ignore and hope the user is doing the right thing. After all, this message
+        # is only to be informative.
+        stop("RecombinatorProxy$prime() must be called again when the 'operation' hyperparameter changes.")
+      }
+      private$.operation$operate(values)
+    },
+    .operation = NULL,
+    .primed_with = NULL,
+    deep_clone = function(name, value) {
+      if (name == ".primed_with") return(NULL)
+      super$deep_clone(name, value)
+    }
+  )
+)
+dict_recombinators$add("proxy", RecombinatorProxy)
+
 #' @title Recombinator Choosing Action Probabilistically
 #'
 #' @name dict_recombinators_maybe
@@ -200,7 +271,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     #' given to `recombinator` and `recombinator_not` during construction.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   Passed to [`MiesOperator`]`$prime()`.
-    #' @return `invisible(self)`.
+    #' @return [invisible] `self`.
     prime = function(param_set) {
       private$.wrapped$prime(param_set)
       private$.wrapped_not$prime(param_set)
