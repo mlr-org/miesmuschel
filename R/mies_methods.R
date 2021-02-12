@@ -26,7 +26,7 @@
 #' @family mies building blocks
 #' @export
 mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
   offspring = as.data.table(assert_data_frame(offspring))
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
@@ -87,7 +87,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #' @family mies building blocks
 #' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
   assert_flag(update_all_alive_fidelity)
   data = inst$archive$data
   generation = max(data$dob, 0)
@@ -137,7 +137,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 #' @family mies building blocks
 #' @export
 mies_survival_plus = function(inst, mu, survival_selector, ...) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
   assert_int(mu, lower = 1, tol = 1e-100)
   data = inst$archive$data
 
@@ -181,7 +181,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #' @family mies building blocks
 #' @export
 mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selector, ...) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
   assert_int(mu, lower = 1, tol = 1e-100)
   assert_int(n_elite, lower = 0, upper = mu - 1, tol = 1e-100)
 
@@ -307,7 +307,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #' @family mies building blocks
 #' @export
 mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL, additional_component_sampler = NULL) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
 
   assert_int(mu, lower = 1, tol = 1e-100)
   assert_function(initializer, nargs = 2)
@@ -407,7 +407,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 #' @family mies building blocks
 #' @export
 mies_get_fitnesses = function(inst, rows) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
 
   multiplier = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
   fitnesses = as.matrix(inst$archive$data[rows, ..(multiplier) != 0, with = FALSE])
@@ -447,7 +447,7 @@ mies_get_fitnesses = function(inst, rows) {
 #' @family mies building blocks
 #' @export
 mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
 
   assert_r6(selector, "Selector")
   assert_true(selector$is_primed)
@@ -518,7 +518,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' @family mies building blocks
 #' @export
 mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new()$prime(inst$search_space), mutator = NULL, recombinator = NULL, budget_id = NULL) {
-  assert(check_r6(inst, "OptimInstance"), check_r6(inst, "TuningInstance"))
+  assert_r6(inst, "OptimInstance")
 
   assert_int(lambda, lower = 1, tol = 1e-100)
   assert_r6(parent_selector, "Selector")
