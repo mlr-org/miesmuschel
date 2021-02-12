@@ -48,7 +48,7 @@
 #'
 #' @section Additional Components:
 #' The search space over which the optimization is performed is fundamentally tied to the [`Objective`][bbotk::Objective], and therefore
-#' to the [`OptimInstance`][paradox::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolutionary Strategy based
+#' to the [`OptimInstance`][bbotk::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolutionary Strategy based
 #' algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 #' self-adaption as implemented in [`OperatorCombination`], where one or several components can be used to adjust operator behaviour.
 #' These additional components are supplied to the optimizer through the `additional_component_sampler` hyperparameter, which takes
@@ -115,21 +115,26 @@
 #'
 #' @param mutator (`Mutator`)\cr
 #'   Mutation operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`MutatorProxy`], which
-#'   exposes the operation as a hyperparameter of the optimizer itself.
+#'   exposes the operation as a hyperparameter of the optimizer itself.\cr
+#'   The `$mutator` field will reflect this value.
 #' @param recombinator (`Recombinator`)\cr
 #'   Recombination operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`RecombinatorProxy`],
 #'   which exposes the operation as a hyperparameter of the optimizer itself. Note: The default [`RecombinatorProxy`] has `$n_indivs_in` set to 2,
 #'   so to use recombination operations with more than two inputs, or to use population size of 1, it may be necessary to construct this
-#'   argument explicitly.
+#'   argument explicitly.\cr
+#'   The `$recombinator` field will reflect this value.
 #' @param parent_selector (`Selector`)\cr
 #'   Parent selection operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`SelectorProxy`],
-#'   which exposes the operation as a hyperparameter of the optimizer itself.
+#'   which exposes the operation as a hyperparameter of the optimizer itself.\cr
+#'   The `$parent_selector` field will reflect this value.
 #' @param survival_selector (`Selector`)\cr
 #'   Survival selection operation to use in [`mies_survival_plus()`] or [`mies_survival_comma()`] (depending on the `survival_strategy` hyperparameter),
-#'   see there for more information. Default is [`SelectorProxy`], which exposes the operation as a hyperparameter of the optimizer itself.
+#'   see there for more information. Default is [`SelectorProxy`], which exposes the operation as a hyperparameter of the optimizer itself.\cr
+#'   The `$survival_selector` field will reflect this value.
 #' @param elite_selector (`Selector` | `NULL`)\cr
 #'   Elite selector used in [`mies_survival_comma()`], see there for more information. "Comma" selection is only available when this
-#'   argument is not `NULL`. Default `NULL`.
+#'   argument is not `NULL`. Default `NULL`.\cr
+#'   The `$elite_selector` field will reflect this value.
 #' @param multi_fidelity (`logical(1)`)\cr
 #'   Whether to enable multi-fidelity optimization. When this is `TRUE`, then the [`OptimInstance`][bbotk::OptimInstance] being optimized must
 #'   contain a [`Param`][paradox::Param] tagged `"budget"`, which is then used as the "budget" search space component, determined by
@@ -145,7 +150,9 @@
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(
-      initialize = function(mutator = MutatorProxy$new(), recombinator = RecombinatorProxy$new(), parent_selector = SelectorProxy$new(),
+    #' @description
+    #' Initialize the `OptimizerMies` object.
+    initialize = function(mutator = MutatorProxy$new(), recombinator = RecombinatorProxy$new(), parent_selector = SelectorProxy$new(),
         survival_selector = SelectorProxy$new(), elite_selector = NULL, multi_fidelity = FALSE) {
       private$.mutator = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.recombinator = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
@@ -201,41 +208,54 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       super$initialize(
         param_set = self$param_set,  # essentially a nop, since at this point we already set private$.param_set, but we can't give NULL here.
         param_classes = Reduce(intersect, map(param_class_determinants, "param_classes")),
-        properties = c("dependencies", Reduce(intersect, map(properties_determinants, "supported")))
+        properties = c("dependencies", Reduce(intersect, map(properties_determinants, "supported"))),
+        packages = "miesmuschel"
       )
     }
   ),
   active = list(
+    #' @field mutator ([`Mutator`])\cr
+    #' Mutation operation to perform during [`mies_generate_offspring()`].
     mutator = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.mutator)) {
         stop("mutator is read-only.")
       }
       private$.mutator
     },
+    #' @field recombinator ([`Recombinator`])\cr
+    #' Recombination operation to perform during [`mies_generate_offspring()`].
     recombinator = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.recombinator)) {
         stop("recombinator is read-only.")
       }
       private$.recombinator
     },
+    #' @field parent_selector ([`Selector`])\cr
+    #' Parent selection operation to perform during [`mies_generate_offspring()`].
     parent_selector = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.parent_selector)) {
         stop("parent_selector is read-only.")
       }
       private$.parent_selector
     },
+    #' @field survival_selector (`Selector`)\cr
+    #' Survival selection operation to use in [`mies_survival_plus()`] or [`mies_survival_comma()`].
     survival_selector = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.survival_selector)) {
         stop("survival_selector is read-only.")
       }
       private$.survival_selector
     },
+    #' @field elite_selector (`Selector` | `NULL`)\cr
+    #' Elite selector used in [`mies_survival_comma()`].
     elite_selector = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.elite_selector)) {
         stop("elite_selector is read-only.")
       }
       private$.elite_selector
     },
+    #' @field param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #' Hyperparameters of the optimization algorithm.
     param_set = function(rhs) {
       if (is.null(private$.param_set)) {
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))

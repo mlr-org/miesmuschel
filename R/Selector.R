@@ -132,9 +132,9 @@ dict_selectors$add("random", SelectorRandom)
 #' [`OptimizerMies`]'s selection operations fully parametrizable.
 #'
 #' Changes in the `operation` hyperparameter are only realized whenever `$prime()` is called, so `$prime()`
-#' must be called every time when `operation` is changed.
+#' must be called every time when `operation` is changed, *even if* the new hyperparameter value is already primed.
 #'
-#' @section Hyperparameters
+#' @section Hyperparameters:
 #' * `operation` :: [`Selector`]\cr
 #'   Operation to perform. Initialized to [`SelectorBest`].
 #'
@@ -157,6 +157,12 @@ SelectorProxy = R6Class("SelectorProxy",
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set)
     },
+    #' @description
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` hyperparameter.
+    #' This must be called whenever the `operation` hyperparameter changes, *even if* the hyperparameter is already primed.
+    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #'   Passed to [`MiesOperator`]`$prime()`.
+    #' @return [invisible] `self`.
     prime = function(param_set) {
       primed_with = self$param_set$get_vlaues()$operation
       operatio = primed_with$clone(deep = TRUE)

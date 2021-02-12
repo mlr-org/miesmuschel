@@ -53,7 +53,7 @@ is active for all following generations.
 \section{Additional Components}{
 
 The search space over which the optimization is performed is fundamentally tied to the \code{\link[bbotk:Objective]{Objective}}, and therefore
-to the \code{\link[paradox:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolutionary Strategy based
+to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolutionary Strategy based
 algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 self-adaption as implemented in \code{\link{OperatorCombination}}, where one or several components can be used to adjust operator behaviour.
 These additional components are supplied to the optimizer through the \code{additional_component_sampler} hyperparameter, which takes
@@ -135,6 +135,29 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \section{Super class}{
 \code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerMies}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{mutator}}{(\code{\link{Mutator}})\cr
+Mutation operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}.}
+
+\item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
+Recombination operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}.}
+
+\item{\code{parent_selector}}{(\code{\link{Selector}})\cr
+Parent selection operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}.}
+
+\item{\code{survival_selector}}{(\code{Selector})\cr
+Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_survival_plus()}} or \code{\link[=mies_survival_comma]{mies_survival_comma()}}.}
+
+\item{\code{elite_selector}}{(\code{Selector} | \code{NULL})\cr
+Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}.}
+
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Hyperparameters of the optimization algorithm.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -155,6 +178,7 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the \code{OptimizerMies} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{OptimizerMies$new(
   mutator = MutatorProxy$new(),
@@ -171,25 +195,30 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \describe{
 \item{\code{mutator}}{(\code{Mutator})\cr
 Mutation operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{MutatorProxy}}, which
-exposes the operation as a hyperparameter of the optimizer itself.}
+exposes the operation as a hyperparameter of the optimizer itself.\cr
+The \verb{$mutator} field will reflect this value.}
 
 \item{\code{recombinator}}{(\code{Recombinator})\cr
 Recombination operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{RecombinatorProxy}},
 which exposes the operation as a hyperparameter of the optimizer itself. Note: The default \code{\link{RecombinatorProxy}} has \verb{$n_indivs_in} set to 2,
 so to use recombination operations with more than two inputs, or to use population size of 1, it may be necessary to construct this
-argument explicitly.}
+argument explicitly.\cr
+The \verb{$recombinator} field will reflect this value.}
 
 \item{\code{parent_selector}}{(\code{Selector})\cr
 Parent selection operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{SelectorProxy}},
-which exposes the operation as a hyperparameter of the optimizer itself.}
+which exposes the operation as a hyperparameter of the optimizer itself.\cr
+The \verb{$parent_selector} field will reflect this value.}
 
 \item{\code{survival_selector}}{(\code{Selector})\cr
 Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_survival_plus()}} or \code{\link[=mies_survival_comma]{mies_survival_comma()}} (depending on the \code{survival_strategy} hyperparameter),
-see there for more information. Default is \code{\link{SelectorProxy}}, which exposes the operation as a hyperparameter of the optimizer itself.}
+see there for more information. Default is \code{\link{SelectorProxy}}, which exposes the operation as a hyperparameter of the optimizer itself.\cr
+The \verb{$survival_selector} field will reflect this value.}
 
 \item{\code{elite_selector}}{(\code{Selector} | \code{NULL})\cr
 Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}, see there for more information. "Comma" selection is only available when this
-argument is not \code{NULL}. Default \code{NULL}.}
+argument is not \code{NULL}. Default \code{NULL}.\cr
+The \verb{$elite_selector} field will reflect this value.}
 
 \item{\code{multi_fidelity}}{(\code{logical(1)})\cr
 Whether to enable multi-fidelity optimization. When this is \code{TRUE}, then the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized must

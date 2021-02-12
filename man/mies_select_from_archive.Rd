@@ -13,7 +13,7 @@ mies_select_from_archive(
 )
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}} | \code{\link[mlr3tuning:TuningInstance]{TuningInstance}})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{n_select}{(\code{integer(1)})\cr
@@ -41,7 +41,7 @@ depending on \code{get_indivs}.
 }
 \description{
 Apply a \code{\link{Selector}} operator to a subset of configurations inside
-an \code{\link[bbotk:OptimInstance]{OptimInstance}} (or \code{\link[mlr3tuning:TuningInstance]{TuningInstance}})
+an \code{\link[bbotk:OptimInstance]{OptimInstance}}
 and return the index within the archive (when \code{get_indivs} \code{FALSE}) or the configurations themselves
 (when \code{get_indivs} is \code{TRUE}).
 

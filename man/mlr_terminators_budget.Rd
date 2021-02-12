@@ -75,6 +75,14 @@ Is \code{TRUE} if when the termination criterion is matched, \code{FALSE} otherw
 \if{html}{\out{<div class="r">}}\preformatted{TerminatorBudget$is_terminated(archive)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{archive}}{\code{\link[bbotk:Archive]{Archive}}
+Archive to check.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 \code{logical(1)}: Whether to terminate.
 }

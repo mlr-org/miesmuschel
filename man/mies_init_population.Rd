@@ -14,7 +14,7 @@ mies_init_population(
 )
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}} | \code{\link[mlr3tuning:TuningInstance]{TuningInstance}})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr
@@ -48,11 +48,11 @@ are present but there are rows that are only \code{NA} valued for some columns, 
 Default is \code{NULL}: no additional components.}
 }
 \value{
-\link{invisible} \code{\link[bbotk:OptimInstance]{OptimInstance}} | \link{invisible} \code{\link[mlr3tuning:TuningInstance]{TuningInstance}}: the input
+\link{invisible} \code{\link[bbotk:OptimInstance]{OptimInstance}}: the input
 instance, modified by-reference.
 }
 \description{
-Set up an \code{\link[bbotk:OptimInstance]{OptimInstance}} (or \code{\link[mlr3tuning:TuningInstance]{TuningInstance}}) for MIES optimization.
+Set up an \code{\link[bbotk:OptimInstance]{OptimInstance}} for MIES optimization.
 This adds the \code{dob} and \code{eol} columns to the instance's archive, and makes sure there are at least \code{mu} survivors
 (i.e. entries with \code{eol} set to \code{NA}) present. If there are already \verb{>= mu} prior evaluations present, then the last
 \code{mu} of these remain alive (the other's \code{eol} set to 0); otherwise, up to \code{mu} new randomly sampled configurations

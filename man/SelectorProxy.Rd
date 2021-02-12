@@ -8,8 +8,16 @@ Selector that performs the operation in its \code{operation} hyperparameter. Thi
 \code{\link{OptimizerMies}}'s selection operations fully parametrizable.
 
 Changes in the \code{operation} hyperparameter are only realized whenever \verb{$prime()} is called, so \verb{$prime()}
-must be called every time when \code{operation} is changed.
+must be called every time when \code{operation} is changed, \emph{even if} the new hyperparameter value is already primed.
 }
+\section{Hyperparameters}{
+
+\itemize{
+\item \code{operation} :: \code{\link{Selector}}\cr
+Operation to perform. Initialized to \code{\link{SelectorBest}}.
+}
+}
+
 \section{Supported Operand Types}{
 
 
@@ -69,10 +77,23 @@ Initialize the \code{SelectorProxy} object.
 \if{html}{\out{<a id="method-prime"></a>}}
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} hyperparameter.
+This must be called whenever the \code{operation} hyperparameter changes, \emph{even if} the hyperparameter is already primed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{SelectorProxy$prime(param_set)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\link{invisible} \code{self}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

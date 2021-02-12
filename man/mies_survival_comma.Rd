@@ -7,7 +7,7 @@
 mies_survival_comma(inst, mu, survival_selector, n_elite, elite_selector, ...)
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}} | \code{\link[mlr3tuning:TuningInstance]{TuningInstance}})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr

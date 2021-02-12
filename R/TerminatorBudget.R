@@ -46,6 +46,8 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
 
     #' @description
     #' Is `TRUE` if when the termination criterion is matched, `FALSE` otherwise.
+    #' @param archive [`Archive`][bbotk::Archive]
+    #'   Archive to check.
     #' @return `logical(1)`: Whether to terminate.
     is_terminated = function(archive) {
       params = self$param_set$get_values()

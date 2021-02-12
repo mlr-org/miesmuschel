@@ -8,12 +8,20 @@ Recombinator that performs the operation in its \code{operation} hyperparameter.
 \code{\link{OptimizerMies}}'s recombination operation fully parametrizable.
 
 Changes in the \code{operation} hyperparameter are only realized whenever \verb{$prime()} is called, so \verb{$prime()}
-must be called every time when \code{operation} is changed.
+must be called every time when \code{operation} is changed, \emph{even if} the new hyperparameter value is already primed.
 }
+\section{Hyperparameters}{
+
+\itemize{
+\item \code{operation} :: \code{\link{Recombinator}}\cr
+Operation to perform. Initialized to \code{\link{RecombinatorNull}} with appropriate \code{n_indivs_in} and \code{n_indivs_out} values.
+}
+}
+
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are:
+Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
 }
 
 \section{Dictionary}{
@@ -70,15 +78,46 @@ Initialize the \code{RecombinatorProxy} object.
 \if{html}{\out{<div class="r">}}\preformatted{RecombinatorProxy$new(n_indivs_in = 2, n_indivs_out = n_indivs_in)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{n_indivs_in}}{(\code{integer(1)})\cr
+Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
+Furthermore, the \code{\link{Recombinator}} assigned to the \code{operation} hyperparameter must have an \code{n_indivs_in} that is a divisor of this number.
+Default 2.\cr
+The \verb{$n_indivs_in} field will reflect this value.}
+
+\item{\code{n_indivs_out}}{(\code{integer(1)})\cr
+Number of individuals that result for each \code{n_indivs_in} lines of input. Must be at most \code{n_indivs_in}.
+The ratio of \verb{$n_indivs_in} to \verb{$n_indivs_out} of the \code{\link{Recombinator}} assigned to the \code{operation} hyperparameter must be the same as
+\code{n_indivs_in} to \code{n_indivs_out} of this object.
+Default equal to \code{n_indivs_in}.\cr
+The \verb{$n_indivs_out} field will reflect this value.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-prime"></a>}}
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} hyperparameter.
+This must be called whenever the \code{operation} hyperparameter changes, \emph{even if} the hyperparameter is already primed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RecombinatorProxy$prime(param_set)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\link{invisible} \code{self}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
