@@ -41,6 +41,11 @@
 #' an operator that supports [`ParamLgl`][paradox::ParamLgl] is assigned to component `"a"`, then the result will support [`ParamLgl`][paradox::ParamLgl] and
 #' [`ParamInt`][paradox::ParamInt] only.
 #'
+#' @section Hyperparameters:
+#'
+#' The `OperatorCombination` has the hyperparameters of all encapsulated [`MiesOperator`]s, minus the hyperparameters that are named in the `adaptions`.
+#' Hyperparameter names are prefixed with the name of the [`MiesOperator`] in the `operators` list.
+#'
 #' @templateVar id combine
 #' @templateVar additional , <operators>, ...
 #' @template autoinfo_prepare_mut

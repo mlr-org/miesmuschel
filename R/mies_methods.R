@@ -122,7 +122,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   inst$eval_batch(indivs[, `:=`(dob = ..(generation - 1), eol = NA_real_)])
 }
 
-#' @title Choose Survivors According to the "Plus" Strategy
+#' @title Choose Survivors According to the "Mu + Lambda" ("Plus") Strategy
 #'
 #' @description
 #' Choose survivors during a MIES iteration using the "Plus" survival strategy, i.e.
@@ -153,7 +153,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
   data[died, eol := max(dob)]
 }
 
-#' @title Choose Survivors According to the "Comma" Strategy
+#' @title Choose Survivors According to the "Mu , Lambda" ("Comma") Strategy
 #'
 #' @description
 #' Choose survivors during a MIES iteration using the "Comma" survival strategy, i.e.
@@ -286,9 +286,10 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #' @template param_inst
 #' @template param_mu
 #' @param initializer (`function`)\cr
-#'   Function that generates a [`Design`][paradox::Design] object, with arguments `param_set` and `n`, unctioning like [`paradox::generate_design_random`]
+#'   Function that generates a [`Design`][paradox::Design] object, with arguments `param_set` and `n`, functioning like [`paradox::generate_design_random`]
 #'   or [`paradox::generate_design_lhs`]. Note that [`paradox::generate_design_grid`] can not be used and must be wrapped with
-#'   a custom function that ensures that only `n` individuals are produced.
+#'   a custom function that ensures that only `n` individuals are produced. The generated design must correspond to the `inst`'s `$search_space`; for
+#'   components that are not in the objective's search space, the `additional_component_sampler` is used.
 #' @template param_fidelity_schedule_maybenull
 #' @template param_budget_id_maybenull
 #' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
