@@ -277,7 +277,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #' @title Initialize MIES Optimization
 #'
 #' @description
-#' Set up an [`OptimInstance`][bbotk::OptimInstance] (or [`TuningInstance`][mlr3tuning::TuningInstance]) for MIES optimization.
+#' Set up an [`OptimInstance`][bbotk::OptimInstance] for MIES optimization.
 #' This adds the `dob` and `eol` columns to the instance's archive, and makes sure there are at least `mu` survivors
 #' (i.e. entries with `eol` set to `NA`) present. If there are already `>= mu` prior evaluations present, then the last
 #' `mu` of these remain alive (the other's `eol` set to 0); otherwise, up to `mu` new randomly sampled configurations
@@ -301,7 +301,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #'   or contains *all* these columns but there are rows that are `NA` valued. If only *some* of the columns are present, or if all these columns
 #'   are present but there are rows that are only `NA` valued for some columns, then an error is thrown.\cr
 #'   Default is `NULL`: no additional components.
-#' @return [invisible] [`OptimInstance`][bbotk::OptimInstance] | [invisible] [`TuningInstance`][mlr3tuning::TuningInstance]: the input
+#' @return [invisible] [`OptimInstance`][bbotk::OptimInstance]: the input
 #'   instance, modified by-reference.
 #'
 #' @family mies building blocks
@@ -396,7 +396,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 #'
 #' @description
 #' Get fitness values in the correct form as used by [`Selector`] operators from an
-#' [`OptimInstance`][bbotk::OptimInstance] (or [`TuningInstance`][mlr3tuning::TuningInstance]).
+#' [`OptimInstance`][bbotk::OptimInstance].
 #' This works for both single-criterion and multi-criterion optimization, and entails multiplying
 #' objectives with -1 if they are being minimized, since [`Selector`] tries to maximize fitness.
 #'
@@ -421,7 +421,7 @@ mies_get_fitnesses = function(inst, rows) {
 #'
 #' @description
 #' Apply a [`Selector`] operator to a subset of configurations inside
-#' an [`OptimInstance`][bbotk::OptimInstance] (or [`TuningInstance`][mlr3tuning::TuningInstance])
+#' an [`OptimInstance`][bbotk::OptimInstance]
 #' and return the index within the archive (when `get_indivs` `FALSE`) or the configurations themselves
 #' (when `get_indivs` is `TRUE`).
 #'
