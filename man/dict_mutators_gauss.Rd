@@ -37,7 +37,7 @@ This \code{\link{Mutator}} can be created with the short access form \code{\link
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
 \code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
 mut("gauss")
-muts("gauss")  # takes vector IDs, returns list of [`Mutator`]s
+muts("gauss")  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("gauss")

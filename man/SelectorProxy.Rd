@@ -30,7 +30,7 @@ This \code{\link{Selector}} can be created with the short access form \code{\lin
 (\code{\link[=sels]{sels()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
 \code{\link{dict_selectors}} in the following way:\preformatted{# preferred:
 sel("proxy")
-sels("proxy")  # takes vector IDs, returns list of [`Selector`]s
+sels("proxy")  # takes vector IDs, returns list of Selectors
 
 # long form:
 dict_selectors$get("proxy")

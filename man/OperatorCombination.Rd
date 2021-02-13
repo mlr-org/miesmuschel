@@ -58,7 +58,7 @@ This \code{\link{Mutator}} can be created with the short access form \code{\link
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
 \code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
 mut("combine", <operators>, ...)
-muts("combine", <operators>, ...)  # takes vector IDs, returns list of [`Mutator`]s
+muts("combine", <operators>, ...)  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("combine", <operators>, ...)
@@ -69,7 +69,7 @@ This \code{\link{Recombinator}} can be created with the short access form \code{
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
 \code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
 rec("combine", <operators>, ...)
-recs("combine", <operators>, ...)  # takes vector IDs, returns list of [`Recombinator`]s
+recs("combine", <operators>, ...)  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("combine", <operators>, ...)

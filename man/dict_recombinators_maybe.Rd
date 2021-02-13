@@ -36,7 +36,7 @@ This \code{\link{Recombinator}} can be created with the short access form \code{
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
 \code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
 rec("maybe", <recombinator> [, <recombinator_not>])
-recs("maybe", <recombinator> [, <recombinator_not>])  # takes vector IDs, returns list of [`Recombinator`]s
+recs("maybe", <recombinator> [, <recombinator_not>])  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("maybe", <recombinator> [, <recombinator_not>])

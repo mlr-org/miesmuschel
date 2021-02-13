@@ -339,3 +339,4 @@ expect_equal(transformed[31:40, b], rep(0, 10))
 #       - generation starts counting at 1
 #       - selector that selects 'at least' x%, or at least n, with method 1, otherwise method 2, [from a subset]
 #       - does mies_step_fidelity work when there are no rows to evaluate?
+#       - test operate() with wrong cols, test operate() with data.table, with data.frame
