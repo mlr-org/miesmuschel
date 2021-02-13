@@ -88,7 +88,9 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE) {
   assert_r6(inst, "OptimInstance")
-  assert_flag(update_all_alive_fidelity)
+  assert_flag(generation_lookahead)
+  assert_flag(current_gen_only)
+  assert_flag(monotonic)
   data = inst$archive$data
   generation = max(data$dob, 0)
   assert_choice(budget_id, inst$search_space$ids())
@@ -271,7 +273,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
   mutators = lapply(mutators, function(x) x$prime(nobudget_search_space))
   recombinators = lapply(recombinators, function(x) x$prime(nobudget_search_space))
 
-  invisible(list(mutators = mutaotrs, recombinators = recombinators, selectors = selectors))
+  invisible(list(mutators = mutators, recombinators = recombinators, selectors = selectors))
 }
 
 #' @title Initialize MIES Optimization
@@ -311,9 +313,10 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 
   assert_int(mu, lower = 1, tol = 1e-100)
   assert_function(initializer, nargs = 2)
+  assert_r6(additional_component_sampler, "Sampler", null.ok = TRUE)
 
   ss_ids = inst$search_space$ids()
-  ac_ids = additional_component_sampler$param_set$ids()
+  ac_ids = if (is.null(additional_component_sampler)) character(0) else additional_component_sampler$param_set$ids()
   present_cols = colnames(inst$archive$data)
 
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
@@ -334,19 +337,20 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     stopf("Some, but not all, additoinal components already in archive: %s", str_collapse(intersect(present_cols, ac_ids)))
   }
   dob = batch_nr = NULL
-  if ("eol" %nin% present_cols) {
-    inst$archive$data[, eol := NA_real_]
-  } else if ("dob" %nin% present_cols) {
-    stop("'eol' but not 'dob' column found in archive; this is an undefined state that would probably lead to bad behaviour, so stopping.")
-  }
+  if (nrow(inst$archive$data)) {
+    if ("eol" %nin% present_cols) {
+      inst$archive$data[, eol := NA_real_]
+    } else if ("dob" %nin% present_cols) {
+      stop("'eol' but not 'dob' column found in archive; this is an undefined state that would probably lead to bad behaviour, so stopping.")
+    }
 
-  if ("dob" %nin% present_cols) {
-    inst$archive$data[, dob := 0]
+    if ("dob" %nin% present_cols) {
+      inst$archive$data[, dob := 0]
+    }
+    data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we need to be careful with copies of data!
+    assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
+    assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
   }
-  data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we need to be careful with copies of data!
-  assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
-
   alive = which(is.na(inst$archive$eol))
   n_alive = length(alive)
   mu_remaining = mu - n_alive
@@ -368,16 +372,19 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     additional_needed = max(0, mu - n_alive) + length(row_insert)  # need to generate components for the missing rows, and for the values that get sampled new
   }
 
-  additional_components = assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
+  additional_components = NULL
+  if (!is.null(additional_component_sampler)) {
+    assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
 
-  # assert here that:
-  # we either have some individuals that need to be sampled (mu_remaining > 0)
-  #   in which case the additional_components table's first `length(row_insert)` and last `mu_remaining` rows are complementary
-  # or that we have no more individuals to sample, in which case `additional_components` are exactly equal to the number of rows where things get inserted.
-  assert_true((mu_remaining > 0 && length(row_insert) + mu_remaining == additional_needed) || (mu_remaining <= 0 && length(row_insert) == additional_needed))
+    # assert here that:
+    # we either have some individuals that need to be sampled (mu_remaining > 0)
+    #   in which case the additional_components table's first `length(row_insert)` and last `mu_remaining` rows are complementary
+    # or that we have no more individuals to sample, in which case `additional_components` are exactly equal to the number of rows where things get inserted.
+    assert_true((mu_remaining > 0 && length(row_insert) + mu_remaining == additional_needed) || (mu_remaining <= 0 && length(row_insert) == additional_needed))
 
-  # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise
-  inst$archive$data[row_insert, ac_ids] <- first(additional_components, length(row_insert))
+    # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise
+    inst$archive$data[row_insert, ac_ids] <- first(additional_components, length(row_insert))
+  }
 
   if (mu_remaining < 0) {
     # TODO: we are currently killing the earliest evals, maybe do something smarter.
@@ -386,7 +393,8 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
   } else if (mu_remaining > 0) {
     mies_evaluate_offspring(inst,
-      cbind(remove_named(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining), budget_id), last(additional_components, mu_remaining)),
+      cbind(remove_named(as.data.table(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining)), budget_id),
+        last(additional_components, mu_remaining)),
       fidelity_schedule, budget_id, survivor_budget = TRUE)
   }
   invisible(inst)
@@ -410,7 +418,7 @@ mies_get_fitnesses = function(inst, rows) {
   assert_r6(inst, "OptimInstance")
 
   multiplier = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
-  fitnesses = as.matrix(inst$archive$data[rows, ..(multiplier) != 0, with = FALSE])
+  fitnesses = as.matrix(inst$archive$data[rows, inst$archive$codomain$ids()[multiplier != 0], with = FALSE])
   multiplier = multiplier[multiplier != 0]
   sweep(fitnesses, 2L, multiplier, `*`)
 }
@@ -452,12 +460,13 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
   assert_r6(selector, "Selector")
   assert_true(selector$is_primed)
   assert_int(n_select, lower = 0, tol = 1e-100)
+  if (!missing(rows)) assert_integerish(rows, lower = 1, upper =  nrow(inst$archive$data), tol = 1e-100)
 
   selector_params <- selector$primed_ps$ids()
   assert_subset(inst$search_space$ids(), selector_params)
-  assert_subset(selector_params, colnames(inst$data))
+  assert_subset(selector_params, colnames(inst$archive$data))
 
-  if (n_select == 0) if (get_indivs) return(inst$data[0, selector_params, with = FALSE]) else return(integer(0))
+  if (n_select == 0) if (get_indivs) return(inst$archive$data[0, selector_params, with = FALSE]) else return(integer(0))
   indivs = inst$archive$data[rows, selector_params, with = FALSE]
 
   fitnesses = mies_get_fitnesses(inst, rows)
@@ -528,11 +537,16 @@ mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$
   assert_r6(recombinator, "Recombinator", null.ok = TRUE)
   assert_true(recombinator$is_primed)
 
+  data = inst$archive$data
+  assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
+
+
   ps_ids <- parent_selector$primed_ps$ids()
   ss_ids <- inst$search_space$ids()
 
   assert_subset(ss_ids, ps_ids)
-  assert_subset(ps_ids, colnames(inst$data))
+  assert_subset(ps_ids, colnames(data))
 
   assert_choice(budget_id, ss_ids, null.ok = TRUE)
   if (is.null(mutator) || is.null(recombinator)) {
@@ -550,7 +564,7 @@ mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$
   needed_recombinations = ceiling(lambda / recombinator$n_indivs_out)
   needed_parents = needed_recombinations * recombinator$n_indivs_in
 
-  parents = mies_select_from_archive(inst, needed_parents, rows, parent_selector)
+  parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector)
   if (!is.null(budget_id)) parents[, (budget_id) := NULL]
 
   recombined = recombinator$operate(parents[sample.int(nrow(parents))])

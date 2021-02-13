@@ -16,7 +16,7 @@
 #'
 #' `OptimizerMies` implements a standard evolutionary strategies loop:
 #' 1. Prime operators, using `mies_prime_operators()`
-#' 2. Initialize population, using `mies_init_population()`
+#' 2. Initialize and evaluate population, using `mies_init_population()`
 #' 3. Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 #' 4. Generate offspring by selecting parents, recombining and mutating them, using `mies_generate_offspring()`
 #' 5. Evaluate performance, using `mies_evaluate_offspring()`
@@ -178,22 +178,21 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           fidelity_current_gen_only = p_lgl(tags = "required"),
           fidelity_monotonic = p_lgl(tags = "required"))
       ))
-      private$.param_set_source = c(alist(
-          private$.own_param_set,
-          mutator = self$mutator$param_set,
-          recombinator = self$recombinator$param_set,
-          parent_selector = self$parent_selector$param_set,
-          survival_selector = self$survival_selector$param_set),
-        if (!is.null(elite_selector)) alist(
-          elite_selector = self$elite_selector$param_set)
-      )
 
-      self$param_set$values = c(
+      self$mutator$param_set$set_id = "mutator"
+      self$recombinator$param_set$set_id = "recombinator"
+      self$parent_selector$param_set$set_id = "parent_selector"
+      self$survival_selector$param_set$set_id = "survival_selector"
+      if (!is.null(elite_selector)) self$elite_selector$param_set$set_id = "elite_selector"
+      private$.param_set_source = c(alist(private$.own_param_set, self$mutator$param_set, self$recombinator$param_set,
+        self$parent_selector$param_set, self$survival_selector$param_set), if (!is.null(elite_selector)) alist(self$elite_selector$param_set))
+
+      self$param_set$values = insert_named(self$param_set$values, c(
         list(lambda = 10, mu = 1, initializer = generate_design_random, survival_strategy = "plus"),
         if (multi_fidelity) list(
           fidelity_schedule = data.frame(generation = 1, budget_new = 1, budget_survivors = 1),
           fidelity_generation_lookahead = TRUE, fidelity_current_gen_only = FALSE, fidelity_monotonic = TRUE)
-      )
+      ))
 
       param_class_determinants = c(
         list(parent_selector, survival_selector),
@@ -262,7 +261,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         private$.param_set = ParamSetCollection$new(sourcelist)
         if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
       }
-      if (!missing(val) && !identical(val, private$.param_set)) {
+      if (!missing(rhs) && !identical(rhs, private$.param_set)) {
         stop("param_set is read-only.")
       }
       private$.param_set
@@ -307,8 +306,10 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           comma = mies_survival_comma)
 
       repeat {
-        mies_step_fidelity(inst, params$fidelity_schedule, budget_id, generation_lookahead = params$fidelity_generation_lookahead,
-          current_gen_only = params$fidelity_current_gen_only, monotonic = params$fidelity_monotonic)
+        if (!is.null(params$fidelity_schedule)) {
+          mies_step_fidelity(inst, params$fidelity_schedule, budget_id, generation_lookahead = params$fidelity_generation_lookahead,
+            current_gen_only = params$fidelity_current_gen_only, monotonic = params$fidelity_monotonic)
+        }
         offspring = mies_generate_offspring(inst, lambda = params$lambda,
           parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
@@ -322,7 +323,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .elite_selector = NULL,
     .own_param_set = NULL,
     .param_set_id = NULL,
-    .param_set_sources = NULL
+    .param_set_source = NULL
   )
 )
 

@@ -76,8 +76,8 @@ MiesOperator = R6Class("MiesOperator",
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       ids = private$.primed_ps$ids()
       private$.primed_ps$assert_dt(values)
-      assert_names(colnames(values), permutation.of = private$.primed_ps$id())
-      convert = is.data.table(values)
+      assert_names(colnames(values), permutation.of = private$.primed_ps$ids())
+      convert = !is.data.table(values)
       if (convert) {
         # don't change input by reference
         values = as.data.table(values)
@@ -136,7 +136,7 @@ MiesOperator = R6Class("MiesOperator",
     #' Whether the `MiesOperator` was primed before. Is `FALSE` exactly when `$primed_ps` is `NULL`. Read-only.
     is_primed = function(val) {
       if (!missing(val)) stop("is_primed is read-only.")
-      is.null(self$primed_ps)
+      !is.null(self$primed_ps)
     }
   ),
   private = list(

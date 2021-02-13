@@ -164,8 +164,8 @@ SelectorProxy = R6Class("SelectorProxy",
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
     prime = function(param_set) {
-      primed_with = self$param_set$get_vlaues()$operation
-      operatio = primed_with$clone(deep = TRUE)
+      primed_with = self$param_set$get_values()$operation
+      operation = primed_with$clone(deep = TRUE)
       operation$prime(param_set)
       super$prime(param_set)
       private$.operation = operation  # only change operation once everything else succeeded
