@@ -34,6 +34,7 @@ Collate:
     'OptimizerMies.R'
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
+    'TunerMies.R'
     'bibentries.R'
     'utils.R'
     'zzz.R'

@@ -16,6 +16,9 @@ lg = NULL
   mlr_terminators$add("gens", TerminatorGenerations)
   mlr_terminators$add("budget", TerminatorBudget)
 
+  mlr_tuners = utils::getFromNamespace("mlr_tuners", ns = "mlr3tuning")
+  mlr_tuners$add("mies", TunerMies)
+
   assign("lg", lgr::get_logger("bbotk"), envir = parent.env(environment()))
 
 }
