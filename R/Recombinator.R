@@ -167,7 +167,7 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
       assert_int(n_indivs_out, lower = 1, tol = 1e-100)
       assert_int(n_indivs_in, lower = n_indivs_out, tol = 1e-100)
 
-      param_set = ps(operation = p_uty(custom_check = crate(function(x) {
+      param_set = ps(operation = p_uty(custom_check = crate(.parent = topenv(), function(x) {
         if (test_r6(x, "Recombinator") && (n_indivs_in %% x$n_indivs_in == 0) && (n_indivs_out * x$n_indivs_in == x$n_indivs_out * n_indivs_in)) {
           return(TRUE)
         }

@@ -10,5 +10,7 @@ Under Development
 Install the github version, using `remotes`:
 
 ```r
+remotes::install_github("mlr-org/bbotk")
+remotes::install_github("mlr-org/paradox")
 remotes::install_github("mlr-org/miesmuschel")
 ```
