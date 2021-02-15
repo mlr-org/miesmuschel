@@ -511,13 +511,13 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'   The [`Selector`] must be primed on a superset of `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization. All components on which `selector` is primed on must occur in the archive.\cr
 #'   The given [`Selector`] *may* return duplicates.
-#' @param mutator ([`Mutator` | `NULL`])\cr
+#' @param mutator ([`Mutator`] | `NULL`)\cr
 #'   [`Mutator`] operation to apply to individuals selected out of `inst` using `parent_selector`.\cr
 #'   The [`Mutator`] must be primed on a [`ParamSet`][paradox::ParamSet] similar to `inst$search_space`,
 #'   but *without* the "budget" component when `budget_id` is given (multi-fidelity optimization). Such a
 #'   [`ParamSet`][paradox::ParamSet] can be generated for example using [`mies_prime_operators`].\cr
 #'   When this is `NULL` (default), then a [`MutatorNull`] is used, effectively disabling mutation.
-#' @param recombinator ([`Recombinator` | `NULL`])\cr
+#' @param recombinator ([`Recombinator`] | `NULL`)\cr
 #'   [`Recombinator`] operation to apply to individuals selected out of `int` using `parent_selector` after mutation using `mutator`.
 #'   The [`Recombinator`] must be primed on a [`ParamSet`][paradox::ParamSet] similar to `inst$search_space`,
 #'   but *without* the "budget" component when `budget_id` is given (multi-fidelity optimization). Such a

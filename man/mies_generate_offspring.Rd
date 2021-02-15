@@ -31,14 +31,14 @@ The \code{\link{Selector}} must be primed on a superset of \code{inst$search_spa
 when performing multi-fidelity optimization. All components on which \code{selector} is primed on must occur in the archive.\cr
 The given \code{\link{Selector}} \emph{may} return duplicates.}
 
-\item{mutator}{(\link[=`Mutator` | `NULL`]{\code{Mutator} | \code{NULL}})\cr
+\item{mutator}{(\code{\link{Mutator}} | \code{NULL})\cr
 \code{\link{Mutator}} operation to apply to individuals selected out of \code{inst} using \code{parent_selector}.\cr
 The \code{\link{Mutator}} must be primed on a \code{\link[paradox:ParamSet]{ParamSet}} similar to \code{inst$search_space},
 but \emph{without} the "budget" component when \code{budget_id} is given (multi-fidelity optimization). Such a
 \code{\link[paradox:ParamSet]{ParamSet}} can be generated for example using \code{\link{mies_prime_operators}}.\cr
 When this is \code{NULL} (default), then a \code{\link{MutatorNull}} is used, effectively disabling mutation.}
 
-\item{recombinator}{(\link[=`Recombinator` | `NULL`]{\code{Recombinator} | \code{NULL}})\cr
+\item{recombinator}{(\code{\link{Recombinator}} | \code{NULL})\cr
 \code{\link{Recombinator}} operation to apply to individuals selected out of \code{int} using \code{parent_selector} after mutation using \code{mutator}.
 The \code{\link{Recombinator}} must be primed on a \code{\link[paradox:ParamSet]{ParamSet}} similar to \code{inst$search_space},
 but \emph{without} the "budget" component when \code{budget_id} is given (multi-fidelity optimization). Such a
