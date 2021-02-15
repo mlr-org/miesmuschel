@@ -320,26 +320,3 @@ expect_equal(transformed[21:30, a], rep(.75, 10))
 expect_equal(transformed[21:30, b], rep(0, 10))
 expect_equal(transformed[31:40, a], rep(1, 10))
 expect_equal(transformed[31:40, b], rep(0, 10))
-
-
-
-
-
-# TODO: - reordering within groups
-#       - recombinator with in 3, out 1
-#       - check if optimization with col named 'generation' works
-#       - test that mies_select_from_archive works without rows argument
-#       - selector defaults are working
-#       - forbidden paramset components? dob, eol, ...?
-#       - recognize right away that additional_searchspace is not supported
-#       - selector ignore params, selector from ranker ('best'), and 'ranker' objects.
-#       - document custom sampling
-#       - test additional_component_sampler functionality and error conditions
-#       - test deps behaviour of paramsetshadow: deps across shadow bounds forbidden, within shadow work.
-#       - generation starts counting at 1
-#       - selector that selects 'at least' x%, or at least n, with method 1, otherwise method 2, [from a subset]
-#       - does mies_step_fidelity work when there are no rows to evaluate?
-#       - test operate() with wrong cols, test operate() with data.table, with data.frame
-#       - test wrappers that they work with more than 2 arguments
-#       - export wrapped operators
-#       - mies_generate_offspring with different missings
