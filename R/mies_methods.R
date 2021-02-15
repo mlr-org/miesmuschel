@@ -246,6 +246,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'   Budget component used for multi-fidelity optimization.
 #' @return `invisible` named `list` with entries `$mutators` (`list` of [`Mutator`], primed `mutators`), `$recombinators` (`list` of [`Recombinator`], primed `recombinators`),
 #'   and `$selectors` (`list` of [`Selector`], primed `selectors`).
+#' @export
 mies_prime_operators = function(mutators = list(), recombinators = list(), selectors = list(), search_space, additional_components = NULL, budget_id = NULL) {
   assert_list(mutators, types = "Mutator", any.missing = FALSE)
   assert_list(recombinators, types = "Recombinator", any.missing = FALSE)

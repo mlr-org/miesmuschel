@@ -7,7 +7,7 @@
 mies_generate_offspring(
   inst,
   lambda,
-  parent_selector = SelectorBest$new()$prime(inst$search_space),
+  parent_selector = NULL,
   mutator = NULL,
   recombinator = NULL,
   budget_id = NULL
@@ -22,11 +22,11 @@ Number of new individuals to generate. This is not necessarily the number with w
 gets called, because \code{recombinator} could in principle need more than \code{lambda} input individuals to
 generate \code{lambda} output individuals.}
 
-\item{parent_selector}{(\code{\link{Selector}})\cr
+\item{parent_selector}{(\code{\link{Selector}} | \code{NULL})\cr
 \code{\link{Selector}} operator that selects parent individuals depending on configuration values
 and objective results. When \code{parent_selector$operate()} is called, then objectives that
 are being minimized are multiplied with -1 (through \code{\link[=mies_get_fitnesses]{mies_get_fitnesses()}}), since \code{\link{Selector}}s always try to maximize fitness.
-Defaults to \code{\link{SelectorBest}}.\cr
+When this is \code{NULL} (default), then a \code{\link{SelectorBest}} us used.\cr
 The \code{\link{Selector}} must be primed on a superset of \code{inst$search_space}; this \emph{includes} the "budget" component
 when performing multi-fidelity optimization. All components on which \code{selector} is primed on must occur in the archive.\cr
 The given \code{\link{Selector}} \emph{may} return duplicates.}
