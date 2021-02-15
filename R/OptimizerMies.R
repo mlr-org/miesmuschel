@@ -288,7 +288,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
 
       budget_id = NULL
       if (!is.null(params$fidelity_schedule)) {
-        budget_id = search_space$ids(tags = "budget")
+        budget_id = inst$search_space$ids(tags = "budget")
         if (length(budget_id) != 1) stopf("Need exactly one budget parameter for multifidelity, but found %s: %s",
           length(budget_id), str_collapse(budget_id))
       }
@@ -328,7 +328,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
 )
 
 check_fidelity_schedule = function(x) {
-  if (test_data_frame(x, ncols = 2, min.rows = 1) &&
+  if (test_data_frame(x, ncols = 3, min.rows = 1) &&
       test_names(colnames(x), identical.to = c("generation", "budget_new", "budget_survivors")) &&
       test_integerish(x$generation, tol = 1e-100, any.missing = FALSE, unique = TRUE) &&
       1 %in% x$generation) {

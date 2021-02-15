@@ -311,7 +311,7 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
       as.data.table(mapply(function(mutnot, mut, takemut) {
         mutnot[takemut] <- mut[takemut]
         mutnot
-      }, mutated_not, mutated, mutating, SIMPLIFY = FALSE))
+      }, mutated_not, mutated, as.data.frame(mutating), SIMPLIFY = FALSE))
     },
     .wrapped = NULL,
     .wrapped_not = NULL,
@@ -464,6 +464,8 @@ MutatorGauss = R6Class("MutatorGauss",
         assert_numeric(lowers, finite = TRUE, any.missing = FALSE)
         assert_numeric(uppers, finite = TRUE, any.missing = FALSE)
         sdev = sdev * (uppers - lowers)
+      } else {
+        sdev = rep(sdev, length(values))  # make the ifelse() further down work
       }
       if (params$truncated_normal) {
         mutated <- ifelse(sdev == 0, values,

@@ -31,20 +31,20 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
   assert_flag(survivor_budget)
-  generation = max(inst$archive$data$dob, 0) + 1
-  assert_names(colnames(offspring), must.include = setdiff(ss_ids, survivor_budget), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
+  current_gen = max(inst$archive$data$dob, 0) + 1
+  assert_names(colnames(offspring), must.include = setdiff(ss_ids, budget_id), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
 
   if (!is.null(fidelity_schedule)) {
     assert(check_fidelity_schedule(fidelity_schedule))
     fidelity_schedule = as.data.table(fidelity_schedule)
     fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
     fidelity_column = if (survivor_budget) "budget_survivors" else "budget_new"
-    fidelity = fidelity_schedule[data.table(generation = generation), fidelity_column, on = generation, roll = TRUE, with = FALSE]
+    fidelity = fidelity_schedule[data.table(generation = current_gen), fidelity_column, on = "generation", roll = TRUE, with = FALSE]
     setnames(fidelity, budget_id)
     offspring = cbind(offspring, fidelity)
   }
 
-  inst$eval_batch(cbind(offspring, dob = generation, eol = NA_real_))
+  eval_batch_handle_zero(inst, cbind(offspring, dob = current_gen, eol = NA_real_))
 }
 
 #' @title Re-Evaluate Configurations with Higher Fidelity
@@ -92,7 +92,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   assert_flag(current_gen_only)
   assert_flag(monotonic)
   data = inst$archive$data
-  generation = max(data$dob, 0)
+  current_gen = max(data$dob, 0)
   assert_choice(budget_id, inst$search_space$ids())
   assert(check_fidelity_schedule(fidelity_schedule))
   fidelity_schedule = as.data.table(fidelity_schedule)
@@ -102,14 +102,14 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
 
-  next_fidelity = fidelity_schedule[data.table(generation = generation + generation_lookahead), "budget_survivors", on = generation, roll = TRUE, with = FALSE]
+  next_fidelity = fidelity_schedule[data.table(generation = current_gen + generation_lookahead), "budget_survivors", on = "generation", roll = TRUE, with = FALSE][[1]]
 
   comparator = if (monotonic) `<` else `!=`
-  reeval = which((!current_gen_only | data$dob == generation) & is.na(data$eol) & comparator(data[[budget_id]], next_fidelity))
+  reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], next_fidelity))
 
-  data[reeval, eol := ..(generation)]
+  set(data, reeval, "eol", current_gen)
   indivs = data[reeval, inst$search_space$ids(), with = FALSE]
-  indivs[, `:=`(budget_id, next_fidelity)]
+  indivs[, (budget_id) := next_fidelity]
 
   # I hate this... but there seems to be no way to avoid the TerminatorGenerations from terminating here :-(
   # What happens here is that we decrease dob by 1 everywhere, evaluate with current-generation-minus-one,
@@ -121,7 +121,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   # stupid race condition. Hope we don't get trapped here...
   on.exit(inst$archive$data[, dob := dob + 1])
 
-  inst$eval_batch(indivs[, `:=`(dob = ..(generation - 1), eol = NA_real_)])
+  eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
 }
 
 #' @title Choose Survivors According to the "Mu + Lambda" ("Plus") Strategy
@@ -374,7 +374,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 
   additional_components = NULL
   if (!is.null(additional_component_sampler)) {
-    assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
+    additional_components = assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
 
     # assert here that:
     # we either have some individuals that need to be sampled (mu_remaining > 0)
@@ -392,8 +392,12 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     # TODO: also also the additional component handling above depends on killing earliest now.
     inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
   } else if (mu_remaining > 0) {
+    sample_space = inst$search_space
+    if (!is.null(budget_id)) {
+      sample_space = ParamSetShadow$new(sample_space, budget_id)
+    }
     mies_evaluate_offspring(inst,
-      cbind(remove_named(as.data.table(assert_data_frame(initializer(inst$search_space, mu_remaining)$data, nrows = mu_remaining)), budget_id),
+      cbind(as.data.table(assert_data_frame(initializer(sample_space, mu_remaining)$data, nrows = mu_remaining)),
         last(additional_components, mu_remaining)),
       fidelity_schedule, budget_id, survivor_budget = TRUE)
   }
@@ -498,11 +502,11 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'   Number of new individuals to generate. This is not necessarily the number with which `parent_selector`
 #'   gets called, because `recombinator` could in principle need more than `lambda` input individuals to
 #'   generate `lambda` output individuals.
-#' @param parent_selector ([`Selector`])\cr
+#' @param parent_selector ([`Selector`] | `NULL`)\cr
 #'   [`Selector`] operator that selects parent individuals depending on configuration values
 #'   and objective results. When `parent_selector$operate()` is called, then objectives that
 #'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.
-#'   Defaults to [`SelectorBest`].\cr
+#'   When this is `NULL` (default), then a [`SelectorBest`] us used.\cr
 #'   The [`Selector`] must be primed on a superset of `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization. All components on which `selector` is primed on must occur in the archive.\cr
 #'   The given [`Selector`] *may* return duplicates.
@@ -526,31 +530,47 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' using [`mies_evaluate_offspring()`].
 #' @family mies building blocks
 #' @export
-mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$new()$prime(inst$search_space), mutator = NULL, recombinator = NULL, budget_id = NULL) {
+mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator = NULL, recombinator = NULL, budget_id = NULL) {
   assert_r6(inst, "OptimInstance")
 
   assert_int(lambda, lower = 1, tol = 1e-100)
-  assert_r6(parent_selector, "Selector")
-  assert_true(parent_selector$is_primed)
+  assert_r6(parent_selector, "Selector", null.ok = TRUE)
+  if (!is.null(parent_selector)) assert_true(parent_selector$is_primed)
   assert_r6(mutator, "Mutator", null.ok = TRUE)
-  assert_true(mutator$is_primed)
+  if (!is.null(mutator)) assert_true(mutator$is_primed)
   assert_r6(recombinator, "Recombinator", null.ok = TRUE)
-  assert_true(recombinator$is_primed)
+  if (!is.null(recombinator)) assert_true(recombinator$is_primed)
 
   data = inst$archive$data
   assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
 
+  ss_ids = inst$search_space$ids()
+  assert_choice(budget_id, ss_ids, null.ok = TRUE)
 
-  ps_ids <- parent_selector$primed_ps$ids()
-  ss_ids <- inst$search_space$ids()
+  if (is.null(parent_selector)) {
+    # need to find out what to prime parent_selector with: If mutator or recombinator exist,
+    # then we use their SS and add budget_id, if necessary. This correctly infers additional_components.
+    # Only if no operator at all was given do we default to inst$search_space
+    if (!is.null(mutator)) {
+      ps_ps = mutator$primed_ps
+    } else if (!is.null(recombinator)) {
+      ps_ps = recombinator$primed_ps
+    } else {
+      ps_ps = inst$search_space
+    }
+    if (!is.null(budget_id) && budget_id %nin% ps_ps$ids()) {
+      ps_ps = ps_ps$clone()$add(inst$search_space$params[[budget_id]])
+    }
+    parent_selector = SelectorBest$new()$prime(ps_ps)
+  }
+
+  ps_ids = parent_selector$primed_ps$ids()
 
   assert_subset(ss_ids, ps_ids)
   assert_subset(ps_ids, colnames(data))
-
-  assert_choice(budget_id, ss_ids, null.ok = TRUE)
   if (is.null(mutator) || is.null(recombinator)) {
-    selector_space= parent_selector$primed_ps
+    selector_space = parent_selector$primed_ps
     if (!is.null(budget_id)) {
       selector_space = ParamSetShadow$new(selector_space, budget_id)
     }
@@ -558,8 +578,8 @@ mies_generate_offspring = function(inst, lambda, parent_selector = SelectorBest$
     recombinator = recombinator %??% RecombinatorNull$new()$prime(selector_space)
   }
 
-  assert_set_equal(mutator$primed_ps$ids(), setdiff(ss_ids, budget_id))
-  assert_set_equal(recombinator$primed_ps$ids(), setdiff(ss_ids, budget_id))
+  assert_set_equal(mutator$primed_ps$ids(), setdiff(ps_ids, budget_id))
+  assert_set_equal(recombinator$primed_ps$ids(), setdiff(ps_ids, budget_id))
 
   needed_recombinations = ceiling(lambda / recombinator$n_indivs_out)
   needed_parents = needed_recombinations * recombinator$n_indivs_in

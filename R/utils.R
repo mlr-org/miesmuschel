@@ -95,3 +95,22 @@ ps_union = function(sets) {
   }
   newps
 }
+
+# call inst$eval_batch(xdt), but handle the case where xdt has length 0 correctly.
+eval_batch_handle_zero = function(inst, xdt) {
+  if (nrow(xdt)) {
+    return(inst$eval_batch(xdt))
+  }
+  assert_data_table(xdt)
+  assert_names(colnames(xdt), must.include = inst$search_space$ids())
+
+  result_types = inst$archive$codomain$storage_type
+  typegen = function(x) switch(x,
+    logical = logical(0),
+    integer = integer(0),
+    numeric = numeric(0),
+    character = character(0)
+  )
+
+  invisible(as.data.table(lapply(result_types, typegen)))
+}
