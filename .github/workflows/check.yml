@@ -87,5 +87,11 @@ jobs:
         working-directory: ..
         run: 'R CMD check *.tar.gz'
       - name: Log
+        if: failed()
         working-directory: ..
         run: 'cat *.Rcheck/00check.log'
+      - name: Latex Log
+        if: failed()
+        working-directory: ..
+        run: 'cat *.Rcheck/Rdlatex.log'
+
