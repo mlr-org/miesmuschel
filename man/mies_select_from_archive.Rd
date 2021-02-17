@@ -22,11 +22,7 @@ Number of individuals to select.}
 \item{rows}{optional (\code{integer})\cr
 Indices of rows within \code{inst} to consider. If this is not given, then the entire archive is used.}
 
-\item{get_indivs}{(\code{logical(1)})\cr
-Whether to return configuration values from within the archive (\code{TRUE}) or just the indices within
-the archive (\code{FALSE}). Default is \code{TRUE}.}
-
-\item{`selector`}{(\code{\link{Selector}})\cr
+\item{selector}{(\code{\link{Selector}})\cr
 \code{\link{Selector}} operator that selects individuals depending on configuration values
 and objective results. When \code{selector$operate()} is called, then objectives that
 are being minimized are multiplied with -1 (through \code{\link[=mies_get_fitnesses]{mies_get_fitnesses()}}), since \code{\link{Selector}}s always try to maximize fitness.
@@ -34,6 +30,10 @@ Defaults to \code{\link{SelectorBest}}.\cr
 The \code{\link{Selector}} must be primed on a superset of \code{inst$search_space}; this \emph{includes} the "budget" component
 when performing multi-fidelity optimization. All components on which \code{selector} is primed on must occur in the archive.\cr
 The given \code{\link{Selector}} \emph{may} return duplicates.}
+
+\item{get_indivs}{(\code{logical(1)})\cr
+Whether to return configuration values from within the archive (\code{TRUE}) or just the indices within
+the archive (\code{FALSE}). Default is \code{TRUE}.}
 }
 \value{
 \code{integer} | \code{\link[data.table:data.table]{data.table}}: Selected individuals, either index into \code{inst} or subset of archive table,

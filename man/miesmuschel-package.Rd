@@ -6,7 +6,7 @@
 \alias{miesmuschel-package}
 \title{miesmuschel: Mixed Integer Evolutionary Strategies.}
 \description{
-
+Evolutionary black box optimization algorithms building on the "bbotk" package. "miesmuschel" offers both ready-to-use optimization algorithms, as well as their fundamental building blocks that can be used to manually construct specialized optimization loops.
 }
 \seealso{
 Useful links:
