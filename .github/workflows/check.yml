@@ -6,12 +6,12 @@ on:
     branches: [master, devel]
   schedule:
     - cron: '33 4 * * *'  # work 4:33 in the morning
-  workflow_dispatch:  # allow manual launch of checks
-    inputs:
-      test:
-        description: a test
-        required: false
-        default: 'test'
+#  workflow_dispatch:  # allow manual launch of checks
+#    inputs:
+#      test:
+#        description: a test
+#        required: false
+#        default: 'test'
 name: check
 
 env:
@@ -83,4 +83,4 @@ jobs:
         run: roxygen2::roxygenise()
       - name: Build
         working-directory: ..
-        run: R CMD
+        run: 'R CMD build */'
