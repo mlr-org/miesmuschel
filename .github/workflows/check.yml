@@ -6,8 +6,12 @@ on:
     branches: [master, devel]
   schedule:
     - cron: '33 4 * * *'  # work 4:33 in the morning
-  workflow_dispatch: []  # allow manual launch of checks
-
+  workflow_dispatch:  # allow manual launch of checks
+    inputs:
+      test:
+        description: a test
+        required: false
+        default: ''
 name: check
 
 env:
@@ -74,8 +78,7 @@ jobs:
         run: roxygen2::roxygenise()
       - name: Build
         working-directory: ..
-        run: |
-          R CMD build miesmuschel
+        run: R CMD build miesmuschel
       - run: |
           echo ${{ matrix.os }} ${{ steps.install-r.outputs.installed-r-version }} ${{ env.R_LIBS_USER }}
           echo $PWD
