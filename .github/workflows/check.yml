@@ -62,4 +62,7 @@ jobs:
           installed.packages()[, c("Package", "Version", "Built")]
           sessionInfo() 
       - run: |
-          echo ${{ runner.os }} ${{ steps.install-r.outputs.instaled-r-version }} ${{ env.R_LIBS_USER }}
+          echo ${{ imatrix.os }} ${{ steps.install-r.outputs.instaled-r-version }} ${{ env.R_LIBS_USER }}
+          echo $PWD
+          ls -a ..
+#      - run: R CMD build ${{   }}
