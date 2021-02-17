@@ -22,6 +22,8 @@ Imports:
 Suggests:
   tinytest,
   mlr3tuning
+Remotes:
+  mlr-org/bbotk
 RoxygenNote: 7.1.1
 Collate: 
     'MiesOperator.R'
