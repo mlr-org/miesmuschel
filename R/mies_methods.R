@@ -444,7 +444,7 @@ mies_get_fitnesses = function(inst, rows) {
 #' @param n_select (`integer(1)`)\cr
 #'   Number of individuals to select.
 #' @template param_rows
-#' @param `selector` ([`Selector`])\cr
+#' @param selector ([`Selector`])\cr
 #'   [`Selector`] operator that selects individuals depending on configuration values
 #'   and objective results. When `selector$operate()` is called, then objectives that
 #'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses()`]), since [`Selector`]s always try to maximize fitness.

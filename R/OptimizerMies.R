@@ -25,9 +25,9 @@
 #'
 #' @section Terminating:
 #' As with all optimizers, [`Terminator`][bbotk::Terminator]s are used to end optimization after a specific number of evaluations were performed,
-#' time elapsed, or other conditions are satisfied. Of particular interest is [`TerminatorGeneration`], which terminates after a number
+#' time elapsed, or other conditions are satisfied. Of particular interest is [`TerminatorGenerations`], which terminates after a number
 #' of generations were evaluated in `OptimizerMies`. The initial population counts as generation 1, its offspring as generation 2 etc.;
-#' fidelity refinements are always included in their generation, [`TerminatorGeneration`] avoids terminating right before they are evaluated.
+#' fidelity refinements are always included in their generation, [`TerminatorGenerations`] avoids terminating right before they are evaluated.
 #' Other terminators may, however, end the optimization process at any time.
 #'
 #' @section Multi-Fidelity:
