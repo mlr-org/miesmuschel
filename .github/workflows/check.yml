@@ -83,4 +83,4 @@ jobs:
         run: roxygen2::roxygenise()
       - name: Build
         working-directory: ..
-        run: R CMD build miesmuschel
+        run: R CMD build
