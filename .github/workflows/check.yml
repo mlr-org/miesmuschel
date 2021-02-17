@@ -86,3 +86,6 @@ jobs:
       - name: Check
         working-directory: ..
         run: 'R CMD check *.tar.gz'
+      - name: Log
+        working-directory: ..
+        run: 'cat *.Rcheck/00check.log'
