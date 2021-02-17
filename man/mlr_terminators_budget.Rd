@@ -33,6 +33,7 @@ progress is reported as the progress from this lower bound to the value of \code
 }
 
 \examples{
+library("bbotk")
 trm("budget", budget = 1024, aggregate = function(x) sum(2 ^ x))
 }
 \section{Super class}{

@@ -38,6 +38,7 @@ Number of generations to evaluate, after which to stop. Initialized to \code{Inf
 }
 
 \examples{
+library("bbotk")
 trm("gens", generations = 10)
 }
 \section{Super class}{
