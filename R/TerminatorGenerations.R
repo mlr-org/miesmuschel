@@ -33,6 +33,7 @@
 #'   Number of generations to evaluate, after which to stop. Initialized to `Inf`.
 #'
 #' @examples
+#' library("bbotk")
 #' trm("gens", generations = 10)
 #' @export
 TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,

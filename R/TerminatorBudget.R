@@ -28,6 +28,7 @@
 #'   progress is reported as the progress from this lower bound to the value of `budget`. Initialized to `sum()`.
 #'
 #' @examples
+#' library("bbotk")
 #' trm("budget", budget = 1024, aggregate = function(x) sum(2 ^ x))
 #' @export
 TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
