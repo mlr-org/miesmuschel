@@ -18,7 +18,8 @@ Imports:
   checkmate (>= 1.9.0),
   R6,
   bbotk (>= 0.3.0.900),
-  data.table
+  data.table,
+  lgr
 Suggests:
   tinytest,
   mlr3tuning
