@@ -6,12 +6,6 @@ on:
     branches: [master, devel]
   schedule:
     - cron: '33 4 * * *'  # work 4:33 in the morning
-#  workflow_dispatch:  # allow manual launch of checks
-#    inputs:
-#      test:
-#        description: a test
-#        required: false
-#        default: 'test'
 name: check
 
 env:
@@ -50,6 +44,8 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.r }}
+      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-tinytex@v1
       - name: Create Cache Key
         shell: Rscript {0}
         run: |
