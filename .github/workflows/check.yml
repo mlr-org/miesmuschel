@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [master, devel]
   schedule:
-    - cron '33 4 * * *'
+    - cron: '33 4 * * *'
 
 name: check
 
