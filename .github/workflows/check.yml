@@ -11,7 +11,7 @@ on:
       test:
         description: a test
         required: false
-        default: ''
+        default: 'test'
 name: check
 
 env:
@@ -47,10 +47,15 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.r }}
+      - name: Create Cache Key
+        shell: Rscript {0}
+        run: |
+          if (!require("remotes", quietly = TRUE)) install.packages("remotes")
+          writeLines(capture.output(print(remotes::dev_package_deps())), "../deps.txt")
       - uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}
+          key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}-${{ hashFiles('../deps.txt') }}
       - shell: Rscript {0}
         name: install necessary build env packages
         run: |
@@ -83,4 +88,5 @@ jobs:
           echo ${{ matrix.os }} ${{ steps.install-r.outputs.installed-r-version }} ${{ env.R_LIBS_USER }}
           echo $PWD
           ls ..
+          cat ../deps.txt
 #      - run: R CMD build ${{   }}
