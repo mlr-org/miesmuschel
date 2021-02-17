@@ -5,7 +5,8 @@ on:
   pull_request:
     branches: [master, devel]
   schedule:
-    - cron: '33 4 * * *'
+    - cron: '33 4 * * *'  # work 4:33 in the morning
+  workflow_dispatch: []  # allow manual launch of checks
 
 name: check
 
@@ -14,25 +15,28 @@ env:
   R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
   WARNINGS_ARE_ERRORS: 1
   _R_CHECK_CRAN_INCOMING_REMOTE_: false
-  _R_CHECK_TESTS_NLINES_: 0
+  _R_CHECK_TESTS_NLINES_: 0  # disable limiting of output lines
   _R_CHECK_CRAN_INCOMING_: false
 
 jobs:
   check:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false  # continue runs even when a parallel run failed
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        # run on ubuntu, macos, windows. 20.04 is more recent than ubuntu-latest, currently.
+        os: [macos-latest, windows-latest, ubuntu-20.04]
         action: [check]
         r: [release]
         include:
-          - os: ubuntu-latest
+          # additionally run r-devel, but only on ubuntu, and an old R version on an old ubuntu
+          - os: ubuntu-20.04
             action: check
             r: devel
           - os: ubuntu-16.04
             action: check
             r: 3.5
-    
+
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@v1 
@@ -44,15 +48,19 @@ jobs:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}
       - shell: Rscript {0}
+        name: install necessary build env packages
         run: |
           if (!require("remotes", quietly = TRUE)) install.packages("remotes")
+          if (!require("roxygen2", quietly = TRUE)) install.packages("roxygen2")
       - if: runner.os == 'Linux'
+        name: install system requirements
         run: |
           while read -r depinst ; do
             echo "> $depinst"
             eval sudo $depinst
           done < <( Rscript -e "writeLines(remotes::system_requirements('ubuntu', '$( . /etc/os-release ; echo $VERSION_ID )'))")
       - shell: Rscript {0}
+        name: install package dependencies
         run: | 
           remotes::install_deps(dependencies = TRUE)
       - name: Session Info
@@ -61,8 +69,15 @@ jobs:
           options(width = 200)
           installed.packages()[, c("Package", "Version", "Built")]
           sessionInfo() 
+      - name: Document
+        shell: Rscript {0}
+        run: roxygen2::roxygenise()
+      - name: Build
+        working-directory: ..
+        run: |
+          R CMD build miesmuschel
       - run: |
           echo ${{ matrix.os }} ${{ steps.install-r.outputs.installed-r-version }} ${{ env.R_LIBS_USER }}
           echo $PWD
-          ls -a ..
+          ls ..
 #      - run: R CMD build ${{   }}
