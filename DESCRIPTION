@@ -1,6 +1,6 @@
 Package: miesmuschel
 Title: Mixed Integer Evolutionary Strategies.
-Description: 
+Description: Evolutionary black box optimization algorithms building on the "bbotk" package. "miesmuschel" offers both ready-to-use optimization algorithms, as well as their fundamental building blocks that can be used to manually construct specialized optimization loops.
 Authors@R: c(
   person("Martin", "Binder", email = "mlr.developer@mb706.com", role = c("aut", "cre"))
   )
@@ -12,16 +12,16 @@ Roxygen: list(markdown = TRUE)
 ByteCompile: yes
 Version: 0.0.0-9000
 Depends:
-  paradox
+  paradox (>= 0.7.0)
 Imports:
   mlr3misc (>= 0.5.0),
   checkmate (>= 1.9.0),
   R6,
-  bbotk,
-  mlr3tuning,
+  bbotk (>= 0.3.0.900),
   data.table
 Suggests:
-  tinytest
+  tinytest,
+  mlr3tuning
 RoxygenNote: 7.1.1
 Collate: 
     'MiesOperator.R'
