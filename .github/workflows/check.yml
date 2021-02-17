@@ -44,5 +44,5 @@ jobs:
 #          key: ${{ runner.os}}-${{ steps.install-r.outputs.instaled-r-version }}-${{ hashFiles('.github/r-depends.rds') }}
 #          restore-keys: ${{ runner.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
       - run: |
-          ls -R
+          ls -aR
           set
