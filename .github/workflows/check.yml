@@ -36,12 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@v1 
+        id: install-r
         with:
           r-version: ${{ matrix.r }}
       - uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ steps.install-r.outputs.instaled-r-version }}
+          key: ${{ matrix.os }}-${{ steps.install-r.outputs.instaled-r-version }}
       - shell: Rscript {0}
         run: |
           if (!require("remotes", quietly = TRUE)) install.packages("remotes")
