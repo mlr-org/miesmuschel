@@ -80,6 +80,9 @@ jobs:
       - name: Document
         shell: Rscript {0}
         run: roxygen2::roxygenise()
+      - if: runner.os == 'windows'
+        name: Remove hypertarget from Latex for Windows
+        run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"
       - name: Build
         working-directory: ..
         run: 'R CMD build */'
