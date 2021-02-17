@@ -28,7 +28,6 @@ expect_set_equal(unlist(lapply(names(ops), function(x) sprintf("%s.%s", x, ops[[
 
 mcom$param_set$values$ParamDbl.sdev = .01
 mcom$param_set$values$ParamFct.can_mutate_to_same = FALSE
-mcom$param_set$values$ParamFct.p = 1
 
 set.seed(1)
 p = ps(x1 = p_dbl(0, 1), x2 = p_dbl(0, 10), y1 = p_fct(c("a", "b")))
@@ -43,18 +42,17 @@ expect_true(all(operated$x1 > .9, operated$x2 < 1))
 
 mcom$param_set$values$ParamDbl.sdev = 1000
 mcom$param_set$values$ParamDbl.truncated_normal = FALSE
-mcom$param_set$values$ParamFct.p = 0
+mcom$param_set$values$ParamFct.can_mutate_to_same = TRUE
 
-operated = mcom$operate(data.table(x1 = c(1, 1), x2 = c(0, 0), y1 = c("a", "b")))
+operated = mcom$operate(data.table(x1 = c(1, 1), x2 = c(0, 0), y1 = rep("a", 10)))
 
-expect_equal(operated$y1, c("a", "b"))
+expect_set_equal(operated$y1, c("a", "b"))
 expect_true(all(operated$x1 %in% c(0, 1), operated$x2 %in% c(0, 10)))
 
 mcom = MutatorCombination$new(c(ops, list(x1 = MutatorGauss$new())))
 
 mcom$param_set$values$ParamDbl.sdev = .01
 mcom$param_set$values$ParamFct.can_mutate_to_same = FALSE
-mcom$param_set$values$ParamFct.p = 1
 mcom$param_set$values$x1.sdev = 1000
 mcom$param_set$values$x1.truncated_normal = FALSE
 
@@ -73,7 +71,7 @@ pslgl = ParamLgl$new("b")$rep(4)
 psfct2 = ParamFct$new("c", c("a", "b"))$rep(4)
 psfct3 = ParamFct$new("d", c("a", "b", "c"))$rep(4)
 
-MutatorClass = R6Class("MutatorNull",
+MutatorClass = R6::R6Class("MutatorNull",
   inherit = Mutator,
   public = list(
     innitialize = function(cls) {
@@ -185,7 +183,6 @@ mut_gauss_zero_one = MutatorGauss$new()
 mut_gauss_zero_one$param_set$values$sdev = 1000
 mut_gauss_zero_one$param_set$values$truncated_normal = FALSE
 mut_fct_flip = MutatorDiscreteUniform$new()
-mut_fct_flip$param_set$values$p = 1
 mut_fct_flip$param_set$values$can_mutate_to_same = FALSE
 
 p_r = p_dbl(0, 1)
@@ -288,7 +285,7 @@ mut_nested = MutatorCombination$new(list(g1 = MutatorCombination$new(list(a = mu
   d = mut_gauss_small, e = mut_null),
   groups = list(g1 = c("a", "b", "c")))
 expected_pv = list(g1.a.sdev = .01, g1.a.truncated_normal = TRUE, g1.b.sdev = 1000, g1.b.truncated_normal = FALSE,
-  g1.c.p = 1, g1.c.can_mutate_to_same = FALSE, d.sdev = .01, d.truncated_normal = TRUE)
+  g1.c.can_mutate_to_same = FALSE, d.sdev = .01, d.truncated_normal = TRUE)
 expect_equal(mut_nested$param_set$values[names(expected_pv)], expected_pv)
 transformed = mut_nested$prime(ps(a = p_r, b = p_r, c = p_ab, d = p_r, e = p_r))$operate(data.table(a = rep(0, 10), b = 0, c = "a", d = 0, e = 0))
 expect_numeric(transformed$a, lower = 1e-10, upper = .1, any.missing = FALSE, len = 10)
@@ -299,7 +296,7 @@ expect_equal(transformed$e, rep(0, 10))
 
 
 mut_maybe_flip = MutatorCombination$new(list(a = MutatorMaybe$new(mut_fct_flip)))
-mut_maybe_flip$param_set$values$a.maybe.p = 0.5
+mut_maybe_flip$param_set$values$a.p = 0.5
 expect_set_equal(mut_maybe_flip$param_classes, c("ParamLgl", "ParamFct"))
 transformed = mut_maybe_flip$prime(ps(a = p_ab))$operate(data.table(a = rep("a", 10)))
 expect_set_equal(transformed$a, c("a", "b"))

@@ -1,4 +1,6 @@
 
+library("data.table")
+
 # mut: mutator to check
 # mutator_name: name to print in info
 # is_primed: whether the mutator is already primed. if so, the expectation that unprimed mutator gives an error will not be checked.

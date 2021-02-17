@@ -204,7 +204,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 
   survivors = c(elites, survivors)
 
-  died = setdiff(alive, survivors)
+  died = setdiff(alive_before, survivors)
   data[died, eol := max(dob)]
 }
 

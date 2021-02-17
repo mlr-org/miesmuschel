@@ -26,5 +26,7 @@ lg = NULL
 
 }
 
+# static code checks should not complain about commonly used data.table columns
+utils::globalVariables(c("dob", "eol"))
 
 .datatable.aware = TRUE  # WTF
