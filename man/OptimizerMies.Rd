@@ -148,10 +148,10 @@ Recombination operation to perform during \code{\link[=mies_generate_offspring]{
 \item{\code{parent_selector}}{(\code{\link{Selector}})\cr
 Parent selection operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}.}
 
-\item{\code{survival_selector}}{(\code{Selector})\cr
+\item{\code{survival_selector}}{(\code{\link{Selector}})\cr
 Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_survival_plus()}} or \code{\link[=mies_survival_comma]{mies_survival_comma()}}.}
 
-\item{\code{elite_selector}}{(\code{Selector} | \code{NULL})\cr
+\item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})\cr
 Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}.}
 
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
@@ -194,29 +194,29 @@ Initialize the \code{OptimizerMies} object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{mutator}}{(\code{Mutator})\cr
+\item{\code{mutator}}{(\code{\link{Mutator}})\cr
 Mutation operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{MutatorProxy}}, which
 exposes the operation as a hyperparameter of the optimizer itself.\cr
 The \verb{$mutator} field will reflect this value.}
 
-\item{\code{recombinator}}{(\code{Recombinator})\cr
+\item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
 Recombination operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{RecombinatorProxy}},
 which exposes the operation as a hyperparameter of the optimizer itself. Note: The default \code{\link{RecombinatorProxy}} has \verb{$n_indivs_in} set to 2,
 so to use recombination operations with more than two inputs, or to use population size of 1, it may be necessary to construct this
 argument explicitly.\cr
 The \verb{$recombinator} field will reflect this value.}
 
-\item{\code{parent_selector}}{(\code{Selector})\cr
+\item{\code{parent_selector}}{(\code{\link{Selector}})\cr
 Parent selection operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{SelectorProxy}},
 which exposes the operation as a hyperparameter of the optimizer itself.\cr
 The \verb{$parent_selector} field will reflect this value.}
 
-\item{\code{survival_selector}}{(\code{Selector})\cr
+\item{\code{survival_selector}}{(\code{\link{Selector}})\cr
 Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_survival_plus()}} or \code{\link[=mies_survival_comma]{mies_survival_comma()}} (depending on the \code{survival_strategy} hyperparameter),
 see there for more information. Default is \code{\link{SelectorProxy}}, which exposes the operation as a hyperparameter of the optimizer itself.\cr
 The \verb{$survival_selector} field will reflect this value.}
 
-\item{\code{elite_selector}}{(\code{Selector} | \code{NULL})\cr
+\item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})\cr
 Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}, see there for more information. "Comma" selection is only available when this
 argument is not \code{NULL}. Default \code{NULL}.\cr
 The \verb{$elite_selector} field will reflect this value.}
@@ -298,7 +298,7 @@ Initialize the \code{TunerMies} object.
 
 \item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})}
 
-\item{\code{multi_fidelity}}{(\code{\link{logical(1)}})}
+\item{\code{multi_fidelity}}{(\code{logical(1)})}
 }
 \if{html}{\out{</div>}}
 }

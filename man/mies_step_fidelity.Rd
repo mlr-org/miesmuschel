@@ -40,7 +40,7 @@ generations (i.e. when a different row from \code{fidelity_schedule} is used).}
 Whether to only re-evaluate configurations for which the fidelity would increase. Default \code{TRUE}.}
 }
 \value{
-\link{invible} \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
+\link{invisible} \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
 through \code{eval_batch}.
 }
 \description{

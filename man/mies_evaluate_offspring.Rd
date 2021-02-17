@@ -34,7 +34,7 @@ when and only when \code{fidelity_schedule} is \code{NULL}.}
 When doing multi-fidelity optimization, determines which column of \code{fidelity_schedule} to use to determine the budget component value.}
 }
 \value{
-invible \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
+\link{invisible} \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
 through \code{eval_batch}.
 }
 \description{
