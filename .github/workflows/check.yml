@@ -42,7 +42,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.os }}-${{ steps.install-r.outputs.instaled-r-version }}
+          key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}
       - shell: Rscript {0}
         run: |
           if (!require("remotes", quietly = TRUE)) install.packages("remotes")
@@ -62,7 +62,7 @@ jobs:
           installed.packages()[, c("Package", "Version", "Built")]
           sessionInfo() 
       - run: |
-          echo ${{ imatrix.os }} ${{ steps.install-r.outputs.instaled-r-version }} ${{ env.R_LIBS_USER }}
+          echo ${{ matrix.os }} ${{ steps.install-r.outputs.installed-r-version }} ${{ env.R_LIBS_USER }}
           echo $PWD
           ls -a ..
 #      - run: R CMD build ${{   }}
