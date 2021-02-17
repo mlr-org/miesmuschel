@@ -113,25 +113,25 @@
 #'   This is equivalent to the `monotonic` parameter of [`mies_step_fidelity()`], see there for more information.\cr
 #'   When this hyperparameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.
 #'
-#' @param mutator (`Mutator`)\cr
+#' @param mutator ([`Mutator`])\cr
 #'   Mutation operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`MutatorProxy`], which
 #'   exposes the operation as a hyperparameter of the optimizer itself.\cr
 #'   The `$mutator` field will reflect this value.
-#' @param recombinator (`Recombinator`)\cr
+#' @param recombinator ([`Recombinator`])\cr
 #'   Recombination operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`RecombinatorProxy`],
 #'   which exposes the operation as a hyperparameter of the optimizer itself. Note: The default [`RecombinatorProxy`] has `$n_indivs_in` set to 2,
 #'   so to use recombination operations with more than two inputs, or to use population size of 1, it may be necessary to construct this
 #'   argument explicitly.\cr
 #'   The `$recombinator` field will reflect this value.
-#' @param parent_selector (`Selector`)\cr
+#' @param parent_selector ([`Selector`])\cr
 #'   Parent selection operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`SelectorProxy`],
 #'   which exposes the operation as a hyperparameter of the optimizer itself.\cr
 #'   The `$parent_selector` field will reflect this value.
-#' @param survival_selector (`Selector`)\cr
+#' @param survival_selector ([`Selector`])\cr
 #'   Survival selection operation to use in [`mies_survival_plus()`] or [`mies_survival_comma()`] (depending on the `survival_strategy` hyperparameter),
 #'   see there for more information. Default is [`SelectorProxy`], which exposes the operation as a hyperparameter of the optimizer itself.\cr
 #'   The `$survival_selector` field will reflect this value.
-#' @param elite_selector (`Selector` | `NULL`)\cr
+#' @param elite_selector ([`Selector`] | `NULL`)\cr
 #'   Elite selector used in [`mies_survival_comma()`], see there for more information. "Comma" selection is only available when this
 #'   argument is not `NULL`. Default `NULL`.\cr
 #'   The `$elite_selector` field will reflect this value.
@@ -237,7 +237,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       }
       private$.parent_selector
     },
-    #' @field survival_selector (`Selector`)\cr
+    #' @field survival_selector ([`Selector`])\cr
     #' Survival selection operation to use in [`mies_survival_plus()`] or [`mies_survival_comma()`].
     survival_selector = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.survival_selector)) {
@@ -245,7 +245,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       }
       private$.survival_selector
     },
-    #' @field elite_selector (`Selector` | `NULL`)\cr
+    #' @field elite_selector ([`Selector`] | `NULL`)\cr
     #' Elite selector used in [`mies_survival_comma()`].
     elite_selector = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.elite_selector)) {

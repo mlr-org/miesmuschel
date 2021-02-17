@@ -21,7 +21,7 @@
 #' @template param_budget_id_maybenull
 #' @param survivor_budget (`logical(1)`)\cr
 #'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.
-#' @return invible [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
+#' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
 #' @export
@@ -82,7 +82,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'   generations (i.e. when a different row from `fidelity_schedule` is used).
 #' @param monotonic (`logical(1)`)\cr
 #'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
-#' @return [invible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
+#' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
 #' @export
