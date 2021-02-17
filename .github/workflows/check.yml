@@ -24,6 +24,9 @@ env:
 
 jobs:
   check:
+    defaults:
+      run:
+        shell: bash
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false  # continue runs even when a parallel run failed
@@ -84,3 +87,6 @@ jobs:
       - name: Build
         working-directory: ..
         run: 'R CMD build */'
+      - name: Check
+        working-directory: ..
+        run: 'R CMD check *.tar.gz'
