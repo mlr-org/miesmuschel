@@ -51,11 +51,11 @@ jobs:
         shell: Rscript {0}
         run: |
           if (!require("remotes", quietly = TRUE)) install.packages("remotes")
-          writeLines(capture.output(print(remotes::dev_package_deps())), "../deps.txt")
+          writeLines(capture.output(print(remotes::dev_package_deps())), ".github/deps.txt")
       - uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}-${{ hashFiles('../deps.txt') }}
+          key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}-${{ hashFiles('.github/deps.txt') }}
       - shell: Rscript {0}
         name: install necessary build env packages
         run: |
@@ -84,9 +84,3 @@ jobs:
       - name: Build
         working-directory: ..
         run: R CMD build miesmuschel
-      - run: |
-          echo ${{ matrix.os }} ${{ steps.install-r.outputs.installed-r-version }} ${{ env.R_LIBS_USER }}
-          echo $PWD
-          ls ..
-          cat ../deps.txt
-#      - run: R CMD build ${{   }}
