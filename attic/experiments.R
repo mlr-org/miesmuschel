@@ -45,3 +45,4 @@ des <- generate_design_random(pp, 10)$data
 rec("xounif")$prime(pp)$operate(des)
 
 
+tinytest::test_all()

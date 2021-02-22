@@ -1,6 +1,5 @@
 
-using("checkmate")
-source("helper_mutators.R", local = TRUE)
+source("setup.R", local = TRUE)
 
 mnull = MutatorNull$new()
 

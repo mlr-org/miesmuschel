@@ -56,3 +56,18 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   expect_true(mut$endomorphism)
 }
 
+MutatorDebug = R6::R6Class("MutatorDebug",
+  inherit = Mutator,
+  public = list(
+    handler = NULL,
+    initialize = function(handler, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps()) {
+      self$handler = assert_function(handler, args = c("n", "v", "p"), ordered = TRUE)
+      super$initialize(param_classes = param_classes, param_set = param_set)
+    }
+  ),
+  private = list(
+    .mutate = function(values) {
+      as.data.table(sapply(names(values), function(n) self$handler(n, values[[n]], self$param_set$values), simplify = FALSE))
+    }
+  )
+)

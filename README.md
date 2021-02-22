@@ -47,7 +47,7 @@ oi <- OptimInstanceSingleCrit$new(objective,
 library("miesmuschel")
 
 # Get operators
-op.m <- mut("gauss", sdev = .2)
+op.m <- mut("gauss")
 op.r <- rec("xounif", p = .3)
 op.parent <- sel("random")
 op.survival <- sel("best")
@@ -76,7 +76,7 @@ oi <- OptimInstanceSingleCrit$new(objective,
 library("miesmuschel")
 
 # Get operators
-op.m <- mut("gauss", sdev = .2)
+op.m <- mut("gauss")
 op.r <- rec("xounif", p = .3)
 op.parent <- sel("random")
 op.survival <- sel("best")

@@ -1,6 +1,4 @@
 
-library("data.table")
-
 # rec: recombinator to check
 # recombinator_name: name to print in info
 # is_primed: whether the recombinator is already primed. If so, the expectation that unprimed recombinator gives an error will not be checked.

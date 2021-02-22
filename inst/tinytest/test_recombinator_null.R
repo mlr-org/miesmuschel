@@ -1,7 +1,5 @@
 
-
-using("checkmate")
-source("helper_recombinators.R", local = TRUE)
+source("setup.R", local = TRUE)
 
 rnull = RecombinatorNull$new()
 

@@ -1,6 +1,5 @@
 
-using("checkmate")
-source("helper_selectors.R", local = TRUE)
+source("setup.R", local = TRUE)
 
 sbest = SelectorBest$new()
 expect_selector(sbest, "SelectorBest", can_oversample = TRUE)

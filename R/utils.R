@@ -114,3 +114,10 @@ eval_batch_handle_zero = function(inst, xdt) {
 
   invisible(as.data.table(lapply(result_types, typegen)))
 }
+
+default_tol = sqrt(.Machine$double.eps)
+
+tol_bound = function(bound, side = c("lower", "upper"), tol = default_tol) {
+  side = match.arg(side)
+  bound + tol * max(1, bound) * switch(side, lower = -1, upper = 1)
+}

@@ -1,29 +1,26 @@
 source("setup.R", local = TRUE)
 
 ## general tests
-mmaybe = MutatorMaybe$new(MutatorDiscreteUniform$new())
+mmaybe = MutatorCmpMaybe$new(MutatorDiscreteUniform$new())
 mmaybe$param_set$values$p = 0.5
-expect_mutator(mmaybe, "MutatorMaybe(MutatorDiscreteUniform)")
+expect_mutator(mmaybe, "MutatorCmpMaybe(MutatorDiscreteUniform)")
 
-mmaybe = MutatorMaybe$new(MutatorGauss$new(), MutatorGauss$new())
+mmaybe = MutatorCmpMaybe$new(MutatorGauss$new(), MutatorGauss$new())
 mmaybe$param_set$values$p = 0.5
-expect_mutator(mmaybe, "MutatorMaybe(MutatorGauss,MutatorGauss)")
+expect_mutator(mmaybe, "MutatorCmpMaybe(MutatorGauss,MutatorGauss)")
 
-mmaybe = MutatorMaybe$new(MutatorGauss$new())
+mmaybe = MutatorCmpMaybe$new(MutatorGauss$new())
 mmaybe$param_set$values$p = 0.5
-expect_mutator(mmaybe, "MutatorMaybe(MutatorGauss)")
+expect_mutator(mmaybe, "MutatorCmpMaybe(MutatorGauss)")
 
-
+madder = MutatorDebug$new(function(n, v, p) v + p$x, "ParamDbl", ps(x = p_dbl()))
 set.seed(1)
-
-madder <- MutatorDebug$new(function(n, v, p) v + p$x, "ParamDbl", ps(x = p_dbl()))
-set.seed(1)
-## MutatorMaybe with Debug Mutator
-mmaybe = MutatorMaybe$new(madder)
+## MutatorCmpMaybe with Debug Mutator
+mmaybe = MutatorCmpMaybe$new(madder)
 p = ps(x = p_dbl(0, 1), y = p_dbl(0, 1))
 mmaybe$prime(p)
 
-mmaybe$param_set$values$maybe.x = 1
+mmaybe$param_set$values$cmpmaybe.x = 1
 mmaybe$param_set$values$p = 1
 
 operated <- mmaybe$operate(data.table(x = rep(0, 10), y = rep(0, 10)))
@@ -40,15 +37,17 @@ expect_true(mean(operated$x == 1) < .55)
 expect_true(mean(operated$y == 1) > .45)
 expect_true(mean(operated$y == 1) < .55)
 
-expect_true(all(operated$x == operated$y))
+expect_true(mean(operated$x == operated$y) < .55)
+expect_true(mean(operated$x == operated$y) > .45)
 
-## MutatorMaybe choosing between two non-null operators
-mmaybe = MutatorMaybe$new(madder, madder)
+
+## MutatorCmpMaybe choosing between two non-null operators
+mmaybe = MutatorCmpMaybe$new(madder, madder)
 p = ps(x = p_dbl(-1, 1), y = p_dbl(-1, 1))
 mmaybe$prime(p)
 
-mmaybe$param_set$values$maybe_not.x = -1
-mmaybe$param_set$values$maybe.x = 1
+mmaybe$param_set$values$cmpmaybe_not.x = -1
+mmaybe$param_set$values$cmpmaybe.x = 1
 
 mmaybe$param_set$values$p = 0
 operated <- mmaybe$operate(data.table(x = rep(0, 10), y = rep(0, 10)))
@@ -65,20 +64,6 @@ expect_true(mean(operated$x == 1) < .8)
 expect_true(mean(operated$y == 1) > .7)
 expect_true(mean(operated$y == 1) < .8)
 
-expect_true(all(operated$x == operated$y))
+expect_true(mean(operated$x == operated$y) < .675)
+expect_true(mean(operated$x == operated$y) > .575)
 
-counter <- MutatorDebug$new(function(n, v, p) { if (n == "x") { p$env$x = p$env$x + length(v) }; v }, "ParamDbl", ps(env = p_uty()))
-mmaybe = MutatorMaybe$new(counter, counter)
-
-cnt = as.environment(list(x = 0))
-mmaybe$param_set$values$maybe.env = cnt
-cnt_not = as.environment(list(x = 0))
-mmaybe$param_set$values$maybe_not.env = cnt_not
-
-mmaybe$param_set$values$p = .75
-mmaybe$prime(p)
-operated = mmaybe$operate(data.table(x = rep(0, 100), y = rep(0, 100)))
-expect_true(all(operated$x == 0) && all(operated$y == 0))
-expect_true(cnt$x > 70)
-expect_true(cnt$x < 80)
-expect_true(cnt_not$x + cnt$x == 100)

@@ -4,7 +4,7 @@
 \alias{MutatorNumeric}
 \title{Numeric Mutator Base Class}
 \description{
-Base class for mutation operations on numeric individuals, inheriting from \code{\link{Mutator}}.
+Base class for mutation operations on numeric and integer valued individuals, inheriting from \code{\link{Mutator}}.
 
 \code{MutatorNumeric} operators perform mutation on numeric (integer and real valued) individuals. Inheriting
 operators implement the private \verb{$.mutate_numeric()} function that is called once for each individual
@@ -16,6 +16,9 @@ and is given a numeric vector.
 function. During \verb{$operate()}, the \verb{$.mutate_numeric()} function is called once for each individual, with the parameters \code{values} (the
 individual as a single \code{numeric} vector), \code{lowers} and \code{uppers} (\code{numeric} vectors, the lower and upper bounds for each component of \code{values}). Typically,
 \verb{$initialize()} should also be overloaded.
+
+\code{\link{MutatorNumeric}}s that perform real-valued operations, such as e.g. \code{\link{MutatorGauss}}, operate on integers by widening the lower and upper bounds
+of integer components by 0.5, applying their operation, and rounding resulting values to the nearest integer (while always staying inside bounds).
 }
 
 \seealso{

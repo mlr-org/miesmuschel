@@ -1,6 +1,5 @@
 
-using("checkmate")
-source("helper_selectors.R", local = TRUE)
+source("setup.R", local = TRUE)
 
 srandom = SelectorRandom$new()
 srandom$param_set$values$replace = FALSE

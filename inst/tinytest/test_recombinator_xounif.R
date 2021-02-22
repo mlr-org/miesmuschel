@@ -1,6 +1,5 @@
 
-using("checkmate")
-source("helper_recombinators.R", local = TRUE)
+source("setup.R", local = TRUE)
 
 rxounif = RecombinatorCrossoverUniform$new(keep_complement = TRUE)
 expect_recombinator(rxounif, "RecombinatorCrossoverUniform(keep_complement = TRUE)")

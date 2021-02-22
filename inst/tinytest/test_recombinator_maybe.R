@@ -1,6 +1,5 @@
 
-using("checkmate")
-source("helper_recombinators.R", local = TRUE)
+source("setup.R", local = TRUE)
 
 ## general tests
 rmaybe = RecombinatorMaybe$new(RecombinatorCrossoverUniform$new())
