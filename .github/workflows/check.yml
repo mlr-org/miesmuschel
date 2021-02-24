@@ -88,7 +88,7 @@ jobs:
         run: 'R CMD build */'
       - name: Check
         working-directory: ..
-        run: 'R CMD check *.tar.gz'
+        run: 'R CMD check --as-cran --run-donttest *.tar.gz'
       - name: Log
         if: ${{ failure() }}
         working-directory: ..
