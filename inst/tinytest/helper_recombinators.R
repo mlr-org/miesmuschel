@@ -52,3 +52,19 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
 
   expect_true(rec$endomorphism)
 }
+
+RecombinatorDebug = R6::R6Class("MutatorDebug",
+  inherit = Recombinator,
+  public = list(
+    handler = NULL,
+    initialize = function(handler, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), n_indivs_in = 2, n_indivs_out = n_indivs_in) {
+      self$handler = assert_function(handler, args = c("n", "v", "p"), ordered = TRUE)
+      super$initialize(param_classes = param_classes, param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out)
+    }
+  ),
+  private = list(
+    .recombine = function(values) {
+      as.data.table(sapply(names(values), function(n) self$handler(n, values[[n]], self$param_set$values), simplify = FALSE))
+    }
+  )
+)
