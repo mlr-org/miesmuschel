@@ -37,6 +37,9 @@ jobs:
           - os: ubuntu-16.04
             action: check
             r: 3.5
+          - os: ubuntu-20.04
+            action: coverage
+            r: release
 
     steps:
       - uses: actions/checkout@v2
@@ -57,9 +60,7 @@ jobs:
           key: ${{ matrix.os }}-${{ steps.install-r.outputs.installed-r-version }}-${{ hashFiles('.github/deps.txt') }}
       - shell: Rscript {0}
         name: install necessary build env packages
-        run: |
-          if (!require("remotes", quietly = TRUE)) install.packages("remotes")
-          if (!require("roxygen2", quietly = TRUE)) install.packages("roxygen2")
+        run: for (req in c("remotes", "roxygen2", "covr", "pkgdown")) if (!require(req, quietly = TRUE)) install.packages(req)
       - if: runner.os == 'Linux'
         name: install system requirements
         run: |
@@ -84,11 +85,37 @@ jobs:
         name: Remove hypertarget from Latex for Windows
         run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"
       - name: Build
+        if: ${{ matrix.action != 'coverage' }}
         working-directory: ..
         run: 'R CMD build */'
       - name: Check
+        if: ${{ matrix.action != 'coverage' }}
         working-directory: ..
         run: 'R CMD check --as-cran --run-donttest *.tar.gz'
+      - name: Coverage
+        if: ${{ matrix.action == 'coverage' }}
+        shell: Rscript {0}
+        run: covr::codecov(quiet = FALSE)
+      - name: install
+        if: ${{ matrix.action != 'coverage' && matrix.os == 'ubuntu-20.04' && matrix.r == 'release' }}
+        working-directory: ..
+        run: 'R CMD INSTALL *.tar.gz'
+      - name: Build Docs
+        if: ${{ matrix.action != 'coverage' && matrix.os == 'ubuntu-20.04' && matrix.r == 'release' }}
+        shell: Rscript {0}
+        run: |
+          pkgdown::build_site()
+          roxygen2::roxygenise()
+          tools::buildVignettes(dir = ".")
+      - name: Deploy Docs
+        if: ${{ matrix.action != 'coverage' && matrix.os == 'ubuntu-20.04' && matrix.r == 'release' && github.ref == 'refs/heads/master' }}
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "mb706@users.noreply.github.com"
+          git checkout --orphan gh-pages
+          git --work-tree=docs add --all
+          git --work-tree=docs commit -m "gh-pages"
+          git push origin HEAD:gh-pages --force
       - name: Log
         if: ${{ failure() }}
         working-directory: ..
