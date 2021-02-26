@@ -10,6 +10,18 @@
 #'   [`ParamSet`][paradox::ParamSet] to wrap.
 #' @param shadowed (`character`)\cr
 #'   Ids of [`Param`][paradox::Param]s to shadow from `sets`, must be a subset of `set$ids()`.
+#' @examples
+#' p1 = ps(x = p_dbl(0, 1), y = p_lgl())
+#' p1$values = list(x = 0.5, y = TRUE)
+#' print(p1)
+#'
+#' p2 = ParamSetShadow$new(p1, "x")
+#' print(p2$values)
+#'
+#' p2$values$y = FALSE
+#' print(p2)
+#'
+#' print(p2$origin$values)
 ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
   public = list(
     #' @description

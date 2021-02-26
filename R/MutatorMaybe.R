@@ -28,6 +28,26 @@
 #'
 #' @family mutators
 #' @family mutator wrappers
+#' @examples
+#' set.seed(1)
+#' mm = mut("maybe", mut("gauss", sdev = 5), p = 0.5)
+#' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
+#' data = data.frame(x = rep(0, 5), y = rep(0, 5))
+#'
+#' mm$prime(p)
+#' mm$operate(data)
+#'
+#' mm$param_set$values$p = 0.3
+#' mm$operate(data)
+#'
+#' mm2 = mut("maybe",
+#'   mutator = mut("gauss", sdev = 0.01),
+#'   mutator_not = mut("gauss", sdev = 10),
+#'   p = 0.5
+#' )
+#'
+#' mm2$prime(p)
+#' mm2$operate(data)
 #' @export
 MutatorMaybe = R6Class("MutatorMaybe",
   inherit = Mutator,

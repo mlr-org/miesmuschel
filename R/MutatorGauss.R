@@ -29,6 +29,17 @@
 #' @template autoinfo_dict
 #'
 #' @family mutators
+#' @examples
+#' set.seed(1)
+#' mg = mut("gauss")
+#' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
+#' data = data.frame(x = rep(0, 5), y = rep(0, 5))
+#'
+#' mg$prime(p)
+#' mg$operate(data)
+#'
+#' mg$param_set$values$sdev = 100
+#' mg$operate(data)
 #' @export
 MutatorGauss = R6Class("MutatorGauss",
   inherit = MutatorNumeric,

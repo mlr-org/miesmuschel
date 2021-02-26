@@ -20,6 +20,18 @@
 #'
 #' @family mutators
 #' @family mutator wrappers
+#' @examples
+#' set.seed(1)
+#' mp = mut("proxy")
+#' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
+#' data = data.frame(x = rep(0, 5), y = rep(0, 5))
+#'
+#' mp$prime(p)
+#' mp$operate(data)
+#'
+#' mp$param_set$values$operation = mut("gauss", sdev = 5)
+#' mp$prime(p)
+#' mp$operate(data)
 #' @export
 MutatorProxy = R6Class("MutatorProxy",
   inherit = Mutator,
