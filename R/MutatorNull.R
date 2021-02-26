@@ -17,7 +17,6 @@
 #'
 #' @family mutators
 #' @examples
-#' set.seed(1)
 #' mn = mut("null")
 #' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
 #' data = data.frame(x = rep(0, 5), y = rep(0, 5), z = rep(TRUE, 5))
