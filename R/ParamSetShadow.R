@@ -22,6 +22,7 @@
 #' print(p2)
 #'
 #' print(p2$origin$values)
+#' @export
 ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
   public = list(
     #' @description
