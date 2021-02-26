@@ -31,6 +31,14 @@ dict_mutators$get("null")
 }
 }
 
+\examples{
+mn = mut("null")
+p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
+data = data.frame(x = rep(0, 5), y = rep(0, 5), z = rep(TRUE, 5))
+
+mn$prime(p)
+mn$operate(data)
+}
 \seealso{
 Other mutators: 
 \code{\link{MutatorDiscrete}},

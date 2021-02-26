@@ -41,6 +41,27 @@ dict_mutators$get("cmpmaybe", <mutator> [, <mutator_not>])
 }
 }
 
+\examples{
+set.seed(1)
+mcm = mut("cmpmaybe", mut("gauss", sdev = 5), p = 0.5)
+p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
+data = data.frame(x = rep(0, 5), y = rep(0, 5))
+
+mcm$prime(p)
+mcm$operate(data)
+
+mcm$param_set$values$p = 0.2
+mcm$operate(data)
+
+mcm2 = mut("cmpmaybe",
+  mutator = mut("gauss", sdev = 0.01),
+  mutator_not = mut("gauss", sdev = 10),
+  p = 0.5
+)
+
+mcm2$prime(p)
+mcm2$operate(data)
+}
 \seealso{
 Other mutators: 
 \code{\link{MutatorDiscrete}},

@@ -9,6 +9,19 @@ The original \code{\link[paradox:ParamSet]{ParamSet}} can still be accessed thro
 otherwise, the \code{ParamSetShadow} behaves like a \code{\link[paradox:ParamSet]{ParamSet}} where the shadowed
 \code{\link[paradox:Param]{Param}}s are not present.
 }
+\examples{
+p1 = ps(x = p_dbl(0, 1), y = p_lgl())
+p1$values = list(x = 0.5, y = TRUE)
+print(p1)
+
+p2 = ParamSetShadow$new(p1, "x")
+print(p2$values)
+
+p2$values$y = FALSE
+print(p2)
+
+print(p2$origin$values)
+}
 \section{Super class}{
 \code{\link[paradox:ParamSet]{paradox::ParamSet}} -> \code{ParamSetShadow}
 }

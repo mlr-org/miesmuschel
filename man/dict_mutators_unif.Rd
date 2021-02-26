@@ -38,6 +38,19 @@ dict_mutators$get("unif")
 }
 }
 
+\examples{
+set.seed(1)
+mdu = mut("unif")
+p = ps(x = p_lgl(), y = p_fct(c("a", "b", "c")))
+data = data.frame(x = rep(TRUE, 5), y = rep("a", 5),
+  stringsAsFactors = FALSE)  # necessary for R <= 3.6
+
+mdu$prime(p)
+mdu$operate(data)
+
+mdu$param_set$values$can_mutate_to_same = FALSE
+mdu$operate(data)
+}
 \seealso{
 Other mutators: 
 \code{\link{MutatorDiscrete}},
