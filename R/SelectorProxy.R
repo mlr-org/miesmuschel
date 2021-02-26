@@ -20,6 +20,21 @@
 #'
 #' @family selectors
 #' @family selector wrappers
+#' @examples
+#' set.seed(1)
+#' sp = sel("proxy")
+#' p = ps(x = p_dbl(-5, 5))
+#' # dummy data; note that SelectorBest does not depend on data content
+#' data = data.frame(x = rep(0, 5))
+#' fitnesses = c(1, 5, 2, 3, 0)
+#'
+#' sp$param_set$values$operation = sel("random")
+#' sp$prime(p)
+#' sp$operate(data, fitnesses, 2)
+#'
+#' sp$param_set$values$operation = sel("best")
+#' sp$prime(p)
+#' sp$operate(data, fitnesses, 2)
 #' @export
 SelectorProxy = R6Class("SelectorProxy",
   inherit = Selector,

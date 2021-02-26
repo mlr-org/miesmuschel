@@ -19,6 +19,23 @@
 #' @template autoinfo_dict
 #'
 #' @family selectors
+#' @examples
+#' set.seed(1)
+#' sr = sel("random")
+#' p = ps(x = p_dbl(-5, 5))
+#' # dummy data; note that SelectorRandom does not depend on data content
+#' data = data.frame(x = rep(0, 5))
+#' fitnesses = c(1, 5, 2, 3, 0)
+#'
+#' sr$prime(p)
+#'
+#' sr$operate(data, fitnesses, 2)
+#' sr$operate(data, fitnesses, 2)
+#' sr$operate(data, fitnesses, 2)
+#'
+#' sr$operate(data, fitnesses, 4)
+#' sr$operate(data, fitnesses, 4)
+#' sr$operate(data, fitnesses, 4)
 #' @export
 SelectorRandom = R6Class("SelectorRandom",
   inherit = Selector,

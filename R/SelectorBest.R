@@ -18,6 +18,18 @@
 #' @template autoinfo_dict
 #'
 #' @family selectors
+#' @examples
+#' sb = sel("best")
+#' p = ps(x = p_dbl(-5, 5))
+#' # dummy data; note that SelectorBest does not depend on data content
+#' data = data.frame(x = rep(0, 5))
+#' fitnesses = c(1, 5, 2, 3, 0)
+#'
+#' sb$prime(p)
+#'
+#' sb$operate(data, fitnesses, 2)
+#'
+#' sb$operate(data, fitnesses, 4)
 #' @export
 SelectorBest = R6Class("SelectorBest",
   inherit = Selector,
