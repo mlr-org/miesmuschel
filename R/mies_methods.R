@@ -24,6 +24,87 @@
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3)
+#' # Initial state:
+#' oi$archive
+#'
+#' # 'offspring' is just a data.frame of values to evaluate.
+#' # In general it should be created using 'mies_generate_offspring()'.
+#' offspring = data.frame(x = 1:2, y = 2:1)
+#'
+#' mies_evaluate_offspring(oi, offspring = offspring)
+#'
+#' # This evaluated the given points and assigned them 'dob' 2.
+#' oi$archive
+#'
+#' # Note that at this point one would ordinarily call a 'mies_survival_*()'
+#' # function.
+#'
+#' ###
+#' # Advanced demo, making use of additional components and fidelity_schedule
+#' # Note that the multifidelity functionality is experimental and the UI may
+#' # change in the future.
+#' ##
+#'
+#' # declare 'y' the budget parameter. It does not occur in 'offspring' any more.
+#' budget_id = "y"
+#' # but: offspring may contain any other value that is appended to 'oi'. They
+#' # are ignored by the objective.
+#' offspring = data.frame(x = 0:1, z = 3)
+#'
+#' fidelity_schedule = data.frame(
+#'   generation = c(1, 5),
+#'   budget_new = c(1, 2),
+#'   budget_survivors = c(3, 4)
+#' )
+#' # The fidelity schedule:
+#' fidelity_schedule
+#'
+#' # When given a fidelity_schedule and budget_id, the 'budget_new' budget
+#' # is used. Here it is '1', because the geeneration number 3 is being evaluated.
+#' mies_evaluate_offspring(oi, offspring = offspring,
+#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+#'
+#' # This now has the additional column 'z'. Values of y for the new evaluations
+#' # are 1.
+#' oi$archive
+#'
+#' # setting 'survivor_budget = TRUE' uses the 'budget_survivors' schedule column.
+#' mies_evaluate_offspring(oi, offspring = offspring,
+#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id,
+#'   survivor_budget = TRUE)
+#'
+#' # the new row has y set to 2.
+#' oi$archive
+#'
+#' # When calling 'mies_evaluate_offspring()' with the same 'fidelity_schedule'
+#' # now, then the generation 5 is evaluated. Therefore the next row of
+#' # the schedule is used, and 'y' is therefore set to 2 (or 4, ir survivor budget
+#' # is used).
+#'
+#' mies_evaluate_offspring(oi, offspring = offspring,
+#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+#'
+#' oi$archive
 #' @export
 mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
   assert_r6(inst, "OptimInstance")
@@ -85,6 +166,68 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' budget_id = "y"
+#'
+#' fidelity_schedule = data.frame(
+#'   generation = c(1, 2),
+#'   budget_new = c(1, 3),
+#'   budget_survivors = c(2, 4)
+#' )
+#'
+#' # The initial population gets evaluated with 'budget_survivors', so y = 2.
+#' mies_init_population(oi, mu = 2, fidelity_schedule = fidelity_schedule,
+#'   budget_id = budget_id)
+#'
+#' oi$archive
+#'
+#' # By default, mies_step_fidelity() will re-evaluate all survivors with
+#' # budget_survivors of the *next* generation. This is the reason why it
+#' # usually does not make sense to have 'budget_survivors' change between
+#' # generations 1 and 2!
+#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
+#'   budget_id = budget_id)
+#'
+#' # The first two evaluations have 'eol = 1' (died in generation 1) and were
+#' # re-evaluated with y = 4.
+#' oi$archive
+#'
+#' # Using 'generation_lookahead = FALSE' will use the 'budget_survivors' of the
+#' # current genereation, where the current generation is always the max() of the
+#' # 'dob' column in the archive.
+#' # Calling 'mies_step_fidelity()' multiple times within one generation barely
+#' # ever makes sense and is done here for demonstration.
+#' # The following call will have *no* effect: The 'budget_survivors' of the
+#' # current generation (generation 1) is 2, but the alive individuals were
+#' # evaluated with budget 4.
+#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
+#'   budget_id = budget_id, generation_lookahead = FALSE)
+#'
+#' oi$archive
+#'
+#' # To also re-evaluate individuals with *lower* budget, use 'monotonic = FALSE':
+#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
+#'   budget_id = budget_id, generation_lookahead = FALSE, monotonic = FALSE)
+#'
+#' oi$archive
 #' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE) {
   assert_r6(inst, "OptimInstance")
@@ -137,6 +280,41 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 #' @template param_survival_dotdotdot
 #' @template param_survival_return
 #' @family mies building blocks
+#' @examples
+#' set.seed(1)
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3)
+#' offspring = generate_design_random(oi$search_space, 2)$data
+#' mies_evaluate_offspring(oi, offspring = offspring)
+#'
+#' # State before: different generations of individuals. Alive individuals have
+#' # 'eol' set to 'NA'.
+#' oi$archive
+#'
+#' s = sel("best")
+#' s$prime(oi$search_space)
+#' mies_survival_plus(oi, mu = 3, survival_selector = s)
+#'
+#' # sel("best") lets only the three best individuals survive.
+#' # The others have 'eol = 2' (the current generation).
+#' oi$archive
 #' @export
 mies_survival_plus = function(inst, mu, survival_selector, ...) {
   assert_r6(inst, "OptimInstance")
@@ -181,6 +359,47 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #' @template param_survival_dotdotdot
 #' @template param_survival_return
 #' @family mies building blocks
+#' @examples
+#' set.seed(1)
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3)
+#' # Usually the offspring is generated using mies_generate_offspring()
+#' # Here shorter for demonstration purposes.
+#' offspring = generate_design_random(oi$search_space, 3)$data
+#' mies_evaluate_offspring(oi, offspring = offspring)
+#'
+#' # State before: different generations of individuals. Alive individuals have
+#' # 'eol' set to 'NA'.
+#' oi$archive
+#'
+#' s = sel("best")
+#' s$prime(oi$search_space)
+#' mies_survival_comma(oi, mu = 3, survival_selector = s,
+#'   n_elite = 2, elite_selector = s)
+#'
+#' # sel("best") lets only the best individuals survive.
+#' # mies_survival_comma selects from new individuals (generation 2 in this case)
+#' # and old individuals (all others) separately: n_elite = 2 from old,
+#' # mu - n_elite = 1 from new.
+#' # The surviving individuals have 'eol' set to 'NA'
+#' oi$archive
 #' @export
 mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selector, ...) {
   assert_r6(inst, "OptimInstance")
@@ -204,7 +423,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 
   survivors = c(elites, survivors)
 
-  died = setdiff(alive_before, survivors)
+  died = setdiff(c(alive_before, current_offspring), survivors)
   data[died, eol := max(dob)]
 }
 
@@ -246,6 +465,31 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'   Budget component used for multi-fidelity optimization.
 #' @return `invisible` named `list` with entries `$mutators` (`list` of [`Mutator`], primed `mutators`), `$recombinators` (`list` of [`Recombinator`], primed `recombinators`),
 #'   and `$selectors` (`list` of [`Selector`], primed `selectors`).
+#' @examples
+#' # Search space of a potential TuningInstance for optimization:
+#' search_space = ps(x = p_dbl(), y = p_dbl())
+#' # Additoinal search space components that are not part of the TuningInstance
+#' additional_components = ps(z = p_dbl())
+#' # Budget parameter not subject to mutation or recombination
+#' budget_id = "y"
+#'
+#' m = mut("gauss")
+#' r = rec("xounif")
+#' s1 = sel("best")
+#' s2 = sel("random")
+#'
+#' mies_prime_operators(mutators = list(m), recombinators = list(r),
+#'   selectors = list(s1, s2), search_space = search_space,
+#'   additional_components = additional_components, budget_id = budget_id
+#' )
+#'
+#' # contain search_space without budget parameter, with additional_components
+#' m$primed_ps
+#' r$primed_ps
+#'
+#' # contain also the budget parameter
+#' s1$primed_ps
+#' s2$primed_ps
 #' @export
 mies_prime_operators = function(mutators = list(), recombinators = list(), selectors = list(), search_space, additional_components = NULL, budget_id = NULL) {
   assert_list(mutators, types = "Mutator", any.missing = FALSE)
@@ -308,6 +552,57 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #'   instance, modified by-reference.
 #'
 #' @family mies building blocks
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3)
+#'
+#' # 3 evaluations, archive contains 'dob' and 'eol'
+#' oi$archive
+#'
+#' ###
+#' # Advanced demo, making use of additional components and fidelity_schedule
+#' # Note that the multifidelity functionality is experimental and the UI may
+#' # change in the future.
+#' ##
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3,
+#'   fidelity_schedule = data.frame(
+#'     generation = c(1, 3),
+#'     budget_new = c(1, 2),
+#'     budget_survivors = c(2, 3)
+#'   ), budget_id = "y",
+#'   additional_component_sampler = Sampler1DRfun$new(
+#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+#'   )
+#' )
+#'
+#' # 3 evaluations. We also have 'additional', sampled from rfun (always -1),
+#' # which is ignored by the objective. Besides, we have "y", which is 2,
+#' # according to the fidelity_schedule: `budget_survivors` of `generation` 1.
+#' oi$archive
+#'
 #' @export
 mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL, additional_component_sampler = NULL) {
   assert_r6(inst, "OptimInstance")
@@ -418,6 +713,54 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 #' @return `numeric` `matrix` with `length(rows)` (if `rows` is given, otherwise `nrow(inst$archive$data)`) rows
 #' and one column for each objective: fitnesses to be maximized.
 #' @family mies building blocks
+#' @examples
+#' set.seed(1)
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3)
+#'
+#' oi$archive
+#'
+#' mies_get_fitnesses(oi, c(2, 3))
+#'
+#' ###
+#' # Multi-objective, and automatic maximization:
+#' objective2 <- ObjectiveRFun$new(
+#'   fun = function(xs) list(Obj1 = xs$x^2, Obj2 = -xs$y^2),
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(
+#'     Obj1 = p_dbl(tags = "minimize"),
+#'     Obj2 = p_dbl(tags = "maximize")
+#'   )
+#' )
+#' # Using MultiCrit!
+#' oi <- OptimInstanceMultiCrit$new(objective2,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 3)
+#'
+#' oi$archive
+#'
+#' # Note Obj1 has a different sign than in the archive.
+#' mies_get_fitnesses(oi, c(2, 3))
+#'
 #' @export
 mies_get_fitnesses = function(inst, rows) {
   assert_r6(inst, "OptimInstance")
@@ -458,6 +801,70 @@ mies_get_fitnesses = function(inst, rows) {
 #' @return `integer` | [`data.table`][data.table::data.table]: Selected individuals, either index into `inst` or subset of archive table,
 #'   depending on `get_indivs`.
 #' @family mies building blocks
+#' @examples
+#' set.seed(1)
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' s = sel("best")
+#' s$prime(oi$search_space)
+#'
+#' mies_init_population(inst = oi, mu = 6)
+#'
+#' oi$archive
+#'
+#' # Default: get individuals
+#' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
+#'
+#' # Alternatively: get rows within archive
+#' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s,
+#'   get_indivs = FALSE)
+#'
+#' # Rows gotten from archive are relative from *all* rows, not from archive[rows]:
+#' mies_select_from_archive(oi, n_select = 2, rows = 3:6, selector = s,
+#'   get_indivs = FALSE)
+#'
+#' ##
+#' # When using additional components: mies_select_from_archive learns about
+#' # additional components from primed selector.
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' mies_init_population(inst = oi, mu = 6,
+#'   additional_component_sampler = Sampler1DRfun$new(
+#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+#'   )
+#' )
+#'
+#' oi$archive
+#'
+#' # Wrong: using selector primed only on search space. The resulting
+#' # individuals do not have the additional component.
+#' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
+#'
+#' # Correct: selector must be primed on search space + additional component
+#' mies_prime_operators(selectors = list(s), search_space = oi$search_space,
+#'   additional_components = ps(additional = p_dbl(-1, 1)))
+#'
+#' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
 #' @export
 mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
   assert_r6(inst, "OptimInstance")
@@ -530,6 +937,62 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' @return [`data.table`][data.table::data.table]: A table of configurations proposed as offspring to be evaluated
 #' using [`mies_evaluate_offspring()`].
 #' @family mies building blocks
+#' @examples
+#' set.seed(1)
+#'
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' # Demo operators
+#' m = mut("gauss", sdev = 0.1)
+#' r = rec("xounif")
+#' s = sel("random", replace = TRUE)
+#' # Operators must be primed
+#' mies_prime_operators(list(m), list(r), list(s), objective$domain)
+#'
+#' # We would normally call mies_init_population, but for reproducibility
+#' # we are going to evaluate three given points
+#'
+#' oi$eval_batch(data.table::data.table(x = 0:2, y = 2:0, dob = 1, eol = NA_real_))
+#'
+#' # Evaluated points:
+#' oi$archive
+#'
+#' # Use default operators: no mutation, no recombination, parent_selctor is
+#' # sel("best") --> get one individual, the one with highest performance in the
+#' # archive (x = 1, y = 1).
+#' # (Note 'mies_generate_offspring()' does not modify 'oi')
+#' mies_generate_offspring(oi, lambda = 1)
+#'
+#' # Mutate the selected individual after selection. 'm' has 'sdev' set to 0.1,
+#' # so the (x = 1, y = 1) is slightly permuted.
+#' mies_generate_offspring(oi, lambda = 1, mutator = m)
+#'
+#' # Recombination, then mutation.
+#' # Even though lambda is 1, there will be two individuals selected with
+#' # sel("best") and recombined, because rec("xounif") needs two parents. One
+#' # of the crossover results is discarded (respecting that 'lambda' is 1),
+#' # the other is mutated and returned.
+#' mies_generate_offspring(oi, lambda = 1, mutator = m, recombinator = r)
+#'
+#' # General application: select, recombine, then mutate.
+#' mies_generate_offspring(oi, lambda = 5, parent_selector = s, mutator = m, recombinator = r)
+#'
 #' @export
 mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator = NULL, recombinator = NULL, budget_id = NULL) {
   assert_r6(inst, "OptimInstance")

@@ -147,6 +147,79 @@
 #'
 #' `r format_bib("li2013mixed")`
 #'
+#' @examples
+#' \donttest{
+#' lgr::threshold("warn")
+#'
+#' op.m <- mut("gauss")
+#' op.r <- rec("xounif", p = .3)
+#' op.parent <- sel("random")
+#' op.survival <- sel("best")
+#'
+#' #####
+#' # Optimizing a Function
+#' #####
+#'
+#' library("bbotk")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "maximize"))
+#' )
+#'
+#' # Get a new OptimInstance
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 100)
+#' )
+#'
+#' # Create OptimizerMies object
+#' mies_opt <- opt("mies", mutator = op.m, recombinator = op.r,
+#'   parent_selector = op.parent, survival_selector = op.survival,
+#'   mu = 10, lambda = 5)
+#'
+#' # mies_opt$optimize performs MIES optimization and returns the optimum
+#' mies_opt$optimize(oi)
+#'
+#' #####
+#' # Optimizing a Machine Learning Method
+#' #####
+#'
+#' # Note that this is a short example, aiming at clarity and short runtime.
+#' # The settings are not optimal for hyperparameter tuning. The resampling
+#' # in particular should not be "holdout" for small datasets where this gives
+#' # a very noisy estimate of performance.
+#'
+#' library("mlr3")
+#' library("mlr3tuning")
+#'
+#' # The Learner to optimize
+#' learner = lrn("classif.rpart")
+#'
+#' # The hyperparameters to optimize
+#' learner$param_set$values[c("cp", "maxdepth")] = list(to_tune())
+#'
+#' # Get a TuningInstance
+#' ti = TuningInstanceSingleCrit$new(
+#'   task = tsk("iris"),
+#'   learner = learner,
+#'   resampling = rsmp("holdout"),
+#'   measure = msr("classif.acc"),
+#'   terminator = trm("gens", generations = 10)
+#' )
+#'
+#' # Create TunerMies object
+#' mies_tune <- tnr("mies", mutator = op.m, recombinator = op.r,
+#'   parent_selector = op.parent, survival_selector = op.survival,
+#'   mu = 10, lambda = 5)
+#'
+#' # mies_tune$optimize performs MIES optimization and returns the optimum
+#' mies_tune$optimize(ti)
+#' }
 #' @export
 OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
   public = list(

@@ -4,6 +4,31 @@
 #' @import paradox
 #' @import R6
 #' @import data.table
+#'
+#' `miesmuschel` offers both an [`Optimizer`][bbotk::Optimizer] and a [`Tuner`][mlr3tuning::Tuner] for general
+#' MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
+#' is more flexible and can be used for research into novel evolutionary strategies.
+#'
+#' The call-graph of the default algorithm in [`OptimizerMies`] / [`TunerMies`] is as follows, and is shown
+#' here as an overview over the `mies_*` functions, and how they are usually connected. (Note that only the
+#' exported `mies_*` functions are shown.) See the help information of these functions for more info.
+#' ```
+#' OptimizerMies$.optimize(inst)
+#' |- mies_prime_operators()  # prime operators on instance's search_space
+#' |- mies_init_population()  # sample and evaluate first generation
+#' |  `- mies_evaluate_offspring()  # evaluate sampled individuals
+#' |     `- inst$eval_batch()  # The OptimInst's evaluation method
+#' `- repeat # Repeat the following until terminated
+#'    |- mies_step_fidelity()  # Evaluate individuals with changing fidelity
+#'    |  `- inst$eval_batch()  # The OptimInst's evaluation method
+#'    |- mies_generate_offspring()  # Sample parents, recombine, mutate
+#'    |  `- mies_select_from_archive()  # Use 'Selector' on 'Archive'
+#'    |     `- mies_get_fitnesses()  # Get objective values as fitness matrix
+#'    |- mies_evaluate_offspring()  # evaluate sampled individuals
+#'    |  `- inst$eval_batch()  # The OptimInst's evaluation method
+#'    `- mies_survival_plus() / mies_survival_comma()  # survival
+#'       `- mies_select_from_archive()  # Use 'Selector' on 'Archive'
+#' ```
 "_PACKAGE"
 
 lg = NULL
@@ -37,7 +62,7 @@ reg_mlr3tuning = function(...) {
   for (pkg in c("bbotk", "mlr3tuning")) {
     load_event = packageEvent(pkg, "onLoad")
     setHook(load_event,
-      keep(getHook(load_event), function(x) x$pkgname != "miesmuschel"),
+      keep(getHook(load_event), function(x) environmentName(topenv(environment(x))) != "miesmuschel"),
       action = "replace"
     )
   }

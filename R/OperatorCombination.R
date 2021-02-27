@@ -99,7 +99,87 @@
 #' @family mutator wrappers
 #' @family recombinators
 #' @family recombinator wrappers
+#' @examples
+#' set.seed(1)
+#' data = data.frame(x = 0, y = 0, a = TRUE, b = "a",
+#'   stringsAsFactors = FALSE)  # necessary for R <= 3.6
+#' p = ps(x = p_dbl(-1, 1), y = p_dbl(-1, 1), a = p_lgl(), b = p_fct(c("a", "b")))
 #'
+#' # Demo operators:
+#' m0 = mut("null")  # no mutation
+#' msmall = mut("gauss", sdev = 0.1)  # mutates to small value around 0
+#' mbig = mut("gauss", sdev = 100)  # likely mutates to +1 or -1
+#' mflip = mut("unif", can_mutate_to_same = FALSE)  # flips TRUE/"a" to FALSE/"b"
+#'
+#' # original:
+#' data
+#'
+#' # operators by name
+#' op = mut("combine", operators = list(x = msmall, y = mbig, a = m0, b = mflip))
+#' op$prime(p)
+#' op$operate(data)
+#'
+#' # operators by type
+#' op = mut("combine",
+#'   operators = list(ParamDbl = msmall, ParamLgl = m0, ParamFct = mflip)
+#' )
+#' op$prime(p)
+#' op$operate(data)
+#'
+#' # the binary ParamFct 'b' counts as 'ParamLgl' when
+#' # 'binary_fct_as_logical' is set to 'TRUE'.
+#' op = mut("combine",
+#'   operators = list(ParamDbl = msmall, ParamLgl = m0, ParamFct = mflip),
+#'   binary_fct_as_logical = TRUE
+#' )
+#' op$prime(p)
+#' op$operate(data)
+#'
+#' # operators by type; groups can be mixed types
+#' op = mut("combine",
+#'   operators = list(group1 = m0, group2 = msmall, group3 = mflip),
+#'   groups = list(group1 = c("a", "x"), group2 = "y", group3 = "b")
+#' )
+#' op$prime(p)
+#' op$operate(data)
+#'
+#' # Special type-groups can be used inside groups.
+#' op = mut("combine",
+#'   operators = list(group1 = m0, b = mflip),
+#'   groups = list(group1 = c("ParamDbl", "a"))
+#' )
+#' op$prime(p)
+#' op$operate(data)
+#'
+#' # Type-groups only capture all parameters that were not caught by name.
+#' # The special 'ParamAny' group captures all that is left.
+#' op = mut("combine",
+#'   operators = list(ParamAny = m0, ParamDbl = msmall, x = mbig)
+#' )
+#' op$prime(p)
+#' op$operate(data)
+#'
+#' # Configuration parameters are named by names in the 'operators' list.
+#' op$param_set
+#'
+#' ###
+#' # Self-adaption:
+#' # In this example, the 'ParamDbl''s operation is changed depending on the
+#' # value of 'b'.
+#' op = mut("combine",
+#'   operators = list(ParamAny = m0, ParamLgl = mflip, ParamDbl = msmall),
+#'   adaptions = list(ParamDbl.sdev = function(x) if (x$a) 100 else 0.1)
+#' )
+#' op$prime(p)
+#'
+#' data2 = data[c(1, 1, 1, 1), ]
+#' data2$a = c(TRUE, TRUE, FALSE, FALSE)
+#'
+#' data2
+#' # Note the value of x$a gets used line-wise, and that it is used *before*
+#' # being flipped here. So the first two lines get large mutations, even though
+#' # they have 'a' 'FALSE' after the operation.
+#' op$operate(data2)
 #' @export
 OperatorCombination = R6Class("OperatorCombination",
   inherit = MiesOperator,

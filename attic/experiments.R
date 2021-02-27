@@ -46,3 +46,5 @@ rec("xounif")$prime(pp)$operate(des)
 
 
 tinytest::test_all()
+
+tinytest::run_test_file("inst/tinytest/test_dictionaries.R")

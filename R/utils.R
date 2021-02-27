@@ -111,9 +111,17 @@ eval_batch_handle_zero = function(inst, xdt) {
   invisible(as.data.table(lapply(result_types, typegen)))
 }
 
+# tolerance of numeric configuration parameter bounds
 default_tol = sqrt(.Machine$double.eps)
 
+# add / subtract appropriate tolerance to bound.
+# Tolerance `tol` is added. It is used as absolute *and* relative tolerance,
+# depending on which is bigger.
+# @param bound: `numeric`, indicating lower or upper bound
+# @param side: "lower" -> `bound` is lower bound, subtract tol. "upper" --> `bound` is upper bound etc.
+# @param tol: tolerance to add, defaults to default_tol.
+# @return: bounds with tolerance term added / subtracted
 tol_bound = function(bound, side = c("lower", "upper"), tol = default_tol) {
   side = match.arg(side)
-  bound + tol * max(1, bound) * switch(side, lower = -1, upper = 1)
+  bound + tol * pmax(1, bound) * switch(side, lower = -1, upper = 1)
 }
