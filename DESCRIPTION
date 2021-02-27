@@ -22,7 +22,8 @@ Imports:
   lgr
 Suggests:
   tinytest,
-  mlr3tuning
+  mlr3tuning,
+  rpart
 Remotes:
   mlr-org/bbotk
 RoxygenNote: 7.1.1
