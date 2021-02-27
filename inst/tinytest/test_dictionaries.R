@@ -1,6 +1,8 @@
 
 source("setup.R", local = TRUE)
 
+library("mlr3misc")
+
 baseclasses = c("Recombinator", "Mutator", "Selector")
 dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors)
 shortforms = list(Mutator = mut, Recombinator = rec, Selector = sel)
