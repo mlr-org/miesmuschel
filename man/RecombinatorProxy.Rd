@@ -37,6 +37,19 @@ dict_recombinators$get("proxy")
 }
 }
 
+\examples{
+set.seed(1)
+rp = rec("proxy")
+p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
+data = data.frame(x = 1:4, y = 0:3, z = rep(TRUE, 4))
+
+rp$prime(p)
+rp$operate(data)  # default operation: null
+
+rp$param_set$values$operation = rec("xounif", p = 0.5)
+rp$prime(p)
+rp$operate(data)
+}
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},

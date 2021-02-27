@@ -7,6 +7,8 @@ library("data.table")
 devtools::document()
 devtools::load_all()
 
+devtools::run_examples()
+
 
 
 

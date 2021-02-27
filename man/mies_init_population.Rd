@@ -58,6 +58,58 @@ This adds the \code{dob} and \code{eol} columns to the instance's archive, and m
 \code{mu} of these remain alive (the other's \code{eol} set to 0); otherwise, up to \code{mu} new randomly sampled configurations
 are evaluated and added to the archive and have \code{eol} set to \code{NA}.
 }
+\examples{
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+mies_init_population(inst = oi, mu = 3)
+
+# 3 evaluations, archive contains 'dob' and 'eol'
+oi$archive
+
+###
+# Advanced demo, making use of additional components and fidelity_schedule
+# Note that the multifidelity functionality is experimental and the UI may
+# change in the future.
+##
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+mies_init_population(inst = oi, mu = 3,
+  fidelity_schedule = data.frame(
+    generation = c(1, 3),
+    budget_new = c(1, 2),
+    budget_survivors = c(2, 3)
+  ), budget_id = "y",
+  additional_component_sampler = Sampler1DRfun$new(
+    param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+  )
+)
+
+# 3 evaluations. We also have 'additional', sampled from rfun (always -1),
+# which is ignored by the objective. Besides, we have "y", which is 2,
+# according to the fidelity_schedule: `budget_survivors` of `generation` 1.
+oi$archive
+
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_evaluate_offspring}()},

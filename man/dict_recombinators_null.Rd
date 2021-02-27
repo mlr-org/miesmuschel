@@ -35,6 +35,18 @@ dict_recombinators$get("null")
 }
 }
 
+\examples{
+rn = rec("null")
+p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
+data = data.frame(x = 1:4, y = 0:3, z = rep(TRUE, 4))
+
+rn$prime(p)
+rn$operate(data)
+
+rn_half = rec("null", n_indivs_in = 2, n_indivs_out = 1)
+rn_half$prime(p)
+rn_half$operate(data)
+}
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},

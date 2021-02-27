@@ -43,6 +43,27 @@ dict_recombinators$get("maybe", <recombinator> [, <recombinator_not>])
 }
 }
 
+\examples{
+set.seed(1)
+rm = rec("maybe", rec("xounif", p = 1), p = 0.5)
+p = ps(x = p_int(1, 8), y = p_dbl(1, 8), z = p_lgl())
+data = data.frame(x = 1:8, y = 1:8, z = rep(TRUE, 4))
+
+rm$prime(p)
+rm$operate(data)
+
+rm$param_set$values$p = 0.3
+rm$operate(data)
+
+rm2 = rec("maybe",
+  recombinator = rec("xounif", p = 1),
+  recombinator_not = rec("xounif", p = 0.5),
+  p = 0.5
+)
+
+rm2$prime(p)
+rm2$operate(data)
+}
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},

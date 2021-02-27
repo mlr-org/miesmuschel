@@ -47,6 +47,71 @@ and return the index within the archive (when \code{get_indivs} \code{FALSE}) or
 
 It is not strictly necessary for the selector to select unique individuals / individuals without replacement.
 }
+\examples{
+set.seed(1)
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+s = sel("best")
+s$prime(oi$search_space)
+
+mies_init_population(inst = oi, mu = 6)
+
+oi$archive
+
+# Default: get individuals
+mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
+
+# Alternatively: get rows within archive
+mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s,
+  get_indivs = FALSE)
+
+# Rows gotten from archive are relative from *all* rows, not from archive[rows]:
+mies_select_from_archive(oi, n_select = 2, rows = 3:6, selector = s,
+  get_indivs = FALSE)
+
+##
+# When using additional components: mies_select_from_archive learns about
+# additional components from primed selector.
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+mies_init_population(inst = oi, mu = 6,
+  additional_component_sampler = Sampler1DRfun$new(
+    param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+  )
+)
+
+oi$archive
+
+# Wrong: using selector primed only on search space. The resulting
+# individuals do not have the additional component.
+mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
+
+# Correct: selector must be primed on search space + additional component
+mies_prime_operators(selectors = list(s), search_space = oi$search_space,
+  additional_components = ps(additional = p_dbl(-1, 1)))
+
+mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_evaluate_offspring}()},

@@ -51,6 +51,88 @@ an extra component named after \code{budget_id} is appended to each individual, 
 the \code{fidelity_schedule} depending on the value of \code{survivor_budget}. Both \code{fidelity_schedule}
 and \code{budget_id} should be the same values as given to the other \verb{mies_*} functions.
 }
+\examples{
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+mies_init_population(inst = oi, mu = 3)
+# Initial state:
+oi$archive
+
+# 'offspring' is just a data.frame of values to evaluate.
+# In general it should be created using 'mies_generate_offspring()'.
+offspring = data.frame(x = 1:2, y = 2:1)
+
+mies_evaluate_offspring(oi, offspring = offspring)
+
+# This evaluated the given points and assigned them 'dob' 2.
+oi$archive
+
+# Note that at this point one would ordinarily call a 'mies_survival_*()'
+# function.
+
+###
+# Advanced demo, making use of additional components and fidelity_schedule
+# Note that the multifidelity functionality is experimental and the UI may
+# change in the future.
+##
+
+# declare 'y' the budget parameter. It does not occur in 'offspring' any more.
+budget_id = "y"
+# but: offspring may contain any other value that is appended to 'oi'. They
+# are ignored by the objective.
+offspring = data.frame(x = 0:1, z = 3)
+
+fidelity_schedule = data.frame(
+  generation = c(1, 5),
+  budget_new = c(1, 2),
+  budget_survivors = c(3, 4)
+)
+# The fidelity schedule:
+fidelity_schedule
+
+# When given a fidelity_schedule and budget_id, the 'budget_new' budget
+# is used. Here it is '1', because the geeneration number 3 is being evaluated.
+mies_evaluate_offspring(oi, offspring = offspring,
+  fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+
+# This now has the additional column 'z'. Values of y for the new evaluations
+# are 1.
+oi$archive
+
+# setting 'survivor_budget = TRUE' uses the 'budget_survivors' schedule column.
+mies_evaluate_offspring(oi, offspring = offspring,
+  fidelity_schedule = fidelity_schedule, budget_id = budget_id,
+  survivor_budget = TRUE)
+
+# the new row has y set to 2.
+oi$archive
+
+# When calling 'mies_evaluate_offspring()' with the same 'fidelity_schedule'
+# now, then the generation 5 is evaluated. Therefore the next row of
+# the schedule is used, and 'y' is therefore set to 2 (or 4, ir survivor budget
+# is used).
+
+mies_evaluate_offspring(oi, offspring = offspring,
+  fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+
+oi$archive
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_generate_offspring}()},

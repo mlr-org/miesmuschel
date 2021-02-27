@@ -34,6 +34,18 @@ dict_recombinators$get("xounif")
 }
 }
 
+\examples{
+set.seed(1)
+rx = rec("xounif")
+p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_dbl(-5, 5))
+data = data.frame(x = 0:5, y = 0:5, z = 0:5)
+
+rx$prime(p)
+rx$operate(data)
+
+rx$param_set$values$p = 0.3
+rx$operate(data)
+}
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},

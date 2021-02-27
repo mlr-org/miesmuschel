@@ -33,6 +33,42 @@ Choose survivors during a MIES iteration using the "Plus" survival strategy, i.e
 combining all alive individuals from the latest and from prior generations indiscriminately and
 choosing survivors using a survival \code{\link{Selector}} operator.
 }
+\examples{
+set.seed(1)
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+mies_init_population(inst = oi, mu = 3)
+offspring = generate_design_random(oi$search_space, 2)$data
+mies_evaluate_offspring(oi, offspring = offspring)
+
+# State before: different generations of individuals. Alive individuals have
+# 'eol' set to 'NA'.
+oi$archive
+
+s = sel("best")
+s$prime(oi$search_space)
+mies_survival_plus(oi, mu = 3, survival_selector = s)
+
+# sel("best") lets only the three best individuals survive.
+# The others have 'eol = 2' (the current generation).
+oi$archive
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_evaluate_offspring}()},

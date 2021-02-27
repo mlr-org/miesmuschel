@@ -61,6 +61,63 @@ Parent individuals are selected using \code{parent_selector}, then mutated using
 recombined using \code{recombinator}. If only a subset of these operations is desired, then
 it is possible to set \code{mutator} or \code{recombinator} to the respective "null"-operators.
 }
+\examples{
+set.seed(1)
+
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+# Demo operators
+m = mut("gauss", sdev = 0.1)
+r = rec("xounif")
+s = sel("random", replace = TRUE)
+# Operators must be primed
+mies_prime_operators(list(m), list(r), list(s), objective$domain)
+
+# We would normally call mies_init_population, but for reproducibility
+# we are going to evaluate three given points
+
+oi$eval_batch(data.table::data.table(x = 0:2, y = 2:0, dob = 1, eol = NA_real_))
+
+# Evaluated points:
+oi$archive
+
+# Use default operators: no mutation, no recombination, parent_selctor is
+# sel("best") --> get one individual, the one with highest performance in the
+# archive (x = 1, y = 1).
+# (Note 'mies_generate_offspring()' does not modify 'oi')
+mies_generate_offspring(oi, lambda = 1)
+
+# Mutate the selected individual after selection. 'm' has 'sdev' set to 0.1,
+# so the (x = 1, y = 1) is slightly permuted.
+mies_generate_offspring(oi, lambda = 1, mutator = m)
+
+# Recombination, then mutation.
+# Even though lambda is 1, there will be two individuals selected with
+# sel("best") and recombined, because rec("xounif") needs two parents. One
+# of the crossover results is discarded (respecting that 'lambda' is 1),
+# the other is mutated and returned.
+mies_generate_offspring(oi, lambda = 1, mutator = m, recombinator = r)
+
+# General application: select, recombine, then mutate.
+mies_generate_offspring(oi, lambda = 5, parent_selector = s, mutator = m, recombinator = r)
+
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_evaluate_offspring}()},

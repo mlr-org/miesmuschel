@@ -44,7 +44,7 @@ p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
 data = data.frame(x = rep(0, 5), y = rep(0, 5))
 
 mp$prime(p)
-mp$operate(data)
+mp$operate(data)  # default operation: null
 
 mp$param_set$values$operation = mut("gauss", sdev = 5)
 mp$prime(p)

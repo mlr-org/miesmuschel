@@ -48,6 +48,48 @@ Choose survivors during a MIES iteration using the "Comma" survival strategy, i.
 selecting survivors from the latest generation only, using a \code{\link{Selector}} operator, and choosing
 "elites" from survivors from previous generations using a different \code{\link{Selector}} operator.
 }
+\examples{
+set.seed(1)
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+mies_init_population(inst = oi, mu = 3)
+# Usually the offspring is generated using mies_generate_offspring()
+# Here shorter for demonstration purposes.
+offspring = generate_design_random(oi$search_space, 3)$data
+mies_evaluate_offspring(oi, offspring = offspring)
+
+# State before: different generations of individuals. Alive individuals have
+# 'eol' set to 'NA'.
+oi$archive
+
+s = sel("best")
+s$prime(oi$search_space)
+mies_survival_comma(oi, mu = 3, survival_selector = s,
+  n_elite = 2, elite_selector = s)
+
+# sel("best") lets only the best individuals survive.
+# mies_survival_comma selects from new individuals (generation 2 in this case)
+# and old individuals (all others) separately: n_elite = 2 from old,
+# mu - n_elite = 1 from new.
+# The surviving individuals have 'eol' set to 'NA'
+oi$archive
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_evaluate_offspring}()},

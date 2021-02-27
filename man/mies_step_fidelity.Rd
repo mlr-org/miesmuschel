@@ -58,6 +58,69 @@ were evaluated. The evaluations are done as part of the \emph{current} generatio
 This function should only be called when doing rolling-tide multifidelity, and should not be part of the
 MIES cycle otherwise.
 }
+\examples{
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+budget_id = "y"
+
+fidelity_schedule = data.frame(
+  generation = c(1, 2),
+  budget_new = c(1, 3),
+  budget_survivors = c(2, 4)
+)
+
+# The initial population gets evaluated with 'budget_survivors', so y = 2.
+mies_init_population(oi, mu = 2, fidelity_schedule = fidelity_schedule,
+  budget_id = budget_id)
+
+oi$archive
+
+# By default, mies_step_fidelity() will re-evaluate all survivors with
+# budget_survivors of the *next* generation. This is the reason why it
+# usually does not make sense to have 'budget_survivors' change between
+# generations 1 and 2!
+mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
+  budget_id = budget_id)
+
+# The first two evaluations have 'eol = 1' (died in generation 1) and were
+# re-evaluated with y = 4.
+oi$archive
+
+# Using 'generation_lookahead = FALSE' will use the 'budget_survivors' of the
+# current genereation, where the current generation is always the max() of the
+# 'dob' column in the archive.
+# Calling 'mies_step_fidelity()' multiple times within one generation barely
+# ever makes sense and is done here for demonstration.
+# The following call will have *no* effect: The 'budget_survivors' of the
+# current generation (generation 1) is 2, but the alive individuals were
+# evaluated with budget 4.
+mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
+  budget_id = budget_id, generation_lookahead = FALSE)
+
+oi$archive
+
+# To also re-evaluate individuals with *lower* budget, use 'monotonic = FALSE':
+mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
+  budget_id = budget_id, generation_lookahead = FALSE, monotonic = FALSE)
+
+oi$archive
+}
 \seealso{
 Other mies building blocks: 
 \code{\link{mies_evaluate_offspring}()},

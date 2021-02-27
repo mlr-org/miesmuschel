@@ -58,3 +58,29 @@ they are also returned as \link{invisible} \code{list}.
 If neither additional components nor multi-fidelity optimization is used, it is also possible to use the \verb{$prime()} function of hte \code{\link{MiesOperator}}s
 directly, although using \code{mies_prime_operators()} gives flexibility for future extension.
 }
+\examples{
+# Search space of a potential TuningInstance for optimization:
+search_space = ps(x = p_dbl(), y = p_dbl())
+# Additoinal search space components that are not part of the TuningInstance
+additional_components = ps(z = p_dbl())
+# Budget parameter not subject to mutation or recombination
+budget_id = "y"
+
+m = mut("gauss")
+r = rec("xounif")
+s1 = sel("best")
+s2 = sel("random")
+
+mies_prime_operators(mutators = list(m), recombinators = list(r),
+  selectors = list(s1, s2), search_space = search_space,
+  additional_components = additional_components, budget_id = budget_id
+)
+
+# contain search_space without budget parameter, with additional_components
+m$primed_ps
+r$primed_ps
+
+# contain also the budget parameter
+s1$primed_ps
+s2$primed_ps
+}
