@@ -5,6 +5,8 @@
 #' @import R6
 #' @import data.table
 #'
+#' @description
+#'
 #' `miesmuschel` offers both an [`Optimizer`][bbotk::Optimizer] and a [`Tuner`][mlr3tuning::Tuner] for general
 #' MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
 #' is more flexible and can be used for research into novel evolutionary strategies.

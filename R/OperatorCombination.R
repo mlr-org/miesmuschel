@@ -129,7 +129,7 @@
 #' # the binary ParamFct 'b' counts as 'ParamLgl' when
 #' # 'binary_fct_as_logical' is set to 'TRUE'.
 #' op = mut("combine",
-#'   operators = list(ParamDbl = msmall, ParamLgl = m0, ParamFct = mflip),
+#'   operators = list(ParamDbl = msmall, ParamLgl = m0),
 #'   binary_fct_as_logical = TRUE
 #' )
 #' op$prime(p)
