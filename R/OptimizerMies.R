@@ -46,6 +46,8 @@
 #' with `"generation"` set to 1, and one set to 4, then the first row is active during generations 1, 2, and 3, and the second row
 #' is active for all following generations.
 #'
+#' Note that the multifidelity functionality is experimental and the UI may change in the future.
+#'
 #' @section Additional Components:
 #' The search space over which the optimization is performed is fundamentally tied to the [`Objective`][bbotk::Objective], and therefore
 #' to the [`OptimInstance`][bbotk::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolutionary Strategy based
@@ -94,24 +96,28 @@
 #'   This is equivalent to the `fidelity_schedule` parameter of [`mies_init_population()`], [`mies_evaluate_offspring()`], and [`mies_step_fidelity()`];
 #'   see there for more information.\cr
 #'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to a `data.frame` containing one row
-#'   for generation 1, setting budget to 1 for both new and survivor individuals.
+#'   for generation 1, setting budget to 1 for both new and survivor individuals.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
 #' * `fidelity_generation_lookahead` :: `logical(1)`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
 #'   Whether to use the `"survivor_budget"` of the *next* generation, instead of the *current* generation, when doing fidelity refinement
 #'   in [`mies_step_fidelity()`].
 #'   This is equivalent to the `generation_lookahead` parameter of [`mies_step_fidelity()`], see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
 #' * `fidelity_current_gen_only` :: `logical(1)`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
 #'   When doing fidelity refinement in [`mies_step_fidelity()`], whether to refine all individuals with different budget component,
 #'   or only individuals created in the current generation.
 #'   This is equivalent to the `current_gen_only` parameter of [`mies_step_fidelity()`], see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `FALSE`.
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `FALSE`.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
 #' * `fidelity_monotonic` :: `logical(1)`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
 #'   Whether to only do fidelity refinement in [`mies_step_fidelity()`] for individuals for which the when budget component value would *increase*.
 #'   This is equivalent to the `monotonic` parameter of [`mies_step_fidelity()`], see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
 #'
 #' @param mutator ([`Mutator`])\cr
 #'   Mutation operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`MutatorProxy`], which

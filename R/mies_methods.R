@@ -20,7 +20,8 @@
 #' @template param_fidelity_schedule_maybenull
 #' @template param_budget_id_maybenull
 #' @param survivor_budget (`logical(1)`)\cr
-#'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.
+#'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
@@ -144,6 +145,8 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'
 #' This function should only be called when doing rolling-tide multifidelity, and should not be part of the
 #' MIES cycle otherwise.
+#'
+#' Note that the multifidelity functionality is experimental and the UI may change in the future.
 #'
 #' @template param_inst
 #' @param fidelity_schedule (`data.frame`)\cr
