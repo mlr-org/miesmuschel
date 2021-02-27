@@ -1,7 +1,3 @@
-
-# access variables from outside a data.table. Does not chain, unfortunately.
-.. <- function(x, level = 1) eval.parent(substitute(x), 1 + assert_int(level, tol = 1e-100))
-
 ps_flatten = function(param_set, clone = TRUE) {
   assert_flag(clone)
   assert_r6(param_set, "ParamSet")
