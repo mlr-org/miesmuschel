@@ -7,7 +7,7 @@
 #' @description
 #' Individuals are mutated with an independent normal random variable on each component.
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `sdev` :: `numeric`\cr
 #'   Standard deviation of normal distribuion. This is absolute if `sdev_is_relative` is `FALSE`, and
 #'   multiplied with each individual component's range (upper - lower) if `sdev_is_relative` is `TRUE`.

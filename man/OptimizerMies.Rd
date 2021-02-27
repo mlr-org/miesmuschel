@@ -20,7 +20,7 @@ as presented in Li (2013) can easily be implemented.
 \item Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 \item Generate offspring by selecting parents, recombining and mutating them, using \code{mies_generate_offspring()}
 \item Evaluate performance, using \code{mies_evaluate_offspring()}
-\item Select survivors, using either \code{mies_survival_plus()} or \code{mies_survival_comma()}, depending on the \code{survival_strategy} hyperparameter
+\item Select survivors, using either \code{mies_survival_plus()} or \code{mies_survival_comma()}, depending on the \code{survival_strategy} configuration parameter
 \item Jump to 3.
 }
 }
@@ -38,14 +38,14 @@ Other terminators may, however, end the optimization process at any time.
 \code{miesmuschel} provides a simple multi-fidelity optimization mechanism that allows increasing fidelity both by generation
 number and survival status. When \code{multi_fidelity} is \code{TRUE}, then one search space component of the \code{\link[bbotk:OptimInstance]{OptimInstance}}
 must have the \code{"budget"} tag, which is then optimized as the "budget" component. This means that the value of this component is
-determined by the \code{fidelity_schedule} hyperparameter, which must contain a \code{data.frame} with columns \code{"generation"}, \code{"budget_new"} and
+determined by the \code{fidelity_schedule} configuration parameter, which must contain a \code{data.frame} with columns \code{"generation"}, \code{"budget_new"} and
 \code{"budget_survivors"}. The budget component's value of newly sampled individuals is set to the \code{"budget_new"} entry in the generation's row,
 and surviving individuals are evaluated again with the budget set to the \code{"budget_survivors"} value (unless they are the same). At the
 end of a generation, if the \code{"budget_survivors"} value changes, all individuals from previous generations are re-evaluated with the
 new budget value, unless \code{fidelity_current_gen_only} is set to \code{TRUE} (and unless the budget value decreases and \code{fidelity_monotonic} is \code{TRUE}).
 This makes it possible to implement increasing fidelity by generation, and also increasing fidelity for samples that survived a generation.
 
-The \code{fidelity_schedule} hyperparameter's \code{"generation"} column determines which row is currently active. A row becomes active in the
+The \code{fidelity_schedule} configuration parameter's \code{"generation"} column determines which row is currently active. A row becomes active in the
 generation that is listed, and becomes inactive whenever a different row becomes active. So e.g. if \code{fidelity_schedule} contains a row
 with \code{"generation"} set to 1, and one set to 4, then the first row is active during generations 1, 2, and 3, and the second row
 is active for all following generations.
@@ -57,22 +57,22 @@ The search space over which the optimization is performed is fundamentally tied 
 to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolutionary Strategy based
 algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 self-adaption as implemented in \code{\link{OperatorCombination}}, where one or several components can be used to adjust operator behaviour.
-These additional components are supplied to the optimizer through the \code{additional_component_sampler} hyperparameter, which takes
+These additional components are supplied to the optimizer through the \code{additional_component_sampler} configuration parameter, which takes
 a \code{\link[paradox:Sampler]{Sampler}} object. This object both has an associated \code{\link[paradox:ParamSet]{ParamSet}} which represents the
 additional components that are present, and it provides a method for generating the initial values of these components. The search space
 that is seen by the \code{\link{MiesOperator}}s is then the union of the \code{\link{OptimInstance}}'s \code{\link[paradox:ParamSet]{ParamSet}}, and the
 \code{\link[paradox:Sampler]{Sampler}}'s \code{\link[paradox:ParamSet]{ParamSet}}.
 }
 
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
-\code{OptimizerMies} has the hyperparameters of the \code{mutator}, \code{recombinator}, \code{parent_selector}, \code{survival_selector}, and, if given,
-\code{elite_selector} operator given during construction, and prefixed according to the name of the argument (\code{mutator}'s hyperparameters
+\code{OptimizerMies} has the configuration parameters of the \code{mutator}, \code{recombinator}, \code{parent_selector}, \code{survival_selector}, and, if given,
+\code{elite_selector} operator given during construction, and prefixed according to the name of the argument (\code{mutator}'s configuration parameters
 are prefixed \code{"mutator."} etc.). When using the construction arguments' default values, they are all "proxy" operators: \code{\link{MutatorProxy}},
-\code{\link{RecombinatorProxy}} and \code{\link{SelectorProxy}}. This means that the respective hyperparameters become \code{mutator.operation}, \code{recombinator.operation} etc.,
-so the operators themselves can be set via hyperparameters in this case.
+\code{\link{RecombinatorProxy}} and \code{\link{SelectorProxy}}. This means that the respective configuration parameters become \code{mutator.operation}, \code{recombinator.operation} etc.,
+so the operators themselves can be set via configuration parameters in this case.
 
-Further hyperparameters are:
+Further configuration parameters are:
 \itemize{
 \item \code{lambda} :: \code{integer(1)}\cr
 Offspring size: Number of individuals that are created and evaluated anew for each generation. This is equivalent to the
@@ -102,25 +102,25 @@ Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 Table that determines the value of the "budget" component of individuals being evaluated when doing multi-fidelity optimization.
 This is equivalent to the \code{fidelity_schedule} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, \code{\link[=mies_evaluate_offspring]{mies_evaluate_offspring()}}, and \code{\link[=mies_step_fidelity]{mies_step_fidelity()}};
 see there for more information.\cr
-When this hyperparameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to a \code{data.frame} containing one row
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to a \code{data.frame} containing one row
 for generation 1, setting budget to 1 for both new and survivor individuals.
 \item \code{fidelity_generation_lookahead} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 Whether to use the \code{"survivor_budget"} of the \emph{next} generation, instead of the \emph{current} generation, when doing fidelity refinement
 in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}.
 This is equivalent to the \code{generation_lookahead} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this hyperparameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.
 \item \code{fidelity_current_gen_only} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 When doing fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, whether to refine all individuals with different budget component,
 or only individuals created in the current generation.
 This is equivalent to the \code{current_gen_only} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this hyperparameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}.
 \item \code{fidelity_monotonic} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 Whether to only do fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}} for individuals for which the when budget component value would \emph{increase}.
 This is equivalent to the \code{monotonic} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this hyperparameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.
 }
 }
 
@@ -155,7 +155,7 @@ Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_sur
 Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}.}
 
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
-Hyperparameters of the optimization algorithm.}
+Configuration parameters of the optimization algorithm.}
 }
 \if{html}{\out{</div>}}
 }
@@ -196,24 +196,24 @@ Initialize the \code{OptimizerMies} object.
 \describe{
 \item{\code{mutator}}{(\code{\link{Mutator}})\cr
 Mutation operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{MutatorProxy}}, which
-exposes the operation as a hyperparameter of the optimizer itself.\cr
+exposes the operation as a configuration parameter of the optimizer itself.\cr
 The \verb{$mutator} field will reflect this value.}
 
 \item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
 Recombination operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{RecombinatorProxy}},
-which exposes the operation as a hyperparameter of the optimizer itself. Note: The default \code{\link{RecombinatorProxy}} has \verb{$n_indivs_in} set to 2,
+which exposes the operation as a configuration parameter of the optimizer itself. Note: The default \code{\link{RecombinatorProxy}} has \verb{$n_indivs_in} set to 2,
 so to use recombination operations with more than two inputs, or to use population size of 1, it may be necessary to construct this
 argument explicitly.\cr
 The \verb{$recombinator} field will reflect this value.}
 
 \item{\code{parent_selector}}{(\code{\link{Selector}})\cr
 Parent selection operation to perform during \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Default is \code{\link{SelectorProxy}},
-which exposes the operation as a hyperparameter of the optimizer itself.\cr
+which exposes the operation as a configuration parameter of the optimizer itself.\cr
 The \verb{$parent_selector} field will reflect this value.}
 
 \item{\code{survival_selector}}{(\code{\link{Selector}})\cr
-Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_survival_plus()}} or \code{\link[=mies_survival_comma]{mies_survival_comma()}} (depending on the \code{survival_strategy} hyperparameter),
-see there for more information. Default is \code{\link{SelectorProxy}}, which exposes the operation as a hyperparameter of the optimizer itself.\cr
+Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_survival_plus()}} or \code{\link[=mies_survival_comma]{mies_survival_comma()}} (depending on the \code{survival_strategy} configuration parameter),
+see there for more information. Default is \code{\link{SelectorProxy}}, which exposes the operation as a configuration parameter of the optimizer itself.\cr
 The \verb{$survival_selector} field will reflect this value.}
 
 \item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})\cr
@@ -225,9 +225,9 @@ The \verb{$elite_selector} field will reflect this value.}
 Whether to enable multi-fidelity optimization. When this is \code{TRUE}, then the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized must
 contain a \code{\link[paradox:Param]{Param}} tagged \code{"budget"}, which is then used as the "budget" search space component, determined by
 \code{fidelity_schedule} instead of by the \code{\link{MiesOperator}}s themselves. For multi-fidelity optimization, the \code{fidelity_schedule},
-\code{fidelity_generation_lookahead}, \code{fidelity_current_gen_only}, and \code{fidelity_monotonic} hyperparameters must be given to determine
+\code{fidelity_generation_lookahead}, \code{fidelity_current_gen_only}, and \code{fidelity_monotonic} configuration parameters must be given to determine
 multi-fidelity behaviour. (While the initial values for most of these are probably good for most cases in which more budget implies
-higher fidelity, the \code{fidelity_schedule} hyperparameter should be adjusted in most cases). Default is \code{FALSE}.}
+higher fidelity, the \code{fidelity_schedule} configuration parameter should be adjusted in most cases). Default is \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }

@@ -2,15 +2,15 @@
 % Please edit documentation in R/MutatorProxy.R
 \name{MutatorProxy}
 \alias{MutatorProxy}
-\title{Proxy-Mutator that Mutates According to its Hyperparameter}
+\title{Proxy-Mutator that Mutates According to its Configuration parameter}
 \description{
-Mutator that performs the operation in its \code{operation} hyperparameter. This is useful, e.g., to make
+Mutator that performs the operation in its \code{operation} configuration parameter. This is useful, e.g., to make
 \code{\link{OptimizerMies}}'s mutation operation fully parametrizable.
 
-Changes in the \code{operation} hyperparameter are only realized whenever \verb{$prime()} is called, so \verb{$prime()}
-must be called every time when \code{operation} is changed, \emph{even if} the new hyperparameter value is already primed.
+Changes in the \code{operation} configuration parameter are only realized whenever \verb{$prime()} is called, so \verb{$prime()}
+must be called every time when \code{operation} is changed, \emph{even if} the new configuration parameter value is already primed.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{operation} :: \code{\link{Mutator}}\cr
@@ -101,8 +101,8 @@ Initialize the \code{MutatorProxy} object.
 \if{html}{\out{<a id="method-prime"></a>}}
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
-See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} hyperparameter.
-This must be called whenever the \code{operation} hyperparameter changes, \emph{even if} the hyperparameter is already primed.
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
+This must be called whenever the \code{operation} configuration parameter changes, \emph{even if} the configuration parameter is already primed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MutatorProxy$prime(param_set)}\if{html}{\out{</div>}}
 }

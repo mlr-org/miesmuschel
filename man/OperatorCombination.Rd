@@ -8,7 +8,7 @@
 \alias{dict_recombinators_combine}
 \title{Self-Adaptive Operator Combinations}
 \description{
-Combines multiple operators and makes operator-hyperparameters self-adaptive.
+Combines multiple operators and makes operator-configuration parameters self-adaptive.
 
 The \code{OperatorCombination} operators combine operators for different subspaces of individuals by wraping other \code{\link{MiesOperator}}s given during construction.
 Different \code{\link{MiesOperator}}s are assigned to different components or sets of components and operate on them independently of the rest of the components
@@ -17,8 +17,8 @@ giving it in \code{operators} with the name of a \emph{group}. Groups are create
 exist.
 }
 \details{
-Operators can be made \emph{self-adaptive} by coupling their hyperparameter values to values in individuals. This is done by giving functions in \code{adaptions}; these
-functions are executed for each individual before an operator is applied, and the result given to a named operator hyperparameter.
+Operators can be made \emph{self-adaptive} by coupling their configuration parameter values to values in individuals. This is done by giving functions in \code{adaptions}; these
+functions are executed for each individual before an operator is applied, and the result given to a named operator configuration parameter.
 
 \code{OperatorCombination} is the base class from which \code{MutatorCombination} and \code{RecombinatorCombination} inherit. The latter two are to be used for \code{\link{Mutator}} and
 \code{\link{Recombinator}} objects, respectively.
@@ -45,11 +45,11 @@ an operator that supports \code{\link[paradox:ParamLgl]{ParamLgl}} is assigned t
 \code{\link[paradox:ParamInt]{ParamInt}} only.
 }
 
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 
-The \code{OperatorCombination} has the hyperparameters of all encapsulated \code{\link{MiesOperator}}s, minus the hyperparameters that are named in the \code{adaptions}.
-Hyperparameter names are prefixed with the name of the \code{\link{MiesOperator}} in the \code{operators} list.
+The \code{OperatorCombination} has the configuration parameters of all encapsulated \code{\link{MiesOperator}}s, minus the configuration parameters that are named in the \code{adaptions}.
+Configuration parameter names are prefixed with the name of the \code{\link{MiesOperator}} in the \code{operators} list.
 }
 
 \section{Dictionary}{
@@ -195,10 +195,10 @@ that occurs in \code{operators} may not be a member of a group as defined in \co
 The \verb{$groups} field will reflect this value.}
 
 \item{\code{adaptions}}{(named \code{list} of \code{function})\cr
-List of functions used for self-adaption of operators. The names of the list must be names of hyperparameters of wrapped operators, prefixed
-with the corresponding name in the \code{operators} list. This is the same name as the hyperparameter would otherwise have if exposed by the
+List of functions used for self-adaption of operators. The names of the list must be names of configuration parameters of wrapped operators, prefixed
+with the corresponding name in the \code{operators} list. This is the same name as the configuration parameter would otherwise have if exposed by the
 \code{OperatorCombination} object. The values in the list must be functions that receive a single input, the individual or individuals being operated on,
-as a \code{\link[data.table:data.table]{data.table}}. It must return a value that is then assigned to the hyperparameter of the operator to which it pertains.
+as a \code{\link[data.table:data.table]{data.table}}. It must return a value that is then assigned to the configuration parameter of the operator to which it pertains.
 Note that \code{\link{MutatorCombination}} adaption functions are always called with a \code{\link[data.table:data.table]{data.table}} containing a single row, while
 \code{\link{RecombinatorCombination}} adaption functions are called with \code{\link[data.table:data.table]{data.table}}s with multiple rows according to \verb{$n_indivs_in}.
 In both cases, the return value must be a scalar. The default is the empty list.\cr

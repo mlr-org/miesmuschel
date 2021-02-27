@@ -5,10 +5,10 @@
 #' @name dict_selectors_random
 #'
 #' @description
-#' Random selector that disregards fitness and individual values and selects individuals randomly. Depending on the hyperparameter `replace`,
+#' Random selector that disregards fitness and individual values and selects individuals randomly. Depending on the configuration parameter `replace`,
 #' it samples with or without replacement.
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `replace` :: `logical(1)`\cr
 #'   Whether to sample individuals with (`TRUE`) or without (`FALSE`) replacement. When sampling is done without replacement, then
 #'   `n_select` must be less or equal the number of rows in `values` when calling `$operate()`. Initialized to `FALSE`.

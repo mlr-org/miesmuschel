@@ -6,18 +6,18 @@
 \title{Recombinator Choosing Action Probabilistically}
 \description{
 \code{\link{Recombinator}} that chooses which operation to perform probabilistically. The \code{\link{Recombinator}} wraps two other \code{\link{Recombinator}}s given during construction,
-and for each group of \verb{$n_indivs_in} individuals, the operation to perform is sampled: with probability \code{p} (hyperparameter), the \code{\link{Recombinator}} given to
+and for each group of \verb{$n_indivs_in} individuals, the operation to perform is sampled: with probability \code{p} (configuration parameter), the \code{\link{Recombinator}} given to
 the \code{recombinator} construction argument is applied, and with probability \code{p - 1} the one given to \code{recombinator_not} is applied.
 
 The values of \verb{$n_indivs_in} and \verb{$n_indivs_out} is set to the corresponding values of the wrapped \code{\link{Recombinator}}s. Both \code{recombinator} and \code{recombinator_not}
 must currently have the same respective \verb{$n_indivs_in} and \verb{$n_indivs_out} values.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
-This operator has the hyperparameters of the \code{\link{Recombinator}}s that it wraps: The hyperparameters of the operator given to the \code{recombinator} construction argument
-are prefixed with \code{"maybe."}, the hyperparameters of the operator given to the \code{recombinator_not} construction argument are prefixed with \code{"maybe_not."}.
+This operator has the configuration parameters of the \code{\link{Recombinator}}s that it wraps: The configuration parameters of the operator given to the \code{recombinator} construction argument
+are prefixed with \code{"maybe."}, the configuration parameters of the operator given to the \code{recombinator_not} construction argument are prefixed with \code{"maybe_not."}.
 
-Additional hyperparameters:
+Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
 Probability per group of \code{n_indivs_in} individuals with which to apply the operator given to the \code{recombinator} construction argument.
@@ -88,7 +88,7 @@ Initialize the \code{RecombinatorMaybe} object.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
-\code{\link{Recombinator}} to wrap. This operator gets run with probability \code{p} (Hyperparameter).\cr
+\code{\link{Recombinator}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
 The constructed object gets a \emph{clone} of this argument.}
 
 \item{\code{recombinator_not}}{(\code{\link{Recombinator}})\cr

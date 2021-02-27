@@ -6,17 +6,17 @@
 #'
 #' @description
 #' [`Recombinator`] that chooses which operation to perform probabilistically. The [`Recombinator`] wraps two other [`Recombinator`]s given during construction,
-#' and for each group of `$n_indivs_in` individuals, the operation to perform is sampled: with probability `p` (hyperparameter), the [`Recombinator`] given to
+#' and for each group of `$n_indivs_in` individuals, the operation to perform is sampled: with probability `p` (configuration parameter), the [`Recombinator`] given to
 #' the `recombinator` construction argument is applied, and with probability `p - 1` the one given to `recombinator_not` is applied.
 #'
 #' The values of `$n_indivs_in` and `$n_indivs_out` is set to the corresponding values of the wrapped [`Recombinator`]s. Both `recombinator` and `recombinator_not`
 #' must currently have the same respective `$n_indivs_in` and `$n_indivs_out` values.
 #'
-#' @section Hyperparameters:
-#' This operator has the hyperparameters of the [`Recombinator`]s that it wraps: The hyperparameters of the operator given to the `recombinator` construction argument
-#' are prefixed with `"maybe."`, the hyperparameters of the operator given to the `recombinator_not` construction argument are prefixed with `"maybe_not."`.
+#' @section Configuration Parameters:
+#' This operator has the configuration parameters of the [`Recombinator`]s that it wraps: The configuration parameters of the operator given to the `recombinator` construction argument
+#' are prefixed with `"maybe."`, the configuration parameters of the operator given to the `recombinator_not` construction argument are prefixed with `"maybe_not."`.
 #'
-#' Additional hyperparameters:
+#' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
 #'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument.
 #'
@@ -38,7 +38,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     #' @description
     #' Initialize the `RecombinatorMaybe` object.
     #' @param recombinator ([`Recombinator`])\cr
-    #'   [`Recombinator`] to wrap. This operator gets run with probability `p` (Hyperparameter).\cr
+    #'   [`Recombinator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
     #' @param recombinator_not ([`Recombinator`])\cr
     #'   Another [`Recombinator`] to wrap. This operator runs when `recombinator` is not chosen. By

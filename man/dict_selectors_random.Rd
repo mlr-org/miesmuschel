@@ -5,10 +5,10 @@
 \alias{SelectorRandom}
 \title{Random Selector}
 \description{
-Random selector that disregards fitness and individual values and selects individuals randomly. Depending on the hyperparameter \code{replace},
+Random selector that disregards fitness and individual values and selects individuals randomly. Depending on the configuration parameter \code{replace},
 it samples with or without replacement.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{replace} :: \code{logical(1)}\cr

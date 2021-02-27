@@ -7,7 +7,7 @@
 #' @description
 #' Values between two individuals are exchanged with component-wise independent probability.
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `p` :: `numeric(1)`\cr
 #'   Component-wise probability with which to exchange values. Initialized to 0.5.
 #'

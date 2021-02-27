@@ -1,15 +1,15 @@
-#' @title Proxy-Selectior that Selects According to its Hyperparameter
+#' @title Proxy-Selectior that Selects According to its Configuration parameter
 #'
 #' @include Selector.R
 #'
 #' @description
-#' Selector that performs the operation in its `operation` hyperparameter. This is useful, e.g., to make
+#' Selector that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s selection operations fully parametrizable.
 #'
-#' Changes in the `operation` hyperparameter are only realized whenever `$prime()` is called, so `$prime()`
-#' must be called every time when `operation` is changed, *even if* the new hyperparameter value is already primed.
+#' Changes in the `operation` configuration parameter are only realized whenever `$prime()` is called, so `$prime()`
+#' must be called every time when `operation` is changed, *even if* the new configuration parameter value is already primed.
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `operation` :: [`Selector`]\cr
 #'   Operation to perform. Initialized to [`SelectorBest`].
 #'
@@ -48,8 +48,8 @@ SelectorProxy = R6Class("SelectorProxy",
       super$initialize(param_set = param_set)
     },
     #' @description
-    #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` hyperparameter.
-    #' This must be called whenever the `operation` hyperparameter changes, *even if* the hyperparameter is already primed.
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
+    #' This must be called whenever the `operation` configuration parameter changes, *even if* the configuration parameter is already primed.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
@@ -59,7 +59,7 @@ SelectorProxy = R6Class("SelectorProxy",
       operation$prime(param_set)
       super$prime(param_set)
       private$.operation = operation  # only change operation once everything else succeeded
-      private$.primed_with = primed_with  # keep uncloned copy of hyperparameter value for check in `.select()`
+      private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
       invisible(self)
     }
   ),
@@ -69,7 +69,7 @@ SelectorProxy = R6Class("SelectorProxy",
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
         # In that case we ignore and hope the user is doing the right thing. After all, this message
         # is only to be informative.
-        stop("SelectorProxy$prime() must be called again when the 'operation' hyperparameter changes.")
+        stop("SelectorProxy$prime() must be called again when the 'operation' configuration parameter changes.")
       }
       private$.operation$operate(values, fitnesses, n_select)
     },

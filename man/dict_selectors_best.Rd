@@ -9,9 +9,9 @@ Selector that selects the top \code{n_select} individuals based on the  fitness 
 of individuals, the selection wraps around: All \code{nrow(values)} individuals are selected at least \code{floor(nrow(values) / n_select)}
 times, with the top \code{nrow(values) \%\% n_select} individuals being selected one more time.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
-This operator has no hyperparameters.
+This operator has no configuration parameters.
 }
 
 \section{Supported Operand Types}{

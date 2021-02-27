@@ -10,7 +10,7 @@
 #'
 #' Since the information loss is very high, this should in most cases be combined with [`MutatorCmpMaybe`].
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `can_mutate_to_same` :: `logical(1)`\cr
 #'   Whether to sample from entire range of each parameter (`TRUE`) or from all values except the
 #'   current value (`FALSE`). Initialized to `TRUE`.

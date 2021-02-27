@@ -6,14 +6,14 @@
 #'
 #' @description
 #' [`Mutator`] that chooses which operation to perform probabilistically. The [`Mutator`] wraps two other [`Mutator`]s given during construction,
-#' and for each individuum, the operation to perform is sampled: with probability `p` (hyperparameter), the [`Mutator`] given to the `mutator`
+#' and for each individuum, the operation to perform is sampled: with probability `p` (configuration parameter), the [`Mutator`] given to the `mutator`
 #' construction argument is applied, and with probability `p - 1` the one given to `mutator_not` is applied.
 #'
-#' @section Hyperparameters:
-#' This operator has the hyperparameters of the [`Mutator`]s that it wraps: The hyperparameters of the operator given to the `mutator` construction argument
-#' are prefixed with `"maybe."`, the hyperparameters of the operator given to the `mutator_not` construction argument are prefixed with `"maybe_not."`.
+#' @section Configuration Parameters:
+#' This operator has the configuration parameters of the [`Mutator`]s that it wraps: The configuration parameters of the operator given to the `mutator` construction argument
+#' are prefixed with `"maybe."`, the configuration parameters of the operator given to the `mutator_not` construction argument are prefixed with `"maybe_not."`.
 #'
-#' Additional hyperparameters:
+#' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
 #'   Probability per individual with which to apply the operator given to the `mutator` construction argument.
 #'
@@ -55,7 +55,7 @@ MutatorMaybe = R6Class("MutatorMaybe",
     #' @description
     #' Initialize the `MutatorMaybe` object.
     #' @param mutator ([`Mutator`])\cr
-    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Hyperparameter).\cr
+    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
     #' @param mutator_not ([`Mutator`])\cr
     #'   Another [`Mutator`] to wrap. This operator runs when `mutator` is not chosen. By

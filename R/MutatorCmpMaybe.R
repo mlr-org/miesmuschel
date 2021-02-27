@@ -7,14 +7,14 @@
 #' @description
 #' [`Mutator`] that chooses which operation to perform probabilistically. The [`Mutator`] wraps two other [`Mutator`]s given during construction,
 #' and both of these operators are run. The ultimate result is sampled from the results of these operations independently for each
-#' individuum and component: with probability `p` (hyperparameter), the result from the [`Mutator`] given to the `mutator`
+#' individuum and component: with probability `p` (configuration parameter), the result from the [`Mutator`] given to the `mutator`
 #' construction argument is used, and with probability `p - 1` the one given to `mutator_not` is used.
 #'
-#' @section Hyperparameters:
-#' This operator has the hyperparameters of the [`Mutator`]s that it wraps: The hyperparameters of the operator given to the `mutator` construction argument
-#' are prefixed with `"cmpmaybe."`, the hyperparameters of the operator given to the `mutator_not` construction argument are prefixed with `"cmpmaybe_not."`.
+#' @section Configuration Parameters:
+#' This operator has the configuration parameters of the [`Mutator`]s that it wraps: The configuration parameters of the operator given to the `mutator` construction argument
+#' are prefixed with `"cmpmaybe."`, the configuration parameters of the operator given to the `mutator_not` construction argument are prefixed with `"cmpmaybe_not."`.
 #'
-#' Additional hyperparameters:
+#' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
 #'   Probability per component with which to apply the operator given to the `mutator` construction argument.
 #'
@@ -56,7 +56,7 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
     #' @description
     #' Initialize the `MutatorCmpMaybe` object.
     #' @param mutator ([`Mutator`])\cr
-    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Hyperparameter).\cr
+    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
     #' @param mutator_not ([`Mutator`])\cr
     #'   Another [`Mutator`] to wrap. This operator runs when `mutator` is not chosen. By

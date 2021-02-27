@@ -9,8 +9,8 @@
 #' of individuals, the selection wraps around: All `nrow(values)` individuals are selected at least `floor(nrow(values) / n_select)`
 #' times, with the top `nrow(values) %% n_select` individuals being selected one more time.
 #'
-#' @section Hyperparameters:
-#' This operator has no hyperparameters.
+#' @section Configuration Parameters:
+#' This operator has no configuration parameters.
 #'
 #' @templateVar id best
 #' @template autoinfo_prepare_sel

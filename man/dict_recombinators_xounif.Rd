@@ -7,7 +7,7 @@
 \description{
 Values between two individuals are exchanged with component-wise independent probability.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{p} :: \code{numeric(1)}\cr

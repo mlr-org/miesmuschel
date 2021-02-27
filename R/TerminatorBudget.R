@@ -18,12 +18,12 @@
 #' mlr_terminators$get("budget")
 #' ```
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `budget` :: `numeric(1)`\cr
 #'   Total budget available, after which to stop. Initialized to `Inf`.
 #' * `aggregate` :: `function`\cr
 #'   Function taking a vector of values of the budget search space component, returning a scalar value to be compared
-#'   to the `budget` hyperparameter. If this function returns a value greater or equal to `budget` the termination
+#'   to the `budget` configuration parameter. If this function returns a value greater or equal to `budget` the termination
 #'   criterion is matched. Calling this function with `NULL` must return the lower bound of the budgetvalue; percentage
 #'   progress is reported as the progress from this lower bound to the value of `budget`. Initialized to `sum()`.
 #'

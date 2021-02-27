@@ -28,7 +28,7 @@
 #' mlr_terminators$get("gens")
 #' ```
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #' * `generations` :: `integer(1)`\cr
 #'   Number of generations to evaluate, after which to stop. Initialized to `Inf`.
 #'

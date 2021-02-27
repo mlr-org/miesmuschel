@@ -7,9 +7,9 @@
 \description{
 Null-mutator that does not perform any operation on its input. Useful in particular with operator-wrappers such as \code{\link{MutatorMaybe}} or \code{\link{MutatorCombination}}.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
-This operator has no hyperparameters.
+This operator has no configuration parameters.
 }
 
 \section{Supported Operand Types}{

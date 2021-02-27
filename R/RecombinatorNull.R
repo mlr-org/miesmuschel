@@ -11,8 +11,8 @@
 #' `n_indivs_in` and `n_indivs_out` can be set during construction, where `n_indivs_out` must be less or equal `n_indivs_in`. If it is strictly less,
 #' then the operation returns only the first `n_indivs_out` individuals out of each `n_indivs_in` sized group.
 #'
-#' @section Hyperparameters:
-#' This operator has no hyperparameters.
+#' @section Configuration Parameters:
+#' This operator has no configuration parameters.
 #'
 #' @templateVar id null
 #' @template autoinfo_prepare_rec

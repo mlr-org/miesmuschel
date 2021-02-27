@@ -5,7 +5,7 @@
 #' @include dictionaries.R
 #'
 #' @description
-#' Combines multiple operators and makes operator-hyperparameters self-adaptive.
+#' Combines multiple operators and makes operator-configuration parameters self-adaptive.
 #'
 #' The `OperatorCombination` operators combine operators for different subspaces of individuals by wraping other [`MiesOperator`]s given during construction.
 #' Different [`MiesOperator`]s are assigned to different components or sets of components and operate on them independently of the rest of the components
@@ -15,8 +15,8 @@
 #'
 #' @details
 #'
-#' Operators can be made *self-adaptive* by coupling their hyperparameter values to values in individuals. This is done by giving functions in `adaptions`; these
-#' functions are executed for each individual before an operator is applied, and the result given to a named operator hyperparameter.
+#' Operators can be made *self-adaptive* by coupling their configuration parameter values to values in individuals. This is done by giving functions in `adaptions`; these
+#' functions are executed for each individual before an operator is applied, and the result given to a named operator configuration parameter.
 #'
 #' `OperatorCombination` is the base class from which `MutatorCombination` and `RecombinatorCombination` inherit. The latter two are to be used for [`Mutator`] and
 #' [`Recombinator`] objects, respectively.
@@ -41,10 +41,10 @@
 #' an operator that supports [`ParamLgl`][paradox::ParamLgl] is assigned to component `"a"`, then the result will support [`ParamLgl`][paradox::ParamLgl] and
 #' [`ParamInt`][paradox::ParamInt] only.
 #'
-#' @section Hyperparameters:
+#' @section Configuration Parameters:
 #'
-#' The `OperatorCombination` has the hyperparameters of all encapsulated [`MiesOperator`]s, minus the hyperparameters that are named in the `adaptions`.
-#' Hyperparameter names are prefixed with the name of the [`MiesOperator`] in the `operators` list.
+#' The `OperatorCombination` has the configuration parameters of all encapsulated [`MiesOperator`]s, minus the configuration parameters that are named in the `adaptions`.
+#' Configuration parameter names are prefixed with the name of the [`MiesOperator`] in the `operators` list.
 #'
 #' @templateVar id combine
 #' @templateVar additional , <operators>, ...
@@ -65,10 +65,10 @@
 #'   that occurs in `operators` may not be a member of a group as defined in `groups`. The default is the empty list.\cr
 #'   The `$groups` field will reflect this value.
 #' @param adaptions (named `list` of `function`)\cr
-#'   List of functions used for self-adaption of operators. The names of the list must be names of hyperparameters of wrapped operators, prefixed
-#'   with the corresponding name in the `operators` list. This is the same name as the hyperparameter would otherwise have if exposed by the
+#'   List of functions used for self-adaption of operators. The names of the list must be names of configuration parameters of wrapped operators, prefixed
+#'   with the corresponding name in the `operators` list. This is the same name as the configuration parameter would otherwise have if exposed by the
 #'   `OperatorCombination` object. The values in the list must be functions that receive a single input, the individual or individuals being operated on,
-#'   as a [`data.table`][data.table::data.table]. It must return a value that is then assigned to the hyperparameter of the operator to which it pertains.
+#'   as a [`data.table`][data.table::data.table]. It must return a value that is then assigned to the configuration parameter of the operator to which it pertains.
 #'   Note that [`MutatorCombination`] adaption functions are always called with a [`data.table`][data.table::data.table] containing a single row, while
 #'   [`RecombinatorCombination`] adaption functions are called with [`data.table`][data.table::data.table]s with multiple rows according to `$n_indivs_in`.
 #'   In both cases, the return value must be a scalar. The default is the empty list.\cr

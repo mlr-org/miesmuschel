@@ -7,8 +7,8 @@
 #' @description
 #' Null-mutator that does not perform any operation on its input. Useful in particular with operator-wrappers such as [`MutatorMaybe`] or [`MutatorCombination`].
 #'
-#' @section Hyperparameters:
-#' This operator has no hyperparameters.
+#' @section Configuration Parameters:
+#' This operator has no configuration parameters.
 #'
 #' @templateVar id null
 #' @template autoinfo_prepare_mut

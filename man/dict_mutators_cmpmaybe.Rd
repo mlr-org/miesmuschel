@@ -7,15 +7,15 @@
 \description{
 \code{\link{Mutator}} that chooses which operation to perform probabilistically. The \code{\link{Mutator}} wraps two other \code{\link{Mutator}}s given during construction,
 and both of these operators are run. The ultimate result is sampled from the results of these operations independently for each
-individuum and component: with probability \code{p} (hyperparameter), the result from the \code{\link{Mutator}} given to the \code{mutator}
+individuum and component: with probability \code{p} (configuration parameter), the result from the \code{\link{Mutator}} given to the \code{mutator}
 construction argument is used, and with probability \code{p - 1} the one given to \code{mutator_not} is used.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
-This operator has the hyperparameters of the \code{\link{Mutator}}s that it wraps: The hyperparameters of the operator given to the \code{mutator} construction argument
-are prefixed with \code{"cmpmaybe."}, the hyperparameters of the operator given to the \code{mutator_not} construction argument are prefixed with \code{"cmpmaybe_not."}.
+This operator has the configuration parameters of the \code{\link{Mutator}}s that it wraps: The configuration parameters of the operator given to the \code{mutator} construction argument
+are prefixed with \code{"cmpmaybe."}, the configuration parameters of the operator given to the \code{mutator_not} construction argument are prefixed with \code{"cmpmaybe_not."}.
 
-Additional hyperparameters:
+Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
 Probability per component with which to apply the operator given to the \code{mutator} construction argument.
@@ -112,7 +112,7 @@ Initialize the \code{MutatorCmpMaybe} object.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{mutator}}{(\code{\link{Mutator}})\cr
-\code{\link{Mutator}} to wrap. This operator gets run with probability \code{p} (Hyperparameter).\cr
+\code{\link{Mutator}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
 The constructed object gets a \emph{clone} of this argument.}
 
 \item{\code{mutator_not}}{(\code{\link{Mutator}})\cr

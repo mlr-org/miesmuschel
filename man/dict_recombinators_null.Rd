@@ -11,9 +11,9 @@ Null-recombinator that does not perform any operation on its input. Useful in pa
 \code{n_indivs_in} and \code{n_indivs_out} can be set during construction, where \code{n_indivs_out} must be less or equal \code{n_indivs_in}. If it is strictly less,
 then the operation returns only the first \code{n_indivs_out} individuals out of each \code{n_indivs_in} sized group.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
-This operator has no hyperparameters.
+This operator has no configuration parameters.
 }
 
 \section{Supported Operand Types}{

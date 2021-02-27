@@ -10,7 +10,7 @@ values of each component, or from all values except the original value.
 
 Since the information loss is very high, this should in most cases be combined with \code{\link{MutatorCmpMaybe}}.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{can_mutate_to_same} :: \code{logical(1)}\cr

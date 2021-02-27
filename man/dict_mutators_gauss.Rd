@@ -7,7 +7,7 @@
 \description{
 Individuals are mutated with an independent normal random variable on each component.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{sdev} :: \code{numeric}\cr

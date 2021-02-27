@@ -2,15 +2,15 @@
 % Please edit documentation in R/RecombinatorProxy.R
 \name{RecombinatorProxy}
 \alias{RecombinatorProxy}
-\title{Proxy-Recombinator that Recombines According to its Hyperparameter}
+\title{Proxy-Recombinator that Recombines According to its Configuration parameter}
 \description{
-Recombinator that performs the operation in its \code{operation} hyperparameter. This is useful, e.g., to make
+Recombinator that performs the operation in its \code{operation} configuration parameter. This is useful, e.g., to make
 \code{\link{OptimizerMies}}'s recombination operation fully parametrizable.
 
-Changes in the \code{operation} hyperparameter are only realized whenever \verb{$prime()} is called, so \verb{$prime()}
-must be called every time when \code{operation} is changed, \emph{even if} the new hyperparameter value is already primed.
+Changes in the \code{operation} configuration parameter are only realized whenever \verb{$prime()} is called, so \verb{$prime()}
+must be called every time when \code{operation} is changed, \emph{even if} the new configuration parameter value is already primed.
 }
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{operation} :: \code{\link{Recombinator}}\cr
@@ -83,13 +83,13 @@ Initialize the \code{RecombinatorProxy} object.
 \describe{
 \item{\code{n_indivs_in}}{(\code{integer(1)})\cr
 Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
-Furthermore, the \code{\link{Recombinator}} assigned to the \code{operation} hyperparameter must have an \code{n_indivs_in} that is a divisor of this number.
+Furthermore, the \code{\link{Recombinator}} assigned to the \code{operation} configuration parameter must have an \code{n_indivs_in} that is a divisor of this number.
 Default 2.\cr
 The \verb{$n_indivs_in} field will reflect this value.}
 
 \item{\code{n_indivs_out}}{(\code{integer(1)})\cr
 Number of individuals that result for each \code{n_indivs_in} lines of input. Must be at most \code{n_indivs_in}.
-The ratio of \verb{$n_indivs_in} to \verb{$n_indivs_out} of the \code{\link{Recombinator}} assigned to the \code{operation} hyperparameter must be the same as
+The ratio of \verb{$n_indivs_in} to \verb{$n_indivs_out} of the \code{\link{Recombinator}} assigned to the \code{operation} configuration parameter must be the same as
 \code{n_indivs_in} to \code{n_indivs_out} of this object.
 Default equal to \code{n_indivs_in}.\cr
 The \verb{$n_indivs_out} field will reflect this value.}
@@ -101,8 +101,8 @@ The \verb{$n_indivs_out} field will reflect this value.}
 \if{html}{\out{<a id="method-prime"></a>}}
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
-See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} hyperparameter.
-This must be called whenever the \code{operation} hyperparameter changes, \emph{even if} the hyperparameter is already primed.
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
+This must be called whenever the \code{operation} configuration parameter changes, \emph{even if} the configuration parameter is already primed.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RecombinatorProxy$prime(param_set)}\if{html}{\out{</div>}}
 }

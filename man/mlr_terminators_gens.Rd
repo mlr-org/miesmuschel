@@ -29,7 +29,7 @@ mlr_terminators$get("gens")
 }
 }
 
-\section{Hyperparameters}{
+\section{Configuration Parameters}{
 
 \itemize{
 \item \code{generations} :: \code{integer(1)}\cr

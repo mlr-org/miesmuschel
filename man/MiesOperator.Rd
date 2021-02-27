@@ -42,7 +42,7 @@ Other base classes:
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
-Hyperparameters of the \code{MiesOperator} object. Read-only.}
+Configuration parameters of the \code{MiesOperator} object. Read-only.}
 
 \item{\code{param_classes}}{(\code{character})\cr
 Classes of parameters that the operator can handle, contains any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}. Read-only.}
@@ -90,7 +90,7 @@ Default is all of them.\cr
 The \verb{$param_classes} field will reflect this value.}
 
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{list} of \code{expression})\cr
-Hyperparameter of the operator. This should be created by the subclass and given to \code{super$initialize()}.
+Strategy parameters of the operator. This should be created by the subclass and given to \code{super$initialize()}.
 If this is a \code{\link[paradox:ParamSet]{ParamSet}}, it is used as the \code{MiesOperator}'s \code{\link[paradox:ParamSet]{ParamSet}}
 directly. Otherwise it must be a \code{list} of expressions e.g. created by \code{alist()} that evaluate to \code{\link[paradox:ParamSet]{ParamSet}}s,
 possibly referencing \code{self} and \code{private}.

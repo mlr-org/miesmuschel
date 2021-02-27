@@ -95,7 +95,7 @@ MiesOperator = R6Class("MiesOperator",
   ),
   active = list(
     #' @field param_set ([`ParamSet`][paradox::ParamSet])\cr
-    #' Hyperparameters of the `MiesOperator` object. Read-only.
+    #' Configuration parameters of the `MiesOperator` object. Read-only.
     param_set = function(val) {
       if (is.null(private$.param_set)) {
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))
