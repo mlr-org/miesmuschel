@@ -6,21 +6,30 @@
 expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed = FALSE) {
   expect_r6(sel, "Selector", info = selector_name)
 
-  p = ps(ParamLgl = p_lgl(), ParamDbl = p_dbl(0, 1), ParamInt = p_int(0, 1), ParamFct = p_fct(c("a", "b", "c")))
+  p = ps(ParamLgl. = p_lgl(), ParamDbl. = p_dbl(0, 1), ParamInt. = p_int(0, 1), ParamFct. = p_fct(c("a", "b", "c")))
+  pbig = p$clone(deep = TRUE)
+  lapply(p$params, function(x) { x = x$clone() ; x$id = paste0(x$id, "1") ; pbig$add(x) })
 
   if (!is_primed) {
     expect_error(sel$operate(pvals), "must be primed first", info = selector_name)
   }
 
-  p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), sel$param_classes))
+  p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), paste0(sel$param_classes, ".")))
   if (length(p_forbidden$ids())) {
     expect_error(sel$prime(p_forbidden), "Must be a subset of", info = selector_name)
   }
 
-  p_allowed = p$clone(deep = TRUE)$subset(ids = sel$param_classes)
+  p_allowed = p$clone(deep = TRUE)$subset(ids = paste0(sel$param_classes, "."))
   pvals_allowed = generate_design_random(p_allowed, 3)$data
 
+  pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(sel$param_classes, "."), paste0(sel$param_classes, ".1")))
+  pbigvals_allowed = generate_design_random(pbig_allowed, 3)$data
+
+  sel$prime(pbig_allowed)
+  expect_error(sel$operate(pvals_allowed), "Must be a permutation of set")
+
   sel$prime(p_allowed)
+  expect_error(sel$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")
 
   test_alloweds = function(data, pp) {
     sel$prime(pp)
@@ -41,6 +50,7 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
   }
 
   test_alloweds(pvals_allowed, p_allowed)
+  test_alloweds(as.data.frame(pvals_allowed), p_allowed)
   test_alloweds(pvals_allowed[1], p_allowed)
 
   p_allowed_one = p_allowed$clone(deep = TRUE)$subset(p_allowed$ids()[[1]])

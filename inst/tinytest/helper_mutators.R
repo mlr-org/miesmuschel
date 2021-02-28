@@ -10,6 +10,8 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
 
   # names may not be param classes directly, so add a period here
   p = ps(ParamLgl. = p_lgl(), ParamDbl. = p_dbl(0, 1), ParamInt. = p_int(0, 1), ParamFct. = p_fct(c("a", "b", "c")))
+  pbig = p$clone(deep = TRUE)
+  lapply(p$params, function(x) { x = x$clone() ; x$id = paste0(x$id, "1") ; pbig$add(x) })
 
   if (!is_primed) {
     expect_error(mut$operate(pvals), "must be primed first", info = mutator_name)
@@ -24,7 +26,18 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   p_allowed = p$clone(deep = TRUE)$subset(ids = paste0(mut$param_classes, "."))
   pvals_allowed = generate_design_random(p_allowed, 3)$data
 
+  pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(mut$param_classes, "."), paste0(mut$param_classes, ".1")))
+  pbigvals_allowed = generate_design_random(pbig_allowed, 3)$data
+
+  mut$prime(pbig_allowed)
+  expect_error(mut$operate(pvals_allowed), "Must be a permutation of set")
+
   mut$prime(p_allowed)
+  expect_error(mut$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")
+
+  mutated = mut$operate(as.data.frame(pvals_allowed))
+  expect_data_frame(mutated, nrows = nrow(pvals_allowed), ncols = ncol(pvals_allowed), any.missing = FALSE, info = mutator_name)
+  expect_true(identical(class(mutated), "data.frame"))  # No data.table output when input is data.frame
 
   test_alloweds = function(data, pp) {
     mut$prime(pp)
@@ -34,6 +47,7 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   }
 
   test_alloweds(pvals_allowed, p_allowed)
+  test_alloweds(rev(pvals_allowed), p_allowed)
   test_alloweds(pvals_allowed[1], p_allowed)
 
   p_allowed_one = p_allowed$clone(deep = TRUE)$subset(p_allowed$ids()[[1]])
@@ -54,6 +68,8 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   test_alloweds(pvals_allowed_multicol[1], p_allowed_multicol)
 
   expect_true(mut$endomorphism)
+
+
 }
 
 MutatorDebug = R6::R6Class("MutatorDebug",

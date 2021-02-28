@@ -6,21 +6,36 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
 
   expect_r6(rec, "Recombinator", info = recombinator_name)
 
-  p = ps(ParamLgl = p_lgl(), ParamDbl = p_dbl(0, 1), ParamInt = p_int(0, 1), ParamFct = p_fct(c("a", "b", "c")))
+  p = ps(ParamLgl. = p_lgl(), ParamDbl. = p_dbl(0, 1), ParamInt. = p_int(0, 1), ParamFct. = p_fct(c("a", "b", "c")))
+  pbig = p$clone(deep = TRUE)
+  lapply(p$params, function(x) { x = x$clone() ; x$id = paste0(x$id, "1") ; pbig$add(x) })
 
   if (!is_primed) {
     expect_error(rec$operate(pvals), "must be primed first", info = recombinator_name)
   }
 
-  p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), rec$param_classes))
+  p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), paste0(rec$param_classes, ".")))
   if (length(p_forbidden$ids())) {
     expect_error(rec$prime(p_forbidden), "Must be a subset of", info = recombinator_name)
   }
 
-  p_allowed = p$clone(deep = TRUE)$subset(ids = rec$param_classes)
+  p_allowed = p$clone(deep = TRUE)$subset(ids = paste0(rec$param_classes, "."))
   pvals_allowed = generate_design_random(p_allowed, 3 * rec$n_indivs_in)$data
 
+  pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(rec$param_classes, "."), paste0(rec$param_classes, ".1")))
+  pbigvals_allowed = generate_design_random(pbig_allowed, 3 * rec$n_indivs_in)$data
+
+  rec$prime(pbig_allowed)
+  expect_error(rec$operate(pvals_allowed), "Must be a permutation of set")
+
   rec$prime(p_allowed)
+  expect_error(rec$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")
+
+  recombined = rec$operate(as.data.frame(pvals_allowed))
+  expect_data_frame(recombined, nrows = nrow(pvals_allowed) / rec$n_indivs_in * rec$n_indivs_out,
+    ncols = ncol(pvals_allowed), any.missing = FALSE, info = recombinator_name)
+  expect_true(identical(class(recombined), "data.frame"))  # No data.table output when input is data.frame
+
 
   test_alloweds = function(data, pp) {
     rec$prime(pp)
@@ -53,7 +68,7 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
   expect_true(rec$endomorphism)
 }
 
-RecombinatorDebug = R6::R6Class("MutatorDebug",
+RecombinatorDebug = R6::R6Class("RecombinatorDebug",
   inherit = Recombinator,
   public = list(
     handler = NULL,
