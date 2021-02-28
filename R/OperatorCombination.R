@@ -293,8 +293,12 @@ OperatorCombination = R6Class("OperatorCombination",
         classes[param_set$nlevels == 2] = "ParamLgl"
       }
 
+      if (any(specialgroups %in% ids)) {
+        stopf("components must not have names that clash with special groups: %s", str_collapse(specialgroups))
+      }
+
       if (any(groupnames %in% ids)) {
-        stop("groupnames / Param class names and ids of param_set must be disjoint")
+        stop("groupnames and ids of param_set must be disjoint")
       }
 
       capturing = c(setdiff(names(self$operators), names(self$groups)), unlist(self$groups))  # dimensions that are captured either directly or through groups

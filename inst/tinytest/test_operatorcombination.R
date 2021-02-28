@@ -173,6 +173,14 @@ expect_warning(MutatorCombination$new(list(ParamLgl = mut_lgl, ParamFct = mut_fc
 expect_warning(MutatorCombination$new(list(ParamLgl = mut_lf, ParamFct = mut_fct), binary_fct_as_logical = TRUE)$prime(ps(x = p_fct(c("a", "b")))), "ParamFct have no corresponding dimension")
 
 
+# cannot prime when Param names clash with special groups
+
+anynull = MutatorCombination$new(list(ParamAny = MutatorNull$new()))
+for (badgroup in c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "ParamAny")) {
+  expect_error(anynull$prime(ParamSet$new(list(ParamInt$new(badgroup)))), sprintf("components must not have names.*%s", badgroup))
+}
+
+
 expect_set_equal(MutatorCombination$new(list(g1 = mut_lf), groups = list(g1 = "ParamFct"))$param_classes, "ParamFct")
 expect_set_equal(MutatorCombination$new(list(g1 = mut_lf), groups = list(g1 = c("ParamFct", "x_rep_1")))$param_classes, c("ParamFct", "ParamLgl"))
 
@@ -317,4 +325,5 @@ expect_equal(mut_adapt$param_set$values, list(ParamDbl.y = TRUE))
 mut_adapt$prime(ps(a = p_r, b = p_r))
 transformed = mut_adapt$operate(data.table(a = c(0, 1, 0, 1), b = c(0, 0, 1, 1)))
 expect_equal(transformed, data.table(a = c(1, 3, 1, 3), b = c(1, 2, 2, 3)))
+
 
