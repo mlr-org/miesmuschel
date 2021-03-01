@@ -117,7 +117,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   current_gen = max(inst$archive$data$dob, 0, na.rm = TRUE) + 1
   assert_names(colnames(offspring), must.include = setdiff(ss_ids, budget_id), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
 
-  if (!is.null(fidelity_schedule)) {
+  if (!is.null(budget_id)) {
     assert(check_fidelity_schedule(fidelity_schedule))
     fidelity_schedule = as.data.table(fidelity_schedule)
     fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
