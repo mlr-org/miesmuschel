@@ -70,3 +70,15 @@ expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, 
 expect_equal(mies_evaluate_offspring(oismall, data.frame(p1 = numeric(0), bud = numeric(0))),
   data.table(pout1 = numeric(0)))
 expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
+
+# larger searchspace
+oilarge = as_oi(get_objective_passthrough("minimize", FALSE))
+expect_equal(mies_evaluate_offspring(oilarge, generate_design_random(oilarge$search_space, 2)$data[, p1 := 1:2]), data.table(pout1 = 1:2))
+
+# multi-objective
+oilarge_mo = as_oi(get_objective_passthrough(c("minimize", "maximize"), FALSE))
+expect_equal(mies_evaluate_offspring(oilarge_mo, generate_design_random(oilarge$search_space, 2)$data[, p1 := 1:2][, p2 := 2:1]), data.table(pout1 = 1:2, pout2 = 2:1))
+oismall_mo = as_oi(get_objective_passthrough(c("minimize", "maximize"), TRUE))
+expect_equal(mies_evaluate_offspring(oismall_mo, generate_design_random(oismall_mo$search_space, 2)$data[, p1 := 1:2][, p2 := 2:1]), data.table(pout1 = 1:2, pout2 = 2:1))
+expected_archive = data.table(p1 = 1:2, p2 = 2:1, dob = 1, eol = NA_real_, pout1 = 1:2, pout2 = 2:1, x_domain = list(list(p1 = 1, p2 = 2), list(p1 = 2, p2 = 1)), batch_nr = 1)
+expect_equal(copy(oismall_mo$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
