@@ -96,7 +96,7 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
       p = self$param_set$get_values()$p
       p = pmin(pmax(p, 0), 1)
       if (!length(p) %in% c(1, ncol(values))) stop("p must have either length 1, or length of input.")
-      mutating = matrix(runif(nrow(values) * ncol(values)) < p, nrow = nrow(values))
+      mutating = matrix(stats::runif(nrow(values) * ncol(values)) < p, nrow = nrow(values))
       as.data.table(mapply(function(mutnot, mut, takemut) {
         mutnot[takemut] <- mut[takemut]
         mutnot
