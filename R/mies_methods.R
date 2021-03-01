@@ -505,11 +505,12 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
   assert_r6(additional_components, "ParamSet", null.ok = TRUE)
   assert_choice(budget_id, search_space$ids(), null.ok = TRUE)
   assert_names(search_space$ids(), disjunct.from = reserved_component_names)
-  assert_names(additional_components$ids(), disjunct.from = reserved_component_names)
+
 
   if (is.null(additional_components)) {
     full_search_space = search_space
   } else {
+    assert_names(additional_components$ids(), disjunct.from = reserved_component_names)
     search_space = search_space$clone(deep = FALSE)
     additional_components = additional_components$clone(deep = FALSE)
     search_space$set_id = ""
