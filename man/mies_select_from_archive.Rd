@@ -46,6 +46,9 @@ and return the index within the archive (when \code{get_indivs} \code{FALSE}) or
 (when \code{get_indivs} is \code{TRUE}).
 
 It is not strictly necessary for the selector to select unique individuals / individuals without replacement.
+
+Individuals are selected independently of whether they are "alive" or not. To select only from alive individuals,
+set \code{rows} to \code{inst$archive$data[, which(is.na(eol))]}.
 }
 \examples{
 set.seed(1)
