@@ -1,4 +1,5 @@
 
+library("bbotk")
 
 adversarial_space = ps(budget_id = p_fct(c("generation", "generation_lookahead")), generation = p_int(0, 10), generation_lookahead = p_lgl(),
   current_gen = p_int(0, 10), reeval = p_lgl(), next_fidelity = p_int(0, 10), inst = p_lgl(), rows = p_lgl(), selected = p_lgl())
