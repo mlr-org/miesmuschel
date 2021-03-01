@@ -124,10 +124,10 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
     fidelity_column = if (survivor_budget) "budget_survivors" else "budget_new"
     fidelity = fidelity_schedule[data.table(generation = current_gen), fidelity_column, on = "generation", roll = TRUE, with = FALSE]
     setnames(fidelity, budget_id)
-    offspring = cbind(offspring, fidelity)
+    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])
   }
 
-  eval_batch_handle_zero(inst, cbind(offspring, dob = current_gen, eol = NA_real_))
+  eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))
 }
 
 #' @title Re-Evaluate Configurations with Higher Fidelity
