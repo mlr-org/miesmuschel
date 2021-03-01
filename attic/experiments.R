@@ -57,3 +57,17 @@ tinytest::run_test_file("inst/tinytest/test_selector_best.R")
 tinytest::run_test_file("inst/tinytest/test_recombinator_xounif.R")
 
 tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
+
+tinytest::run_test_file("inst/tinytest/test_mies_init_population.R")
+
+
+objective <- ObjectiveRFun$new(
+  fun = function(xs) list(x = xs$x + 10),
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(x = p_dbl(tags = "maximize"))
+)
+oi <- OptimInstanceSingleCrit$new(objective, terminator = trm("none"))
+
+oi$eval_batch(data.table(x = 1, y = 2))
+
+oi$archive$data

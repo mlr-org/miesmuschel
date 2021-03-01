@@ -1,0 +1,70 @@
+
+
+adversarial_space = ps(budget_id = p_fct(c("generation", "generation_lookahead")), generation = p_int(0, 10), generation_lookahead = p_lgl(),
+  current_gen = p_int(0, 10), reeval = p_lgl(), next_fidelity = p_int(0, 10), inst = p_lgl(), rows = p_lgl(), selected = p_lgl())
+
+objective = ObjectiveRFun$new(
+  fun = function(xs) {
+    z = exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+objective_invertible = ObjectiveRFun$new(
+  fun = function(xs) {
+    z = exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    if (xs$invert) z = -z
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), invert = p_lgl()),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+objective_budget = ObjectiveRFun$new(
+  fun = function(xs) {
+    z = exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    z = z + rnorm(1, sd = 1 / sqrt(xs$b))
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4),
+    b = p_int(1, tags = "budget")),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+get_objective_passthrough = function(directions, small = FALSE, extra = character(0)) {
+  assert_subset(directions, c("minimize", "maximize"))
+  ObjectiveRFun$new(
+    fun = function(xs) {
+      x = xs[paste0("p", seq_along(directions))]
+      names(x) = paste0("pout", seq_along(directions))
+      x
+    },
+    domain = ParamSet$new(c(
+      lapply(seq_along(directions), function(x) ParamDbl$new(paste0("p", x), -10, 10)),
+      if (!small) adversarial_space$params,
+      lapply(extra, function(x) ParamDbl$new(x, -10, 10))
+    )),
+    codomain = ParamSet$new(lapply(seq_along(directions), function(x) ParamDbl$new(paste0("pout", x), -10, 10, tags = directions[[x]])))
+  )
+}
+
+as_oi = function(objective, search_space = NULL, terminator = trm("none")) {
+  if (length(unlist(lapply(c("minimize", "maximize"), function(x) objective$codomain$ids(tags = x)))) > 1) {
+    OptimInstanceMultiCrit$new(objective, search_space = search_space, terminator = terminator)
+  } else {
+    OptimInstanceSingleCrit$new(objective, search_space = search_space, terminator = terminator)
+  }
+}
+
+generate_increasing_sampler = function(param_set) {
+  SamplerHierarchical$new(param_set,
+    lapply(param_set$params, function(p) Sampler1DRfun$new(param = p, rfun = function(n) seq_len(n)))
+  )
+}
+
+generate_design_increasing = function(param_set, n) {
+  generate_increasing_sampler(param_set)$sample(n)
+}
+

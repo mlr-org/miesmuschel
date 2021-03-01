@@ -108,7 +108,8 @@
 #' oi$archive
 #' @export
 mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
+
   offspring = as.data.table(assert_data_frame(offspring))
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
@@ -233,7 +234,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #' oi$archive
 #' @export
 mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
   assert_flag(generation_lookahead)
   assert_flag(current_gen_only)
   assert_flag(monotonic)
@@ -320,7 +321,8 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 #' oi$archive
 #' @export
 mies_survival_plus = function(inst, mu, survival_selector, ...) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
+
   assert_int(mu, lower = 1, tol = 1e-100)
   data = inst$archive$data
 
@@ -405,7 +407,8 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #' oi$archive
 #' @export
 mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selector, ...) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
+
   assert_int(mu, lower = 1, tol = 1e-100)
   assert_int(n_elite, lower = 0, upper = mu - 1, tol = 1e-100)
 
@@ -501,6 +504,8 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
   assert_r6(search_space, "ParamSet")
   assert_r6(additional_components, "ParamSet", null.ok = TRUE)
   assert_choice(budget_id, search_space$ids(), null.ok = TRUE)
+  assert_names(search_space$ids(), disjunct.from = reserved_component_names)
+  assert_names(additional_components$ids(), disjunct.from = reserved_component_names)
 
   if (is.null(additional_components)) {
     full_search_space = search_space
@@ -597,7 +602,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #'     budget_survivors = c(2, 3)
 #'   ), budget_id = "y",
 #'   additional_component_sampler = Sampler1DRfun$new(
-#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
 #'   )
 #' )
 #'
@@ -608,7 +613,7 @@ mies_prime_operators = function(mutators = list(), recombinators = list(), selec
 #'
 #' @export
 mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL, additional_component_sampler = NULL) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
 
   assert_int(mu, lower = 1, tol = 1e-100)
   assert_function(initializer, nargs = 2)
@@ -629,11 +634,15 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   if (any(c("dob", "eol") %in% ac_ids)) {
     stop("'dob' and 'eol' may not be additional component dimensions.")
   }
+  assert_names(ac_ids, disjunct.from = reserved_component_names)
   if (any(ss_ids %in% ac_ids)) {
     stopf("Search space and additional components name clash: %s", str_collapse(intersect(ss_ids, ac_ids)))
   }
+  if (any(inst$objective$codomain$ids() %in% ac_ids)) {
+    stopf("Objective codomain and additional components name clash: %s", str_collapse(intersect(inst$objective$codomain$ids(), ac_ids)))
+  }
   if (any(ac_ids %in% present_cols) && !all(ac_ids %in% present_cols)) {
-    stopf("Some, but not all, additoinal components already in archive: %s", str_collapse(intersect(present_cols, ac_ids)))
+    stopf("Some, but not all, additional components already in archive: %s", str_collapse(intersect(present_cols, ac_ids)))
   }
   dob = batch_nr = NULL
   if (nrow(inst$archive$data)) {
@@ -650,7 +659,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
     assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
   }
-  alive = which(is.na(inst$archive$eol))
+  alive = which(is.na(inst$archive$data$eol))
   n_alive = length(alive)
   mu_remaining = mu - n_alive
 
@@ -660,7 +669,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   # at those rows where there are alive individuals!)
   additional_needed = mu  # how many more rows of additional components need to be sampled. by default: mu
   row_insert = last(alive, mu)  # at what rows of `data` the components are inserted
-  if (n_alive && all(ac_ids %in% present_cols)) {
+  if (n_alive && length(ac_ids) && all(ac_ids %in% present_cols)) {
     # additional components already present in the archive. Let's check if there are any rows with NAs.
     missing_info = is.na(data[row_insert, ac_ids, with = FALSE])
     any_missing_ac = apply(missing_info, 1, all)
@@ -766,7 +775,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 #'
 #' @export
 mies_get_fitnesses = function(inst, rows) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
 
   multiplier = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
   fitnesses = as.matrix(inst$archive$data[rows, inst$archive$codomain$ids()[multiplier != 0], with = FALSE])
@@ -870,7 +879,7 @@ mies_get_fitnesses = function(inst, rows) {
 #' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
 #' @export
 mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
 
   assert_r6(selector, "Selector")
   assert_true(selector$is_primed)
@@ -998,7 +1007,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'
 #' @export
 mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator = NULL, recombinator = NULL, budget_id = NULL) {
-  assert_r6(inst, "OptimInstance")
+  assert_optim_instance(inst)
 
   assert_int(lambda, lower = 1, tol = 1e-100)
   assert_r6(parent_selector, "Selector", null.ok = TRUE)

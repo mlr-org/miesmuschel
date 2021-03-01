@@ -111,6 +111,10 @@ eval_batch_handle_zero = function(inst, xdt) {
   invisible(as.data.table(lapply(result_types, typegen)))
 }
 
+## Component names that can not be used inside MIES functions
+reserved_component_names = c("x_domain", "timestamp", "batch_nr", "eol", "dob")
+
+
 # tolerance of numeric configuration parameter bounds
 default_tol = sqrt(.Machine$double.eps)
 
@@ -124,4 +128,18 @@ default_tol = sqrt(.Machine$double.eps)
 tol_bound = function(bound, side = c("lower", "upper"), tol = default_tol) {
   side = match.arg(side)
   bound + tol * pmax(1, bound) * switch(side, lower = -1, upper = 1)
+}
+
+# Check that the optiminstance is OK for us:
+# - is an OptimInstance R6 object
+# - neither search_space nor codomain contain reserved components
+# - no overlap in names between domain and codomain
+assert_optim_instance = function(inst) {
+  assert_r6(inst, "OptimInstance")
+  search_space_ids = inst$search_space$ids()
+  codomain_ids = inst$objective$codomain$ids()
+  assert_names(search_space_ids, disjunct.from = reserved_component_names)
+  assert_names(codomain_ids, disjunct.from = reserved_component_names)
+  assert_names(search_space_ids, disjunct.from = codomain_ids)
+  invisible(inst)
 }
