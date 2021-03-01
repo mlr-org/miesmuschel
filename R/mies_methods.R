@@ -803,6 +803,9 @@ mies_get_fitnesses = function(inst, rows) {
 #'
 #' It is not strictly necessary for the selector to select unique individuals / individuals without replacement.
 #'
+#' Individuals are selected independently of whether they are "alive" or not. To select only from alive individuals,
+#' set `rows` to `inst$archive$data[, which(is.na(eol))]`.
+#'
 #' @template param_inst
 #' @param n_select (`integer(1)`)\cr
 #'   Number of individuals to select.
