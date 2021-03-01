@@ -23,6 +23,7 @@ Imports:
 Suggests:
   tinytest,
   mlr3tuning,
+  mlr3,
   rpart
 Remotes:
   mlr-org/bbotk

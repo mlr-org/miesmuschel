@@ -30,6 +30,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     initialize = function(set, shadowed) {
       private$.set = assert_r6(set, "ParamSet")
       private$.shadowed = assert_subset(shadowed, set$ids())
+      id = on = NULL
       baddeps = set$deps[(id %in% private$.shadowed) != (on %in% private$.shadowed), id]
       if (length(baddeps)) {
         stop("Params %s have dependencies that reach across shadow bounds", str_collapse(baddeps))
@@ -102,6 +103,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       if (!missing(rhs)) {
         stop("deps is read-only")
       }
+      id = on = NULL
       rbind(private$.set$deps[!id %in% private$.shadowed & !on %in% private$.shadowed, ],
         private$.deps)
     },
