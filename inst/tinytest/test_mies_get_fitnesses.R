@@ -7,7 +7,7 @@ oibigmultimin = as_oi(get_objective_passthrough(c("minimize", "minimize"), FALSE
 oibigmultimax = as_oi(get_objective_passthrough(c("maximize", "maximize"), FALSE, "bud"))
 oibigmultiboth = as_oi(get_objective_passthrough(c("minimize", "maximize"), FALSE, "bud"))
 
-design = cbind(generate_design_random(oibig$search_space, 9)$data[, bud := c(1, 1, 1, 3, 3, 7, 5, 5, 9)],
+design = cbind(generate_design_random(oibigmin$search_space, 9)$data[, bud := c(1, 1, 1, 3, 3, 7, 5, 5, 9)],
   data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
 )
 
