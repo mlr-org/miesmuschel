@@ -141,6 +141,13 @@ fidelity_schedule = data.frame(
   budget_new = c(1, 2),
   budget_survivors = c(2, 3)
 )
+
+expect_error(mies_init_population(inst = oibu, mu = 3, initializer = generate_design_increasing, fidelity_schedule = fidelity_schedule),
+  "budget_id.*not 'NULL'")
+
+expect_error(mies_init_population(inst = oibu, mu = 3, initializer = generate_design_increasing, budget_id = "bud"),
+  "fidelity_schedule.*must be a data.frame")
+
 mies_init_population(inst = oibu, mu = 3, initializer = generate_design_increasing, fidelity_schedule = fidelity_schedule, budget_id = "bud")
 expected_archive = data.table(p1 = 1:3, bud = 2, dob = 1, eol = NA_real_, pout1 = 1:3, x_domain = lapply(1:3, function(x) list(p1 = x, bud = 2)), batch_nr = 1)
 expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
