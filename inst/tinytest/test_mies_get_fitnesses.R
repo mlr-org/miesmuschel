@@ -11,7 +11,7 @@ design = cbind(generate_design_random(oibigmin$search_space, 9)$data[, bud := c(
   data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
 )
 
-designmultiobj = cbind(generate_design_random(oibigmulti$search_space, 9)$data[, bud := c(1, 1, 1, 3, 3, 7, 5, 5, 9)],
+designmultiobj = cbind(generate_design_random(oibigmultiboth$search_space, 9)$data[, bud := c(1, 1, 1, 3, 3, 7, 5, 5, 9)],
   data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
 )
 
