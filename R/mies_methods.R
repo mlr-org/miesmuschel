@@ -246,8 +246,8 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 
   if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
 
-  assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
+  assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
   next_fidelity = fidelity_schedule[data.table(generation = current_gen + generation_lookahead), "budget_survivors", on = "generation", roll = TRUE, with = FALSE][[1]]
 
@@ -256,7 +256,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 
   set(data, reeval, "eol", current_gen)
   indivs = data[reeval, inst$search_space$ids(), with = FALSE]
-  indivs[, (budget_id) := next_fidelity]
+  set(indivs, , budget_id, next_fidelity)
 
   # I hate this... but there seems to be no way to avoid the TerminatorGenerations from terminating here :-(
   # What happens here is that we decrease dob by 1 everywhere, evaluate with current-generation-minus-one,
@@ -329,8 +329,8 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
   alive = which(is.na(data$eol))
   if (!length(alive)) stop("No alive individuals. Need to run mies_init_population()?")
 
-  assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
+  assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
   survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
   if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
@@ -413,8 +413,8 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   assert_int(n_elite, lower = 0, upper = mu - 1, tol = 1e-100)
 
   data = inst$archive$data
-  assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
+  assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, tol = 1e-100)
   alive_before = data[, which(is.na(eol) & dob != max(dob))]
   current_offspring = data[, which(is.na(eol) & dob == max(dob))]
 
@@ -657,8 +657,8 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
       inst$archive$data[, dob := 0]
     }
     data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we need to be careful with copies of data!
-    assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-    assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
+    assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+    assert_integerish(data$eol, lower = 0, tol = 1e-100)
   }
   alive = which(is.na(inst$archive$data$eol))
   n_alive = length(alive)
@@ -1019,8 +1019,8 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   if (!is.null(recombinator)) assert_true(recombinator$is_primed)
 
   data = inst$archive$data
-  assert_integerish(data$dob, lower = 0, upper = inst$archive$n_batch, any.missing = FALSE, tol = 1e-100)
-  assert_integerish(data$eol, lower = 0, upper = inst$archive$n_batch, tol = 1e-100)
+  assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = TRUE)
