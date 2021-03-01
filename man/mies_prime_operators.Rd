@@ -5,15 +5,18 @@
 \title{Prime MIES Operators}
 \usage{
 mies_prime_operators(
+  search_space,
   mutators = list(),
   recombinators = list(),
   selectors = list(),
-  search_space,
   additional_components = NULL,
   budget_id = NULL
 )
 }
 \arguments{
+\item{search_space}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{\link[bbotk:OptimInstance]{OptimInstance}} to be optimized.}
+
 \item{mutators}{(\code{list} of \code{\link{Mutator}})\cr
 \code{\link{Mutator}} objects to prime. May be empty (default).}
 
@@ -22,9 +25,6 @@ mies_prime_operators(
 
 \item{selectors}{(\code{list} of \code{\link{Selector}})\cr
 \code{\link{Selector}} objects to prime. May be empty (default).}
-
-\item{search_space}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
-Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{\link[bbotk:OptimInstance]{OptimInstance}} to be optimized.}
 
 \item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
 Additional components to optimize over, not included in \code{search_space}, but possibly used for self-adaption. This must be the \code{\link[paradox:ParamSet]{ParamSet}}
@@ -71,8 +71,8 @@ r = rec("xounif")
 s1 = sel("best")
 s2 = sel("random")
 
-mies_prime_operators(mutators = list(m), recombinators = list(r),
-  selectors = list(s1, s2), search_space = search_space,
+mies_prime_operators(search_space, mutators = list(m),
+  recombinators = list(r), selectors = list(s1, s2),
   additional_components = additional_components, budget_id = budget_id
 )
 

@@ -87,7 +87,7 @@ m = mut("gauss", sdev = 0.1)
 r = rec("xounif")
 s = sel("random", replace = TRUE)
 # Operators must be primed
-mies_prime_operators(list(m), list(r), list(s), objective$domain)
+mies_prime_operators(objective$domain, list(m), list(r), list(s))
 
 # We would normally call mies_init_population, but for reproducibility
 # we are going to evaluate three given points

@@ -10,7 +10,8 @@ mies_step_fidelity(
   budget_id,
   generation_lookahead = TRUE,
   current_gen_only = FALSE,
-  monotonic = TRUE
+  monotonic = TRUE,
+  additional_components = NULL
 )
 }
 \arguments{
@@ -38,6 +39,10 @@ generations (i.e. when a different row from \code{fidelity_schedule} is used).}
 
 \item{monotonic}{(\code{logical(1)})\cr
 Whether to only re-evaluate configurations for which the fidelity would increase. Default \code{TRUE}.}
+
+\item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
+Additional components to optimize over, not included in \code{search_space}, but possibly used for self-adaption. This must be the \code{\link[paradox:ParamSet]{ParamSet}}
+of \code{mies_init_population()}'s \code{additional_component_sampler} argument.}
 }
 \value{
 \link{invisible} \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
@@ -57,6 +62,8 @@ were evaluated. The evaluations are done as part of the \emph{current} generatio
 
 This function should only be called when doing rolling-tide multifidelity, and should not be part of the
 MIES cycle otherwise.
+
+Note that the multifidelity functionality is experimental and the UI may change in the future.
 }
 \examples{
 library("bbotk")

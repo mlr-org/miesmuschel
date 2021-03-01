@@ -167,6 +167,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'   generations (i.e. when a different row from `fidelity_schedule` is used).
 #' @param monotonic (`logical(1)`)\cr
 #'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
+#' @template param_additional_components
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
@@ -233,14 +234,22 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'
 #' oi$archive
 #' @export
-mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE) {
+mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL) {
   assert_optim_instance(inst)
   assert_flag(generation_lookahead)
   assert_flag(current_gen_only)
   assert_flag(monotonic)
+  assert_r6(additional_components, "ParamSet", null.ok = TRUE)
+  ss_ids = inst$search_space$ids()
+  ac_ids = character(0)
+  if (!is.null(additional_components)) {
+    ac_ids = additional_components$ids()
+    assert_names(ac_ids, disjunct.from = reserved_component_names, .var.name = "IDs of additional_components")
+    assert_names(ac_ids, disjunct.from = ss_ids, .var.name = "IDs of additional_components")
+  }
   data = inst$archive$data
   current_gen = max(data$dob, 0)
-  assert_choice(budget_id, inst$search_space$ids())
+  assert_choice(budget_id, ss_ids)
   assert(check_fidelity_schedule(fidelity_schedule))
   fidelity_schedule = as.data.table(fidelity_schedule)
 
@@ -255,7 +264,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], next_fidelity))
 
   set(data, reeval, "eol", current_gen)
-  indivs = data[reeval, inst$search_space$ids(), with = FALSE]
+  indivs = data[reeval, c(ss_ids, ac_ids), with = FALSE]
   set(indivs, , budget_id, next_fidelity)
 
   # I hate this... but there seems to be no way to avoid the TerminatorGenerations from terminating here :-(
@@ -464,9 +473,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'   [`Recombinator`] objects to prime. May be empty (default).
 #' @param selectors (`list` of [`Selector`])\cr
 #'   [`Selector`] objects to prime. May be empty (default).
-#' @param additional_components ([`ParamSet`][paradox::ParamSet] | `NULL`)\cr
-#'   Additional components to optimize over, not included in `search_space`, but possibly used for self-adaption. This must be the [`ParamSet`][paradox::ParamSet]
-#'   of `mies_init_population()`'s `additional_component_sampler` argument.
+#' @template param_additional_components
 #' @param budget_id (`character(1)` | `NULL`)\cr
 #'   Budget component used for multi-fidelity optimization.
 #' @return `invisible` named `list` with entries `$mutators` (`list` of [`Mutator`], primed `mutators`), `$recombinators` (`list` of [`Recombinator`], primed `recombinators`),

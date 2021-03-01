@@ -31,7 +31,8 @@ components that are not in the objective's search space, the \code{additional_co
 are atomic columns assigned to the \code{budget_id} component of \code{offspring}; which one is chosen depends on \code{survivor_budget}.
 \code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
 \code{generation == 1} must be present.\cr
-This value may be \code{NULL} if no multi-fidelity optimization is performed (the default).}
+This value may be \code{NULL} if no multi-fidelity optimization is performed (the default).\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.}
 
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
 Budget component that is set to the value found in \code{fidelity_schedule} when doing multi-fidelity optimization. Should be \code{NULL}
@@ -100,7 +101,7 @@ mies_init_population(inst = oi, mu = 3,
     budget_survivors = c(2, 3)
   ), budget_id = "y",
   additional_component_sampler = Sampler1DRfun$new(
-    param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+    param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
   )
 )
 

@@ -49,6 +49,8 @@ The \code{fidelity_schedule} configuration parameter's \code{"generation"} colum
 generation that is listed, and becomes inactive whenever a different row becomes active. So e.g. if \code{fidelity_schedule} contains a row
 with \code{"generation"} set to 1, and one set to 4, then the first row is active during generations 1, 2, and 3, and the second row
 is active for all following generations.
+
+Note that the multifidelity functionality is experimental and the UI may change in the future.
 }
 
 \section{Additional Components}{
@@ -103,24 +105,28 @@ Table that determines the value of the "budget" component of individuals being e
 This is equivalent to the \code{fidelity_schedule} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, \code{\link[=mies_evaluate_offspring]{mies_evaluate_offspring()}}, and \code{\link[=mies_step_fidelity]{mies_step_fidelity()}};
 see there for more information.\cr
 When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to a \code{data.frame} containing one row
-for generation 1, setting budget to 1 for both new and survivor individuals.
+for generation 1, setting budget to 1 for both new and survivor individuals.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.
 \item \code{fidelity_generation_lookahead} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 Whether to use the \code{"survivor_budget"} of the \emph{next} generation, instead of the \emph{current} generation, when doing fidelity refinement
 in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}.
 This is equivalent to the \code{generation_lookahead} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.
 \item \code{fidelity_current_gen_only} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 When doing fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, whether to refine all individuals with different budget component,
 or only individuals created in the current generation.
 This is equivalent to the \code{current_gen_only} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.
 \item \code{fidelity_monotonic} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 Whether to only do fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}} for individuals for which the when budget component value would \emph{increase}.
 This is equivalent to the \code{monotonic} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.
 }
 }
 

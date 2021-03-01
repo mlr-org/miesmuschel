@@ -107,7 +107,7 @@ oi$archive
 mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
 
 # Correct: selector must be primed on search space + additional component
-mies_prime_operators(selectors = list(s), search_space = oi$search_space,
+mies_prime_operators(oi$search_space, selectors = list(s),
   additional_components = ps(additional = p_dbl(-1, 1)))
 
 mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)

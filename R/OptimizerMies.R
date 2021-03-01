@@ -372,9 +372,10 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           length(budget_id), str_collapse(budget_id))
       }
 
+      additional_components = params$additional_component_sampler$param_set
       mies_prime_operators(mutators = list(self$mutator), recombinators = list(self$recombinator),
         selectors = discard(list(self$survival_selector, self$parent_selector, self$elite_selector), is.null),
-        search_space = inst$search_space, additional_components = params$additional_component_sampler$param_set,
+        search_space = inst$search_space, additional_components = additional_components,
         budget_id = budget_id)
 
       mies_init_population(inst, mu = params$mu, initializer = params$initializer, fidelity_schedule = params$fidelity_schedule,
@@ -387,7 +388,8 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       repeat {
         if (!is.null(params$fidelity_schedule)) {
           mies_step_fidelity(inst, params$fidelity_schedule, budget_id, generation_lookahead = params$fidelity_generation_lookahead,
-            current_gen_only = params$fidelity_current_gen_only, monotonic = params$fidelity_monotonic)
+            current_gen_only = params$fidelity_current_gen_only, monotonic = params$fidelity_monotonic,
+            additional_components = additional_components)
         }
         offspring = mies_generate_offspring(inst, lambda = params$lambda,
           parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator, budget_id = budget_id)

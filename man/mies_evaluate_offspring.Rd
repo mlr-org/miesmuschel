@@ -24,14 +24,16 @@ Proposed configurations to be evaluated, must have columns named after the \code
 are atomic columns assigned to the \code{budget_id} component of \code{offspring}; which one is chosen depends on \code{survivor_budget}.
 \code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
 \code{generation == 1} must be present.\cr
-This value may be \code{NULL} if no multi-fidelity optimization is performed (the default).}
+This value may be \code{NULL} if no multi-fidelity optimization is performed (the default).\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.}
 
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
 Budget component that is set to the value found in \code{fidelity_schedule} when doing multi-fidelity optimization. Should be \code{NULL}
 when and only when \code{fidelity_schedule} is \code{NULL}.}
 
 \item{survivor_budget}{(\code{logical(1)})\cr
-When doing multi-fidelity optimization, determines which column of \code{fidelity_schedule} to use to determine the budget component value.}
+When doing multi-fidelity optimization, determines which column of \code{fidelity_schedule} to use to determine the budget component value.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.}
 }
 \value{
 \link{invisible} \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
