@@ -456,14 +456,14 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'
 #' If neither additional components nor multi-fidelity optimization is used, it is also possible to use the `$prime()` function of hte [`MiesOperator`]s
 #' directly, although using `mies_prime_operators()` gives flexibility for future extension.
+#' @param search_space ([`ParamSet`][paradox::ParamSet])\cr
+#'   Search space of the [`Objective`][bbotk::Objective] or [`OptimInstance`][bbotk::OptimInstance] to be optimized.
 #' @param mutators (`list` of [`Mutator`])\cr
 #'   [`Mutator`] objects to prime. May be empty (default).
 #' @param recombinators (`list` of [`Recombinator`])\cr
 #'   [`Recombinator`] objects to prime. May be empty (default).
 #' @param selectors (`list` of [`Selector`])\cr
 #'   [`Selector`] objects to prime. May be empty (default).
-#' @param search_space ([`ParamSet`][paradox::ParamSet])\cr
-#'   Search space of the [`Objective`][bbotk::Objective] or [`OptimInstance`][bbotk::OptimInstance] to be optimized.
 #' @param additional_components ([`ParamSet`][paradox::ParamSet] | `NULL`)\cr
 #'   Additional components to optimize over, not included in `search_space`, but possibly used for self-adaption. This must be the [`ParamSet`][paradox::ParamSet]
 #'   of `mies_init_population()`'s `additional_component_sampler` argument.
@@ -484,8 +484,8 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #' s1 = sel("best")
 #' s2 = sel("random")
 #'
-#' mies_prime_operators(mutators = list(m), recombinators = list(r),
-#'   selectors = list(s1, s2), search_space = search_space,
+#' mies_prime_operators(search_space, mutators = list(m),
+#'   recombinators = list(r), selectors = list(s1, s2),
 #'   additional_components = additional_components, budget_id = budget_id
 #' )
 #'
@@ -497,7 +497,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #' s1$primed_ps
 #' s2$primed_ps
 #' @export
-mies_prime_operators = function(mutators = list(), recombinators = list(), selectors = list(), search_space, additional_components = NULL, budget_id = NULL) {
+mies_prime_operators = function(search_space, mutators = list(), recombinators = list(), selectors = list(), additional_components = NULL, budget_id = NULL) {
   assert_list(mutators, types = "Mutator", any.missing = FALSE)
   assert_list(recombinators, types = "Recombinator", any.missing = FALSE)
   assert_list(selectors, types = "Selector", any.missing = FALSE)
@@ -873,7 +873,7 @@ mies_get_fitnesses = function(inst, rows) {
 #' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
 #'
 #' # Correct: selector must be primed on search space + additional component
-#' mies_prime_operators(selectors = list(s), search_space = oi$search_space,
+#' mies_prime_operators(oi$search_space, selectors = list(s),
 #'   additional_components = ps(additional = p_dbl(-1, 1)))
 #'
 #' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
@@ -975,7 +975,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' r = rec("xounif")
 #' s = sel("random", replace = TRUE)
 #' # Operators must be primed
-#' mies_prime_operators(list(m), list(r), list(s), objective$domain)
+#' mies_prime_operators(objective$domain, list(m), list(r), list(s))
 #'
 #' # We would normally call mies_init_population, but for reproducibility
 #' # we are going to evaluate three given points
