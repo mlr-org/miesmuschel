@@ -1,0 +1,167 @@
+
+
+source("setup.R", local = TRUE)
+
+oibig = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
+
+design = cbind(generate_design_random(oibig$search_space, 9)$data[, bud := c(1, 1, 1, 3, 3, 7, 5, 5, 9)],
+  data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
+)
+
+ac = ps(additional = p_int(1, 9))
+
+expect_reevald = function(rows, budget, oi, additional = TRUE) {
+  expected_archive = rbind(
+    cbind(copy(design), batch_nr = 1, pout1 = design$p1)[rows, eol := 3],
+    cbind(copy(design), batch_nr = 2, pout1 = design$p1)[, dob := 3][, bud := budget][rows]
+  )
+  expected_archive$x_domain = transpose_list(expected_archive[, oi$search_space$ids(), with = FALSE])
+  if (!additional) expected_archive[, additional := NULL]
+  expect_equal(copy(oi$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
+#  print(copy(oi$archive$data)[, timestamp := NULL][])
+#  print(expected_archive)
+}
+
+oibig$clear()
+oibig$eval_batch(design)
+expect_reevald(integer(0), 1, oibig)
+
+# no reeval: budget is 1, the smallest, and reeval is monotonic
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 1
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac)
+expect_reevald(integer(0), 1, oibig)
+
+# reeval of rows 2:3 (alive with budget 1)
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 2
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac)
+expect_reevald(2:3, 2, oibig)
+
+
+# reeval 2:3, 5, 8 (budget 6)
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 6
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac)
+expect_reevald(c(2:3, 5, 8), 6, oibig)
+
+# no reeval
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 6,
+  budget_survivors = 1
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac)
+expect_reevald(integer(0), 6, oibig)
+
+
+# reeval 2:3, 5, 8 (budget 6): generation lookahead
+fidelity_schedule = data.frame(
+  generation = c(1, 3, 4),
+  budget_new = c(1, 2, 3),
+  budget_survivors = c(1, 4, 6)
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac)
+expect_reevald(c(2:3, 5, 8), 6, oibig)
+
+# reeval 2:3, 5 (budget 4): no generation lookahead
+fidelity_schedule = data.frame(
+  generation = c(1, 3, 4),
+  budget_new = c(1, 2, 3),
+  budget_survivors = c(1, 4, 6)
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac, generation_lookahead = FALSE)
+expect_reevald(c(2:3, 5), 4, oibig)
+
+# reeval 8 (budget 6): current gen only
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 6
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac, current_gen_only = TRUE)
+expect_reevald(8, 6, oibig)
+
+# no reeval: current gen only
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 5
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac, current_gen_only = TRUE)
+expect_reevald(integer(0), 6, oibig)
+
+# reeval 9: current gen only, nonmonotonic
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 5
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac, current_gen_only = TRUE, monotonic = FALSE)
+expect_reevald(9, 5, oibig)
+
+# reeval 2:3, 5:6, 9: current gen only, nonmonotonic
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 5
+)
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac, monotonic = FALSE)
+expect_reevald(c(2:3, 5:6, 9), 5, oibig)
+
+# reeval 2:3, 5:6, 9: current gen only, nonmonotonic; no additional component
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 5
+)
+oibig$clear()
+oibig$eval_batch(copy(design)[, additional := NULL])
+mies_step_fidelity(oibig, fidelity_schedule, "bud", monotonic = FALSE)
+expect_reevald(c(2:3, 5:6, 9), 5, oibig, additional = FALSE)
+
+# no reeval: current gen only; no additional component
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 5
+)
+oibig$clear()
+oibig$eval_batch(copy(design)[, additional := NULL])
+mies_step_fidelity(oibig, fidelity_schedule, "bud", current_gen_only = TRUE)
+expect_reevald(integer(0), 5, oibig, additional = FALSE)
+
+
+# what columns do we have? archive$cols_y, timestamp, batch_nr, x_domain
+
+
+# generation terminator not triggeredb
