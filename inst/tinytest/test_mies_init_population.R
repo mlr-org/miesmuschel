@@ -11,10 +11,18 @@ expect_error(mies_init_population(oismall, mu = 2,
 expect_error(mies_init_population(oismall, mu = 2,
   additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("eol", 0, 1), rfun = function(n) rep(0, n))), "eol.*may not be additional component")
 
+expect_error(mies_init_population(oismall, mu = 2,
+  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("p1", 0, 1), rfun = function(n) rep(0, n))), "Search space and additional copmonents name clash: p1")
+expect_error(mies_init_population(oismall, mu = 2,
+  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("pout1", 0, 1), rfun = function(n) rep(0, n))), "codomain and additional components name clash: pout1")
+
 oilarge = as_oi(get_objective_passthrough("minimize", FALSE))
 mies_init_population(oilarge, mu = 3)
 expect_data_table(oilarge$archive$data, nrow = 3)
 expect_true(oilarge$search_space$check_dt(oilarge$archive$data[, oilarge$search_space$ids(), with = FALSE]))
+
+oilarge$archive$data[, dob := NULL]
+expect_error(mies_init_population(oilarge, mu = 3), "'eol' but not 'dob' column found")
 
 # init empty archive with 3 samples
 mies_init_population(oismall, mu = 3, initializer = generate_design_increasing)
@@ -161,3 +169,6 @@ expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ign
 mies_init_population(inst = oibu, mu = 8, initializer = generate_design_increasing, fidelity_schedule = fidelity_schedule, budget_id = "bud")
 expected_archive = rbind(expected_archive, data.table(p1 = 1:3, bud = 3, dob = 3, eol = NA_real_, pout1 = 1:3, x_domain = lapply(1:3, function(x) list(p1 = x, bud = 3)), batch_nr = 3))
 expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
+
+
+# coverage

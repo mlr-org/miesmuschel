@@ -669,9 +669,6 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     assert(check_fidelity_schedule(fidelity_schedule))
   }
 
-  if (any(c("dob", "eol") %in% ss_ids)) {
-    stop("'dob' and 'eol' may not be search space dimensions.")
-  }
   if (any(c("dob", "eol") %in% ac_ids)) {
     stop("'dob' and 'eol' may not be additional component dimensions.")
   }
