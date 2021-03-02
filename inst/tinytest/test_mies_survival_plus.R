@@ -68,3 +68,7 @@ expect_equal(mies_survival_plus(oibigmultiboth, 1, sr), oibigmultiboth$archive$d
 expect_equal(sum(is.na(oibigmultiboth$archive$data$eol)), 1)
 expect_equal(oibigmultiboth$archive$data, archive_before[, eol := oibigmultiboth$archive$data$eol])
 
+# fill in coverage
+oibig$clear()
+oibig$eval_batch(copy(design)[, eol := NULL])
+expect_error(mies_survival_plus(oibig, 1, sb), "No alive individuals. Need to run mies_init_population")

@@ -193,3 +193,11 @@ expect_reevald(integer(0), 5, oibigmulti, multiobj = TRUE)
 
 
 # generation terminator not triggered
+
+
+
+# fill in coverage
+oibig$clear()
+oibig$eval_batch(copy(design)[, eol := NULL])
+
+expect_error(mies_step_fidelity(oibigmulti, fidelity_schedule, "bud"), "No alive individuals. Need to run mies_init_population")
