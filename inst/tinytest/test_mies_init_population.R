@@ -12,7 +12,8 @@ expect_error(mies_init_population(oismall, mu = 2,
   additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("eol", 0, 1), rfun = function(n) rep(0, n))), "eol.*may not be additional component")
 
 expect_error(mies_init_population(oismall, mu = 2,
-  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("p1", 0, 1), rfun = function(n) rep(0, n))), "Search space and additional copmonents name clash: p1")
+  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("p1", 0, 1), rfun = function(n) rep(0, n))), "Search space and additional components name clash: p1")
+
 expect_error(mies_init_population(oismall, mu = 2,
   additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("pout1", 0, 1), rfun = function(n) rep(0, n))), "codomain and additional components name clash: pout1")
 

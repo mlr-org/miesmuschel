@@ -140,6 +140,6 @@ assert_optim_instance = function(inst) {
   codomain_ids = inst$objective$codomain$ids()
   assert_names(search_space_ids, disjunct.from = reserved_component_names, .var.name = "inst$search_space$ids()")
   assert_names(codomain_ids, disjunct.from = reserved_component_names, .var.name = "inst$objective$codomain$ids()")
-  assert_names(search_space_ids, disjunct.from = codomain_ids, "inst$search_space$ids()")
+  assert_names(search_space_ids, disjunct.from = codomain_ids, .var.name = "inst$search_space$ids()")
   invisible(inst)
 }

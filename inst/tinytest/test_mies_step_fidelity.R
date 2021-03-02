@@ -33,6 +33,7 @@ oibig$clear()
 oibig$eval_batch(design)
 expect_reevald(integer(0), 1, oibig)
 
+
 # no reeval: budget is 1, the smallest, and reeval is monotonic
 fidelity_schedule = data.frame(
   generation = 1,
@@ -191,9 +192,35 @@ mies_step_fidelity(oibigmulti, fidelity_schedule, "bud", current_gen_only = TRUE
 expect_reevald(integer(0), 5, oibigmulti, multiobj = TRUE)
 
 
+oibig$clear()
+oibig$eval_batch(design)
+# termination during fidelity step does not change archive
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 2
+)
+archive_expected = copy(oibig$archive$data)
+oibig$terminator = bbotk::TerminatorEvals$new()
+oibig$terminator$param_set$values$n_evals = 9
+expect_error(mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac), class = "terminated_error", "TerminatorEvals")
+expect_equal(oibig$archive$data, archive_expected)
 
-# generation terminator not triggered
-
+# generation terminator doesn't trigger in fidelity step
+# reeval of rows 2:3 (alive with budget 1)
+fidelity_schedule = data.frame(
+  generation = 1,
+  budget_new = 1,
+  budget_survivors = 2
+)
+oibig$terminator = TerminatorGenerations$new()
+oibig$terminator$param_set$values$generations = 3
+oibig$clear()
+oibig$eval_batch(design)
+mies_step_fidelity(oibig, fidelity_schedule, "bud", additional_components = ac)  # no termination triggered
+expect_reevald(2:3, 2, oibig)
+expect_error(oibig$eval_batch(design), class = "terminated_error", "TerminatorGenerations")  # .. but not because the terminator doesn't do anything
+oibig$terminator = bbotk::TerminatorNone$new()
 
 
 # fill in coverage
