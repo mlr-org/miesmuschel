@@ -12,7 +12,9 @@ designmultiobj = cbind(generate_design_random(oibigmultiboth$search_space, 9)$da
   data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
 )
 
-sb = sel("best")$prime(oibigmax$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
+p = oibigmax$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9)))
+
+sb = sel("best")$prime(p)
 sr = sel("random")$prime(oibigmultiboth$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
 
 oibigmax$eval_batch(copy(design))
@@ -72,3 +74,12 @@ expect_equal(oibigmultiboth$archive$data, archive_before[, eol := oibigmultiboth
 oibigmax$clear()
 oibigmax$eval_batch(copy(design)[, eol := NULL])
 expect_error(mies_survival_plus(oibigmax, 1, sb), "No alive individuals. Need to run mies_init_population")
+
+
+# error when selector selects the same row twice
+sdb = SelectorDebug$new(function(v, f, n, p) {
+  c(1, seq_len(n - 1))
+})$prime(p)
+oibigmax$clear()
+oibigmax$eval_batch(copy(design))
+expect_error(mies_survival_plus(oibigmax, 3, sdb), "not generate duplicates")

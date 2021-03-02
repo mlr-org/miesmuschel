@@ -129,3 +129,11 @@ oibigmax$clear()
 oibigmax$eval_batch(copy(design)[, eol := NULL])
 expect_error(mies_survival_comma(oibigmax, 2, sb, n_elite = 1, elite_selector = sb), "No alive individuals. Need to run mies_init_population")
 
+# error when selector selects the same row twice
+sdb = SelectorDebug$new(function(v, f, n, p) {
+  c(1, seq_len(n - 1))
+})$prime(p)
+oibigmax$clear()
+oibigmax$eval_batch(copy(design))
+expect_error(mies_survival_comma(oibigmax, 3, sdb, n_elite = 1, elite_selector = sb), "survival_selector.*not generate duplicates")
+expect_error(mies_survival_comma(oibigmax, 3, sb, n_elite = 3, elite_selector = sdb), "elite_selector.*not generate duplicates")
