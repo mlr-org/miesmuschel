@@ -192,7 +192,4 @@ expect_reevald(integer(0), 5, oibigmulti, multiobj = TRUE)
 
 
 
-# what columns do we have? archive$cols_y, timestamp, batch_nr, x_domain
-
-
 # generation terminator not triggered
