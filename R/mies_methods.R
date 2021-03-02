@@ -434,7 +434,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   assert_optim_instance(inst)
 
   assert_int(mu, lower = 1, tol = 1e-100)
-  assert_int(n_elite, lower = 0, upper = mu - 1, tol = 1e-100)
+  assert_int(n_elite, lower = 0, upper = mu, tol = 1e-100)
 
   data = inst$archive$data
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
@@ -447,6 +447,8 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 
   if (mu - n_elite > length(current_offspring)) {
     survivors = current_offspring
+  } else if (mu - n_elite == 0) {  # don't use survival_selector when not needed.
+    survivors = integer(0)
   } else {
     survivors = if (mu > n_elite) mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
@@ -454,6 +456,8 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 
   if (n_elite > length(alive_before)) {
     elites = alive_before
+  } else if (n_elite == 0) {
+    elites = integer(0)
   } else {
     elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
     if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
@@ -462,7 +466,8 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   survivors = c(elites, survivors)
 
   died = setdiff(c(alive_before, current_offspring), survivors)
-  data[died, eol := max(dob)]
+  curgen = data[, max(dob)]
+  set(data, died, "eol", curgen)
 }
 
 #' @title Prime MIES Operators
