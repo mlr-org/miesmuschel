@@ -70,10 +70,12 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
         length(budget_id), str_collapse(budget_id))
 
       origin = params$aggregate(NULL)
+      aggregated = params$aggregate(archive$data[[budget_id]])
 
       c(
         max_steps = 100,
-        current_steps = floor((params$aggregate(archive$data[[budget_id]]) - origin) / (params$budget - origin) * 100)
+        # when budget <= origin, then we are terminated from the beginning, and want to avoid negative numbers / division by 0.
+        current_steps = if (params$budget <= origin) 100 else floor((aggregated - origin) / (params$budget - origin) * 100)
       )
     }
   )
