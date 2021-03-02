@@ -35,32 +35,32 @@
 
 lg = NULL
 
-reg_bbotk = function(...) {
+reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
   mlr_optimizers$add("mies", OptimizerMies)
 
   mlr_terminators = utils::getFromNamespace("mlr_terminators", ns = "bbotk")
   mlr_terminators$add("gens", TerminatorGenerations)
   mlr_terminators$add("budget", TerminatorBudget)
-}
+}  # nocov end
 
-reg_mlr3tuning = function(...) {
+reg_mlr3tuning = function(...) {  # nocov start
   if (requireNamespace("mlr3tuning", quietly = TRUE)) {
     mlr_tuners = utils::getFromNamespace("mlr_tuners", ns = "mlr3tuning")
     mlr_tuners$add("mies", TunerMies)
   }
-}
+}  # nocov end
 
-.onLoad = function(libname, pkgname) {
+.onLoad = function(libname, pkgname) {  # nocov start
   reg_bbotk()
   reg_mlr3tuning()
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
-}
+}  # nocov end
 
-.onUnload = function(libpath) {
+.onUnload = function(libpath) {  # nocov start
   for (pkg in c("bbotk", "mlr3tuning")) {
     load_event = packageEvent(pkg, "onLoad")
     setHook(load_event,
@@ -68,7 +68,7 @@ reg_mlr3tuning = function(...) {
       action = "replace"
     )
   }
-}
+}  # nocov end
 
 
 # static code checks should not complain about commonly used data.table columns

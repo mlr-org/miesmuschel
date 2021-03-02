@@ -17,7 +17,7 @@ ps_flatten = function(param_set, clone = TRUE) {
 # from the input `sets`, but some `$id`s are changed: If the ParamSet has a non-empty `set_id`, then the Params will
 # have their <id> changed to <set_id>.<id>. This is also reflected in deps and in `$trafo`.
 # @param sets: list of ParamSet
-ps_union = function(sets) {
+ps_union = function(sets) {  # nocov start
   assert_list(sets, types = "ParamSet")
   assert_names(discard(map_chr(sets, "set_id"), `==`, ""), type = "unique")
 
@@ -90,7 +90,7 @@ ps_union = function(sets) {
     }, setinfo, allnames)
   }
   newps
-}
+}  # nocov end
 
 # call inst$eval_batch(xdt), but handle the case where xdt has length 0 correctly.
 eval_batch_handle_zero = function(inst, xdt) {
@@ -138,8 +138,8 @@ assert_optim_instance = function(inst) {
   assert_r6(inst, "OptimInstance")
   search_space_ids = inst$search_space$ids()
   codomain_ids = inst$objective$codomain$ids()
-  assert_names(search_space_ids, disjunct.from = reserved_component_names)
-  assert_names(codomain_ids, disjunct.from = reserved_component_names)
-  assert_names(search_space_ids, disjunct.from = codomain_ids)
+  assert_names(search_space_ids, disjunct.from = reserved_component_names, .var.name = "inst$search_space$ids()")
+  assert_names(codomain_ids, disjunct.from = reserved_component_names, .var.name = "inst$objective$codomain$ids()")
+  assert_names(search_space_ids, disjunct.from = codomain_ids, "inst$search_space$ids()")
   invisible(inst)
 }
