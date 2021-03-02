@@ -199,5 +199,4 @@ expect_reevald(integer(0), 5, oibigmulti, multiobj = TRUE)
 # fill in coverage
 oibig$clear()
 oibig$eval_batch(copy(design)[, eol := NULL])
-
-expect_error(mies_step_fidelity(oibigmulti, fidelity_schedule, "bud"), "No alive individuals. Need to run mies_init_population")
+expect_error(mies_step_fidelity(oibig, fidelity_schedule, "bud"), "No alive individuals. Need to run mies_init_population")

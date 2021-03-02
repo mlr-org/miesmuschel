@@ -1062,6 +1062,9 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   if (!is.null(recombinator)) assert_true(recombinator$is_primed)
 
   data = inst$archive$data
+
+  if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
+
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, tol = 1e-100)
 

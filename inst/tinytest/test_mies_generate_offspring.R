@@ -87,3 +87,9 @@ expect_equal(mies_generate_offspring(oibig, 3, mutator = mutator, recombinator =
 expect_equal(mies_generate_offspring(oibig, 3, mutator = mutator, recombinator = getrec(2, 1))$p1 %% 1, c(0.11, 0.21, 0.31))
 expect_equal(mies_generate_offspring(oibig, 3, mutator = mutator, recombinator = getrec())[order(p1)][, -"p1", with = FALSE], design[c(9, 6, 8), -c("dob", "eol", "p1")])
 expect_equal(mies_generate_offspring(oibig, 4, mutator = mutator, recombinator = getrec(2))[order(p1)][, -"p1", with = FALSE], design[c(5, 9, 6, 8), -c("dob", "eol", "p1")])
+
+
+# error message advises initialization
+oibig$clear()
+oibig$eval_batch(copy(design)[, eol := NULL])
+expect_error(mies_generate_offspring(oibig, 10), "No alive individuals. Need to run mies_init_population")
