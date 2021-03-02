@@ -366,7 +366,9 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #' "elites" from survivors from previous generations using a different [`Selector`] operator.
 #'
 #' When `n_elite` is greater than the number of alive individuals from previous generations,
-#' then all these individuals from previous generations survive. Similarly, when `mu - n_elite` is greater
+#' then all these individuals from previous generations survive. In this case, it is
+#' possible that more than `mu - n_elite` individuals from the current generation survive.
+#' Similarly, when `mu` is greater
 #' than the number of alive individuals from the last generation, then all these individuals survive.
 #'
 #' @template param_inst
@@ -437,30 +439,33 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   assert_int(n_elite, lower = 0, upper = mu, tol = 1e-100)
 
   data = inst$archive$data
+
+  if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
+
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, tol = 1e-100)
+
+
   alive_before = data[, which(is.na(eol) & dob != max(dob))]
   current_offspring = data[, which(is.na(eol) & dob == max(dob))]
 
-  if (!length(alive_before)) stop("No alive individuals. Need to run mies_init_population()?")
-  if (!length(current_offspring)) stop("No current offspring. Need to run mies_evaluate_offspring()?")
+  if (n_elite > length(alive_before)) {
+    elites = alive_before
+    n_elite = length(alive_before)
+  } else if (n_elite == 0) {
+    elites = integer(0)
+  } else {
+    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
+    if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
+  }
 
   if (mu - n_elite > length(current_offspring)) {
     survivors = current_offspring
   } else if (mu - n_elite == 0) {  # don't use survival_selector when not needed.
     survivors = integer(0)
   } else {
-    survivors = if (mu > n_elite) mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
-  }
-
-  if (n_elite > length(alive_before)) {
-    elites = alive_before
-  } else if (n_elite == 0) {
-    elites = integer(0)
-  } else {
-    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
-    if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
   }
 
   survivors = c(elites, survivors)

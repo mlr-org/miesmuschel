@@ -43,12 +43,31 @@ expect_equal(oibigmax$archive$data, archive_before[8, eol := 3])
 expect_equal(mies_survival_comma(oibigmax, 3, sb, n_elite = 0), oibigmax$archive$data)
 expect_equal(oibigmax$archive$data, archive_before[5:6, eol := 3])
 
+# running when there are no elites
+expect_equal(mies_survival_comma(oibigmax, 1, sb, n_elite = 1, elite_selector = sb), oibigmax$archive$data)
+expect_equal(oibigmax$archive$data, archive_before)
+
 oibigmax$clear()
 oibigmax$eval_batch(design)
 archive_before$timestamp = oibigmax$archive$data$timestamp
 # no more elites (doesn't need elite_selector), killing non-elites at the same time
 expect_equal(mies_survival_comma(oibigmax, 1, sb, n_elite = 0), oibigmax$archive$data)
 expect_equal(oibigmax$archive$data, archive_before)
+
+oibigmax$clear()
+oibigmax$eval_batch(design)
+archive_before = copy(oibigmax$archive$data)
+# no more elites (doesn't need elite_selector)
+expect_equal(mies_survival_comma(oibigmax, 3, sb, n_elite = 0), oibigmax$archive$data)
+expect_equal(oibigmax$archive$data, archive_before[1:6, eol := 3])
+# n_elite > number of alive individuals doesn't break things
+expect_equal(mies_survival_comma(oibigmax, 3, sb, n_elite = 2), oibigmax$archive$data)
+expect_equal(oibigmax$archive$data, archive_before)
+# n_elite > number of alive individuals doesn't break things
+expect_equal(mies_survival_comma(oibigmax, 3, sb, n_elite = 2), oibigmax$archive$data)
+expect_equal(oibigmax$archive$data, archive_before)
+
+
 
 oibigmax$clear()
 oibigmax$eval_batch(design)
@@ -105,4 +124,8 @@ expect_equal(oibigmultiboth$archive$data, archive_before[8:9, eol := 3][1:6, eol
 
 
 
+# fill in coverage
+oibig$clear()
+oibig$eval_batch(copy(design)[, eol := NULL])
+expect_error(mies_survival_comma(oibig, 2, sb, n_elite = 1, elite_selector = sb), "No alive individuals. Need to run mies_init_population")
 

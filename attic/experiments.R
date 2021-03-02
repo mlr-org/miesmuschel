@@ -61,6 +61,9 @@ tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
 tinytest::run_test_file("inst/tinytest/test_mies_init_population.R")
 
 
+tinytest::run_test_file("inst/tinytest/test_mies_survival_comma.R")
+
+
 objective <- ObjectiveRFun$new(
   fun = function(xs) list(x = xs$x + 10),
   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
