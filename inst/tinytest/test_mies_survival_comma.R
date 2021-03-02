@@ -125,7 +125,7 @@ expect_equal(oibigmultiboth$archive$data, archive_before[8:9, eol := 3][1:6, eol
 
 
 # fill in coverage
-oibig$clear()
-oibig$eval_batch(copy(design)[, eol := NULL])
-expect_error(mies_survival_comma(oibig, 2, sb, n_elite = 1, elite_selector = sb), "No alive individuals. Need to run mies_init_population")
+oibigmax$clear()
+oibigmax$eval_batch(copy(design)[, eol := NULL])
+expect_error(mies_survival_comma(oibigmax, 2, sb, n_elite = 1, elite_selector = sb), "No alive individuals. Need to run mies_init_population")
 
