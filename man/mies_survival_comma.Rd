@@ -47,6 +47,10 @@ in-place with \code{eol} set to the current generation for non-survivors.
 Choose survivors during a MIES iteration using the "Comma" survival strategy, i.e.
 selecting survivors from the latest generation only, using a \code{\link{Selector}} operator, and choosing
 "elites" from survivors from previous generations using a different \code{\link{Selector}} operator.
+
+When \code{n_elite} is greater than the number of alive individuals from previous generations,
+then all these individuals from previous generations survive. Similarly, when \code{mu - n_elite} is greater
+than the number of alive individuals from the last generation, then all these individuals survive.
 }
 \examples{
 set.seed(1)

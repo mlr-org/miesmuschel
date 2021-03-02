@@ -32,6 +32,8 @@ in-place with \code{eol} set to the current generation for non-survivors.
 Choose survivors during a MIES iteration using the "Plus" survival strategy, i.e.
 combining all alive individuals from the latest and from prior generations indiscriminately and
 choosing survivors using a survival \code{\link{Selector}} operator.
+
+When \code{mu} is greater than the number of alive individuals, then all individuals survive.
 }
 \examples{
 set.seed(1)

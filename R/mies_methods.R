@@ -263,7 +263,6 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   comparator = if (monotonic) `<` else `!=`
   reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], next_fidelity))
 
-  set(data, reeval, "eol", current_gen)
   indivs = data[reeval, c(ss_ids, ac_ids), with = FALSE]
   set(indivs, , budget_id, next_fidelity)
 
@@ -277,7 +276,11 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   # stupid race condition. Hope we don't get trapped here...
   on.exit(inst$archive$data[, dob := dob + 1])
 
-  eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
+  ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
+
+  on.exit(set(data, reeval, "eol", current_gen))  # do this once we are done evaluating replacements, e.g. in case the terminator triggers
+
+  invisible(ret)
 }
 
 #' @title Choose Survivors According to the "Mu + Lambda" ("Plus") Strategy
@@ -286,6 +289,8 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 #' Choose survivors during a MIES iteration using the "Plus" survival strategy, i.e.
 #' combining all alive individuals from the latest and from prior generations indiscriminately and
 #' choosing survivors using a survival [`Selector`] operator.
+#'
+#' When `mu` is greater than the number of alive individuals, then all individuals survive.
 #'
 #' @template param_inst
 #' @template param_mu
@@ -341,10 +346,16 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
-  survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
-  if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+  if (length(alive) < mu) {
+    survivors = alive
+  } else {
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+  }
+
   died = setdiff(alive, survivors)
-  data[died, eol := max(dob)]
+  curgen = data[, max(dob)]
+  set(data, died, "eol", curgen)
 }
 
 #' @title Choose Survivors According to the "Mu , Lambda" ("Comma") Strategy
@@ -353,6 +364,10 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
 #' Choose survivors during a MIES iteration using the "Comma" survival strategy, i.e.
 #' selecting survivors from the latest generation only, using a [`Selector`] operator, and choosing
 #' "elites" from survivors from previous generations using a different [`Selector`] operator.
+#'
+#' When `n_elite` is greater than the number of alive individuals from previous generations,
+#' then all these individuals from previous generations survive. Similarly, when `mu - n_elite` is greater
+#' than the number of alive individuals from the last generation, then all these individuals survive.
 #'
 #' @template param_inst
 #' @template param_mu
@@ -430,11 +445,19 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   if (!length(alive_before)) stop("No alive individuals. Need to run mies_init_population()?")
   if (!length(current_offspring)) stop("No current offspring. Need to run mies_evaluate_offspring()?")
 
-  survivors = if (mu > n_elite) mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
-  if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+  if (mu - n_elite > length(current_offspring)) {
+    survivors = current_offspring
+  } else {
+    survivors = if (mu > n_elite) mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
+    if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+  }
 
-  elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
-  if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
+  if (n_elite > length(alive_before)) {
+    elites = alive_before
+  } else {
+    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
+    if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
+  }
 
   survivors = c(elites, survivors)
 
