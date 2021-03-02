@@ -278,7 +278,7 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
 
   ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
 
-  on.exit(set(data, reeval, "eol", current_gen))  # do this once we are done evaluating replacements, e.g. in case the terminator triggers
+  set(data, reeval, "eol", current_gen)  # do this once we are done evaluating replacements, e.g. in case the terminator triggers
 
   invisible(ret)
 }
