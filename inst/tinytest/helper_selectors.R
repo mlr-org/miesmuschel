@@ -73,3 +73,19 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
 
   expect_false(sel$endomorphism)
 }
+
+SelectorDebug = R6::R6Class("SelectorDebug",
+  inherit = Selector,
+  public = list(
+    handler = NULL,
+    initialize = function(handler, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {
+      self$handler = assert_function(handler, args = c("v", "f", "n", "p"), ordered = TRUE)
+      super$initialize(param_classes = param_classes, param_set = param_set, supported = supported)
+    }
+  ),
+  private = list(
+    .select = function(values, fitnesses, n_select) {
+      self$handler(v = values, f = fitnesses, n = n_select, p = self$param_set$values)
+    }
+  )
+)
