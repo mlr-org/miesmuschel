@@ -1,4 +1,6 @@
 
+source("setup.R", local = TRUE)
+
 tb = TerminatorBudget$new()
 expect_equal(tb$param_set$values, list(budget = Inf, aggregate = sum))
 
