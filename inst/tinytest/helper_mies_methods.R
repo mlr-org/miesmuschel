@@ -69,3 +69,9 @@ generate_design_increasing = function(param_set, n) {
   generate_increasing_sampler(param_set)$sample(n)
 }
 
+generate_design_random_increasing = function(param_set, n) {
+  SamplerJointIndep$new(list(
+    generate_increasing_sampler(ps(p1 = param_set$params$p1)),
+    SamplerUnif$new(ParamSetShadow$new(param_set, "p1"))
+  ))$sample(n)
+}
