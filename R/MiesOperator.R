@@ -142,8 +142,10 @@ MiesOperator = R6Class("MiesOperator",
   private = list(
     deep_clone = function(name, value) {
       if (!is.null(private$.param_set_source)) {
-        private$.param_set_id = private$.param_set$set_id
-        private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
+        if (!is.null(private$.param_set)) {
+          private$.param_set_id = private$.param_set$set_id
+          private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
+        }
         if (name == ".param_set_source") {
           value = lapply(value, function(x) {
             if (inherits(x, "R6")) x$clone(deep = TRUE) else x
