@@ -1,5 +1,6 @@
 
 using("checkmate")
+checkmate::register_test_backend("tinytest")
 
 library("data.table")
 
