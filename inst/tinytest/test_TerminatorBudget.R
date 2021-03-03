@@ -9,6 +9,7 @@ oibig = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
 expect_error(tb$is_terminated(oibig), "Must inherit from class 'Archive'")
 
 expect_error(tb$is_terminated(oibig$archive), "Need exactly one budget parameter")
+expect_error(tb$status(oibig$archive), "Need exactly one budget parameter")
 
 oibig$search_space$params$bud$tags = "budget"
 

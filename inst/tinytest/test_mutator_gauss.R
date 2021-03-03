@@ -73,6 +73,17 @@ expect_true(all(operated$x == 0))
 expect_true(all(operated$y == 0))
 expect_error({mgauss$param_set$values$sdev = -1e-3})
 
+mgauss$prime(ps(x = p_dbl(0, 1)))
+expect_error(mgauss$operate(data.table(x = 0)), "sdev must have either length 1, or length of input")
+
+# tolerance in sdev
+expect_error({mgauss$param_set$values$sdev = -1e-4}, "sdev: Element 1 is not >=")
+mgauss$param_set$values$sdev = -1e-10
+expect_equal(mgauss$param_set$values$sdev * 1e10, -1)
+# can't use all_equal here because of all_equal's tolerance
+expect_true(all(mgauss$operate(data.table(x = rep(0, 10))) == data.table(x = rep(0, 10))))
+
+
 
 # Test that two dimensions are treated independently
 mgauss$param_set$values = list(sdev = 1, sdev_is_relative = FALSE, truncated_normal = FALSE)
