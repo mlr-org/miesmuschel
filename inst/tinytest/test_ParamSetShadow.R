@@ -10,6 +10,8 @@ pshadow = ParamSetShadow$new(p, c("x", "y", "z"))
 
 expect_equal(pshadow$params, ps(a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))$params)
 
+expect_read_only(pshadow, c("params", "params_unid", "deps", "origin"))
+
 # object properties
 expect_equal(pshadow$values, list(b = FALSE))
 expect_equal(pshadow$set_id, "")

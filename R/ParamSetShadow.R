@@ -95,7 +95,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' `$id`s set to invalid values but avoids cloning overhead.
     params_unid = function(rhs) {
       if (!missing(rhs)) {
-        stop("params is read-only.")
+        stop("params_unid is read-only.")
       }
       params = private$.set$params_unid
       params[private$.shadowed] = NULL
@@ -107,7 +107,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' modified in-place; instead, the `$origin`'s `$deps` should be modified.
     deps = function(rhs) {
       if (!missing(rhs)) {
-        stop("deps is read-only")
+        stop("deps is read-only.")
       }
       id = on = NULL
       private$.set$deps[!id %in% private$.shadowed & !on %in% private$.shadowed, ]
