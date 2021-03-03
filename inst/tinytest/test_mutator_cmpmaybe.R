@@ -67,3 +67,19 @@ expect_true(mean(operated$y == 1) < .8)
 expect_true(mean(operated$x == operated$y) < .675)
 expect_true(mean(operated$x == operated$y) > .575)
 
+# MutatorCmpMaybe with vector-valued p
+
+p = ps(x = p_dbl(-1, 1), y = p_dbl(-1, 1), z = p_dbl(-1, 1))
+mmaybe$prime(p)
+mmaybe$param_set$values$p = c(0, 0.5, 1)
+operated <- mmaybe$operate(data.table(x = rep(0, 100), y = rep(0, 100), z = rep(0, 100)))
+
+expect_true(all(operated$x == -1))
+expect_true(all(operated$z == 1))
+
+expect_true(mean(operated$y == 1) > .4)
+expect_true(mean(operated$y == 1) < .6)
+
+
+mmaybe$param_set$values$p = c(0, 0.5, 1, 0.5)
+expect_error(mmaybe$operate(data.table(x = 0, y = 0, z = 0)), "p must have either length 1, or length of input")
