@@ -85,3 +85,12 @@ expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$params,
   ps(a = p_dbl(-2, 2, tags = "test"), b = p_lgl())$params)
 
 expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$deps, pshadow$deps)
+
+
+pshadow$trafo = function(x, param_set) {
+  list(x = x$a + x$b)
+}
+
+expect_true(pshadow$has_trafo)
+
+expect_equal(generate_design_grid(pshadow, 2)$transpose(), list(list(x = 0.5), list(x = integer(0))))
