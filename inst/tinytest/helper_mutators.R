@@ -13,10 +13,6 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   pbig = p$clone(deep = TRUE)
   lapply(p$params, function(x) { x = x$clone() ; x$id = paste0(x$id, "1") ; pbig$add(x) })
 
-  if (!is_primed) {
-    expect_error(mut$operate(pvals), "must be primed first", info = mutator_name)
-  }
-
   p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), paste0(mut$param_classes, ".")))
   if (length(p_forbidden$ids())) {
     expect_error(mut$prime(p_forbidden), "Must be a subset of", info = mutator_name)
@@ -25,6 +21,10 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
 
   p_allowed = p$clone(deep = TRUE)$subset(ids = paste0(mut$param_classes, "."))
   pvals_allowed = generate_design_random(p_allowed, 3)$data
+
+  if (!is_primed) {
+    expect_error(mut$operate(pvals_allowed), "must be primed first", info = mutator_name)
+  }
 
   pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(mut$param_classes, "."), paste0(mut$param_classes, ".1")))
   pbigvals_allowed = generate_design_random(pbig_allowed, 3)$data

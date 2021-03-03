@@ -10,10 +10,6 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
   pbig = p$clone(deep = TRUE)
   lapply(p$params, function(x) { x = x$clone() ; x$id = paste0(x$id, "1") ; pbig$add(x) })
 
-  if (!is_primed) {
-    expect_error(rec$operate(pvals), "must be primed first", info = recombinator_name)
-  }
-
   p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), paste0(rec$param_classes, ".")))
   if (length(p_forbidden$ids())) {
     expect_error(rec$prime(p_forbidden), "Must be a subset of", info = recombinator_name)
@@ -21,6 +17,11 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
 
   p_allowed = p$clone(deep = TRUE)$subset(ids = paste0(rec$param_classes, "."))
   pvals_allowed = generate_design_random(p_allowed, 3 * rec$n_indivs_in)$data
+
+  if (!is_primed) {
+    expect_error(rec$operate(pvals_allowed), "must be primed first", info = recombinator_name)
+  }
+
 
   pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(rec$param_classes, "."), paste0(rec$param_classes, ".1")))
   pbigvals_allowed = generate_design_random(pbig_allowed, 3 * rec$n_indivs_in)$data
