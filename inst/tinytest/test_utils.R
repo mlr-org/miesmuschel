@@ -13,6 +13,8 @@ psboth = ps(a.x = p_dbl(1, 2), b.y = p_dbl(-1, 1))
 psboth$values = list()
 psboth$deps = data.table(id = character(0), on = character(0), cond = list())
 
+ps_flatten = miesmuschel:::ps_flatten
+
 fullps_collection = ParamSetCollection$new(list(ps1, ps2))
 fullps_flat = ps_flatten(fullps_collection)
 fullps_flat$values = list()
