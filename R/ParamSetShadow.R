@@ -33,7 +33,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       id = on = NULL
       baddeps = set$deps[(id %in% private$.shadowed) != (on %in% private$.shadowed), id]
       if (length(baddeps)) {
-        stop("Params %s have dependencies that reach across shadow bounds", str_collapse(baddeps))
+        stopf("Params %s have dependencies that reach across shadow bounds", str_collapse(baddeps))
       }
     },
     #' @description
@@ -61,28 +61,21 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       assert_subset(ids, names(self$params_unid))
       private$.set$subset(c(ids, private$.shadowed))
       invisible(self)
+    },
+    #' @description
+    #' Adds a dependency to the unterlying [`ParamSet`][paradox::ParamSet].
+    #'
+    #' @param id (`character(1)`)
+    #' @param on (`character(1)`)
+    #' @param cond ([`Condition`][paradox::Condition])
+    #' @return `invisible(self)`.
+    add_dep = function(id, on, cond) {
+      ids = names(self$params_unid)
+      assert_choice(id, ids)
+      assert_choice(on, ids)
+      private$.set$add_dep(id, on, cond)
+      invisible(self)
     }
-    # TODO: see if using the original 'check' function suffices
-    ## #' @description
-    ## #' \pkg{checkmate}-like check-function for values.
-    ## #'
-    ## #' @param xs (named `list`)\cr
-    ## #'   Value to be checked.
-    ## #' @return `TRUE` if successful, otherwise a string describing the error.
-    ## check = function(xs) {
-    ##   # We insert the $values of the shadowed ParamSet into xs, so that dependency checks work the way they should.
-    ##   # For this, we have to first make sure that xs is a named list that doesn't contain any shadowed values; then
-    ##   # we can delegate to the wrapped `ParamSet`.
-    ##   ok = check_list(xs, names = "unique")
-    ##   if (!isTRUE(ok)) return(ok)
-    ##   if (any(names(rhs) %in% private$.shadowed)) {
-    ##     return(sprintf("Params %s are shadowed and must not be present in values.", str_collapse(intersect(names(rhs), private$.shadowed), quote = '"')))
-    ##   }
-    ##   shadow_vals = private$.set$values
-    ##   shadow_vals = shadow_vals[intersect(names(shadow_vals), private$.shadowed)]
-
-    ##   private$.set$check(insert_named(xs, shadow_vals))
-    ## }
   ),
   active = list(
     #' @field params (named `list` of [`Param`][paradox::Param])
@@ -117,8 +110,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
         stop("deps is read-only")
       }
       id = on = NULL
-      rbind(private$.set$deps[!id %in% private$.shadowed & !on %in% private$.shadowed, ],
-        private$.deps)
+      private$.set$deps[!id %in% private$.shadowed & !on %in% private$.shadowed, ]
     },
     #' @field values (named `list`)\cr
     #' List of values, as in [`ParamSet`][paradox::ParamSet], with the shadowed values removed.
