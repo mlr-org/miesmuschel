@@ -53,6 +53,7 @@ TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,
     #'   Archive to check.
     #' @return `logical(1)`: Whether to terminate.
     is_terminated = function(archive) {
+      assert_r6(archive, "Archive")
       max(archive$data$dob, 0) >= self$param_set$get_values()$generations
     }
   ),

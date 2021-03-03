@@ -24,7 +24,7 @@
 #' * `aggregate` :: `function`\cr
 #'   Function taking a vector of values of the budget search space component, returning a scalar value to be compared
 #'   to the `budget` configuration parameter. If this function returns a value greater or equal to `budget` the termination
-#'   criterion is matched. Calling this function with `NULL` must return the lower bound of the budgetvalue; percentage
+#'   criterion is matched. Calling this function with `NULL` must return the lower bound of the budget value; percentage
 #'   progress is reported as the progress from this lower bound to the value of `budget`. Initialized to `sum()`.
 #'
 #' @examples
@@ -55,6 +55,7 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
     #'   Archive to check.
     #' @return `logical(1)`: Whether to terminate.
     is_terminated = function(archive) {
+      assert_r6(archive, "Archive")
       params = self$param_set$get_values()
       budget_id = archive$search_space$ids(tags = "budget")
       if (length(budget_id) != 1) stopf("Need exactly one budget parameter, but found %s: %s",
@@ -73,9 +74,9 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
       aggregated = params$aggregate(archive$data[[budget_id]])
 
       c(
-        max_steps = 100,
+        max_steps = if (params$budget <= origin) 0 else 100,
         # when budget <= origin, then we are terminated from the beginning, and want to avoid negative numbers / division by 0.
-        current_steps = if (params$budget <= origin) 100 else floor((aggregated - origin) / (params$budget - origin) * 100)
+        current_steps = if (params$budget <= origin) 0 else floor((aggregated - origin) / (params$budget - origin) * 100)
       )
     }
   )
