@@ -242,12 +242,13 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       if (!is.null(elite_selector)) {
         private$.elite_selector = elite_selector$clone(deep = TRUE)
       }
+      commareq = quote(survival_strategy == "comma")  # TODO: put back when paradox 0.8 is up
       private$.own_param_set = do.call(ps, c(list(
           lambda = p_int(1, tags = c("required", "offspring")),
           mu = p_int(1, tags = c("required", "init", "survival")),
           survival_strategy = p_fct(c("plus", if (!is.null(elite_selector)) "comma"), tags = "required")),
         if (!is.null(elite_selector)) list(
-          n_elite = p_int(0, depends = quote(survival_strategy == "comma"), tags = "survival")),
+          n_elite = p_int(0, depends = commareq, tags = "survival")),
         list(
           initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), tags = c("init", "required")),  # arguments: param_set, n
           additional_component_sampler = p_uty(custom_check = function(x) if (is.null(x)) TRUE else check_r6(x, "Sampler"))),
