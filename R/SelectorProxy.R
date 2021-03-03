@@ -12,6 +12,10 @@
 #' @section Configuration Parameters:
 #' * `operation` :: [`Selector`]\cr
 #'   Operation to perform. Initialized to [`SelectorBest`].
+#'   This is primed when `$prime()` of `SelectorProxy` is called, and also when `$operate()` is called, to make changing
+#'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `SelectorProxy`
+#'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
+#'   frequent re-priming.
 #'
 #' @templateVar id proxy
 #' @template autoinfo_prepare_sel
@@ -49,7 +53,7 @@ SelectorProxy = R6Class("SelectorProxy",
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
-    #' This must be called whenever the `operation` configuration parameter changes, *even if* the configuration parameter is already primed.
+    #'   Note that this modifies the `$param_set$values$operation` object.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
@@ -65,18 +69,19 @@ SelectorProxy = R6Class("SelectorProxy",
   ),
   private = list(
     .select = function(values, fitnesses, n_select) {
-      if (!is.null(private$.primed_with) && !identical(self$param_set$get_values()$operation, private$.primed_with)) {
+      operation = self$param_set$get_values()$operation
+      if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
-        # In that case we ignore and hope the user is doing the right thing. After all, this message
-        # is only to be informative.
-        stop("SelectorProxy$prime() must be called again when the 'operation' configuration parameter changes.")
+        # In that case we try to stay safe by priming again.
+        operation$prime(private$.primed_ps)
+        private$.primed_with = operation$primed_ps
       }
-      private$.operation$operate(values, fitnesses, n_select)
+      operation$operate(values, fitnesses, n_select)
     },
     .operation = NULL,
     .primed_with = NULL,
     deep_clone = function(name, value) {
-      if (name == ".primed_with") return(NULL)
+      if (name == ".primed_with") return(NULL)  # don't even bother cloning this
       super$deep_clone(name, value)
     }
   )

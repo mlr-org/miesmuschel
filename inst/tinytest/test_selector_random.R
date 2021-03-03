@@ -25,3 +25,11 @@ selected = srandom$operate(data[1:3], 1:3, 100)
 expect_true(all(table(selected) < 47))
 expect_true(all(table(selected) > 20))
 
+# multiobjective
+
+
+srandom$prime(p)
+srandom$param_set$values$replace = TRUE
+selected = srandom$operate(data[1:3], matrix(1:6, ncol = 2), 100)
+expect_true(all(table(selected) < 47))
+expect_true(all(table(selected) > 20))
