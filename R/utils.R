@@ -4,7 +4,10 @@ ps_flatten = function(param_set, clone = TRUE) {
   if (class(param_set)[[1]] == "ParamSet") {
     if (clone) param_set$clone(deep = TRUE) else param_set
   } else {
-    ParamSet$new()$add(param_set)
+    ret = ParamSet$new()$add(param_set)
+    ret$deps = param_set$deps
+    ret$set_id = param_set$set_id
+    ret
   }
 }
 
