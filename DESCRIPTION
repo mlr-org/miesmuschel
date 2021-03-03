@@ -26,7 +26,7 @@ Suggests:
   mlr3,
   rpart
 Remotes:
-  mlr-org/bbotk
+  mlr-org/bbotk,
   mlr-org/paradox
 RoxygenNote: 7.1.1
 Collate: 
