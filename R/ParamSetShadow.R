@@ -37,18 +37,31 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       }
     },
     #' @description
-    #' Implemented for compatibility with [`ParamSet`][paradox::ParamSet] superclass. However, this function is
-    #' not implemented and will give an error.
-    #' @param p not used.
-    #' @return nothing.
-    add = function(p) stop("Not Allowed."),
+    #' Adds a single param or another set to this set, all params are cloned.
+    #'
+    #' This calls the underlying [`ParamSet`][paradox::ParamSet]'s `$add()` function.
+    #'
+    #' [`Param`][paradox::Param] with ids that also occur in the underlying  [`ParamSet`][paradox::ParamSet]
+    #' but are shadowed can *not* be added and instead will result in an error.
+    #'
+    #' @param p ([`Param`][paradox::Param] | [`ParamSet`][paradox::ParamSet])
+    #' @return `invisible(self)`.
+    add = function(p) {
+      private$.set$add(p)
+      invisible(self)
+    },
     #' @description
-    #' Implemented for compatibility with [`ParamSet`][paradox::ParamSet] superclass. However, this function is
-    #' not implemented and will give an error.
-    #' @param p not used.
-    #' @return nothing.
-    subset = function(p) stop("Not Allowed.")
-
+    #' Reduces the parameters to the ones of passed ids.
+    #'
+    #' This calls the underlying [`ParamSet`][paradox::ParamSet]'s `$subset()` function.
+    #'
+    #' @param ids (`character`)
+    #' @return `invisible(self)`.
+    subset = function(ids) {
+      assert_subset(ids, names(self$params_unid))
+      private$.set$subset(c(ids, private$.shadowed))
+      invisible(self)
+    }
     # TODO: see if using the original 'check' function suffices
     ## #' @description
     ## #' \pkg{checkmate}-like check-function for values.
