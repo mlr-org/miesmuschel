@@ -204,3 +204,22 @@ expect_equal(opt2$param_set$values$mutator.plus, -1)
 
 expect_equal(opt2$param_set$set_id, "test")
 expect_equal(opt$param_set$set_id, "test")
+
+# ParamClasses
+
+mdblint = MutatorDebug$new(handler = function(n, v, p) if (n == "p1" ) v + p$plus * seq_along(v) else v, c("ParamDbl", "ParamInt"), param_set = ps(plus = p_dbl()))
+rdblfct = RecombinatorDebug$new(handler = function(n, v, p) if (n == "p1" ) v - p$minus * seq_along(v) else v, c("ParamDbl", "ParamFct"),
+  param_set = ps(minus = p_dbl()), n_indivs_in = 3)
+
+seltopsc = SelectorDebug$new(handler = function(v, f, n, p) head(order(abs(f[, 1] - p$top)), n), param_set = ps(top = p_dbl()), supported = "single-crit")
+
+# oi = as_oi(get_objective_passthrough("minimize", FALSE))
+# oi$terminator = trm("evals", n_evals = 28)
+
+opt2 = OptimizerMies$new(mutator = mdblint, recombinator = rdblfct, parent_selector = seltop, survival_selector = seltop)
+
+expect_equal(opt2$param_classes, "ParamDbl")
+expect_true(all(c("single-crit", "multi-crit") %in% opt2$properties))
+
+opt3 = OptimizerMies$new(mutator = mdblint, recombinator = rdblfct, parent_selector = seltop, survival_selector = seltopsc)
+expect_equal(intersect(opt3$properties, c("single-crit", "multi-crit")), "single-crit")
