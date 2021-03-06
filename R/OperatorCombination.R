@@ -392,6 +392,12 @@ OperatorCombination = R6Class("OperatorCombination",
     }
   ),
   private = list(
+    deep_clone = function(name, value) {
+      if (name == ".operators") {
+        return(lapply(value, function(x) x$clone(deep = TRUE)))
+      }
+      super$deep_clone(name, value)
+    },
     .operators = NULL,
     .groups = NULL,
     .adaptions = NULL,
@@ -458,8 +464,8 @@ RecombinatorCombination = R6Class("RecombinatorCombination",
       assert_list(operators, types = "Recombinator")
       inout = map_dtr(operators, function(o) list(nin = o$n_indivs_in, nout = o$n_indivs_out))
       if (nrow(unique(inout)) == 1) {
-        private$.n_indivs_in = inout$nin
-        private$.n_indivs_out = inout$nout
+        private$.n_indivs_in = inout$nin[[1]]
+        private$.n_indivs_out = inout$nout[[1]]
       } else if (length(setdiff(inout$nin, 1)) == 1 && all(inout$nout == inout$nin)) {
         private$.n_indivs_in = max(inout$nin)
         private$.n_indivs_out = max(inout$nout)
@@ -487,14 +493,13 @@ RecombinatorCombination = R6Class("RecombinatorCombination",
   ),
   private = list(
     .n_indivs_in = NULL,
-    .n_indivs_out = NULL,
-    .recombine = function(values) stop(".recombine needs to be implemented by inheriting class."),
+    .n_indivs_out = NULL
   # --- copy-paste end
-    .operate = function(values) {
-      assert_true(nrow(values) == self$n_indivs_in)  # combinator handles granularity
-      values = private$.recombine(values)
-      assert_data_table(values, nrows = self$n_indivs_out)
-    }
+    ## .operate = function(values) {
+    ##   assert_true(nrow(values) == self$n_indivs_in)  # combinator handles granularity
+    ##   values = private$.recombine(values)
+    ##   assert_data_table(values, nrows = self$n_indivs_out)
+    ## }
   )
 )
 dict_recombinators$add("combine", RecombinatorCombination)
