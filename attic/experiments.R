@@ -50,6 +50,8 @@ rec("xounif")$prime(pp)$operate(des)
 
 tinytest::test_all()
 
+tinytest::run_test_file("inst/tinytest/test_recombinator_maybe.R")
+
 tinytest::run_test_file("inst/tinytest/test_mutator_gauss.R")
 
 tinytest::run_test_file("inst/tinytest/test_selector_best.R")
