@@ -356,7 +356,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         }
         if (name == ".param_set_source") {
           value = lapply(value, function(x) {
-            if (inherits(x, "R6")) x$clone(deep = TRUE) else x
+            if (inherits(x, "R6")) x$clone(deep = TRUE) else x  # nocov
           })
         }
       }

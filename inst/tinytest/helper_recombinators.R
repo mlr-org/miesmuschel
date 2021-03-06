@@ -44,6 +44,12 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
     expect_true(pp$test_dt(recombined), info = recombinator_name)
     expect_data_table(recombined, nrows = nrow(data) / rec$n_indivs_in * rec$n_indivs_out,
       ncols = ncol(data), any.missing = FALSE, info = recombinator_name)
+
+    rec$prime(ps())
+    expect_error(rec$operate(data), "Parameter .* not available")
+
+    rec$primed_ps = pp
+    rec$operate(data)
   }
 
   test_alloweds(pvals_allowed, p_allowed)

@@ -195,6 +195,10 @@ expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl), groups = l
 expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl, x_rep_2 = mut_dbl),
   groups = list(g1 = c("x_rep_1", "x_rep_2"), g2 = c("x_rep_3", "x_rep_4"))), "x_rep_2.* own operator must not be present in group")
 
+expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_dbl), groups = list(g1 = c("x", "y"), g2 = "ParamDbl"))$
+  prime(ps(x = p_dbl(), y = p_dbl(), z = p_dbl(), g1 = p_dbl())),
+  "groupnames and ids of param_set must be disjoint")
+
 expect_error(MutatorCombination$new(list()), "Must have length >= 1")
 expect_error(MutatorCombination$new(list(x = RecombinatorNull$new())), "May only contain.*Mutator")
 

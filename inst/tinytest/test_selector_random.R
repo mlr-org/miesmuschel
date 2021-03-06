@@ -4,6 +4,8 @@ source("setup.R", local = TRUE)
 srandom = SelectorRandom$new()
 srandom$param_set$values$replace = FALSE
 expect_selector(srandom, "SelectorRandom", can_oversample = FALSE)
+expect_equal(srandom$supported, c("single-crit", "multi-crit"))
+
 
 srandom = SelectorRandom$new()
 srandom$param_set$values$replace = TRUE
