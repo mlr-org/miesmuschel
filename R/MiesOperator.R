@@ -58,7 +58,7 @@ MiesOperator = R6Class("MiesOperator",
       private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
       private$.endomorphism = assert_flag(endomorphism)
     },
-    repr = function(skip_defaults = TRUE, ...) {
+    repr = function(skip_defaults = TRUE, show_params = TRUE, show_constructor_args = TRUE, ...) {
       initformals = formals(self$initialize)
       formalvalues = list()
       deviantformals = list()
@@ -67,15 +67,15 @@ MiesOperator = R6Class("MiesOperator",
       selfnames = names(self)
       ownps = eval(private$.own_param_set)
       pnames = ownps$ids()
-      representable = all(names(initformals) %in% selfnames) &&
+      representable = (!show_constructor_args || all(names(initformals) %in% selfnames)) &&
         !is.null(self$dict_entry) && !is.null(self$dict_shortaccess) &&
         !any(names(initformals) %in% pnames)
 
       if (representable) {
-        for (formalname in names(initformals)) {
+        for (formalname in if (show_constructor_args) names(initformals)) {
 
           truevalue = self[[formalname]]
-          truerep = repr(truevalue, skip_defaults = skip_defaults, ...)
+          truerep = repr(truevalue, skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...)
 
           validrep = tryCatch({
             eval(truerep, envir = environment(self$initialize))
@@ -91,7 +91,7 @@ MiesOperator = R6Class("MiesOperator",
               inferredvalue = eval(initformals[[formalname]], envir = formalvalues, enclos = environment(self$initialize))
               has_inferred_value = TRUE
             }, error = function(e) NULL)
-            has_inferred_value = has_inferred_value && identical(truerep, repr(inferredvalue, skip_defaults = skip_defaults, ...))
+            has_inferred_value = has_inferred_value && identical(truerep, repr(inferredvalue, skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...))
           }
           if (!has_inferred_value) {
             deviantformals[[formalname]] = truerep
@@ -99,16 +99,16 @@ MiesOperator = R6Class("MiesOperator",
           formalvalues[[formalname]] = truevalue
         }
 
-        for (paramname in pnames) {
+        for (paramname in if (show_params) pnames) {
           truevalue = ownps$values[[paramname]]
-          truerep = repr(truevalue, skip_defaults = skip_defaults, ...)
+          truerep = repr(truevalue, skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...)
           validrep = tryCatch({
             eval(truerep, envir = environment(self$initialize))
             TRUE
           }, error = function(e) {
             FALSE
           })
-          if (!skip_defaults || !validrep || !identical(truerep, repr(private$.own_defaults[[paramname]], skip_defaults = skip_defaults, ...))) {
+          if (!skip_defaults || !validrep || !identical(truerep, repr(private$.own_defaults[[paramname]], skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...))) {
             deviantparams[[paramname]] = truerep
           }
         }
@@ -119,8 +119,12 @@ MiesOperator = R6Class("MiesOperator",
       as.call(c(list(as.symbol(self$dict_shortaccess), self$dict_entry), deviantparams, deviantformals))
     },
     print = function(verbose = FALSE, ...) {
-      txt = paste0(gsub("stop(\"<([^>]*)>\")", "<\\1>", capture.output(repr(self, skip_defaults = !verbose))), "\n")
+      txt = capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE))
+      txt = paste0(gsub("stop(\"<([^>]*)>\")", "<\\1>", txt), "\n$param_set:\n")
       cat(txt)
+      pids = as.data.table(self$param_set)[, c("id", "lower", "upper", "levels")]
+      pids = cbind(pids, value = self$param_set$values[pids$id])
+      print(pids)
     },
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
