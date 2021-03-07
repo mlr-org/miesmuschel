@@ -46,7 +46,7 @@ MutatorProxy = R6Class("MutatorProxy",
       param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Mutator"), tags = "required"))
       param_set$values = list(operation = MutatorNull$new())
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set)
+      super$initialize(param_set = param_set, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -60,6 +60,14 @@ MutatorProxy = R6Class("MutatorProxy",
       super$prime(param_set)
       private$.primed_with = operation$primed_ps  # keep uncloned copy of primed ParamSet for check in `.recombine()`
       invisible(self)
+    }
+  ),
+  active = list(
+    #' @field packages (`character`)\cr
+    #' Packages needed for the operator. Retrieved from the `operation` configuration parameter. Read-only.
+    packages = function(val) {
+      if (!missing(val)) stop("packages is read-only.")
+      self$param_set$values$operation$packages
     }
   ),
   private = list(

@@ -37,7 +37,7 @@ SelectorBest = R6Class("SelectorBest",
     #' @description
     #' Initialize the `SelectorBest` object.
     initialize = function() {
-      super$initialize(supported = "single-crit")
+      super$initialize(supported = "single-crit", dict_entry = "best")
     }
   ),
   private = list(

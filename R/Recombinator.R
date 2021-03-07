@@ -38,12 +38,15 @@ Recombinator = R6Class("Recombinator",
     #'   Number of individuals that result for each `n_indivs_in` lines of input. The number of results from the recombinator will be
     #'   `nrow(values) / n_indivs_in * n_indivs_out`. Default equal to `n_indivs_in`.\cr
     #'   The `$n_indivs_out` field will reflect this value.
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), n_indivs_in = 2, n_indivs_out = n_indivs_in) {
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_own_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), n_indivs_in = 2, n_indivs_out = n_indivs_in, packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_int(n_indivs_in, lower = 1, tol = 1e-100)
       assert_int(n_indivs_out, lower = 1, tol = 1e-100)
       private$.n_indivs_in = n_indivs_in
       private$.n_indivs_out = n_indivs_out
-      super$initialize(param_classes, param_set)
+      super$initialize(param_classes, param_set, packages = packages, dict_entry = dict_entry, dict_shortaccess = "rec", own_param_set = own_param_set)
     }
   ),
   active = list(

@@ -55,14 +55,16 @@ MutatorMaybe = R6Class("MutatorMaybe",
     #' @description
     #' Initialize the `MutatorMaybe` object.
     #' @param mutator ([`Mutator`])\cr
-    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
-    #'   The constructed object gets a *clone* of this argument.
+    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (configuration parameter).\cr
+    #'   The constructed object gets a *clone* of this argument.\cr
+    #'   The `$mutator` field will reflect this value.
     #' @param mutator_not ([`Mutator`])\cr
     #'   Another [`Mutator`] to wrap. This operator runs when `mutator` is not chosen. By
     #'   default, this is [`MutatorNull`], i.e. no operation. With this default, the
     #'   `MutatorMaybe` object applies the `mutator` operation with probability `p`, and
     #'   no operation at all otherwise.\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$mutator_not` field will reflect this value.
     initialize = function(mutator, mutator_not = MutatorNull$new()) {
       private$.wrapped = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(mutator_not, "Mutator")$clone(deep = TRUE)
@@ -72,7 +74,9 @@ MutatorMaybe = R6Class("MutatorMaybe",
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
       private$.maybe_param_set$values = list(p = 1)
       super$initialize(intersect(mutator$param_classes, mutator_not$param_classes),
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set))
+        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        packages = c("stats", mutator$packages, mutator_not$packages), dict_entry = "maybe",
+        own_param_set = quote(private$.maybe_param_set))
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
@@ -85,6 +89,20 @@ MutatorMaybe = R6Class("MutatorMaybe",
       private$.wrapped_not$prime(param_set)
       super$prime(param_set)
       invisible(self)
+    }
+  ),
+  active = list(
+    #' @field mutator ([`Mutator`])\cr
+    #' [`Mutator`] being wrapped. This operator gets run with probability `p` (configuration parameter).
+    mutator = function(val) {
+      if (!missing(val)) stop("mutator is read-only.")
+      private$.wrapped
+    },
+    #' @field mutator_not ([`Mutator`])\cr
+    #' Alternative [`Mutator`] being wrapped. This operator gets run with probability `1 - p` (configuration parameter).
+    mutator_not = function(val) {
+      if (!missing(val)) stop("mutator_not is read-only.")
+      private$.wrapped_not
     }
   ),
   private = list(

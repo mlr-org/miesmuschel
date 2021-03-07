@@ -43,6 +43,11 @@ repr.data.table = function(obj) {
 }
 
 #' @export
+repr.environment = function(obj) {
+  quote(stop("<environment>"))
+}
+
+#' @export
 repr.data.frame = function(obj) {
   careful = any(colnames(obj) %in% names(formals(data.frame)))
   has_strings = some(obj, is.character)  # stringsAsFactors = FALSE
@@ -66,7 +71,6 @@ repr.data.frame = function(obj) {
   if (is.atomic(rownames)) {
     att$row.names = NULL
   }
-
 
   call = repr(obj)
 
@@ -112,4 +116,18 @@ wrap_attributes = function(call, att) {
   } else {
     call
   }
+}
+
+#' @export
+repr.R6 = function(obj) {
+  if (is.function({cl = .subset2(obj, "repr")})) {
+    cl()
+  } else {
+    repr.environment(obj)
+  }
+}
+
+#' @export
+`!.MiesOperator` = function(x) {
+  repr(x)
 }

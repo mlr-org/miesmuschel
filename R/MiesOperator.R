@@ -34,13 +34,14 @@ MiesOperator = R6Class("MiesOperator",
     #' @template param_packages
     #' @template param_dict_entry
     #' @template param_dict_shortaccess
+    #' @template param_own_param_set
     #' @param endomorphism (`logical(1)`)\cr
     #'   Whether the private `$.operate()` operation creates a [`data.table`][data.table::data.table] with the same columns as the input
     #'   (i.e. conforming to the primed [`ParamSet`][paradox::ParamSet]). If this is `TRUE` (default), then the return value of `$.operate()`
     #'   is checked for this and columns are put in the correct order.\cr
     #'   The `$endomorphsim` field will reflect this value.
       initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(),
-        packages = character(0), dict_entry = NULL, dict_shortaccess = NULL, endomorphism = TRUE) {
+        packages = character(0), dict_entry = NULL, dict_shortaccess = NULL, own_param_set = quote(self$param_set), endomorphism = TRUE) {
       assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
         private$.param_set = assert_param_set(param_set)
@@ -50,13 +51,73 @@ MiesOperator = R6Class("MiesOperator",
         private$.param_set_source = param_set
       }
       private$.param_classes = param_classes
-      private$.packages = assert_character(packages, any.missing = FALSE)
+      private$.packages = unique(assert_character(packages, any.missing = FALSE))
       private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
       private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
+      private$.own_param_set = own_param_set
+      private$.own_defaults = map(assert_r6(eval(own_param_set), "ParamSet")$values, repr)
       private$.endomorphism = assert_flag(endomorphism)
     },
-    repr = function() {
-      "test"
+    repr = function(skip_defaults = TRUE) {
+      initformals = formals(self$initialize)
+      formalvalues = list()
+      deviantformals = list()
+      deviantparams = list()
+
+      selfnames = names(self)
+      ownps = eval(private$.own_param_set)
+      pnames = ownps$ids()
+      representable = all(names(initformals) %in% selfnames) &&
+        !is.null(self$dict_entry) && !is.null(self$dict_shortaccess) &&
+        !any(names(initformals) %in% pnames)
+
+      if (representable) {
+        for (formalname in names(initformals)) {
+
+          truevalue = self[[formalname]]
+          truerep = repr(truevalue)
+
+          validrep = tryCatch({
+            eval(truerep, envir = environment(self$initialize))
+            TRUE
+          }, error = function(e) {
+            FALSE
+          })
+
+          has_inferred_value = FALSE
+          if (skip_defaults && validrep) {
+            inferredvalue = NULL
+            tryCatch({
+              inferredvalue = eval(initformals[[formalname]], envir = formalvalues, enclos = environment(self$initialize))
+              has_inferred_value = TRUE
+            }, error = function(e) NULL)
+            has_inferred_value = has_inferred_value && identical(truerep, repr(inferredvalue))
+          }
+          if (!has_inferred_value) {
+            deviantformals[[formalname]] = truerep
+          }
+          formalvalues[[formalname]] = truevalue
+        }
+
+        for (paramname in pnames) {
+          truevalue = ownps$values[[paramname]]
+          truerep = repr(truevalue)
+          validrep = tryCatch({
+            eval(truerep, envir = environment(self$initialize))
+            TRUE
+          }, error = function(e) {
+            FALSE
+          })
+          if (!skip_defaults || !validrep || !identical(truerep, private$.own_defaults[[paramname]])) {
+            deviantparams[[paramname]] = truerep
+          }
+        }
+      }
+      if (!representable) {
+        return(substitute(stop(msg), list(msg = sprintf("%s (not representable)", class(self)[[1]]))))
+      }
+
+      as.call(c(list(as.symbol(self$dict_shortaccess), self$dict_entry), deviantparams, deviantformals))
     },
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
@@ -93,7 +154,7 @@ MiesOperator = R6Class("MiesOperator",
         values = as.data.table(values)
       }
       # load packages
-      require_namespaces(private$.packages, msg = sprintf("The following packages are required for %s operator: %%s", class(self)[[1]]))
+      require_namespaces(self$packages, msg = sprintf("The following packages are required for %s operator: %%s", class(self)[[1]]))
       # make sure input / output cols are in the order as inndicated by paramset --> use `match` on input (and output if endomorphic)
       values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ...)
       if (self$endomorphism) {
@@ -199,6 +260,8 @@ MiesOperator = R6Class("MiesOperator",
     .packages = NULL,
     .dict_entry = NULL,
     .dict_shortaccess = NULL,
+    .own_param_set = NULL,
+    .own_defaults = NULL,
     .endomorphism = NULL
   )
 )

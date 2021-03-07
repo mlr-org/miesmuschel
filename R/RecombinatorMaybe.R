@@ -60,6 +60,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     #' @param recombinator ([`Recombinator`])\cr
     #'   [`Recombinator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$recombinator` field will reflect this value.
     #' @param recombinator_not ([`Recombinator`])\cr
     #'   Another [`Recombinator`] to wrap. This operator runs when `recombinator` is not chosen. By
     #'   default, this is [`RecombinatorNull`], i.e. no operation, with both `n_indivs_in` and `n_indivs_out` set
@@ -68,6 +69,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     #'   With the default behaviour, the `RecombinatorMaybe` object applies the `recombinator` operation with probability `p`, and
     #'   no operation at all otherwise.\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$recombinator_not` field will reflect this value.
     initialize = function(recombinator, recombinator_not = NULL) {
       private$.wrapped = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       if (is.null(recombinator_not)) {
@@ -87,7 +89,9 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       private$.maybe_param_set$values = list(p = 1)
       super$initialize(recombinator$param_classes,
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
-        recombinator$n_indivs_in, recombinator$n_indivs_out)
+        recombinator$n_indivs_in, recombinator$n_indivs_out,
+        packages = c("stats", mutator$packages, mutator_not$packages), dict_entry = "maybe",
+        own_param_set = quote(private$.maybe_param_set))
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
@@ -100,6 +104,20 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       private$.wrapped_not$prime(param_set)
       super$prime(param_set)
       invisible(self)
+    }
+  ),
+  active = list(
+    #' @field mutator ([`Recombinator`])\cr
+    #' [`Recombinator`] being wrapped. This operator gets run with probability `p` (configuration parameter).
+    recombinator = function(val) {
+      if (!missing(val)) stop("recombinator is read-only.")
+      private$.wrapped
+    },
+    #' @field mutator_not ([`Recombinator`])\cr
+    #' Alternative [`Recombinator`] being wrapped. This operator gets run with probability `1 - p` (configuration parameter).
+    recombinator_not = function(val) {
+      if (!missing(val)) stop("recombinator_not is read-only.")
+      private$.wrapped_not
     }
   ),
   private = list(

@@ -40,7 +40,7 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     initialize = function(keep_complement = TRUE) {
       param_set = ps(p = p_dbl(0, tags = "required"))
       param_set$values = list(p = 0.5)
-      super$initialize(c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set, 2, if (keep_complement) 2 else 1)
+      super$initialize(c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set, 2, if (keep_complement) 2 else 1, dict_entry = "xounif")
     }
   ),
   private = list(

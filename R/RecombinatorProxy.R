@@ -66,7 +66,7 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
       }, n_indivs_in, n_indivs_out)))
       param_set$values = list(operation = RecombinatorNull$new(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out))
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out)
+      super$initialize(param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -80,6 +80,14 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
       super$prime(param_set)
       private$.primed_with = operation$primed_ps  # keep uncloned copy of primed ParamSet for check in `.recombine()`
       invisible(self)
+    }
+  ),
+  active = list(
+    #' @field packages (`character`)\cr
+    #' Packages needed for the operator. Retrieved from the `operation` configuration parameter. Read-only.
+    packages = function(val) {
+      if (!missing(val)) stop("packages is read-only.")
+      self$param_set$values$operation$packages
     }
   ),
   private = list(
