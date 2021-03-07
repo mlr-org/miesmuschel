@@ -1,11 +1,11 @@
 
 #' @export
-repr = function(obj) {
+repr = function(obj, ...) {
   UseMethod("repr", obj)
 }
 
 #' @export
-repr.default = function(obj) {
+repr.default = function(obj, ...) {
   if (is.list(obj)) return(repr.list(obj))
   parse(text = deparse(obj, backtick = TRUE,
     control = c("keepInteger", "quoteExpressions", "showAttributes", "useSource", "niceNames")
@@ -13,7 +13,7 @@ repr.default = function(obj) {
 }
 
 #' @export
-repr.data.table = function(obj) {
+repr.data.table = function(obj, ...) {
   careful = any(colnames(obj) %in% names(formals(data.table)))
   objkey = key(obj)
   preclass = class(obj)
@@ -28,7 +28,7 @@ repr.data.table = function(obj) {
     att$class = NULL
   }
 
-  call = repr(obj)
+  call = repr(obj, ...)
 
   if (careful) {
     call = substitute(data.table::as.data.table(x), list(x = call))
@@ -43,12 +43,12 @@ repr.data.table = function(obj) {
 }
 
 #' @export
-repr.environment = function(obj) {
+repr.environment = function(obj, ...) {
   quote(stop("<environment>"))
 }
 
 #' @export
-repr.data.frame = function(obj) {
+repr.data.frame = function(obj, ...) {
   careful = any(colnames(obj) %in% names(formals(data.frame)))
   has_strings = some(obj, is.character)  # stringsAsFactors = FALSE
   has_empty_names = is.null(names(obj)) || some(names(obj), identical, "")  # --> fix.empty.names = FALSE
@@ -72,16 +72,15 @@ repr.data.frame = function(obj) {
     att$row.names = NULL
   }
 
-  call = repr(obj)
+  call = repr(obj, ...)
 
   if (careful) {
     call = substitute(as.data.frame(x), list(x = call))
   } else {
-    call = repr(obj)
     call[[1]] = substitute(data.frame)
   }
   if (!is.null(rownames)) {
-    call[[length(call) + 1]] = repr(rownames)
+    call[[length(call) + 1]] = repr(rownames, ...)
     names(call)[[length(call)]] = "row.names"
   }
   if (has_strings) {
@@ -101,10 +100,10 @@ repr.data.frame = function(obj) {
 
 
 #' @export
-repr.list = function(obj) {
+repr.list = function(obj, ...) {
   att = attributes(obj)
   att$row.names = .row_names_info(obj, type = 0)  # row.names special storage type
-  call = as.call(c(list(quote(list)), lapply(obj, repr)))
+  call = as.call(c(list(quote(list)), lapply(obj, function(x) repr(x, ...))))
   wrap_attributes(call, att)
 }
 
@@ -119,11 +118,11 @@ wrap_attributes = function(call, att) {
 }
 
 #' @export
-repr.R6 = function(obj) {
+repr.R6 = function(obj, ...) {
   if (is.function({cl = .subset2(obj, "repr")})) {
-    cl()
+    cl(...)
   } else {
-    repr.environment(obj)
+    repr.environment(obj, ...)
   }
 }
 

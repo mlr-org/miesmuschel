@@ -55,10 +55,10 @@ MiesOperator = R6Class("MiesOperator",
       private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
       private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
       private$.own_param_set = own_param_set
-      private$.own_defaults = map(assert_r6(eval(own_param_set), "ParamSet")$values, repr)
+      private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
       private$.endomorphism = assert_flag(endomorphism)
     },
-    repr = function(skip_defaults = TRUE) {
+    repr = function(skip_defaults = TRUE, ...) {
       initformals = formals(self$initialize)
       formalvalues = list()
       deviantformals = list()
@@ -75,7 +75,7 @@ MiesOperator = R6Class("MiesOperator",
         for (formalname in names(initformals)) {
 
           truevalue = self[[formalname]]
-          truerep = repr(truevalue)
+          truerep = repr(truevalue, skip_defaults = skip_defaults, ...)
 
           validrep = tryCatch({
             eval(truerep, envir = environment(self$initialize))
@@ -91,7 +91,7 @@ MiesOperator = R6Class("MiesOperator",
               inferredvalue = eval(initformals[[formalname]], envir = formalvalues, enclos = environment(self$initialize))
               has_inferred_value = TRUE
             }, error = function(e) NULL)
-            has_inferred_value = has_inferred_value && identical(truerep, repr(inferredvalue))
+            has_inferred_value = has_inferred_value && identical(truerep, repr(inferredvalue, skip_defaults = skip_defaults, ...))
           }
           if (!has_inferred_value) {
             deviantformals[[formalname]] = truerep
@@ -101,23 +101,26 @@ MiesOperator = R6Class("MiesOperator",
 
         for (paramname in pnames) {
           truevalue = ownps$values[[paramname]]
-          truerep = repr(truevalue)
+          truerep = repr(truevalue, skip_defaults = skip_defaults, ...)
           validrep = tryCatch({
             eval(truerep, envir = environment(self$initialize))
             TRUE
           }, error = function(e) {
             FALSE
           })
-          if (!skip_defaults || !validrep || !identical(truerep, private$.own_defaults[[paramname]])) {
+          if (!skip_defaults || !validrep || !identical(truerep, repr(private$.own_defaults[[paramname]], skip_defaults = skip_defaults, ...))) {
             deviantparams[[paramname]] = truerep
           }
         }
       }
       if (!representable) {
-        return(substitute(stop(msg), list(msg = sprintf("%s (not representable)", class(self)[[1]]))))
+        return(substitute(stop(msg), list(msg = sprintf("<%s>", class(self)[[1]]))))
       }
-
       as.call(c(list(as.symbol(self$dict_shortaccess), self$dict_entry), deviantparams, deviantformals))
+    },
+    print = function(verbose = FALSE, ...) {
+      txt = paste0(gsub("stop(\"<([^>]*)>\")", "<\\1>", capture.output(repr(self, skip_defaults = !verbose))), "\n")
+      cat(txt)
     },
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
