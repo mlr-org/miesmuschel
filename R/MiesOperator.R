@@ -31,12 +31,16 @@ MiesOperator = R6Class("MiesOperator",
     #' Initialize base class components of the `MiesOperator`.
     #' @template param_param_classes
     #' @template param_param_set
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_dict_shortaccess
     #' @param endomorphism (`logical(1)`)\cr
     #'   Whether the private `$.operate()` operation creates a [`data.table`][data.table::data.table] with the same columns as the input
     #'   (i.e. conforming to the primed [`ParamSet`][paradox::ParamSet]). If this is `TRUE` (default), then the return value of `$.operate()`
     #'   is checked for this and columns are put in the correct order.\cr
     #'   The `$endomorphsim` field will reflect this value.
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), endomorphism = TRUE) {
+      initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(),
+        packages = character(0), dict_entry = NULL, dict_shortaccess = NULL, endomorphism = TRUE) {
       assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
         private$.param_set = assert_param_set(param_set)
@@ -46,7 +50,13 @@ MiesOperator = R6Class("MiesOperator",
         private$.param_set_source = param_set
       }
       private$.param_classes = param_classes
+      private$.packages = assert_character(packages, any.missing = FALSE)
+      private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
+      private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
       private$.endomorphism = assert_flag(endomorphism)
+    },
+    repr = function() {
+      "test"
     },
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
@@ -82,6 +92,8 @@ MiesOperator = R6Class("MiesOperator",
         # don't change input by reference
         values = as.data.table(values)
       }
+      # load packages
+      require_namespaces(private$.packages, msg = sprintf("The following packages are required for %s operator: %%s", class(self)[[1]]))
       # make sure input / output cols are in the order as inndicated by paramset --> use `match` on input (and output if endomorphic)
       values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ...)
       if (self$endomorphism) {
@@ -116,6 +128,27 @@ MiesOperator = R6Class("MiesOperator",
     param_classes = function(val) {
       if (!missing(val)) stop("param_classes is read-only.")
       private$.param_classes
+    },
+    #' @field packages (`character`)\cr
+    #' Packages needed for the operator. Read-only.
+    packages = function(val) {
+      if (!missing(val)) stop("packages is read-only.")
+      private$.packages
+    },
+    #' @field dict_entry (`character(1)` | `NULL`)\cr
+    #' Key of this class in its respective [`Dictionary`][mlr3misc::Dictionary].
+    #' Is `NULL` if this class it not (known to be) in a [`Dictionary`][mlr3misc::Dictionary]. Read-only.
+    dict_entry = function(val) {
+      if (!missing(val)) stop("dict_entry is read-only.")
+      private$.dict_entry
+    },
+    #' @field dict_shortaccess (`character(1)` | `NULL`)\cr
+    #' Name of [`Dictionary`][mlr3misc::Dictionary] short-access function where an object of this class can be retrieved.
+    #' Is `NULL` if this class is not (known to be) in a [`Dictionary`][mlr3misc::Dictionary]
+    #' with a short-access function. Read-only.
+    dict_shortaccess = function(val) {
+      if (!missing(val)) stop("dict_shortaccess is read-only.")
+      private$.dict_shortaccess
     },
     #' @field endomorphism (`logical(1)`)\cr
     #' Whether the output of `$operate()` is a `data.frame` / [`data.table`][data.table::data.table] in the same domain as its input. Read-only.
@@ -163,6 +196,9 @@ MiesOperator = R6Class("MiesOperator",
     .param_classes = NULL,
     .param_set_source = NULL,
     .operate = function(values, ...) stop(".operate needs to be implemented by inheriting class."),
+    .packages = NULL,
+    .dict_entry = NULL,
+    .dict_shortaccess = NULL,
     .endomorphism = NULL
   )
 )

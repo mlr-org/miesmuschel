@@ -3,12 +3,12 @@ source("setup.R", local = TRUE)
 
 op = MiesOperator$new()
 
-expect_read_only(op, c("param_classes", "endomorphism", "is_primed", "param_set"))
+expect_read_only(op, c("param_classes", "endomorphism", "is_primed", "param_set", "packages"))
 op$prime(ps(a = p_dbl()))
 expect_error(op$operate(data.table(a = 1)), "\\.operate needs to be implemented")
 
 mt = Mutator$new()
-expect_read_only(mt, c("param_classes", "endomorphism", "is_primed", "param_set"))
+expect_read_only(mt, c("param_classes", "endomorphism", "is_primed", "param_set", "packages"))
 mt$prime(ps(a = p_dbl()))
 expect_error(mt$operate(data.table(a = 1)), "\\.mutate needs to be implemented")
 mtn = MutatorNumeric$new()
@@ -19,12 +19,12 @@ mtd$prime(ps(a = p_lgl()))
 expect_error(mtd$operate(data.table(a = TRUE)), "\\.mutate_discrete needs to be implemented")
 
 sl = Selector$new()
-expect_read_only(sl, c("param_classes", "endomorphism", "supported", "is_primed", "param_set"))
+expect_read_only(sl, c("param_classes", "endomorphism", "supported", "is_primed", "param_set", "packages"))
 sl$prime(ps(a = p_dbl()))
 expect_error(sl$operate(data.table(a = 1), 1, 1), "\\.select needs to be implemented")
 
 rc = Recombinator$new()
-expect_read_only(rc, c("param_classes", "endomorphism", "n_indivs_in", "n_indivs_out", "is_primed", "param_set"))
+expect_read_only(rc, c("param_classes", "endomorphism", "n_indivs_in", "n_indivs_out", "is_primed", "param_set", "packages"))
 rc$prime(ps(a = p_dbl()))
 expect_error(rc$operate(data.table(a = c(1, 1))), "\\.recombine needs to be implemented")
 

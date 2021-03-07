@@ -56,5 +56,6 @@ Collate:
     'TerminatorGenerations.R'
     'TunerMies.R'
     'bibentries.R'
+    'repr.R'
     'utils.R'
     'zzz.R'
