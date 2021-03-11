@@ -15,6 +15,10 @@ must be called every time when \code{operation} is changed, \emph{even if} the n
 \itemize{
 \item \code{operation} :: \code{\link{Selector}}\cr
 Operation to perform. Initialized to \code{\link{SelectorBest}}.
+This is primed when \verb{$prime()} of \code{SelectorProxy} is called, and also when \verb{$operate()} is called, to make changing
+the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{SelectorProxy}
+objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid
+frequent re-priming.
 }
 }
 
@@ -94,7 +98,7 @@ Initialize the \code{SelectorProxy} object.
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
-This must be called whenever the \code{operation} configuration parameter changes, \emph{even if} the configuration parameter is already primed.
+Note that this modifies the \verb{$param_set$values$operation} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{SelectorProxy$prime(param_set)}\if{html}{\out{</div>}}
 }

@@ -2,7 +2,7 @@
 #'
 #' @include Mutator.R
 #'
-#' @name dict_mutators_unif
+#' @name dict_mutators_discreteunif
 #'
 #' @description
 #' Discrete components are mutated by sampling from a uniform distribution, either from all possible
@@ -15,7 +15,7 @@
 #'   Whether to sample from entire range of each parameter (`TRUE`) or from all values except the
 #'   current value (`FALSE`). Initialized to `TRUE`.
 #'
-#' @templateVar id unif
+#' @templateVar id discreteunif
 #' @template autoinfo_prepare_mut
 #' @template autoinfo_operands
 #' @template autoinfo_dict
@@ -23,7 +23,7 @@
 #' @family mutators
 #' @examples
 #' set.seed(1)
-#' mdu = mut("unif")
+#' mdu = mut("discreteunif")
 #' p = ps(x = p_lgl(), y = p_fct(c("a", "b", "c")))
 #' data = data.frame(x = rep(TRUE, 5), y = rep("a", 5),
 #'   stringsAsFactors = FALSE)  # necessary for R <= 3.6
@@ -55,4 +55,4 @@ MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
     }
   )
 )
-dict_mutators$add("unif", MutatorDiscreteUniform)
+dict_mutators$add("discreteunif", MutatorDiscreteUniform)

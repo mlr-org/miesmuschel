@@ -164,7 +164,7 @@ mies <- tnr("mies", mutator = op.m, recombinator = op.r,
   parent_selector = op.parent, survival_selector = op.survival)
 
 
-mut("unif")$param_set
+mut("discreteunif")$param_set
 
 mut("null")$param_set
 
@@ -204,14 +204,14 @@ objective <- ObjectiveRFun$new(
   codomain = ps(Obj = p_dbl(tags = "maximize"))
 )
 
-mut("combine", operators = list(x = mut("gauss"), y = mut("gauss"), invert = mut("unif")))
+mut("combine", operators = list(x = mut("gauss"), y = mut("gauss"), invert = mut("discreteunif")))
 
-mut("combine", operators = list(nums = mut("gauss"), invert = mut("unif")),
+mut("combine", operators = list(nums = mut("gauss"), invert = mut("discreteunif")),
   groups = list(nums = c("x", "y")))
 
-mut("combine", operators = list(ParamDbl = mut("gauss"), ParamLgl = mut("unif")))
+mut("combine", operators = list(ParamDbl = mut("gauss"), ParamLgl = mut("discreteunif")))
 
-mut("combine", operators = list(nums = mut("gauss"), ParamAny = mut("unif")),
+mut("combine", operators = list(nums = mut("gauss"), ParamAny = mut("discreteunif")),
   groups = list(nums = c("x", "ParamDbl")))
 
 
@@ -235,7 +235,7 @@ op.mcmb <- mut("maybe", p = 0.7,
   mutator = mut("combine", operators = list(
     ParamDbl = mut("gauss", sdev = 0.1, sdev_is_relative = FALSE),
     ParamLgl = mut("cmpmaybe", p = 0.3,
-      mutator = mut("unif", can_mutate_to_same = FALSE),
+      mutator = mut("discreteunif", can_mutate_to_same = FALSE),
       mutator_not = mut("null")  # redundant
     )
   ))

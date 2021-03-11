@@ -69,10 +69,11 @@ Other mutators:
 \code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
+\code{\link{dict_mutators_discreteunif}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
-\code{\link{dict_mutators_unif}}
+\code{\link{dict_mutators_numericunif}}
 
 Other mutator wrappers: 
 \code{\link{MutatorProxy}},

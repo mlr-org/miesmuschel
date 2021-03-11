@@ -36,10 +36,11 @@ Other mutators:
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
+\code{\link{dict_mutators_discreteunif}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
-\code{\link{dict_mutators_unif}}
+\code{\link{dict_mutators_numericunif}}
 }
 \concept{base classes}
 \concept{mutators}

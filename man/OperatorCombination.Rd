@@ -86,7 +86,7 @@ p = ps(x = p_dbl(-1, 1), y = p_dbl(-1, 1), a = p_lgl(), b = p_fct(c("a", "b")))
 m0 = mut("null")  # no mutation
 msmall = mut("gauss", sdev = 0.1)  # mutates to small value around 0
 mbig = mut("gauss", sdev = 100)  # likely mutates to +1 or -1
-mflip = mut("unif", can_mutate_to_same = FALSE)  # flips TRUE/"a" to FALSE/"b"
+mflip = mut("discreteunif", can_mutate_to_same = FALSE)  # flips TRUE/"a" to FALSE/"b"
 
 # original:
 data
@@ -173,10 +173,11 @@ Other mutators:
 \code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{dict_mutators_cmpmaybe}},
+\code{\link{dict_mutators_discreteunif}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
-\code{\link{dict_mutators_unif}}
+\code{\link{dict_mutators_numericunif}}
 
 Other mutator wrappers: 
 \code{\link{MutatorProxy}},

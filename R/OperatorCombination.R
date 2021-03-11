@@ -109,7 +109,7 @@
 #' m0 = mut("null")  # no mutation
 #' msmall = mut("gauss", sdev = 0.1)  # mutates to small value around 0
 #' mbig = mut("gauss", sdev = 100)  # likely mutates to +1 or -1
-#' mflip = mut("unif", can_mutate_to_same = FALSE)  # flips TRUE/"a" to FALSE/"b"
+#' mflip = mut("discreteunif", can_mutate_to_same = FALSE)  # flips TRUE/"a" to FALSE/"b"
 #'
 #' # original:
 #' data
