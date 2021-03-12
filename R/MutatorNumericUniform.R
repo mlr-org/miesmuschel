@@ -21,8 +21,8 @@
 #' @examples
 #' set.seed(1)
 #' mnu = mut("numericunif")
-#' p = ps(x = p_int(0, 2), y = p_dbl(-5, 5))
-#' data = data.frame(x = rep(0, 10000), y = rep(0, 10000))
+#' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
+#' data = data.frame(x = rep(0, 5), y = rep(0, 5))
 #'
 #' mnu$prime(p)
 #' mnu$operate(data)
@@ -33,7 +33,7 @@ MutatorNumericUniform = R6Class("MutatorNumericUniform",
     #' @description
     #' Initialize the `MutatorNumericUniform` object.
     initialize = function() {
-      super$initialize(c("ParamDbl"))
+      super$initialize("ParamDbl")
     }
   ),
   private = list(
