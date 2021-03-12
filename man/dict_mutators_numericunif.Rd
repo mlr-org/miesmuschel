@@ -36,8 +36,8 @@ dict_mutators$get("numericunif")
 \examples{
 set.seed(1)
 mnu = mut("numericunif")
-p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
-data = data.frame(x = rep(0, 5), y = rep(0, 5))
+p = ps(x = p_int(0, 2), y = p_dbl(-5, 5))
+data = data.frame(x = rep(0, 10000), y = rep(0, 10000))
 
 mnu$prime(p)
 mnu$operate(data)

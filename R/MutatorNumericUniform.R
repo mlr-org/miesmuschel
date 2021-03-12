@@ -21,8 +21,8 @@
 #' @examples
 #' set.seed(1)
 #' mnu = mut("numericunif")
-#' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
-#' data = data.frame(x = rep(0, 5), y = rep(0, 5))
+#' p = ps(x = p_int(0, 2), y = p_dbl(-5, 5))
+#' data = data.frame(x = rep(0, 10000), y = rep(0, 10000))
 #'
 #' mnu$prime(p)
 #' mnu$operate(data)
@@ -33,24 +33,14 @@ MutatorNumericUniform = R6Class("MutatorNumericUniform",
     #' @description
     #' Initialize the `MutatorNumericUniform` object.
     initialize = function() {
-      super$initialize(c("ParamInt", "ParamDbl"))
+      super$initialize(c("ParamDbl"))
     }
   ),
   private = list(
     .mutate_numeric = function(values, lowers, uppers) {
-      ints = which(self$primed_ps$class == "ParamInt")
-      dbls = which(self$primed_ps$class == "ParamDbl")
-      mutated = numeric(length(values))
-      if (length(ints)) {
-        mutated[ints] = map_int(ints, .f = function(int) {
-          # discrete uniform
-          sample(uppers[int] - lowers[int] + 1L, size = 1L) + as.integer(lowers[int]) - 1L
-        })
-      }
-      if (length(dbls)) {
-        mutated[dbls] = stats::runif(length(dbls), min = lowers[dbls], max = uppers[dbls])
-      }
-      mutated
+      # discrete uniform for ParamInt is handled via corrections in
+      # MutatorNumeric$private$.mutate
+      stats::runif(length(values), min = lowers, max = uppers)
     }
   )
 )
