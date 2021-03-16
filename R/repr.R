@@ -1,4 +1,31 @@
 
+#' @title Create a 'call' Object Representation
+#'
+#' `repr()` creates a [`call`][base::call] object representing `obj`, if possible.
+#' Evaluating the call should come close to recreating the original object.
+#'
+#' In the most trivial cases, it should be possible to recreate objects from their
+#' representation by evaluating them using [`eval()`][base::eval]. Important exceptions
+#' are:
+#' * Functions are represented by their source code, if available, and by their AST if not.
+#'   This drops the context from their environments and recreated objects will not work
+#'   if they contain functions that depend on specific environments
+#' * [`environment`][base::environment]s are not represented.
+#' * [`R6`][R6::R6Class] objects are only represented if they have a `$repr()` function.
+#'   This function may have arbitrary arguments, and should have a `...` argument to
+#'   capture ignored arguments.
+#'
+#' Objects that can not be represented are currently mapped to the call `stop("<###>")`, where
+#' `###` is a short description of the non-representable object.
+#'
+#' @param obj (any)\cr
+#'   Object to create a representation of.
+#' @param ... (any)\cr
+#'   Further arguments to be passed to class methods. Currently in use are:
+#'   * `skip_defaults` (`logical(1)`) whether to skip construction arguments that have their default value. Default `TRUE`.
+#'   * `show_params` (`logical(1)`) whether to show [`ParamSet`][paradox::ParamSet] values. Default `TRUE`.
+#'   * `show_constructor_args` (`logical(1)`) whether to show construction args that are not [`ParamSet`][paradox::ParamSet] values. Default `TRUE`.
+#' @return [`call`][base::call]: A call that, when evaluated, tries to re-create the object.
 #' @export
 repr = function(obj, ...) {
   UseMethod("repr", obj)
@@ -122,7 +149,7 @@ repr.R6 = function(obj, ...) {
   if (is.function({cl = .subset2(obj, "repr")})) {
     cl(...)
   } else {
-    repr.environment(obj, ...)
+    substitute(stop(msg), list(msg = sprintf("<%s>", class(obj)[[1]])))
   }
 }
 
