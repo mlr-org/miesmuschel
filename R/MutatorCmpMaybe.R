@@ -72,8 +72,7 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
 
       private$.wrapped$param_set$set_id = "cmpmaybe"
       private$.wrapped_not$param_set$set_id = "cmpmaybe_not"
-      private$.maybe_param_set = ps(p = p_uty(custom_check = crate(function(x) check_numeric(x,
-        lower = tol_bound(0, "lower"), upper = tol_bound(1, "upper"), any.missing = FALSE, min.len = 1), .parent = topenv()), tags = "required"))
+      private$.maybe_param_set = ps(p = p_vct(lower = 0, upper = 1, tags = "required"))
       private$.maybe_param_set$values = list(p = 1)
       super$initialize(intersect(mutator$param_classes, mutator_not$param_classes),
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),

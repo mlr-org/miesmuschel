@@ -47,8 +47,7 @@ MutatorGauss = R6Class("MutatorGauss",
     #' @description
     #' Initialize the `MutatorGauss` object.
     initialize = function() {
-      param_set = ps(sdev = p_uty(custom_check = crate(function(x) check_numeric(x,
-        lower = tol_bound(0, "lower"), any.missing = FALSE, min.len = 1), .parent = topenv()), tags = "required"),
+      param_set = ps(sdev = p_vct(lower = 0, tags = "required"),
         sdev_is_relative = p_lgl(tags = "required"), truncated_normal = p_lgl(tags = "required"))
       param_set$values = list(sdev = 1, sdev_is_relative = FALSE, truncated_normal = FALSE)
       super$initialize("ParamDbl", param_set, packages = "stats", dict_entry = "gauss")

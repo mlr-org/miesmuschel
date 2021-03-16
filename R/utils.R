@@ -146,3 +146,8 @@ assert_optim_instance = function(inst) {
   assert_names(search_space_ids, disjunct.from = codomain_ids, .var.name = "inst$search_space$ids()")
   invisible(inst)
 }
+
+# vector-domain
+p_vct = function(lower = -Inf, upper = Inf, min.len = 1, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
+  p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper, min.len, .parent = topenv()), tags = tags, depends = depends, trafo = trafo)
+}
