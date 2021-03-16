@@ -132,24 +132,22 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
   if (any(t(fitnesses) < nadir)) stop("Found fitness worse than nadir")
   if (prefilter) {
     fitnesses = fitnesses[nondominated(fitnesses)$strong_front, , drop = FALSE]
+#    cat("prefiltered:\n")
+#    print(fitnesses)
   }
   fitnesses_t = t(fitnesses)
 
   zenith = apply(fitnesses, 2, max)
-
+  if (length(nadir) == 1) nadir = rep(nadir, ncol(fitnesses))
   prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
 }
 
 domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
+#  cat(sprintf("\nFrom %s to %s dim %s:\n", str_collapse(nadir), str_collapse(zenith), dimension))
+#  print(t(fitnesses_t))
+
   # for each simplify step, we need to check again if things fall out of the current window
   repeat {
-    below = colSums(fitnesses_t <= nadir) == 0
-    # left out below the nadir --> no influence on current window
-    if (any(below)) {
-      fitnesses_t = fitnesses_t[, below, drop = FALSE]
-    }
-    if (!length(fitnesses_t)) return(prod(zenith - nadir))
-
     above = colSums(fitnesses_t >= zenith)
     if (any(above == nrow(fitnesses_t))) {
       # one point completely dominates the current window --> no volume
@@ -166,9 +164,21 @@ domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
     # but the points that do not indicate how much we cut away. From them we take the max, because
     # there could be multiple orthants that cut away space.
     # (We always cut away from below, because we have (-inf)^d-orthants)
-    cutcube[cutcube >= zenith] = nadir
-    nadir = apply(cutcube, 1L, max)
+    cutcube[cutcube >= zenith] = -Inf
+    #> nadir = pmax(nadir, matrixStats::rowMaxs(cutcube))  # relatively lean dependency
+    #> nadir = pmax(nadir, apply(cutcube, 1L, max))  # base R
+    nadir = pmax(nadir, Rfast::rowMaxs(cutcube, value = TRUE))
+
     fitnesses_t = fitnesses_t[, !cutting, drop = FALSE]
+
+    below = colSums(fitnesses_t <= nadir) != 0
+    #> below = Rfast::colAny(fitnesses_t <= nadir)  # doesn't seem to add much
+
+    # left out below the nadir --> no influence on current window
+    if (any(below)) {
+      fitnesses_t = fitnesses_t[, !below, drop = FALSE]
+    }
+    if (!length(fitnesses_t)) return(prod(zenith - nadir))
   }
 
   # one point left: subtract its volume from entire volume
@@ -177,13 +187,18 @@ domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
   }
 
   repeat {
-    cutpoints = fitnesses_t[dimension, ]
-    cutpoints = cutpoints[cutpoints < zenith[dimension]]
+    dimpoints = fitnesses_t[dimension, ]
+    cutpoints = dimpoints[dimpoints < zenith[dimension]]
     if (length(cutpoints)) break
     dimension = (dimension %% nrow(fitnesses_t)) + 1L
   }
 
-  cutat = cutpoints[(length(cutpoints) + 1L) / 2]
+
+  cutat = Rfast::nth(cutpoints, (length(cutpoints) + 1L) / 2)
+  #> cutat = sort(cutpoints)[(length(cutpoints) + 1L) / 2]
+  ## alternative: sort partially
+  #> cutrank = as.integer((length(cutpoints) + 1L) / 2)
+  #> cutat = sort(cutpoints, partial = cutrank)[[cutrank]]
 
   cutnadir = nadir
   cutnadir[dimension] = cutat
@@ -192,7 +207,9 @@ domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
 
   dimension = (dimension %% nrow(fitnesses_t)) + 1L
 
-  domhv_recurse(fitnesses_t, cutnadir, zenith, dimension) + domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
+  # pre-emptively drop lower part for upper half
+  domhv_recurse(fitnesses_t[, dimpoints > cutat, drop = FALSE], cutnadir, zenith, dimension) +
+    domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
 }
 
 
@@ -215,7 +232,7 @@ nondominated = function(fitnesses, epsilon = 0) {
     dominated = any(colSums(front < epsrowvals) == 0 & colSums(front > epsrowvals) > 0)
     if (!dominated) {
       # strong dominating front
-      if (colSums(front <= rowvals) == 0) {
+      if (all(colSums(front <= rowvals) > 0)) {
         curfi_strong[[length(curfi_strong) + 1]] = orow
         front = fitnesses_t[, curfi_strong, drop = FALSE]  # also create the matrix
       }

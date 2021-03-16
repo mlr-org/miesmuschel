@@ -19,6 +19,7 @@ Imports:
   R6,
   bbotk (>= 0.3.0.900),
   data.table,
+  Rfast,
   lgr
 Suggests:
   tinytest,
