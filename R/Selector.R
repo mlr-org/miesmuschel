@@ -42,7 +42,7 @@ Selector = R6Class("Selector",
   inherit = MiesOperator,
   public = list(
     #' @description
-    #' Initialize base class components of the `Mutator`.
+    #' Initialize base class components of the `Selector`.
     #' @template param_param_classes
     #' @template param_param_set
     #' @param supported (`character`)\cr

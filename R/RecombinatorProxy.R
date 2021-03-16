@@ -6,9 +6,6 @@
 #' Recombinator that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s recombination operation fully parametrizable.
 #'
-#' Changes in the `operation` configuration parameter are only realized whenever `$prime()` is called, so `$prime()`
-#' must be called every time when `operation` is changed, *even if* the new configuration parameter value is already primed.
-#'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Recombinator`]\cr
 #'   Operation to perform. Initialized to [`RecombinatorNull`] with appropriate `n_indivs_in` and `n_indivs_out` values.

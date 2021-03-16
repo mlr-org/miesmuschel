@@ -5,7 +5,7 @@
 #' @name dict_selectors_best
 #'
 #' @description
-#' Selector that selects the top `n_select` individuals based on the  fitness value. When `n_select` is larger than the number
+#' [`Selector`] that selects the top `n_select` individuals based on the  fitness value. When `n_select` is larger than the number
 #' of individuals, the selection wraps around: All `nrow(values)` individuals are selected at least `floor(nrow(values) / n_select)`
 #' times, with the top `nrow(values) %% n_select` individuals being selected one more time.
 #'
