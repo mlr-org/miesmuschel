@@ -59,6 +59,9 @@ MiesOperator = R6Class("MiesOperator",
       private$.endomorphism = assert_flag(endomorphism)
     },
     repr = function(skip_defaults = TRUE, show_params = TRUE, show_constructor_args = TRUE, ...) {
+      assert_flag(skip_defaults)
+      assert_flag(show_params)
+      assert_flag(show_constructor_args)
       initformals = formals(self$initialize)
       formalvalues = list()
       deviantformals = list()
@@ -119,12 +122,15 @@ MiesOperator = R6Class("MiesOperator",
       as.call(c(list(as.symbol(self$dict_shortaccess), self$dict_entry), deviantparams, deviantformals))
     },
     print = function(verbose = FALSE, ...) {
+      hasparams = length(self$param_set$ids())
       txt = capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE))
-      txt = paste0(gsub("stop(\"<([^>]*)>\")", "<\\1>", txt), "\n$param_set:\n")
+      txt = paste0(gsub("stop\\(\"<([^>]*)>\"\\)", "<\\1>", txt), "\n$param_set:", if (hasparams) "\n" else " empty.\n")
       cat(txt)
-      pids = as.data.table(self$param_set)[, c("id", "lower", "upper", "levels")]
-      pids = cbind(pids, value = self$param_set$values[pids$id])
-      print(pids)
+      if (hasparams) {
+        pids = as.data.table(self$param_set)[, c("id", "lower", "upper", "levels")]
+        pids = cbind(pids, value = self$param_set$values[pids$id])
+        print(pids)
+      }
     },
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
