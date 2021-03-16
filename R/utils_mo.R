@@ -156,33 +156,32 @@ domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
   cutcube = fitnesses_t[, cutting, drop = FALSE]
 
   # see if we need to do "simplify". if no -> done with this loop
-  if (!length(cutcube)) break
+  if (length(cutcube)) {
+    # the points that go beyond zenith stay at nadir (because they are not what we care about)
+    # but the points that do not indicate how much we cut away. From them we take the max, because
+    # there could be multiple orthants that cut away space.
+    # (We always cut away from below, because we have (-inf)^d-orthants)
+    cutcube[cutcube >= zenith] = -Inf
+    #> nadir = pmax(nadir, matrixStats::rowMaxs(cutcube))  # relatively lean dependency
+    #> nadir = pmax(nadir, apply(cutcube, 1L, max))  # base R
+    nadir = pmax(nadir, Rfast::rowMaxs(cutcube, value = TRUE))
 
-  # the points that go beyond zenith stay at nadir (because they are not what we care about)
-  # but the points that do not indicate how much we cut away. From them we take the max, because
-  # there could be multiple orthants that cut away space.
-  # (We always cut away from below, because we have (-inf)^d-orthants)
-  cutcube[cutcube >= zenith] = -Inf
-  #> nadir = pmax(nadir, matrixStats::rowMaxs(cutcube))  # relatively lean dependency
-  #> nadir = pmax(nadir, apply(cutcube, 1L, max))  # base R
-  nadir = pmax(nadir, Rfast::rowMaxs(cutcube, value = TRUE))
+    fitnesses_t = fitnesses_t[, !cutting, drop = FALSE]
 
-  fitnesses_t = fitnesses_t[, !cutting, drop = FALSE]
+    # for each simplify step, we need to check again if things fall out of the current window
+    below = colSums(fitnesses_t <= nadir) != 0
+    #> below = Rfast::colAny(fitnesses_t <= nadir)  # doesn't seem to add much
 
-  # for each simplify step, we need to check again if things fall out of the current window
-  below = colSums(fitnesses_t <= nadir) != 0
-  #> below = Rfast::colAny(fitnesses_t <= nadir)  # doesn't seem to add much
-
-  # left out below the nadir --> no influence on current window
-  if (any(below)) {
-    fitnesses_t = fitnesses_t[, !below, drop = FALSE]
+    # left out below the nadir --> no influence on current window
+    if (any(below)) {
+      fitnesses_t = fitnesses_t[, !below, drop = FALSE]
+    }
+    if (!length(fitnesses_t)) return(prod(zenith - nadir))
   }
-  if (!length(fitnesses_t)) return(prod(zenith - nadir))
-
 
   # one point left: subtract its volume from entire volume
   if (ncol(fitnesses_t) == 1L) {
-    return(prod(zenith - nadir) - prod(fitnesses_t - nadir))  # I don't like what this does to numerics
+    return(prod(zenith - nadir) - prod(pmin(zenith, fitnesses_t) - nadir))  # I don't like what this does to numerics
   }
 
   repeat {
