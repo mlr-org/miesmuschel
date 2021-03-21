@@ -165,9 +165,9 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
       # there could be multiple orthants that cut away space.
       # (We always cut away from below, because we have (-inf)^d-orthants)
       cutcube[cutcube >= zenith] = -Inf
-      #> nadir = pmax(nadir, matrixStats::rowMaxs(cutcube))  # relatively lean dependency
+      nadir = pmax(nadir, matrixStats::rowMaxs(cutcube))  # relatively lean dependency
       #> nadir = pmax(nadir, apply(cutcube, 1L, max))  # base R
-      nadir = pmax(nadir, Rfast::rowMaxs(cutcube, value = TRUE))
+      #> nadir = pmax(nadir, Rfast::rowMaxs(cutcube, value = TRUE))
 
       fitnesses_t = fitnesses_t[, !cutting, drop = FALSE]
 
@@ -211,7 +211,7 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
       cutpointweights = colSums((fitnesses_t[, which.cutpoints, drop = FALSE] < zenith) * weight_lut[seq.int(dim + 1 - dimension, length.out = dim)])
 
       cutat = matrixStats::weightedMedian(cutpoints, cutpointweights, interpolate = FALSE, ties = "min")  # n log(n), apparently does sorting internally, pathetic.
-      if (length(cutpoints) > 1 && cutat == max(cutpoints)) {
+      if (cutat == max(cutpoints)) {
         cutat = max(cutpoints[cutpoints != cutat])
       }
     }
