@@ -126,9 +126,10 @@ domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
 
 }
 
-domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
+domhv = function(fitnesses, nadir = 0, prefilter = TRUE, wgt = TRUE) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
-  assert(check_number(nadir), check_numeric(nadir, len = ncol(fitnesses)))
+  dim = ncol(fitnesses)
+  assert(check_number(nadir), check_numeric(nadir, len = dim))
   if (any(t(fitnesses) < nadir)) stop("Found fitness worse than nadir")
   if (prefilter) {
     fitnesses = fitnesses[nondominated(fitnesses)$strong_front, , drop = FALSE]
@@ -138,20 +139,118 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
   fitnesses_t = t(fitnesses)
 
   zenith = apply(fitnesses, 2, max)
-  if (length(nadir) == 1) nadir = rep(nadir, ncol(fitnesses))
-  prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
+  if (length(nadir) == 1) nadir = rep(nadir, dim)
+
+  weight_lut = 2^(seq_len(dim) / dim)
+  weight_lut[[1]] = 0  # first dimension is not regarded for weight
+  weight_lut = c(weight_lut, weight_lut)
+
+  domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
+  #  cat(sprintf("\nFrom %s to %s dim %s:\n", str_collapse(nadir), str_collapse(zenith), dimension))
+  #  print(t(fitnesses_t))
+
+    above = colSums(fitnesses_t >= zenith)
+    if (any(above == dim)) {
+      # one point completely dominates the current window --> no volume
+      return(0)
+    }
+    cutting = above == dim - 1L
+
+    cutcube = fitnesses_t[, cutting, drop = FALSE]
+
+    # see if we need to do "simplify". if no -> done with this loop
+    if (length(cutcube)) {
+      # the points that go beyond zenith stay at nadir (because they are not what we care about)
+      # but the points that do not indicate how much we cut away. From them we take the max, because
+      # there could be multiple orthants that cut away space.
+      # (We always cut away from below, because we have (-inf)^d-orthants)
+      cutcube[cutcube >= zenith] = -Inf
+      #> nadir = pmax(nadir, matrixStats::rowMaxs(cutcube))  # relatively lean dependency
+      #> nadir = pmax(nadir, apply(cutcube, 1L, max))  # base R
+      nadir = pmax(nadir, Rfast::rowMaxs(cutcube, value = TRUE))
+
+      fitnesses_t = fitnesses_t[, !cutting, drop = FALSE]
+
+      # for each simplify step, we need to check again if things fall out of the current window
+      below = colSums(fitnesses_t <= nadir) != 0
+      #> below = Rfast::colAny(fitnesses_t <= nadir)  # doesn't seem to add much
+
+      # left out below the nadir --> no influence on current window
+      if (any(below)) {
+        fitnesses_t = fitnesses_t[, !below, drop = FALSE]
+      }
+      if (!length(fitnesses_t)) return(prod(zenith - nadir))
+    }
+
+    # one point left: subtract its volume from entire volume
+    if (ncol(fitnesses_t) == 1L) {
+      return(prod(zenith - nadir) - prod(pmin(zenith, fitnesses_t) - nadir))  # I don't like what this does to numerics
+    }
+
+    repeat {
+      dimpoints = fitnesses_t[dimension, ]
+      which.cutpoints = which(dimpoints < zenith[dimension])
+      if (length(which.cutpoints)) break
+      dimension = (dimension %% dim) + 1L
+    }
+
+    cutpoints = dimpoints[which.cutpoints]
+
+    # Maybe a different cut is more appropriate here, because more points fall out on the upper half.
+    #  - points "below" are eliminated 100% points "above" are eliminated only if they have one dimension left
+    #  - on the other hand the majority case could be that most points have only one dimension overlap
+    #> cutat = Rfast::nth(cutpoints, (length(cutpoints) + 1L) / 2)  # not the correct way of doing this, because it doesn't really count the (d-2)-faces *within* the bounds.
+    # interpolate = TRUE in the following because we never want to get the maximum element.
+    if (length(cutpoints) == 1) {
+      cutat = cutpoints
+    } else if (length(cutpoints) == 2) {
+      cutat = min(cutpoints)
+    } else {
+
+      # calculate weights; disregard dimension itself by subtracting its own weight again at the end.
+      cutpointweights = colSums((fitnesses_t[, which.cutpoints, drop = FALSE] < zenith) * weight_lut[seq.int(dim + 1 - dimension, length.out = dim)])
+
+      cutat = matrixStats::weightedMedian(cutpoints, cutpointweights, interpolate = FALSE, ties = "min")  # n log(n), apparently does sorting internally, pathetic.
+      if (length(cutpoints) > 1 && cutat == max(cutpoints)) {
+        cutat = max(cutpoints[cutpoints != cutat])
+      }
+    }
+    #> cutat = sort(cutpoints)[(length(cutpoints) + 1L) / 2]
+    ## alternative: sort partially
+    #> cutrank = as.integer((length(cutpoints) + 1L) / 2)
+    #> cutat = sort(cutpoints, partial = cutrank)[[cutrank]]
+
+    cutnadir = nadir
+    cutnadir[dimension] = cutat
+    cutzenith = zenith
+    cutzenith[dimension] = cutat
+
+    dimension = (dimension %% dim) + 1L
+
+    # pre-emptively drop lower part for upper half
+    domhv_recurse(fitnesses_t[, dimpoints > cutat, drop = FALSE], cutnadir, zenith, dimension) +
+      domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
+  }
+
+  if (wgt) {
+    prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
+  } else {
+    prod(zenith - nadir) - domhv_recurse_unweighted(fitnesses_t, nadir, zenith, 1)
+  }
+
 }
 
-domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
+domhv_recurse_unweighted = function(fitnesses_t, nadir, zenith, dimension) {
 #  cat(sprintf("\nFrom %s to %s dim %s:\n", str_collapse(nadir), str_collapse(zenith), dimension))
 #  print(t(fitnesses_t))
 
   above = colSums(fitnesses_t >= zenith)
-  if (any(above == nrow(fitnesses_t))) {
+  dim = nrow(fitnesses_t)
+  if (any(above == dim)) {
     # one point completely dominates the current window --> no volume
     return(0)
   }
-  cutting = above == nrow(fitnesses_t) - 1L
+  cutting = above == dim - 1L
 
   cutcube = fitnesses_t[, cutting, drop = FALSE]
 
@@ -188,11 +287,14 @@ domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
     dimpoints = fitnesses_t[dimension, ]
     cutpoints = dimpoints[dimpoints < zenith[dimension]]
     if (length(cutpoints)) break
-    dimension = (dimension %% nrow(fitnesses_t)) + 1L
+    dimension = (dimension %% dim) + 1L
   }
 
 
-  cutat = Rfast::nth(cutpoints, (length(cutpoints) + 1L) / 2)
+  # Maybe a different cut is more appropriate here, because more points fall out on the upper half.
+  #  - points "below" are eliminated 100% points "above" are eliminated only if they have one dimension left
+  #  - on the other hand the majority case could be that most points have only one dimension overlap
+  cutat = Rfast::nth(cutpoints, (length(cutpoints) + 1L) / 2)  # not the correct way of doing this, because it doesn't really count the (d-2)-faces *within* the bounds.
   #> cutat = sort(cutpoints)[(length(cutpoints) + 1L) / 2]
   ## alternative: sort partially
   #> cutrank = as.integer((length(cutpoints) + 1L) / 2)
@@ -203,11 +305,11 @@ domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
   cutzenith = zenith
   cutzenith[dimension] = cutat
 
-  dimension = (dimension %% nrow(fitnesses_t)) + 1L
+  dimension = (dimension %% dim) + 1L
 
   # pre-emptively drop lower part for upper half
-  domhv_recurse(fitnesses_t[, dimpoints > cutat, drop = FALSE], cutnadir, zenith, dimension) +
-    domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
+  domhv_recurse_unweighted(fitnesses_t[, dimpoints > cutat, drop = FALSE], cutnadir, zenith, dimension) +
+    domhv_recurse_unweighted(fitnesses_t, nadir, cutzenith, dimension)
 }
 
 
