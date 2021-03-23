@@ -188,6 +188,7 @@ Other recombinators:
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 

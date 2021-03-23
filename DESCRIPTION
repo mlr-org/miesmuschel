@@ -48,6 +48,7 @@ Collate:
     'RecombinatorMaybe.R'
     'RecombinatorNull.R'
     'RecombinatorProxy.R'
+    'RecombinatorSimulatedBinaryCrossover.R'
     'SelectorBest.R'
     'SelectorProxy.R'
     'SelectorRandom.R'
