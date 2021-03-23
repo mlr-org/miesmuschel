@@ -59,13 +59,13 @@ Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value 
 \item \href{#method-new}{\code{ParamSetShadow$new()}}
 \item \href{#method-add}{\code{ParamSetShadow$add()}}
 \item \href{#method-subset}{\code{ParamSetShadow$subset()}}
+\item \href{#method-add_dep}{\code{ParamSetShadow$add_dep()}}
 \item \href{#method-clone}{\code{ParamSetShadow$clone()}}
 }
 }
 \if{html}{
 \out{<details ><summary>Inherited methods</summary>}
 \itemize{
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="add_dep">}\href{../../paradox/html/ParamSet.html#method-add_dep}{\code{paradox::ParamSet$add_dep()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert">}\href{../../paradox/html/ParamSet.html#method-assert}{\code{paradox::ParamSet$assert()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert_dt">}\href{../../paradox/html/ParamSet.html#method-assert_dt}{\code{paradox::ParamSet$assert_dt()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check">}\href{../../paradox/html/ParamSet.html#method-check}{\code{paradox::ParamSet$check()}}\out{</span>}
@@ -105,8 +105,12 @@ Ids of \code{\link[paradox:Param]{Param}}s to shadow from \code{sets}, must be a
 \if{html}{\out{<a id="method-add"></a>}}
 \if{latex}{\out{\hypertarget{method-add}{}}}
 \subsection{Method \code{add()}}{
-Implemented for compatibility with \code{\link[paradox:ParamSet]{ParamSet}} superclass. However, this function is
-not implemented and will give an error.
+Adds a single param or another set to this set, all params are cloned.
+
+This calls the underlying \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$add()} function.
+
+\code{\link[paradox:Param]{Param}} with ids that also occur in the underlying  \code{\link[paradox:ParamSet]{ParamSet}}
+but are shadowed can \emph{not} be added and instead will result in an error.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$add(p)}\if{html}{\out{</div>}}
 }
@@ -114,33 +118,58 @@ not implemented and will give an error.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{p}}{not used.}
+\item{\code{p}}{(\code{\link[paradox:Param]{Param}} | \code{\link[paradox:ParamSet]{ParamSet}})}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-nothing.
+\code{invisible(self)}.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset"></a>}}
 \if{latex}{\out{\hypertarget{method-subset}{}}}
 \subsection{Method \code{subset()}}{
-Implemented for compatibility with \code{\link[paradox:ParamSet]{ParamSet}} superclass. However, this function is
-not implemented and will give an error.
+Reduces the parameters to the ones of passed ids.
+
+This calls the underlying \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$subset()} function.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$subset(p)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$subset(ids)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{p}}{not used.}
+\item{\code{ids}}{(\code{character})}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-nothing.
+\code{invisible(self)}.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-add_dep"></a>}}
+\if{latex}{\out{\hypertarget{method-add_dep}{}}}
+\subsection{Method \code{add_dep()}}{
+Adds a dependency to the unterlying \code{\link[paradox:ParamSet]{ParamSet}}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$add_dep(id, on, cond)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{id}}{(\code{character(1)})}
+
+\item{\code{on}}{(\code{character(1)})}
+
+\item{\code{cond}}{(\code{\link[paradox:Condition]{Condition}})}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{invisible(self)}.
 }
 }
 \if{html}{\out{<hr>}}

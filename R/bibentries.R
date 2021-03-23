@@ -19,6 +19,16 @@ bibentries = c(
     pages = "29--64",
     year = "2013",
     publisher = "MIT Press"
+  ),
+  deb1995simulated = bibentry("article",
+    title = "Simulated binary crossover for continuous search space",
+    author = "{Deb, Kalyanmoy and Agrawal, Ram Bhushan and others",
+    journal = "Complex systems",
+    volume = "9",
+    number = "2",
+    pages = "115--148",
+    year = "1995}",
+    publisher = "Citeseer"
   )
 )
 
