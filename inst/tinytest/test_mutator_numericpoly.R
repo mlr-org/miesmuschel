@@ -18,6 +18,11 @@ x_n4 = mpoly$operate(data.table(x = rep(5, 100)))$x
 expect_true(var(x_n0) > var(x_n4))
 
 # vector-valued n
+mpoly$param_set$values = list(n = c(0, 4, 0))
+mpoly$prime(ps(x = p_dbl(0, 2), y = p_dbl(0, 2)))
+expect_error(mpoly$operate(data.table(x = rep(1, 100), y = rep(1, 100))),
+  pattern = "n must have either length 1, or length of input")
+
 mpoly$param_set$values = list(n = c(0, 4))
 mpoly$prime(ps(x = p_dbl(0, 2), y = p_dbl(0, 2)))
 operated = mpoly$operate(data.table(x = rep(1, 100), y = rep(1, 100)))
