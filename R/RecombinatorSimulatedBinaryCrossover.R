@@ -11,7 +11,7 @@
 #' @section Configuration Parameters:
 #' * `p` :: `numeric(1)`\cr
 #'  Component-wise probability with which to crossover values. Initialized to 0.5.
-#' *  `n` :: `double()`\cr
+#' *  `n` :: `double`\cr
 #'  Non-negative distribution index of the polynomial distribution for each component.
 #'  Generally spoken, the higher `n`, the higher the probability of creating near parent values.
 #'  This may either be a scalar in which case it is applied to all input components, or a vector,
@@ -24,6 +24,10 @@
 #' @template autoinfo_dict
 #'
 #' @family recombinators
+#'
+#' @references
+#' `r format_bib("deb1995simulated")`
+#'
 #' @examples
 #' set.seed(1)
 #' rsbx = rec("sbx")

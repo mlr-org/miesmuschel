@@ -6,14 +6,14 @@
 \title{Simulated Binary Crossover Recombinator}
 \description{
 Numeric Values between two individuals are recombined via component-wise independent simulated
-binary crossover. See {Deb (1995}) for more details.
+binary crossover. See Deb (1995) for more details.
 }
 \section{Configuration Parameters}{
 
 \itemize{
 \item \code{p} :: \code{numeric(1)}\cr
 Component-wise probability with which to crossover values. Initialized to 0.5.
-\item \code{n} :: \code{double()}\cr
+\item \code{n} :: \code{double}\cr
 Non-negative distribution index of the polynomial distribution for each component.
 Generally spoken, the higher \code{n}, the higher the probability of creating near parent values.
 This may either be a scalar in which case it is applied to all input components, or a vector,
@@ -53,6 +53,11 @@ rsbx$operate(data)
 rsbx$param_set$values$n = c(0.5, 1, 10)
 rsbx$param_set$values$p = 1
 rsbx$operate(data)
+}
+\references{
+Deb, Kalyanmoy, Agrawal, Bhushan R, others (1995).
+\dQuote{Simulated binary crossover for continuous search space.}
+\emph{Complex systems}, \bold{9}(2), 115--148.
 }
 \seealso{
 Other recombinators: 
