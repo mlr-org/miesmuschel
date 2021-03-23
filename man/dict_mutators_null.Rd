@@ -49,6 +49,7 @@ Other mutators:
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
+\code{\link{dict_mutators_numericpoly}},
 \code{\link{dict_mutators_unif}}
 }
 \concept{mutators}

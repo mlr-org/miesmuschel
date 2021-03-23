@@ -61,7 +61,8 @@ Other mutators:
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
-\code{\link{dict_mutators_null}}
+\code{\link{dict_mutators_null}},
+\code{\link{dict_mutators_numericpoly}}
 }
 \concept{mutators}
 \section{Super classes}{

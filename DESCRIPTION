@@ -37,6 +37,7 @@ Collate:
     'MutatorGauss.R'
     'MutatorMaybe.R'
     'MutatorNull.R'
+    'MutatorNumericPolynomial.R'
     'MutatorProxy.R'
     'ParamSetShadow.R'
     'OperatorCombination.R'

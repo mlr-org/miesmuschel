@@ -19,6 +19,16 @@ bibentries = c(
     pages = "29--64",
     year = "2013",
     publisher = "MIT Press"
+  ),
+  deb1996combined = bibentry("article",
+    title = "A combined genetic adaptive search (GeneAS) for engineering design",
+    author = "Deb, Kalyanmoy and Goyal, Mayank",
+    journal = "Computer Science and Informatics",
+    volume = "26",
+    number = "4",
+    pages = "30--45",
+    year = "1996",
+    publisher = "COMPUTER SOCIETY OF INDIA"
   )
 )
 
