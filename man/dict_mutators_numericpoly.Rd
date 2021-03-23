@@ -7,19 +7,19 @@
 \description{
 Numeric components are mutated by sampling from a polynomial distribution having its mean at the
 current value and its variance as a function of the distribution index \code{n}.
+See Deb (1996) for more details.
 
 Since the information loss is rather high, this should in most cases be combined with \code{\link{MutatorCmpMaybe}}.
 }
 \section{Configuration Parameters}{
 
 \itemize{
-\item \code{max_mut} :: \code{numeric}\cr
-Maximum permissible perturbance allowed for each individual.
-See \verb{rDeb (1996)or more details.  This may either be a scalar in which case it is applied to all input components, or a vector,  in which case it must have the length of the input and applies to components in order in which  they appear in the priming [}ParamSet`]\link[paradox:ParamSet]{paradox::ParamSet}. Initialized to 1.
-\item \code{n} :: \code{integer()}\cr
-Distribution index of the polynomial distribution for each individual.
+\item \code{n} :: \code{double}\cr
+Non-negative distribution index of the polynomial distribution for each individual.
 Generally spoken, the higher \code{n}, the lower the variance of the distribution.
-See \verb{r Deb (1996)r more details.  This may either be a scalar in which case it is applied to all input components, or a vector,  in which case it must have the length of the input and applies to components in order in which  they appear in the priming [}ParamSet`]\link[paradox:ParamSet]{paradox::ParamSet}. Initialized to 1.
+This may either be a scalar in which case it is applied to all input components, or a vector,
+in which case it must have the length of the input and applies to components in order in which
+they appear in the priming \code{\link[paradox:ParamSet]{ParamSet}}. Initialized to 1.
 }
 }
 
