@@ -15,6 +15,10 @@ must be called every time when \code{operation} is changed, \emph{even if} the n
 \itemize{
 \item \code{operation} :: \code{\link{Mutator}}\cr
 Operation to perform. Initialized to \code{\link{MutatorNull}}.
+This is primed when \verb{$prime()} of \code{MutatorProxy} is called, and also when \verb{$operate()} is called, to make changing
+the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{MutatorProxy}
+objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid
+frequent re-priming.
 }
 }
 
@@ -57,6 +61,7 @@ Other mutators:
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
+\code{\link{dict_mutators_erase}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
@@ -102,7 +107,7 @@ Initialize the \code{MutatorProxy} object.
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
-This must be called whenever the \code{operation} configuration parameter changes, \emph{even if} the configuration parameter is already primed.
+Note that this modifies the \verb{$param_set$values$operation} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MutatorProxy$prime(param_set)}\if{html}{\out{</div>}}
 }

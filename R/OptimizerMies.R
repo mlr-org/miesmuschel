@@ -153,6 +153,7 @@
 #'
 #' `r format_bib("li2013mixed")`
 #'
+#' @family optimizers
 #' @examples
 #' \donttest{
 #' lgr::threshold("warn")
@@ -410,15 +411,4 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .param_set_source = NULL
   )
 )
-
-check_fidelity_schedule = function(x) {
-  if (test_data_frame(x, ncols = 3, min.rows = 1) &&
-      test_names(colnames(x), identical.to = c("generation", "budget_new", "budget_survivors")) &&
-      test_integerish(x$generation, tol = 1e-100, any.missing = FALSE, unique = TRUE) &&
-      1 %in% x$generation) {
-    TRUE
-  } else {
-    "must be a data.frame with integer column 'generation' (with unique non-missing values and at least one row with value 1) and columns 'budget_new', 'budget_survivors'."
-  }
-}
 

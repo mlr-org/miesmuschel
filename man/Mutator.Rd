@@ -37,6 +37,7 @@ Other mutators:
 \code{\link{MutatorProxy}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
+\code{\link{dict_mutators_erase}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
