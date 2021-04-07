@@ -154,6 +154,17 @@ Other optimizers:
 \section{Super class}{
 \code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerSumoHB}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}} | \code{NULL})\cr
+Regression learner for the surrogate model filtering algorithm.}
+
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Configuration parameters of the optimization algorithm.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

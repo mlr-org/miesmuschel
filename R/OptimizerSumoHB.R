@@ -140,11 +140,11 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
     #' @description
     #' Initialize the 'OptimizerSumoHB' object.
     initialize = function(surrogate_learner = NULL) {
-      private$.surrogate_learner = assert_r6(surrogate_learner, "Learner", null.ok = TRUE)
+      private$.surrogate_learner = assert_r6(surrogate_learner, "LearnerRegr", null.ok = TRUE)
       private$.own_param_set = do.call(ps, c(list(
           mu = p_int(1, tags = "required"),
           survival_fraction = p_dbl(0, 1, tags = "required"),
-          sampling = p_uty(custom_check = function(x) check_function(x, nargs = 2), tags = c("init", "required"))),
+          sampling = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required"))),
         if (!is.null(surrogate_learner)) list(
           filter_rate_first = p_dbl(0, tags = "required"),
           filter_rate_per_sample = p_dbl(0, tags = "required"))
@@ -152,6 +152,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       private$.param_set_source = c(alist(private$.own_param_set), if (!is.null(surrogate_learner)) alist(self$surrogate_learner$param_set))
 
+      # insert_named, but self$param_set$values may be NULL when no `Learner` is given.
       self$param_set$values = insert_named(self$param_set$values, c(
         list(mu = 2, survival_fraction = 0.5, sampling = generate_design_lhs),
         if (!is.null(surrogate_learner)) list(
@@ -172,14 +173,46 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
     }
   ),
   active = list(
+    #' @field surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
+    #' Regression learner for the surrogate model filtering algorithm.
     surrogate_learner = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.surrogate_learner)) {
         stop("surrogate_learner is read-only.")
       }
-      priate$.surrogate_learner
+      private$.surrogate_learner
+    },
+    #' @field param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #' Configuration parameters of the optimization algorithm.
+    param_set = function(rhs) {
+      if (is.null(private$.param_set)) {
+        sourcelist = lapply(private$.param_set_source, function(x) eval(x))
+        private$.param_set = ParamSetCollection$new(sourcelist)
+        if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
+      }
+      if (!missing(rhs) && !identical(rhs, private$.param_set)) {
+        stop("param_set is read-only.")
+      }
+      private$.param_set
     }
   ),
   private = list(
+    deep_clone = function(name, value) {
+      if (!is.null(private$.param_set_source)) {
+        if (!is.null(private$.param_set)) {
+          private$.param_set_id = private$.param_set$set_id
+          private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
+        }
+        if (name == ".param_set_source") {
+          value = lapply(value, function(x) {
+            if (inherits(x, "R6")) x$clone(deep = TRUE) else x  # nocov
+          })
+        }
+      }
+      if (is.environment(value) && !is.null(value[[".__enclos_env__"]])) {
+        return(value$clone(deep = TRUE))
+      }
+      value
+    },
     .optimize = function(inst) {
       params = self$param_set$get_values()
 
@@ -201,7 +234,8 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       parent_selector = SelectorRandom$new()
       parent_selector$param_set$values$replace = TRUE
 
-      mies_prime_operators(mutators = list(mutator), selectors = list(survival_selector, parent_selector))
+      mies_prime_operators(mutators = list(mutator), selectors = list(survival_selector, parent_selector),
+        search_space = inst$search_space, budget_id = budget_id)
 
       mies_init_population(inst, mu = params$mu, initializer = params$sampling, fidelity_schedule = fidelity_schedule,
         budget_id = budget_id)
@@ -213,7 +247,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       repeat {
         mies_survival_plus(inst, mu = survivors, survival_selector = survival_selector)
-        offspring = mies_generate_offspring(inst, lambda = mu - survivors, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
+        offspring = mies_generate_offspring(inst, lambda = params$mu - survivors, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id)
         mies_step_fidelity(inst, fidelity_schedule, budget_id, generation_lookahead = FALSE)
         # TODO: combine the above into one batch
