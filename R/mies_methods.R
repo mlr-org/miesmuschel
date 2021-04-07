@@ -22,6 +22,14 @@
 #' @param survivor_budget (`logical(1)`)\cr
 #'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.\cr
 #'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#' @param step_fidelity (`logical(1)`)\cr
+#'   Whether to *also* evaluate alive individuals from previous generations that have a budget value below the current `budget_survivors`.
+#'   Default `FALSE`. Ignored when `budget_id` and `fidelity_schedule` are `NULL`.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#' @param monotonic (`logical(1)`)\cr
+#'   When `step_fidelity` is `TRUE`, then this indicates whether individuals should only ever be re-evaluated when this increases fidelity.
+#'   Ignored when `step_fidelity` is `FALSE` or when `budget_id` and `fidelity_schedule` are `NULL`.\cr
+#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
@@ -106,16 +114,19 @@
 #'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
 #'
 #' oi$archive
+#' # TODO example with step_fidelity = TRUE
 #' @export
-mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
+mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE, step_fidelity = FALSE, monotonic = TRUE) {
   assert_optim_instance(inst)
 
   offspring = as.data.table(assert_data_frame(offspring))
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
   assert_flag(survivor_budget)
-  current_gen = max(inst$archive$data$dob, 0, na.rm = TRUE) + 1
-  assert_names(colnames(offspring), must.include = setdiff(ss_ids, budget_id), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
+  data = inst$archive$data
+  current_gen = max(data$dob, 0, na.rm = TRUE) + 1
+  ocols = colnames(offspring)
+  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
 
   if (!is.null(budget_id)) {
     assert(check_fidelity_schedule(fidelity_schedule))
@@ -124,7 +135,22 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
     fidelity_column = if (survivor_budget) "budget_survivors" else "budget_new"
     fidelity = fidelity_schedule[data.table(generation = current_gen), fidelity_column, on = "generation", roll = TRUE, with = FALSE]
     setnames(fidelity, budget_id)
-    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])
+
+
+    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])  # the conditional is to avoid edge-cases for empty tables here.
+
+    if (assert_flag(step_fidelity) && any(is.na(data$eol))) {
+      assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+      assert_integerish(data$eol, lower = 0, tol = 1e-100)
+      budget_survivors = NULL
+      survivor_fidelity = fidelity_schedule[data.table(generation = current_gen), budget_survivors, on = "generation", roll = TRUE]
+      comparator = if (assert_flag(monotonic)) `<` else `!=`
+      reeval = which(is.na(data$eol) & comparator(data[[budget_id]], survivor_fidelity))
+      indivs = data[reeval, ocols, with = FALSE]
+      offspring = rbind(offspring,
+        indivs[, (budget_id) := survivor_fidelity]
+      )
+    }
   }
 
   eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))

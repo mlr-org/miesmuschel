@@ -9,7 +9,9 @@ mies_evaluate_offspring(
   offspring,
   fidelity_schedule = NULL,
   budget_id = NULL,
-  survivor_budget = FALSE
+  survivor_budget = FALSE,
+  step_fidelity = FALSE,
+  monotonic = TRUE
 )
 }
 \arguments{
@@ -33,6 +35,16 @@ when and only when \code{fidelity_schedule} is \code{NULL}.}
 
 \item{survivor_budget}{(\code{logical(1)})\cr
 When doing multi-fidelity optimization, determines which column of \code{fidelity_schedule} to use to determine the budget component value.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.}
+
+\item{step_fidelity}{(\code{logical(1)})\cr
+Whether to \emph{also} evaluate alive individuals from previous generations that have a budget value below the current \code{budget_survivors}.
+Default \code{FALSE}. Ignored when \code{budget_id} and \code{fidelity_schedule} are \code{NULL}.\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.}
+
+\item{monotonic}{(\code{logical(1)})\cr
+When \code{step_fidelity} is \code{TRUE}, then this indicates whether individuals should only ever be re-evaluated when this increases fidelity.
+Ignored when \code{step_fidelity} is \code{FALSE} or when \code{budget_id} and \code{fidelity_schedule} are \code{NULL}.\cr
 Note that the multifidelity functionality is experimental and the UI may change in the future.}
 }
 \value{
@@ -134,6 +146,7 @@ mies_evaluate_offspring(oi, offspring = offspring,
   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
 
 oi$archive
+# TODO example with step_fidelity = TRUE
 }
 \seealso{
 Other mies building blocks: 

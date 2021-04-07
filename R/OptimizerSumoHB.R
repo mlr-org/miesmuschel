@@ -248,9 +248,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       repeat {
         mies_survival_plus(inst, mu = survivors, survival_selector = survival_selector)
         offspring = mies_generate_offspring(inst, lambda = params$mu - survivors, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
-        mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id)
-        mies_step_fidelity(inst, fidelity_schedule, budget_id, generation_lookahead = FALSE)
-        # TODO: combine the above into one batch
+        mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)
       }
     },
     .own_param_set = NULL,
