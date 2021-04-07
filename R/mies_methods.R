@@ -22,8 +22,11 @@
 #' @param survivor_budget (`logical(1)`)\cr
 #'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.\cr
 #'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
-#'   through `eval_batch`.
+#' @param dry_run (`logical(1)`)\cr
+#'   When `dry_run` is `TRUE`, then the offspring is not actually evaluated. Instead, a [`data.table`][data.table::data.table] is returned
+#'   that can be used as input to `inst$eval_batch()`. Default is `FALSE`.
+#' @return [invisible] [`data.table`][data.table::data.table]: when `dry.run` is `FALSE` (default): the performance values returned when
+#'   evaluating the `offspring` values through `eval_batch`. When `dry.run` is `TRUE`: the table of values that can be evaluated using `inst$eval_batch()`.
 #' @family mies building blocks
 #' @examples
 #' library("bbotk")
@@ -107,7 +110,7 @@
 #'
 #' oi$archive
 #' @export
-mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE) {
+mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE, dry_run = FALSE) {
   assert_optim_instance(inst)
 
   offspring = as.data.table(assert_data_frame(offspring))
@@ -168,8 +171,11 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #' @param monotonic (`logical(1)`)\cr
 #'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
 #' @template param_additional_components
-#' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
-#'   through `eval_batch`.
+#' @param dry_run (`logical(1)`)\cr
+#'   When `dry_run` is `TRUE`, then the offspring is not actually evaluated. Instead, a [`data.table`][data.table::data.table] is returned
+#'   that can be used as input to `inst$eval_batch()`. Default is `FALSE`.
+#' @return [invisible] [`data.table`][data.table::data.table]: when `dry.run` is `FALSE` (default): the performance values returned when
+#'   evaluating the `offspring` values through `eval_batch`. When `dry.run` is `TRUE`: the table of values that can be evaluated using `inst$eval_batch()`.
 #' @family mies building blocks
 #' @examples
 #' library("bbotk")
@@ -234,7 +240,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'
 #' oi$archive
 #' @export
-mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL) {
+mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL, dry_run = FALSE) {
   assert_optim_instance(inst)
   assert_flag(generation_lookahead)
   assert_flag(current_gen_only)
