@@ -251,7 +251,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         if (!is.null(elite_selector)) list(
           n_elite = p_int(0, depends = commareq, tags = "survival")),
         list(
-          initializer = p_uty(custom_check = function(x) check_function(x, nargs = 2), tags = c("init", "required")),  # arguments: param_set, n
+          initializer = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required")),  # arguments: param_set, n
           additional_component_sampler = p_uty(custom_check = function(x) if (is.null(x)) TRUE else check_r6(x, "Sampler"))),
         if (multi_fidelity) list(
           fidelity_schedule = p_uty(custom_check = check_fidelity_schedule, tags = "required"),

@@ -657,7 +657,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   assert_optim_instance(inst)
 
   assert_int(mu, lower = 1, tol = 1e-100)
-  assert_function(initializer, nargs = 2)
+  assert_function(initializer, args = c("param_set", "n"))
   assert_r6(additional_component_sampler, "Sampler", null.ok = TRUE)
 
   ss_ids = inst$search_space$ids()
