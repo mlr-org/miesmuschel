@@ -14,12 +14,13 @@
 #' @section Algorithm:
 #'
 #' Given the number `n_filter` of of individuals to sample, progressive surrogate model filtering proceeds as follows:
-#' 1. Take `filter_rate_first` configurations, predict their expected performance using the surrogate model, and put them
+#' 1. Train the `surrogate_learner` [`LearnerRegr`][mlr3::LearnerRegr] on the `known_values` and their `fitnesses`.
+#' 2. Take `filter_rate_first` configurations, predict their expected performance using the surrogate model, and put them
 #'    into a pool `P` of configurations to consider.
-#' 2. Take the individual that is optimal according to predicted performance, remove it from `P` and add it to solution set `S`.
-#' 3. If the number of solutions in `S` equals `n_filter`, quit.
-#' 4. Take the next `filter_rate_per_sample` configurations, predict their expected performance using the surrogate model, and add them to `P`.
-#' 5. Jump to 2.
+#' 3. Take the individual that is optimal according to predicted performance, remove it from `P` and add it to solution set `S`.
+#' 4. If the number of solutions in `S` equals `n_filter`, quit.
+#' 5. Take the next `filter_rate_per_sample` configurations, predict their expected performance using the surrogate model, and add them to `P`.
+#' 6. Jump to 3.
 #'
 #' (The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally
 #' equivalent).

@@ -17,12 +17,13 @@ The filtering is "progressive" in that successive values are filtered more agres
 
 Given the number \code{n_filter} of of individuals to sample, progressive surrogate model filtering proceeds as follows:
 \enumerate{
+\item Train the \code{surrogate_learner} \code{\link[mlr3:LearnerRegr]{LearnerRegr}} on the \code{known_values} and their \code{fitnesses}.
 \item Take \code{filter_rate_first} configurations, predict their expected performance using the surrogate model, and put them
 into a pool \code{P} of configurations to consider.
 \item Take the individual that is optimal according to predicted performance, remove it from \code{P} and add it to solution set \code{S}.
 \item If the number of solutions in \code{S} equals \code{n_filter}, quit.
 \item Take the next \code{filter_rate_per_sample} configurations, predict their expected performance using the surrogate model, and add them to \code{P}.
-\item Jump to 2.
+\item Jump to 3.
 }
 
 (The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally

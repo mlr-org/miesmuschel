@@ -12,7 +12,7 @@ the algorithm works as follows:
 \enumerate{
 \item Sample an initial design of size \code{mu} at fidelity \code{F0}
 \item Kill individuals that are not in the top \code{survival_fraction} part of individuals, by performance
-\item Generate new individuals using either random sampling, or \link[=FiltorSurrogateProgressive]{\strong{progressive surrogate model filtering}},
+\item Generate new individuals using either random sampling, or \strong{\link[=FiltorSurrogateProgressive]{progressive surrogate model filtering}},
 until \code{mu} alive individuals are present again.
 \item Evaluate all alive individuals at fidelity \verb{F\{generation\}}
 \item Jump to 2., until termination, possibly because \code{n} generations are reached.

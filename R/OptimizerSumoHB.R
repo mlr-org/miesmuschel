@@ -7,7 +7,7 @@
 #' the algorithm works as follows:
 #' 1. Sample an initial design of size `mu` at fidelity `F0`
 #' 2. Kill individuals that are not in the top `survival_fraction` part of individuals, by performance
-#' 3. Generate new individuals using either random sampling, or [**progressive surrogate model filtering**][FiltorSurrogateProgressive],
+#' 3. Generate new individuals using either random sampling, or **[progressive surrogate model filtering][FiltorSurrogateProgressive]**,
 #'    until `mu` alive individuals are present again.
 #' 4. Evaluate all alive individuals at fidelity `F{generation}`
 #' 5. Jump to 2., until termination, possibly because `n` generations are reached.
