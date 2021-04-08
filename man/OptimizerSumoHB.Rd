@@ -75,6 +75,12 @@ objective <- ObjectiveRFun$new(
   codomain = ps(Obj = p_dbl(tags = "maximize"))
 )
 
+search_space = objective$domain$search_space(list(
+  x = to_tune(),
+  y = to_tune(),
+  b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
+))
+
 # Get a new OptimInstance. Here we determine that the optimizatoin goes
 # for 10 generations.
 oi <- OptimInstanceSingleCrit$new(objective,

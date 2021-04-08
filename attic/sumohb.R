@@ -71,6 +71,6 @@ ggplot(oi$archive$data, aes(x = x, y = y, color = dob)) + geom_point()
 
 oi$archive$data[, id := sapply(paste(x, y), function(x) substr(digest::digest(x), 1, 5))]
 
-ggplot(oi$archive$data, aes(x = dob, y = Obj, color = id, group = id)) + geom_line() + geom_point()
+ggplot(oi$archive$data, aes(x = dob, y = Obj, group = id)) + geom_line() + geom_point()
 
 
