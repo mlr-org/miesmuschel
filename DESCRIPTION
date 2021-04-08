@@ -29,8 +29,11 @@ Remotes:
   mlr-org/bbotk
 RoxygenNote: 7.1.1
 Collate: 
-    'MiesOperator.R'
     'dictionaries.R'
+    'MiesOperator.R'
+    'Filtor.R'
+    'FiltorNull.R'
+    'FiltorSurrogateProgressive.R'
     'Mutator.R'
     'MutatorCmpMaybe.R'
     'MutatorDiscreteUniform.R'

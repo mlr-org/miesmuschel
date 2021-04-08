@@ -12,7 +12,7 @@ devtools::load_all()
 
 
 
-objective <- ObjectiveRFun$new(
+oobjective <- ObjectiveRFun$new(
   fun = function(xs) {
     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
     z <- z + rnorm(1, sd = 1 / sqrt(xs$b))
@@ -25,7 +25,7 @@ objective <- ObjectiveRFun$new(
 
 oi <- OptimInstanceSingleCrit$new(objective,
   search_space = objective$domain$search_space(list(x = to_tune(), y = to_tune(), b = to_tune(p_int(1, 32, logscale = TRUE, tags = "budget")))),
-  terminator = trm("combo", list(trm("evals", n_evals = 200), trm("gens", generations = 5)))
+  terminator = trm("combo", list(trm("evals", n_evals = 200), trm("gens", generations = 2)))
 )
 
 
@@ -36,4 +36,22 @@ tuner$surrogate_learner
 
 tuner$optimize(oi)
 
-oi$archive
+oi$archive$data
+
+unnest(oi$archive$data[, .(x_domain)], "x_domain")
+
+
+library("mlr3learners")
+tuner_sumo <- OptimizerSumoHB$new(lrn("regr.ranger"))
+
+
+oi$clear()
+tuner_sumo$param_set$values$filter_rate_first = 2
+
+
+
+tuner_sumo$optimize(oi)
+
+oi$archive$data
+
+unnest(oi$archive$data[, .(x_domain)], "x_domain")

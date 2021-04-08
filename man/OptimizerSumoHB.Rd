@@ -45,27 +45,28 @@ then the surrogate model is used to propose points that have, according to the s
 
 Given the number \code{lambda} of of new individuals to sample, surrogate model filtering proceeds as follows:
 \enumerate{
-\item Sample \code{filter_rate_first} * \code{lambda} configurations, predict their expected performance using the surrogate model, and put them
+\item Sample \code{filter_rate_first} configurations, predict their expected performance using the surrogate model, and put them
 into a pool \code{P} of configurations to consider.
-\item Sample \code{filter_rate_per_sample} * \code{lambda} configurations, predict their expected performance using the surrogate model, and add them to \code{P}.
 \item Take the individual that is optimal according to predicted performance, remove it from \code{P} and add it to solution set \code{S}.
-\item Jump to 2., until the number of solutions in \code{S} equals \code{lambda}.
+\item If the number of solutions in \code{S} equals \code{lambda}, quit.
+\item Sample \code{filter_rate_per_sample} configurations, predict their expected performance using the surrogate model, and add them to \code{P}.
+\item Jump to 2.
 }
 
 (The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally
 equivalent).
-
-(Rounding is performed so that, when the \code{i}'th individual is chosen, the number of already considered individuals \verb{|S|} + \verb{|P|} is
-round((\code{filter_rate_first} + \code{i} * \code{filter_rate_per_sapmle}) * \code{lambda}) ).
 
 The \code{filter_rate_first} and \code{filter_rate_per_sample} configuration parameters of this algorithm determine how agressively the surrogate model is used to
 filter out sampled configurations. If the filtering is agressive (\code{filter_rate_first} is large), then more "exploitation" at the cost of "exploration" is performed.
 When \code{filter_rate_first} is small but \code{filter_rate_per_sample} is large, then successive individuals are filtered successively more agressively, potentially
 leading to a tradeoff between "exploration" and "exploitation".
 
-When \code{filter_rate_per_sample} is set to 0, then the method is equivalent to sampling the top \code{lambda} individuals from \code{filter_rate_first} * \code{lambda}
-sampled ones. When \code{filter_rate_per_sample} is 0 and \code{filter_rate_first} is 1, then the method is equivalent to random sampling.
-\code{filter_rate_first} + \code{filter_rate_per_sample} must be at least \code{1}.
+When \code{filter_rate_per_sample} is set to 0, then the method is equivalent to sampling the top \code{lambda} individuals from \code{filter_rate_first}
+sampled ones. When \code{filter_rate_per_sample} is 1 and \code{filter_rate_first} is 0, then the method is equivalent to random sampling.
+
+\code{filter_rate_first} and \code{filter_rate_per_sample} may be fractional; the total number of individuals to select from when selecting \code{i}
+individuals is always round(\code{filter_rate_first} + (\code{filter_rate_per_sample} - 1) * (\code{i} - 1)). However, \code{filter_rate_first} must
+be at least 1, and \code{filter_rate_first} + \code{filter_rate_per_sample} * (\code{lambda} - 1) must be at least \code{lambda}.
 }
 
 \section{Configuration Parameters}{
@@ -75,13 +76,15 @@ sampled ones. When \code{filter_rate_per_sample} is 0 and \code{filter_rate_firs
 \item \code{mu} :: \code{integer(1)}\cr
 Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
 \item \code{survival_fraction} :: \code{numeric(1)}\cr
-Only present when \code{surrogate_learner} construction argument is not \code{NULL}.
 Fraction of the population that survives at each fidelity step. The number of newly sampled individuals is (1 - \code{survival_fraction}) * \code{mu}.
 \item \code{filter_rate_first} :: \code{numeric(1)}\cr
 Only present when the \code{surrogate_learner} construction argument is not \code{NULL}.
-\code{filter_rate_first} parameter of the surrogate model filtering algorithm, see the corresponding section. Initialized to 1. Note that \code{filter_rate_first} + \code{filter_rate_per_sample} must be at least 1.
+\code{filter_rate_first} parameter of the surrogate model filtering algorithm, see the corresponding section. Initialized to 1. Together with the
+default of \code{filter_rate_per_sample}, this is equivalent to random sampling new individuals.
 \item \code{filter_rate_per_sample} :: \code{numeric(1)}\cr
-\code{filter_rate_per_sample} parameter of the surrogate model filtering algorithm, see the corresponding section. Initialized to 0, equivalent to randomly sampling new individuals. Note that \code{filter_rate_first} + \code{filter_rate_per_sample} must be at least 1.
+Only present when \code{surrogate_learner} construction argument is not \code{NULL}.
+\code{filter_rate_per_sample} parameter of the surrogate model filtering algorithm, see the corresponding section.
+Initialized to 1. Together with the default of \code{filter_rate_per_sample}, this is equivalent to random sampling new individuals.
 \item \code{sampling} :: \code{function}\cr
 Function that generates the initial population, as well as new individuals to be filtered from, as a \code{\link[paradox:Design]{Design}} object. The function must have
 arguments \code{param_set} and \code{n} and function like \code{\link[paradox:generate_design_random]{paradox::generate_design_random}} or \code{\link[paradox:generate_design_lhs]{paradox::generate_design_lhs}}.

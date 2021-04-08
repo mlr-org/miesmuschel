@@ -160,6 +160,7 @@ op$operate(data2)
 }
 \seealso{
 Other base classes: 
+\code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},

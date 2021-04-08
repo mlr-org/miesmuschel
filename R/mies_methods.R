@@ -128,6 +128,8 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   ocols = colnames(offspring)
   assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
 
+  reeval = integer(0)  # individuals to be killed; only becomes relevant when `step_fidelity` is `TRUE`
+
   if (!is.null(budget_id)) {
     assert(check_fidelity_schedule(fidelity_schedule))
     fidelity_schedule = as.data.table(fidelity_schedule)
@@ -153,7 +155,11 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
     }
   }
 
-  eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))
+  ret = eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))
+
+  set(inst$archive$data, reeval, "eol", current_gen)
+
+  invisible(ret)
 }
 
 #' @title Re-Evaluate Configurations with Higher Fidelity
@@ -532,6 +538,10 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'   [`Recombinator`] objects to prime. May be empty (default).
 #' @param selectors (`list` of [`Selector`])\cr
 #'   [`Selector`] objects to prime. May be empty (default).
+#' @param filtors (`list` of [`Filtor`])\cr
+#'   [`Filtor`] objects to prime. May be empty (default).
+#' @param ... \cr
+#'   Must not be given. Other operators may be added in the future, so the following arguments should be passed by name.
 #' @template param_additional_components
 #' @param budget_id (`character(1)` | `NULL`)\cr
 #'   Budget component used for multi-fidelity optimization.
@@ -563,10 +573,12 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #' s1$primed_ps
 #' s2$primed_ps
 #' @export
-mies_prime_operators = function(search_space, mutators = list(), recombinators = list(), selectors = list(), additional_components = NULL, budget_id = NULL) {
+mies_prime_operators = function(search_space, mutators = list(), recombinators = list(), selectors = list(), filtors = list(), ..., additional_components = NULL, budget_id = NULL) {
   assert_list(mutators, types = "Mutator", any.missing = FALSE)
   assert_list(recombinators, types = "Recombinator", any.missing = FALSE)
   assert_list(selectors, types = "Selector", any.missing = FALSE)
+  assert_list(filtors, types = "Filtor", any.missing = FALSE)
+  assert_list(list(...), len = 0)
   assert_r6(search_space, "ParamSet")
   assert_r6(additional_components, "ParamSet", null.ok = TRUE)
   assert_choice(budget_id, search_space$ids(), null.ok = TRUE)
@@ -586,6 +598,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 
   # selectors are primed with entire searchspace
   selectors = lapply(selectors, function(x) x$prime(full_search_space))
+  filtors = lapply(filtors, function(x) x$prime(full_search_space))
 
   nobudget_search_space = ParamSetShadow$new(full_search_space, budget_id)
 
@@ -1139,3 +1152,47 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   mutator$operate(recombined)
 }
 
+#' @title Filter Offspring
+#'
+#' @description
+#' TODO
+#'
+#' @template param_inst
+#' @param lambda (`integer(1)`)\cr
+#'   Number of individuals to filter down to.
+#' @param filtor ([`Filtor`] | `NULL`)\cr
+#'   [`Filtor`] operator that filters.
+#' @param get_indivs (`logical(1)`)\cr
+#'   Whether to return the selected individuals, or an index into `individuals`.
+#' @return If `get_indivs` is `TRUE`: a `data.frame` or [`data.table`][data.table::data.table] (depending on the type of `individuals`) of filtered configurations.
+#'   Otherwise: an integer vector indexing the filtered individuals.
+#' @export
+mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, get_indivs = TRUE) {
+  assert_optim_instance(inst)
+  individuals_dt = as.data.table(assert_data_frame(individuals))
+  assert_int(lambda, lower = 0, tol = 1e-100)
+  assert_r6(filtor, "Filtor", null.ok = TRUE)
+  data = inst$archive$data
+  ss_ids = inst$search_space$ids()
+  assert_subset(ss_ids, colnames(individuals_dt))
+  assert_subset(colnames(individuals_dt), colnames(data))
+
+  if (lambda == 0) if (get_indivs) individuals[0] else integer(0)
+
+  if (is.null(filtor)) {
+    filtor = FiltorNull$new()$prime(inst$search_space)
+    if (setdiff(colnames(individuals_dt), ss_ids)) stop("filtor must be given when individuals contain additional components.")
+  }
+  f_ids = filtor$primed_ps$ids()
+  assert_subset(ss_ids, f_ids)
+  assert_set_equal(f_ids, colnames(individuals_dt))
+
+  known_values = inst$archive$data[, f_ids, with = FALSE]
+  fitnesses = mies_get_fitnesses(inst)
+  selected = filtor$operate(individuals_dt, known_values, fitnesses, lambda)
+  if (get_indivs) {
+    individuals[selected, ]
+  } else {
+    selected
+  }
+}

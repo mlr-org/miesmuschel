@@ -9,6 +9,8 @@ mies_prime_operators(
   mutators = list(),
   recombinators = list(),
   selectors = list(),
+  filtors = list(),
+  ...,
   additional_components = NULL,
   budget_id = NULL
 )
@@ -25,6 +27,12 @@ Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{\link[bbot
 
 \item{selectors}{(\code{list} of \code{\link{Selector}})\cr
 \code{\link{Selector}} objects to prime. May be empty (default).}
+
+\item{filtors}{(\code{list} of \code{\link{Filtor}})\cr
+\code{\link{Filtor}} objects to prime. May be empty (default).}
+
+\item{...}{\cr
+Must not be given. Other operators may be added in the future, so the following arguments should be passed by name.}
 
 \item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
 Additional components to optimize over, not included in \code{search_space}, but possibly used for self-adaption. This must be the \code{\link[paradox:ParamSet]{ParamSet}}
