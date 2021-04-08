@@ -1,13 +1,12 @@
-#' @title Proxy-Selectior that Selects According to its Configuration parameter
+#' @title Proxy-Selectior that Selects According to its Configuration Parameter
 #'
 #' @include Selector.R
+#'
+#' @name dict_selectors_proxy
 #'
 #' @description
 #' Selector that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s selection operations fully parametrizable.
-#'
-#' Changes in the `operation` configuration parameter are only realized whenever `$prime()` is called, so `$prime()`
-#' must be called every time when `operation` is changed, *even if* the new configuration parameter value is already primed.
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Selector`]\cr
@@ -37,7 +36,6 @@
 #' sp$operate(data, fitnesses, 2)
 #'
 #' sp$param_set$values$operation = sel("best")
-#' sp$prime(p)
 #' sp$operate(data, fitnesses, 2)
 #' @export
 SelectorProxy = R6Class("SelectorProxy",
