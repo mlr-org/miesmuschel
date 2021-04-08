@@ -7,13 +7,12 @@
 \description{
 Perform Surrogate Model Assisted Hyperband Optimization.
 
-Given a population size \code{mu}, a fraction of surviving individuals \code{survival_fraction}, a number of generations \code{n} and a fidelity progression \code{F0}, \code{F1}, ..., \code{Fn},
+Given a population size \code{mu}, a fraction of surviving individuals \code{survival_fraction}, a number of generations \code{n} and a fidelity progression \code{F1}, \code{F1}, ..., \code{Fn},
 the algorithm works as follows:
 \enumerate{
-\item Sample an initial design of size \code{mu} at fidelity \code{F0}
+\item Sample an initial design of size \code{mu} at fidelity \code{F1}
 \item Kill individuals that are not in the top \code{survival_fraction} part of individuals, by performance
-\item Generate new individuals using either random sampling, or \strong{\link[=FiltorSurrogateProgressive]{progressive surrogate model filtering}},
-until \code{mu} alive individuals are present again.
+\item Generate new individuals using random sampling and optionally a \code{\link{Filtor}}, until \code{mu} alive individuals are present again.
 \item Evaluate all alive individuals at fidelity \verb{F\{generation\}}
 \item Jump to 2., until termination, possibly because \code{n} generations are reached.
 }
@@ -26,37 +25,43 @@ The lower limit of the budget parameter is used as \code{F0}. The upper limit is
 so \code{F1} - \code{F0} = \code{F2} - \code{F1} etc. In many cases it is desirable to have a multiplicative progression of "difficulty" of the problem. In this case, it is
 recommended to use a budget parameter with exponential "trafo", or one with \code{logscale = TRUE} (see example).
 
-The \code{\link{FiltorSurrogateProgressive}} is used for filtering, see the class's documentation for details on the algorithm.
+A \code{\link{Filtor}} can be used for filtering, see the respective class's documentation for details on algorithms. The \code{\link{FiltorSurrogateProgressive}} can be used
+for progressive surrogate model filtering. \code{\link{FiltorMaybe}} can be used for random interleaving.
 }
-\section{Terminating}{
+\section{Fidelity Steps}{
 
-\code{\link{TerminatorGenerations}} is used to determine the number of fidelity refinements to be performed. Therefore, the  \code{\link[bbotk:OptimInstance]{OptimInstance}}
-being optimized must contain a \code{\link{TerminatorGenerations}}. Either directly (\code{inst$terminator}), or indirectly through a
-\code{\link[bbotk:mlr_terminators_combo]{bbotk::TerminatorCombo}} with \verb{$any} set to \code{TRUE} (recursive \code{\link[bbotk:mlr_terminators_combo]{TerminatorCombo}} may also be used). The
-number of generations is determined from the given \code{\link[bbotk:Terminator]{Terminator}} object and the number of fidelity refinements
+The number of fidelity steps can be determined through the \code{fidelity_steps} configuration parameter, or can be determined when a
+\code{\link{TerminatorGenerations}} is used to determine the number of fidelity refinements that are being performed. For this, the  \code{\link[bbotk:OptimInstance]{OptimInstance}}
+being optimized must contain a \code{\link{TerminatorGenerations}}, either directly (\code{inst$terminator}), or indirectly through a
+\code{\link[bbotk:mlr_terminators_combo]{bbotk::TerminatorCombo}} with \verb{$any} set to \code{TRUE} (recursive \code{\link[bbotk:mlr_terminators_combo]{TerminatorCombo}} may also be used). When \code{fidelity_steps} is \code{0},
+the number of generations is determined from the given \code{\link[bbotk:Terminator]{Terminator}} object and the number of fidelity refinements
 is planned according to this number. Other terminators may be present in a \code{\link[bbotk:mlr_terminators_combo]{TerminatorCombo}} that may
 lead to finishing the tuning process earlier.
 
-It is possible to continue optimization runs that quit early due to other terminators. It is not recommended to change the number of generations
-between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
+It is possible to continue optimization runs that quit early due to other terminators. It is not recommended to change \code{fidelity_steps} (or the number of generations
+when \code{fidelity_steps} is 0) between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
 }
 
 \section{Configuration Parameters}{
 
-\code{OptimizerSumoHB}'s configuration parameters are the hyperparameters of the \code{surrogate_learner} \code{\link[mlr3:Learner]{Learner}}, if it is not \code{NULL}, as well as:
+\code{OptimizerSumoHB}'s configuration parameters are the hyperparameters of the \code{\link{Filtor}} given to the \code{filtor} construction argument, as well as:
 \itemize{
 \item \code{mu} :: \code{integer(1)}\cr
 Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
 \item \code{survival_fraction} :: \code{numeric(1)}\cr
-Fraction of the population that survives at each fidelity step. The number of newly sampled individuals is (1 - \code{survival_fraction}) * \code{mu}.
+Fraction of the population that survives at each fidelity step. The number of newly sampled individuals is (1 - \code{survival_fraction}) * \code{mu}. Initialized to 0.5.
 \item \code{sampling} :: \code{function}\cr
 Function that generates the initial population, as well as new individuals to be filtered from, as a \code{\link[paradox:Design]{Design}} object. The function must have
 arguments \code{param_set} and \code{n} and function like \code{\link[paradox:generate_design_random]{paradox::generate_design_random}} or \code{\link[paradox:generate_design_lhs]{paradox::generate_design_lhs}}.
 This is equivalent to the \code{initializer} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information. Initialized to
 \code{\link[paradox:generate_design_random]{generate_design_random()}}.
+\item \code{fidelity_steps} :: \code{integer(1)}\cr
+Number of fidelity steps. When it is 0, the number is determined from the \code{\link[bbotk:OptimInstance]{OptimInstance}}'s \code{\link[bbotk:Terminator]{Terminator}}. See the
+section \strong{Fidelity Steps} for more details. Initialized to 0.
+\item \code{filter_with_max_budget} :: \code{logical(1)}\cr
+Whether to perform filtering with the maximum fidelity value found in the archive, as opposed the current \code{budget_survivors}. This has only an effect when
+\code{fidelity_steps} is greater than 1 and some evaluations are done when the archive already contains evaluations with greater fidelity. Initialized to \code{FALSE}.
 }
-
-The following are configuration parameters of \code{\link{FiltorSurrogateProgressive}} and therefore only present when the \code{surrogate_learner} construction argument is not \code{NULL}:
 }
 
 \examples{
@@ -94,9 +99,10 @@ library("mlr3learners")
 # of which survive, while 10 are sampled new.
 # For this, 100 individuals are sampled randomly, and the top 10, according
 # to the surrogate model, are used.
-sumohb_opt <- opt("sumohb", surrogate_learner = mlr3::lrn("regr.ranger"),
-  mu = 30, survival_fraction = 2/3,
-  filter_rate_first = 100, filter_rate_per_sample = 0
+sumohb_opt <- opt("sumohb", ftr("surprog",
+    surrogate_learner = mlr3::lrn("regr.ranger"),
+    filter_rate_first = 100, filter_rate_per_sample = 0),
+  mu = 30, survival_fraction = 2/3
 )
 # sumohb_opt$optimize performs SumoHB optimization and returns the optimum
 sumohb_opt$optimize(oi)
@@ -128,9 +134,11 @@ ti = TuningInstanceSingleCrit$new(
   terminator = trm("gens", generations = 3)
 )
 
-sumohb_tune <- tnr("sumohb", surrogate_learner = lrn("regr.ranger"),
-  mu = 20, survival_fraction = 0.5,
-  filter_rate_first = 100, filter_rate_per_sample = 0
+# use ftr("maybe") for random interleaving: only 50\% of proposed points are filtered.
+sumohb_tune <- tnr("sumohb", ftr("maybe", p = 0.5, filtor = ftr("surprog",
+    surrogate_learner = lrn("regr.ranger"),
+    filter_rate_first = 100, filter_rate_per_sample = 0)),
+  mu = 20, survival_fraction = 0.5
 )
 # sumohb_tune$optimize performs SumoHB optimization and returns the optimum
 sumohb_tune$optimize(ti)
@@ -148,8 +156,8 @@ Other optimizers:
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}} | \code{NULL})\cr
-Regression learner for the surrogate model filtering algorithm.}
+\item{\code{filtor}}{(\code{\link{Filtor}})\cr
+Filtering algorithm used.}
 
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
 Configuration parameters of the optimization algorithm.}
@@ -178,14 +186,16 @@ Configuration parameters of the optimization algorithm.}
 \subsection{Method \code{new()}}{
 Initialize the 'OptimizerSumoHB' object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{OptimizerSumoHB$new(surrogate_learner = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{OptimizerSumoHB$new(filtor = FiltorProxy$new())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}} | \code{NULL})\cr
-Regression learner for the surrogate model filtering algorithm. May be \code{NULL}, in which case no surrogate model is used and individuals are sampled randomly.}
+\item{\code{filtor}}{(\code{\link{Filtor}})\cr
+\code{\link{Filtor}} for the filtering algorithm. Default is \code{\link{FiltorProxy}}, which exposes the operation as
+a configuration parameter of the optimizer itself.\cr
+The \verb{$filtor} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }

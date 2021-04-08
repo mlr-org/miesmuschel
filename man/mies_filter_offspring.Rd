@@ -18,25 +18,40 @@ mies_filter_offspring(
 \item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
+\item{individuals}{(\code{data.frame} | \code{\link[data.table:data.table]{data.table}})\cr
+Individuals to filter. Must have columns according to \code{filtor$primed_ps}, and must have at least \code{filtor$needed_input(lambda)} rows.}
+
 \item{lambda}{(\code{integer(1)})\cr
 Number of individuals to filter down to.}
 
 \item{filtor}{(\code{\link{Filtor}} | \code{NULL})\cr
-\code{\link{Filtor}} operator that filters.}
+\code{\link{Filtor}} operator that filters. When \code{NULL} is given, then the \code{\link{FiltorNull}} operation is performed and the first \code{lambda} individuals are
+taken from \code{individuals}.}
 
-\item{fidelity_schedule}{(TODO)}
+\item{fidelity_schedule}{(\code{data.frame} | \code{NULL})\cr
+\code{data.frame} with three columns \code{"generation"}, \code{"budget_new"}, \code{"budget_survivors"}, in that order. \code{"budget_new"} and \code{"budget_survivors"}
+are atomic columns assigned to the \code{budget_id} component of \code{offspring}; which one is chosen depends on \code{survivor_budget}.
+\code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
+\code{generation == 1} must be present.\cr
+This value may be \code{NULL} if no multi-fidelity optimization is performed, \strong{or} when, instead of the current generation's budget, the
+maximum budget found in \code{inst$archive} should be used (the default).\cr
+Note that the multifidelity functionality is experimental and the UI may change in the future.}
 
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
 Budget compnent when doing multi-fidelity optimization. This component of the search space is added
-to \code{individuals} according to \code{fidelity_schedule} and the current generation's \code{"budget_survivors"}.}
+to \code{individuals} according to \code{fidelity_schedule} and the current generation's \code{"budget_survivors"}. Should be \code{NULL}
+when and only when \code{fidelity_schedule} is \code{NULL}.}
 
 \item{get_indivs}{(\code{logical(1)})\cr
-Whether to return the selected individuals, or an index into \code{individuals}.}
+Whether to return the \code{data.frame} or \code{\link[data.table:data.table]{data.table}} of selected individuals, or an index into \code{individuals}.}
 }
 \value{
-If \code{get_indivs} is \code{TRUE}: a \code{data.frame} or \code{\link[data.table:data.table]{data.table}} (depending on the type of \code{individuals}) of filtered configurations.
-Otherwise: an integer vector indexing the filtered individuals.
+If \code{get_indivs} is \code{TRUE}: a \code{data.frame} or \code{\link[data.table:data.table]{data.table}} (depending on the input type of \code{individuals}) of filtered configurations.
+If \code{get_indivs} is \code{FALSE}: an \code{integer} vector indexing the filtered individuals.
 }
 \description{
-TODO
+Uses a \code{\link{Filtor}} to extract a subset of individuals from a given set. The individuals are either returned directly (when \code{get_indivs} is \code{TRUE})
+or in form of an index into the given individuals (when \code{get_indivs} is \code{FALSE}).
+
+\code{\link{Filtor}}s must always select individuals without replacement, so selected individual indices are unique.
 }

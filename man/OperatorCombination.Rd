@@ -171,30 +171,30 @@ Other base classes:
 Other mutators: 
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
+\code{\link{dict_mutators_proxy}},
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
-\code{\link{MutatorProxy}},
 \code{\link{dict_mutators_cmpmaybe}},
-\code{\link{dict_mutators_maybe}}
+\code{\link{dict_mutators_maybe}},
+\code{\link{dict_mutators_proxy}}
 
 Other recombinators: 
-\code{\link{RecombinatorProxy}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
-\code{\link{RecombinatorProxy}},
-\code{\link{dict_recombinators_maybe}}
+\code{\link{dict_recombinators_maybe}},
+\code{\link{dict_recombinators_proxy}}
 }
 \concept{base classes}
 \concept{mutator wrappers}

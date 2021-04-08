@@ -7,6 +7,8 @@
 \alias{recs}
 \alias{sel}
 \alias{sels}
+\alias{ftr}
+\alias{ftrs}
 \title{Short Access Forms for Operators}
 \usage{
 mut(.key, ...)
@@ -20,6 +22,10 @@ recs(.key, ...)
 sel(.key, ...)
 
 sels(.key, ...)
+
+ftr(.key, ...)
+
+ftrs(.key, ...)
 }
 \arguments{
 \item{.key}{(\code{character(1)})\cr

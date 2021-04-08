@@ -66,7 +66,7 @@ learner$param_set$values$nrounds = to_tune(p_int(1, 4, tags = "budget", logscale
 ti = TuningInstanceSingleCrit$new(
   task = tsk("iris"),
   learner = learner,
-  resampling = rsmp("holdout"),
+  resampling = rsmp("cv"),
   measure = msr("classif.acc"),
   terminator = trm("gens", generations = 3)
 )
@@ -82,5 +82,11 @@ ti$archive$data
 
 unnest(ti$archive$data[, .(x_domain, dob, eol, classif.acc)], "x_domain")
 
+ti$archive$data[, id := sapply(x_domain, function(x) substr(digest::digest(x), 1, 5))]
+
+ggplot(ti$archive$data, aes(x = dob, y = classif.acc, group = id, color = as.numeric(as.factor(id)))) + geom_line() + geom_point()
 
 
+# TODO
+# filtor random interleave
+# multicrit

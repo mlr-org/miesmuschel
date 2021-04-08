@@ -67,14 +67,14 @@ rm2$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorProxy}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorProxy}}
+\code{\link{dict_recombinators_proxy}}
 }
 \concept{recombinator wrappers}
 \concept{recombinators}

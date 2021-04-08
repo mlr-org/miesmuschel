@@ -34,9 +34,9 @@ Other base classes:
 
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorProxy}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{base classes}

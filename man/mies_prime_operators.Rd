@@ -78,9 +78,10 @@ m = mut("gauss")
 r = rec("xounif")
 s1 = sel("best")
 s2 = sel("random")
+f = ftr("null")
 
 mies_prime_operators(search_space, mutators = list(m),
-  recombinators = list(r), selectors = list(s1, s2),
+  recombinators = list(r), selectors = list(s1, s2), filtors = list(f),
   additional_components = additional_components, budget_id = budget_id
 )
 
@@ -91,4 +92,5 @@ r$primed_ps
 # contain also the budget parameter
 s1$primed_ps
 s2$primed_ps
+f$primed_ps
 }

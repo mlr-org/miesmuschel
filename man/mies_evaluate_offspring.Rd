@@ -43,7 +43,7 @@ Default \code{FALSE}. Ignored when \code{budget_id} and \code{fidelity_schedule}
 Note that the multifidelity functionality is experimental and the UI may change in the future.}
 
 \item{monotonic}{(\code{logical(1)})\cr
-When \code{step_fidelity} is \code{TRUE}, then this indicates whether individuals should only ever be re-evaluated when this increases fidelity.
+When \code{step_fidelity} is \code{TRUE}, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
 Ignored when \code{step_fidelity} is \code{FALSE} or when \code{budget_id} and \code{fidelity_schedule} are \code{NULL}.\cr
 Note that the multifidelity functionality is experimental and the UI may change in the future.}
 }

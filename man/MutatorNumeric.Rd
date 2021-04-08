@@ -33,7 +33,6 @@ Other base classes:
 
 Other mutators: 
 \code{\link{MutatorDiscrete}},
-\code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
@@ -41,6 +40,7 @@ Other mutators:
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
+\code{\link{dict_mutators_proxy}},
 \code{\link{dict_mutators_unif}}
 }
 \concept{base classes}

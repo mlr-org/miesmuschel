@@ -50,8 +50,8 @@ Other base classes:
 \code{\link{Recombinator}}
 
 Other selectors: 
-\code{\link{SelectorProxy}},
 \code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}}
 }
 \concept{base classes}

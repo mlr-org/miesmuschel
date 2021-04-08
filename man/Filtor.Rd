@@ -6,11 +6,11 @@
 \description{
 Base class representing filter operations, inheriting from \code{\link{MiesOperator}}.
 
-A \code{\link{Filtor}} gets (1) a table of individuals that are to be filtered, as well as a table of individuals that were already evaluated,
+A \code{\link{Filtor}} gets a table of individuals that are to be filtered, as well as a table of individuals that were already evaluated,
 along with information on the latter individuals' performance values. Furthermore, the
 number of individuals to return is given. The \code{Filtor} returns a vector of unique integers indicating which individuals were selected.
 
-Filter operations are performed in ES algorithms to facilitate concentration towards individuals that perform well with regard to the
+Filter operations are performed in ES algorithms to facilitate concentration towards individuals that likely perform well with regard to the
 fitness measure, without evaluating the fitness measure, for example through a surrogate model.
 
 Fitness values are always \emph{maximized}, both in single- and multi-criterion optimization.
@@ -59,8 +59,10 @@ Other base classes:
 \code{\link{Selector}}
 
 Other filtors: 
-\code{\link{FiltorNull}},
-\code{\link{FiltorSurrogateProgressive}}
+\code{\link{dict_filtor_maybe}},
+\code{\link{dict_filtors_null}},
+\code{\link{dict_filtors_proxy}},
+\code{\link{dict_filtors_surprog}}
 }
 \concept{base classes}
 \concept{filtors}
