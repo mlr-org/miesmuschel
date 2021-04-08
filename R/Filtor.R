@@ -89,16 +89,16 @@ Filtor = R6Class("Filtor",
         known_values = as.data.table(known_values)
       }
 
-      if ("single-crit" %in% self$supported && test_numeric(fitnesses, any.missing = FALSE, len = nrow(values))) {
+      if ("single-crit" %in% self$supported && test_numeric(fitnesses, any.missing = FALSE, len = nrow(known_values))) {
         fitnesses = matrix(fitnesses, ncol = 1)
       }
 
-      assert_matrix(fitnesses, nrows = nrow(values),
+      assert_matrix(fitnesses, nrows = nrow(known_values),
         min.cols = 1, max.cols = if ("multi-crit" %nin% self$supported) 1,
         mode = "numeric", any.missing = FALSE
       )
 
-      assert_int(n_filter, lower = 0, upper = nrow(values), tol = 1e-100)
+      assert_int(n_filter, lower = 0, upper = nrow(known_values), tol = 1e-100)
 
       needed_input = self$needed_input(n_filter)
       if (nrow(values) < needed_input) stopf("Needs at least %s individuals to select %s individuals, but got %s.", needed_input, n_filter, nrow(values))

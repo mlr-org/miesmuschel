@@ -1164,25 +1164,42 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
 #'   [`Filtor`] operator that filters.
 #' @param get_indivs (`logical(1)`)\cr
 #'   Whether to return the selected individuals, or an index into `individuals`.
+#' @param fidelity_schedule (TODO)
+#' @param budget_id (`character(1)` | `NULL`)\cr
+#'   Budget compnent when doing multi-fidelity optimization. This component of the search space is added
+#'   to `individuals` according to `fidelity_schedule` and the current generation's `"budget_survivors"`.
 #' @return If `get_indivs` is `TRUE`: a `data.frame` or [`data.table`][data.table::data.table] (depending on the type of `individuals`) of filtered configurations.
 #'   Otherwise: an integer vector indexing the filtered individuals.
 #' @export
-mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, get_indivs = TRUE) {
+mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidelity_schedule = NULL, budget_id = NULL, get_indivs = TRUE) {
   assert_optim_instance(inst)
-  individuals_dt = as.data.table(assert_data_frame(individuals))
   assert_int(lambda, lower = 0, tol = 1e-100)
+  individuals_dt = as.data.table(assert_data_frame(individuals, min.rows = lambda))
   assert_r6(filtor, "Filtor", null.ok = TRUE)
   data = inst$archive$data
   ss_ids = inst$search_space$ids()
-  assert_subset(ss_ids, colnames(individuals_dt))
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
+
   assert_subset(colnames(individuals_dt), colnames(data))
 
+  current_gen = max(data$dob, 0, na.rm = TRUE)
+
   if (lambda == 0) if (get_indivs) individuals[0] else integer(0)
+  if (!is.null(budget_id)) {
+    assert(check_fidelity_schedule(fidelity_schedule))
+    fidelity_schedule = as.data.table(fidelity_schedule)
+    fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
+    budget_survivors = NULL
+    fidelity = fidelity_schedule[data.table(generation = current_gen), budget_survivors, on = "generation", roll = TRUE]
+    individuals_dt[, (budget_id) := fidelity]
+  }
+  assert_subset(ss_ids, colnames(individuals_dt))
 
   if (is.null(filtor)) {
     filtor = FiltorNull$new()$prime(inst$search_space)
     if (setdiff(colnames(individuals_dt), ss_ids)) stop("filtor must be given when individuals contain additional components.")
   }
+
   f_ids = filtor$primed_ps$ids()
   assert_subset(ss_ids, f_ids)
   assert_set_equal(f_ids, colnames(individuals_dt))

@@ -159,7 +159,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
         private$.filtor = FiltorSurrogateProgressive$new(surrogate_learner)
       }
 
-      private$.param_set_source = alits(private$.own_param_set, private$.filtor$param_set)
+      private$.param_set_source = alist(private$.own_param_set, private$.filtor$param_set)
 
       can_dependencies = is.null(surrogate_learner) || "missings" %in% surrogate_learner$properties
 
@@ -253,7 +253,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       repeat {
         mies_survival_plus(inst, mu = survivors, survival_selector = survival_selector)
         offspring = mies_generate_offspring(inst, lambda = pre_filter_size, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
-        offspring = mies_filter_offspring(inst, offspring, lambda, private$.filtor)
+        offspring = mies_filter_offspring(inst, offspring, lambda, private$.filtor, fidelity_schedule = fidelity_schedule, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)
       }
     },

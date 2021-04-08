@@ -23,7 +23,7 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
         filter_rate_first = p_dbl(1, tags = "required"),
         filter_rate_per_sample = p_dbl(0, tags = "required")
       )
-      private$.own_param_set$values = list(filter_rate_first = 0, filter_rate_per_sample = 1)
+      private$.own_param_set$values = list(filter_rate_first = 1, filter_rate_per_sample = 1)
 
       param_classes = c("ParamInt", "ParamDbl", "ParamLgl", "ParamFct")
       if (!is.null(surrogate_learner)) {
@@ -45,13 +45,13 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
   ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter) {
-      params = self$param_set$values()
-      values = first(values, self$needed_input)
+      params = self$param_set$get_values()
+      values = first(values, self$needed_input(n_filter))
       fcolname = "fitnesses"
       while (fcolname %in% colnames(known_values)) {
         fcolname = paste0(".", fcolname)
       }
-      known_values[[fcolname]] = fitnesses
+      known_values[[fcolname]] = c(fitnesses)
       surrogate_prediction = self$surrogate_learner$train(
         mlr3::TaskRegr$new("surrogate", known_values, target = fcolname)
       )$predict_newdata(values)$data$response
@@ -60,12 +60,13 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
         population_size = round(params$filter_rate_first + params$filter_rate_per_sample * (i - 1))
         consider = first(surrogate_prediction, population_size)
         selected[[i]] = which.max(consider)
-        consider[[selected[[i]]]] = -Inf
+        assert_true(is.finite(consider[[selected[[i]]]]))
+        surrogate_prediction[[selected[[i]]]] = -Inf
       }
       selected
     },
     .needed_input = function(output_size) {
-      params = self$param_set$values()
+      params = self$param_set$get_values()
       requested = params$filter_rate_first + params$filter_rate_per_sample * (output_size - 1)
       if (requested < output_size) stopf("filter_rate_first (which is %s) + filter_rate_per_sample (which is %s) times (output_size (which is %s) minus one) must at least be output_size.",
         params$filter_rate_first, params$filter_rate_per_sample, output_size)
