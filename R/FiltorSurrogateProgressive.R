@@ -1,12 +1,46 @@
-#' @title Surrogate Model Filtering
+#' @title Progressive Surrogate Model Filtering
 #'
 #' @include Filtor.R
 #'
 #' @description
-#' ` # TODO: enter the stuff in `OptimizerSumoHB.R` here. `
+#' Performs progressive surrogate model filtering.
+#'
+#' A *surrogate model* is a regression model, based on an [`mlr3::Learner`], which predicts the approximate performance of newly sampled configurations
+#' given the empirical performance of already evaluated configurations. If the optional `surrogate_learner` construction argument is given to `SumoHB`,
+#' then the surrogate model is used to propose points that have, according to the surrogate model, a relatively high chance of performing well.
+#'
+#' The filtering is "progressive" in that successive values are filtered more agressively.
+#'
+#' @section Algorithm:
+#'
+#' Given the number `n_filter` of of individuals to sample, progressive surrogate model filtering proceeds as follows:
+#' 1. Take `filter_rate_first` configurations, predict their expected performance using the surrogate model, and put them
+#'    into a pool `P` of configurations to consider.
+#' 2. Take the individual that is optimal according to predicted performance, remove it from `P` and add it to solution set `S`.
+#' 3. If the number of solutions in `S` equals `n_filter`, quit.
+#' 4. Take the next `filter_rate_per_sample` configurations, predict their expected performance using the surrogate model, and add them to `P`.
+#' 5. Jump to 2.
+#'
+#' (The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally
+#' equivalent).
+#'
+#' The `filter_rate_first` and `filter_rate_per_sample` configuration parameters of this algorithm determine how agressively the surrogate model is used to
+#' filter out sampled configurations. If the filtering is agressive (`filter_rate_first` is large), then more "exploitation" at the cost of "exploration" is performed.
+#' When `filter_rate_first` is small but `filter_rate_per_sample` is large, then successive individuals are filtered successively more agressively, potentially
+#' leading to a tradeoff between "exploration" and "exploitation".
+#'
+#' When `filter_rate_per_sample` is set to 0, then the method is equivalent to sampling the top `n_filter` individuals from `filter_rate_first`
+#' sampled ones. When `filter_rate_per_sample` is 1 and `filter_rate_first` is 0, then the method is equivalent to random sampling.
+#'
+#' `filter_rate_first` and `filter_rate_per_sample` may be fractional; the total number of individuals to select from when selecting the `i`th
+#' individuals is always `round(filter_rate_first + (filter_rate_per_sample - 1) * (i - 1))`. However, `filter_rate_first` must
+#' be at least 1, and `filter_rate_first + filter_rate_per_sample * (n_filter - 1)` must be at least `n_filter`.
 #'
 #' @section Configuration Parameters:
-#' ` # TODO: enter the stuff in `OptimizerSumoHB.R` here. `
+#' `FiltorSurrogateProgressive`'s configuration parameters are the hyperparameters of the `surrogate_learner` [`Learner`][mlr3::Learner], as well as:
+#'
+#' @template param_filter_rate_first
+#' @template param_filter_rate_per_sample
 #'
 #' @param surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
 #'   Regression learner for the surrogate model filtering algorithm.

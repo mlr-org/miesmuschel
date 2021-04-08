@@ -9,6 +9,7 @@ mies_filter_offspring(
   individuals,
   lambda,
   filtor = NULL,
+  fidelity_schedule = NULL,
   budget_id = NULL,
   get_indivs = TRUE
 )
@@ -23,14 +24,14 @@ Number of individuals to filter down to.}
 \item{filtor}{(\code{\link{Filtor}} | \code{NULL})\cr
 \code{\link{Filtor}} operator that filters.}
 
+\item{fidelity_schedule}{(TODO)}
+
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
 Budget compnent when doing multi-fidelity optimization. This component of the search space is added
 to \code{individuals} according to \code{fidelity_schedule} and the current generation's \code{"budget_survivors"}.}
 
 \item{get_indivs}{(\code{logical(1)})\cr
 Whether to return the selected individuals, or an index into \code{individuals}.}
-
-\item{fidelity_schedule}{(TODO)}
 }
 \value{
 If \code{get_indivs} is \code{TRUE}: a \code{data.frame} or \code{\link[data.table:data.table]{data.table}} (depending on the type of \code{individuals}) of filtered configurations.

@@ -18,14 +18,19 @@ objective <- ObjectiveRFun$new(
     z <- z + rnorm(1, sd = 1 / sqrt(xs$b))
     list(Obj = z)
   },
-  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4),
-    b = p_int(1, tags = "budget")),
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), b = p_int(1)),
   codomain = ps(Obj = p_dbl(tags = "maximize"))
 )
 
+search_space = objective$domain$search_space(list(
+  x = to_tune(),
+  y = to_tune(),
+  b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
+))
+
 oi <- OptimInstanceSingleCrit$new(objective,
-  search_space = objective$domain$search_space(list(x = to_tune(), y = to_tune(), b = to_tune(p_int(1, 32, logscale = TRUE, tags = "budget")))),
-  terminator = trm("combo", list(trm("evals", n_evals = 200), trm("gens", generations = 20)))
+  search_space = search_space,
+  terminator = trm("gens", generations = 10)
 )
 
 
@@ -67,3 +72,5 @@ ggplot(oi$archive$data, aes(x = x, y = y, color = dob)) + geom_point()
 oi$archive$data[, id := sapply(paste(x, y), function(x) substr(digest::digest(x), 1, 5))]
 
 ggplot(oi$archive$data, aes(x = dob, y = Obj, color = id, group = id)) + geom_line() + geom_point()
+
+

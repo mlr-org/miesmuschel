@@ -12,7 +12,8 @@ the algorithm works as follows:
 \enumerate{
 \item Sample an initial design of size \code{mu} at fidelity \code{F0}
 \item Kill individuals that are not in the top \code{survival_fraction} part of individuals, by performance
-\item Generate new individuals using either random sampling, or \strong{surrogate model filtering}, until \code{mu} alive individuals are present again.
+\item Generate new individuals using either random sampling, or \link[=FiltorSurrogateProgressive]{\strong{progressive surrogate model filtering}},
+until \code{mu} alive individuals are present again.
 \item Evaluate all alive individuals at fidelity \verb{F\{generation\}}
 \item Jump to 2., until termination, possibly because \code{n} generations are reached.
 }
@@ -24,6 +25,8 @@ The \strong{fidelity progression} uses a specially designated "budget" parameter
 The lower limit of the budget parameter is used as \code{F0}. The upper limit is used as \code{Fn}. The budget is evaluated at equally spaced values in generations \verb{0..n},
 so \code{F1} - \code{F0} = \code{F2} - \code{F1} etc. In many cases it is desirable to have a multiplicative progression of "difficulty" of the problem. In this case, it is
 recommended to use a budget parameter with exponential "trafo", or one with \code{logscale = TRUE} (see example).
+
+The \code{\link{FiltorSurrogateProgressive}} is used for filtering, see the class's documentation for details on the algorithm.
 }
 \section{Terminating}{
 
@@ -34,63 +37,26 @@ number of generations is determined from the given \code{\link[bbotk:Terminator]
 is planned according to this number. Other terminators may be present in a \code{\link[bbotk:mlr_terminators_combo]{TerminatorCombo}} that may
 lead to finishing the tuning process earlier.
 
-TODO: what does generations == 0 mean?
-}
-
-\section{Surrogate Model Filtering}{
-
-A \emph{surrogate model} is a regression model, based on an \code{\link[mlr3:Learner]{mlr3::Learner}}, which predicts the approximate performance of newly sampled configurations
-given the empirical performance of already evaluated configurations. If the optional \code{surrogate_learner} construction argument is given to \code{SumoHB},
-then the surrogate model is used to propose points that have, according to the surrogate model, a relatively high chance of performing well.
-
-Given the number \code{lambda} of of new individuals to sample, surrogate model filtering proceeds as follows:
-\enumerate{
-\item Sample \code{filter_rate_first} configurations, predict their expected performance using the surrogate model, and put them
-into a pool \code{P} of configurations to consider.
-\item Take the individual that is optimal according to predicted performance, remove it from \code{P} and add it to solution set \code{S}.
-\item If the number of solutions in \code{S} equals \code{lambda}, quit.
-\item Sample \code{filter_rate_per_sample} configurations, predict their expected performance using the surrogate model, and add them to \code{P}.
-\item Jump to 2.
-}
-
-(The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally
-equivalent).
-
-The \code{filter_rate_first} and \code{filter_rate_per_sample} configuration parameters of this algorithm determine how agressively the surrogate model is used to
-filter out sampled configurations. If the filtering is agressive (\code{filter_rate_first} is large), then more "exploitation" at the cost of "exploration" is performed.
-When \code{filter_rate_first} is small but \code{filter_rate_per_sample} is large, then successive individuals are filtered successively more agressively, potentially
-leading to a tradeoff between "exploration" and "exploitation".
-
-When \code{filter_rate_per_sample} is set to 0, then the method is equivalent to sampling the top \code{lambda} individuals from \code{filter_rate_first}
-sampled ones. When \code{filter_rate_per_sample} is 1 and \code{filter_rate_first} is 0, then the method is equivalent to random sampling.
-
-\code{filter_rate_first} and \code{filter_rate_per_sample} may be fractional; the total number of individuals to select from when selecting \code{i}
-individuals is always round(\code{filter_rate_first} + (\code{filter_rate_per_sample} - 1) * (\code{i} - 1)). However, \code{filter_rate_first} must
-be at least 1, and \code{filter_rate_first} + \code{filter_rate_per_sample} * (\code{lambda} - 1) must be at least \code{lambda}.
+It is possible to continue optimization runs that quit early due to other terminators. It is not recommended to change the number of generations
+between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
 }
 
 \section{Configuration Parameters}{
 
-\code{OptimizerSumoHB}'s configuration parameters are the hyperparameters of the \code{surrogate_learner} \code{\link[mlr3:Learner]{Learner}}, as well as:
+\code{OptimizerSumoHB}'s configuration parameters are the hyperparameters of the \code{surrogate_learner} \code{\link[mlr3:Learner]{Learner}}, if it is not \code{NULL}, as well as:
 \itemize{
 \item \code{mu} :: \code{integer(1)}\cr
 Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
 \item \code{survival_fraction} :: \code{numeric(1)}\cr
 Fraction of the population that survives at each fidelity step. The number of newly sampled individuals is (1 - \code{survival_fraction}) * \code{mu}.
-\item \code{filter_rate_first} :: \code{numeric(1)}\cr
-Only present when the \code{surrogate_learner} construction argument is not \code{NULL}.
-\code{filter_rate_first} parameter of the surrogate model filtering algorithm, see the corresponding section. Initialized to 1. Together with the
-default of \code{filter_rate_per_sample}, this is equivalent to random sampling new individuals.
-\item \code{filter_rate_per_sample} :: \code{numeric(1)}\cr
-Only present when \code{surrogate_learner} construction argument is not \code{NULL}.
-\code{filter_rate_per_sample} parameter of the surrogate model filtering algorithm, see the corresponding section.
-Initialized to 1. Together with the default of \code{filter_rate_per_sample}, this is equivalent to random sampling new individuals.
 \item \code{sampling} :: \code{function}\cr
 Function that generates the initial population, as well as new individuals to be filtered from, as a \code{\link[paradox:Design]{Design}} object. The function must have
 arguments \code{param_set} and \code{n} and function like \code{\link[paradox:generate_design_random]{paradox::generate_design_random}} or \code{\link[paradox:generate_design_lhs]{paradox::generate_design_lhs}}.
 This is equivalent to the \code{initializer} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information. Initialized to
 \code{\link[paradox:generate_design_random]{generate_design_random()}}.
 }
+
+The following are configuration parameters of \code{\link{FiltorSurrogateProgressive}} and therefore only present when the \code{surrogate_learner} construction argument is not \code{NULL}:
 }
 
 \examples{
@@ -98,42 +64,54 @@ This is equivalent to the \code{initializer} parameter of \code{\link[=mies_init
 lgr::threshold("warn")
 
 # Define the objective to optimize
+# The 'budget' here simulates averaging 'b' samples from a noisy function
 objective <- ObjectiveRFun$new(
   fun = function(xs) {
     z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    z <- z + rnorm(1, sd = 1 / sqrt(xs$b))
     list(Obj = z)
   },
-  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), b = p_int(1)),
   codomain = ps(Obj = p_dbl(tags = "maximize"))
 )
 
-# Get a new OptimInstance
+# Get a new OptimInstance. Here we determine that the optimizatoin goes
+# for 10 generations.
 oi <- OptimInstanceSingleCrit$new(objective,
-  terminator = trm("evals", n_evals = 100)
+  search_space = search_space,
+  terminator = trm("gens", generations = 10)
 )
 
-# TODO
-# sumohb_opt <- # TODO
+library("mlr3learners")
+# use the 'regr.ranger' as surrogate.
+# The following settings have 30 individuals in a batch, the 20 best
+# of which survive, while 10 are sampled new.
+# For this, 100 individuals are sampled randomly, and the top 10, according
+# to the surrogate model, are used.
+sumohb_opt <- opt("sumohb", surrogate_learner = mlr3::lrn("regr.ranger"),
+  mu = 30, survival_fraction = 2/3,
+  filter_rate_first = 100, filter_rate_per_sample = 0
+)
 # sumohb_opt$optimize performs SumoHB optimization and returns the optimum
-# sumohb_opt$optimize(oi)
+sumohb_opt$optimize(oi)
 
 #####
 # Optimizing a Machine Learning Method
 #####
 
 # Note that this is a short example, aiming at clarity and short runtime.
-# The settings are not optimal for hyperparameter tuning. The resampling
-# in particular should not be "holdout" for small datasets where this gives
-# a very noisy estimate of performance.
+# The settings are not optimal for hyperparameter tuning.
 
 library("mlr3")
+library("mlr3learners")
 library("mlr3tuning")
 
 # The Learner to optimize
-learner = lrn("classif.rpart")
+learner = lrn("classif.xgboost")
 
 # The hyperparameters to optimize
-learner$param_set$values[c("cp", "maxdepth")] = list(to_tune())
+learner$param_set$values[c("eta", "booster")] = list(to_tune())
+learner$param_set$values$nrounds = to_tune(p_int(1, 4, tags = "budget", logscale = TRUE))
 
 # Get a TuningInstance
 ti = TuningInstanceSingleCrit$new(
@@ -141,12 +119,16 @@ ti = TuningInstanceSingleCrit$new(
   learner = learner,
   resampling = rsmp("holdout"),
   measure = msr("classif.acc"),
-  terminator = trm("gens", generations = 10)
+  terminator = trm("gens", generations = 3)
 )
 
-# sumohb_tune <- # TODO
+sumohb_tune <- tnr("sumohb", surrogate_learner = lrn("regr.ranger"),
+  mu = 20, survival_fraction = 0.5,
+  filter_rate_first = 100, filter_rate_per_sample = 0
+)
 # sumohb_tune$optimize performs SumoHB optimization and returns the optimum
-# sumohb_tune$optimize(ti)
+sumohb_tune$optimize(ti)
+
 }
 }
 \seealso{
