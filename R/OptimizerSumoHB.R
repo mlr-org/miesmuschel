@@ -145,7 +145,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
     #' @description
     #' Initialize the 'OptimizerSumoHB' object.
     initialize = function(filtor = FiltorProxy$new()) {
-      private$.filtor = assert_r6(filtor, "Filtor")
+      private$.filtor = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       param_set = ps(
         mu = p_int(1, tags = "required"),
         survival_fraction = p_dbl(0, 1, tags = "required"),
@@ -156,6 +156,8 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_lhs, fidelity_steps = 0, filter_with_max_budget = FALSE)
 
       private$.own_param_set = param_set
+
+      self$filtor$param_set$set_id = "filtor"
 
       private$.param_set_source = alist(private$.own_param_set, private$.filtor$param_set)
 
