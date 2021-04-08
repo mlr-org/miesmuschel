@@ -20,6 +20,7 @@
 #' @templateVar id maybe
 #' @templateVar additional , <mutator> \[, <mutator_not>\]
 #' @template autoinfo_prepare_mut
+#'
 #' @section Supported Operand Types:
 #'
 #' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `mutator` and `mutator_not`.

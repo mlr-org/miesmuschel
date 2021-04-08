@@ -6,11 +6,11 @@
 #' @description
 #' Base class representing filter operations, inheriting from [`MiesOperator`].
 #'
-#' A [`Filtor`] gets (1) a table of individuals that are to be filtered, as well as a table of individuals that were already evaluated,
+#' A [`Filtor`] gets a table of individuals that are to be filtered, as well as a table of individuals that were already evaluated,
 #' along with information on the latter individuals' performance values. Furthermore, the
 #' number of individuals to return is given. The `Filtor` returns a vector of unique integers indicating which individuals were selected.
 #'
-#' Filter operations are performed in ES algorithms to facilitate concentration towards individuals that perform well with regard to the
+#' Filter operations are performed in ES algorithms to facilitate concentration towards individuals that likely perform well with regard to the
 #' fitness measure, without evaluating the fitness measure, for example through a surrogate model.
 #'
 #' Fitness values are always *maximized*, both in single- and multi-criterion optimization.
@@ -65,6 +65,7 @@ Filtor = R6Class("Filtor",
       super$initialize(param_classes, param_set, endomorphism = FALSE)
     },
     needed_input = function(output_size) {
+      if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       assert_int(output_size, tol = 1e-100, lower = 1)
       assert_int(private$.needed_input(output_size), tol = 1e-100, lower = output_size)
     }

@@ -2,6 +2,8 @@
 #'
 #' @include Filtor.R
 #'
+#' @name dict_filtors_surprog
+#'
 #' @description
 #' Performs progressive surrogate model filtering.
 #'
@@ -43,10 +45,39 @@
 #' @template param_filter_rate_first
 #' @template param_filter_rate_per_sample
 #'
+#' @templateVar id surprog
+#' @templateVar additional , <surrogate_learner>
+#' @template autoinfo_prepare_ftr
+#'
+#' @section Supported Operand Types:
+#'
+#' Supported [`Param`][paradox::Param] classes depend on the supported feature types of the `surrogate_learner`, as reported
+#' by `surrogate_learner$feature_types`: `"ParamInt"` requires
+#' `"integer"`, `"ParamDbl"` requires `"numeric"`, `"ParamLgl"` requires `"logical"`, and `"ParamFct"` requires `"factor"`.
+#'
+#' @template autoinfo_dict
+#'
 #' @param surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
 #'   Regression learner for the surrogate model filtering algorithm.
 #'
 #' @family filtors
+#'
+#' @example
+#' library("mlr3")
+#' library("mlr3learners")
+#' fp = ftr("surprog", lrn("regr.lm"), filter_rate_first = 2)
+#'
+#' p = ps(x = p_dbl(-5, 5))
+#' known_data = data.frame(x = 1:5)
+#' fitnesses = 1:5
+#' new_data = data.frame(x = c(2.5, 4.5))
+#'
+#' fp$prime(p)
+#'
+#' fp$needed_input(1)
+#'
+#' fp$operate(new_data, known_data, fitnesses, 1)
+#'
 #' @export
 FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
   inherit = Filtor,
@@ -111,4 +142,4 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
     .own_param_set = NULL
   )
 )
-
+dict_filtors$add("surprog", FiltorSurrogateProgressive)
