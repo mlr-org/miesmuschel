@@ -3,12 +3,11 @@
 #' @description
 #' Perform Surrogate Model Assisted Hyperband Optimization.
 #'
-#' Given a population size `mu`, a fraction of surviving individuals `survival_fraction`, a number of generations `n` and a fidelity progression `F0`, `F1`, ..., `Fn`,
+#' Given a population size `mu`, a fraction of surviving individuals `survival_fraction`, a number of generations `n` and a fidelity progression `F1`, `F1`, ..., `Fn`,
 #' the algorithm works as follows:
-#' 1. Sample an initial design of size `mu` at fidelity `F0`
+#' 1. Sample an initial design of size `mu` at fidelity `F1`
 #' 2. Kill individuals that are not in the top `survival_fraction` part of individuals, by performance
-#' 3. Generate new individuals using either random sampling, or **[progressive surrogate model filtering][FiltorSurrogateProgressive]**,
-#'    until `mu` alive individuals are present again.
+#' 3. Generate new individuals using random sampling and optionally a [`Filtor`], until `mu` alive individuals are present again.
 #' 4. Evaluate all alive individuals at fidelity `F{generation}`
 #' 5. Jump to 2., until termination, possibly because `n` generations are reached.
 #'
@@ -20,38 +19,44 @@
 #' so `F1` - `F0` = `F2` - `F1` etc. In many cases it is desirable to have a multiplicative progression of "difficulty" of the problem. In this case, it is
 #' recommended to use a budget parameter with exponential "trafo", or one with `logscale = TRUE` (see example).
 #'
-#' The [`FiltorSurrogateProgressive`] is used for filtering, see the class's documentation for details on the algorithm.
+#' A [`Filtor`] can be used for filtering, see the respective class's documentation for details on algorithms. The [`FiltorSurrogateProgressive`] can be used
+#' for progressive surrogate model filtering. [`FiltorMaybe`] can be used for random interleaving.
 #'
-#' @section Terminating:
-#' [`TerminatorGenerations`] is used to determine the number of fidelity refinements to be performed. Therefore, the  [`OptimInstance`][bbotk::OptimInstance]
-#' being optimized must contain a [`TerminatorGenerations`]. Either directly (`inst$terminator`), or indirectly through a
-#' [`bbotk::TerminatorCombo`] with `$any` set to `TRUE` (recursive [`TerminatorCombo`][bbotk::TerminatorCombo] may also be used). The
-#' number of generations is determined from the given [`Terminator`][bbotk::Terminator] object and the number of fidelity refinements
+#' @section Fidelity Steps:
+#' The number of fidelity steps can be determined through the `fidelity_steps` configuration parameter, or can be determined when a
+#' [`TerminatorGenerations`] is used to determine the number of fidelity refinements that are being performed. For this, the  [`OptimInstance`][bbotk::OptimInstance]
+#' being optimized must contain a [`TerminatorGenerations`], either directly (`inst$terminator`), or indirectly through a
+#' [`bbotk::TerminatorCombo`] with `$any` set to `TRUE` (recursive [`TerminatorCombo`][bbotk::TerminatorCombo] may also be used). When `fidelity_steps` is `0`,
+#' the number of generations is determined from the given [`Terminator`][bbotk::Terminator] object and the number of fidelity refinements
 #' is planned according to this number. Other terminators may be present in a [`TerminatorCombo`][bbotk::TerminatorCombo] that may
 #' lead to finishing the tuning process earlier.
 #'
-#' It is possible to continue optimization runs that quit early due to other terminators. It is not recommended to change the number of generations
-#' between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
+#' It is possible to continue optimization runs that quit early due to other terminators. It is not recommended to change `fidelity_steps` (or the number of generations
+#' when `fidelity_steps` is 0) between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
 #'
 #' @section Configuration Parameters:
-#' `OptimizerSumoHB`'s configuration parameters are the hyperparameters of the `surrogate_learner` [`Learner`][mlr3::Learner], if it is not `NULL`, as well as:
+#' `OptimizerSumoHB`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
 #'
 #' * `mu` :: `integer(1)`\cr
 #'   Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
 #' * `survival_fraction` :: `numeric(1)`\cr
-#'   Fraction of the population that survives at each fidelity step. The number of newly sampled individuals is (1 - `survival_fraction`) * `mu`.
+#'   Fraction of the population that survives at each fidelity step. The number of newly sampled individuals is (1 - `survival_fraction`) * `mu`. Initialized to 0.5.
 #' * `sampling` :: `function`\cr
 #'   Function that generates the initial population, as well as new individuals to be filtered from, as a [`Design`][paradox::Design] object. The function must have
 #'   arguments `param_set` and `n` and function like [`paradox::generate_design_random`] or [`paradox::generate_design_lhs`].
 #'   This is equivalent to the `initializer` parameter of [`mies_init_population()`], see there for more information. Initialized to
 #'   [`generate_design_random()`][paradox::generate_design_random].
+#' * `fidelity_steps` :: `integer(1)`\cr
+#'   Number of fidelity steps. When it is 0, the number is determined from the [`OptimInstance`][bbotk::OptimInstance]'s [`Terminator`][bbotk::Terminator]. See the
+#'   section **Fidelity Steps** for more details. Initialized to 0.
+#' * `filter_with_max_budget` :: `logical(1)`\cr
+#'   Whether to perform filtering with the maximum fidelity value found in the archive, as opposed the current `budget_survivors`. This has only an effect when
+#'   `fidelity_steps` is greater than 1 and some evaluations are done when the archive already contains evaluations with greater fidelity. Initialized to `FALSE`.
 #'
-#' The following are configuration parameters of [`FiltorSurrogateProgressive`] and therefore only present when the `surrogate_learner` construction argument is not `NULL`:
-#' @template param_filter_rate_first
-#' @template param_filter_rate_per_sample
-#'
-#' @param surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
-#'   Regression learner for the surrogate model filtering algorithm. May be `NULL`, in which case no surrogate model is used and individuals are sampled randomly.
+#' @param filtor ([`Filtor`])\cr
+#'   [`Filtor`] for the filtering algorithm. Default is [`FiltorProxy`], which exposes the operation as
+#'   a configuration parameter of the optimizer itself.\cr
+#'   The `$filtor` field will reflect this value.
 #'
 #' @family optimizers
 #' @examples
@@ -89,9 +94,10 @@
 #' # of which survive, while 10 are sampled new.
 #' # For this, 100 individuals are sampled randomly, and the top 10, according
 #' # to the surrogate model, are used.
-#' sumohb_opt <- opt("sumohb", surrogate_learner = mlr3::lrn("regr.ranger"),
-#'   mu = 30, survival_fraction = 2/3,
-#'   filter_rate_first = 100, filter_rate_per_sample = 0
+#' sumohb_opt <- opt("sumohb", ftr("surprog",
+#'     surrogate_learner = mlr3::lrn("regr.ranger"),
+#'     filter_rate_first = 100, filter_rate_per_sample = 0),
+#'   mu = 30, survival_fraction = 2/3
 #' )
 #' # sumohb_opt$optimize performs SumoHB optimization and returns the optimum
 #' sumohb_opt$optimize(oi)
@@ -123,9 +129,11 @@
 #'   terminator = trm("gens", generations = 3)
 #' )
 #'
-#' sumohb_tune <- tnr("sumohb", surrogate_learner = lrn("regr.ranger"),
-#'   mu = 20, survival_fraction = 0.5,
-#'   filter_rate_first = 100, filter_rate_per_sample = 0
+#' # use ftr("maybe") for random interleaving: only 50% of proposed points are filtered.
+#' sumohb_tune <- tnr("sumohb", ftr("maybe", p = 0.5, filtor = ftr("surprog",
+#'     surrogate_learner = lrn("regr.ranger"),
+#'     filter_rate_first = 100, filter_rate_per_sample = 0)),
+#'   mu = 20, survival_fraction = 0.5
 #' )
 #' # sumohb_tune$optimize performs SumoHB optimization and returns the optimum
 #' sumohb_tune$optimize(ti)
@@ -136,41 +144,37 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
   public = list(
     #' @description
     #' Initialize the 'OptimizerSumoHB' object.
-    initialize = function(surrogate_learner = NULL) {
-      assert_r6(surrogate_learner, "LearnerRegr", null.ok = TRUE)
+    initialize = function(filtor = FiltorProxy$new()) {
+      private$.filtor = assert_r6(filtor, "Filtor")
       param_set = ps(
         mu = p_int(1, tags = "required"),
         survival_fraction = p_dbl(0, 1, tags = "required"),
-        sampling = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required"))
+        sampling = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required")),
+        fidelity_steps = p_int(0, tags = "required"),
+        filter_with_max_budget = p_lgl(tags = "required")
       )
-      param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_lhs)
+      param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_lhs, fidelity_steps = 0, filter_with_max_budget = FALSE)
 
       private$.own_param_set = param_set
 
-      if (is.null(surrogate_learner)) {
-        private$.filtor = FiltorNull$new()
-      } else {
-        private$.filtor = FiltorSurrogateProgressive$new(surrogate_learner)
-      }
-
       private$.param_set_source = alist(private$.own_param_set, private$.filtor$param_set)
 
-      can_dependencies = is.null(surrogate_learner) || "missings" %in% surrogate_learner$properties
+      can_dependencies = TRUE  # TODO filtor needs to announce this
 
       super$initialize(
         param_set = self$param_set, param_classes = private$.filtor$param_classes,
         properties = c(if (can_dependencies) "dependencies", "single-crit"),
-        packages = c("miesmuschel", "lhs", surrogate_learner$packages)
+        packages = "miesmuschel"  # TODO: packages from filtor, this is in a different branch currently
       )
     }
   ),
   active = list(
-    #' @field surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
-    #' Regression learner for the surrogate model filtering algorithm.
-    surrogate_learner = function(rhs) {
-      ret = private$.filtor$surrogate_learner
+    #' @field filtor ([`Filtor`])\cr
+    #' Filtering algorithm used.
+    filtor = function(rhs) {
+      ret = private$.filtor
       if (!missing(rhs) && !identical(rhs, ret)) {
-        stop("surrogate_learner is read-only.")
+        stop("filtor is read-only.")
       }
       ret
     },
@@ -213,17 +217,24 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       if (length(budget_id) != 1) stopf("Need exactly one budget parameter for multifidelity method, but found %s: %s",
         length(budget_id), str_collapse(budget_id))
 
-      generations = terminator_get_generations(inst$terminator)
+      generations = params$fidelity_steps
+      if (generations == 0) generations = terminator_get_generations(inst$terminator)
       if (!is.finite(generations)) {
-        stop("Given OptimizationInstance must have a TerminatorGenerations, or a TerminatorCombo with 'any = TRUE' containing at least one TerminatorGenerations (possibly recursively).")
+        stop("When fidelity_steps is 0, then the given OptimizationInstance must have a TerminatorGenerations, or a TerminatorCombo with 'any = TRUE' containing at least one TerminatorGenerations (possibly recursively).")
       }
       if (generations < 1) {
         stopf("At least one generation must be evaluated (at full fidelity), but terminator had %s generations.", generations)
       }
 
       # use rev(seq(upper, lower)), so that with sequence length 1, we get the upper bound only.
-      budget_progression = rev(seq(inst$search_space$upper[budget_id], inst$search_space$lower[budget_id], length.out = generations))
-      fidelity_schedule = data.table(generation = seq_len(generations), budget_new = budget_progression, budget_survivors = budget_progression)
+      budget_progression = rev(seq(inst$search_space$upper[[budget_id]], inst$search_space$lower[[budget_id]], length.out = generations))
+      fidelity_schedule_base = data.table(generation = seq_len(generations), budget_new = budget_progression, budget_survivors = budget_progression)
+
+      # if this is a continued run, then `inst$archie$data$dob` may already contain 'dob' values, and mies_init_population will perform
+      # evaluations with 'max(inst$archive$data$dob) + 1`. fidelity_schedule then needs to be recycled, so we get the last available generation here.
+      last_gen = max(inst$archive$data$dob, 0, na.rm = TRUE)
+
+      fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
 
       mutator = MutatorErase$new()
       mutator$param_set$values$initializer = params$sampling
@@ -243,11 +254,25 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       }
       lambda = params$mu - survivors
       pre_filter_size = private$.filtor$needed_input(lambda)
+      pre_filter_size_wraparound = private$.filtor$needed_input(mu)  # need this many indivs pre-filter when 'generations' are reached and all indivs are sampled new.
 
       repeat {
-        mies_survival_plus(inst, mu = survivors, survival_selector = survival_selector)
-        offspring = mies_generate_offspring(inst, lambda = pre_filter_size, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
-        offspring = mies_filter_offspring(inst, offspring, lambda, private$.filtor, fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+        last_gen = max(inst$archive$data$dob, na.rm = TRUE)
+        if (last_gen %% generations == 0) {
+          fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
+          # generation cycle is over; kill all individuals, sample new ones.
+          keep_alive= 0
+          sample_new = pre_filter_size_wraparound
+          filter_down_to = mu
+        } else {
+          keep_alive = survivors
+          sample_new = pre_filter_size
+          filter_down_to = lambda
+        }
+        offspring = mies_generate_offspring(inst, lambda = sample_new, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
+        mies_survival_plus(inst, mu = keep_alive, survival_selector = survival_selector)
+        offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
+          fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)
       }
     },
@@ -276,5 +301,18 @@ terminator_get_generations.TerminatorCombo = function(x) {
     min(sapply(x$terminators, terminator_get_generations))
   } else {
     max(sapply(x$terminators, terminator_get_generations))
+  }
+}
+
+recycle_fidelity_schedule = function(fidelity_schedule_base, last_gen, generations) {
+  current_cycle = floor(last_gen / generations)
+  if (current_cycle == 0) {
+    fidelity_schedule_base
+  } else {
+    # fidelity wrap-around
+    # build the new fidelity schedule: it goes from last_gen + 1 .. last_gen + generations.
+    # BUT: formal requirement for fidelity_schedule is that '1' also occurs in 'generations' column, so we just
+    # copy the fidelity_schedule_base.
+    rbind(fidelity_schedule_base, copy(fidelity_schedule_base)[, generation := generation + generations * current_cycle])
   }
 }
