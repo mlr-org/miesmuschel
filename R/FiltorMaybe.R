@@ -135,6 +135,24 @@ FiltorMaybe = R6Class("FiltorMaybe",
         )
       }
     },
+    .needed_input = function(output_size) {
+      params = self$param_set$get_values()
+      if (params$random_choice) {
+        filter_min = qbinom(-20, output_size, log.p = TRUE, lower.tail = TRUE)
+        filter_max = qbinom(-20, output_size, log.p = TRUE, lower.tail = FALSE)
+        # worst case: take filter_max from .wrapped, and take output_size - filter_min from .wrapped_not.
+        #
+        # This is even a bit worse than the worst case, since the needed_input arguments of both wrapped functions
+        # do not sum to output_size. In theory we could iterate through filter_min:filter_max and calculate the
+        # max of '.wrapped$needed_input(i) + .wrapped_not$needed_input(output_size - i)', but that is probably
+        # more wasteful so we don't do that here.
+        private$.wrapped$needed_input(filter_max) + private$.wrapped_not$needed_input(output_size - filter_min)
+      } else {
+        filtering = round(output_size * params$p)
+        # we know exactly how many elements each filter needs.
+        private$.wrapped$needed_input(filtering) + private$.wrapped_not$needed_input(output_size - filtering)
+      }
+    },
     .wrapped = NULL,
     .wrapped_not = NULL,
     .maybe_param_set = NULL

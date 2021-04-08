@@ -254,7 +254,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       }
       lambda = params$mu - survivors
       pre_filter_size = private$.filtor$needed_input(lambda)
-      pre_filter_size_wraparound = private$.filtor$needed_input(mu)  # need this many indivs pre-filter when 'generations' are reached and all indivs are sampled new.
+      pre_filter_size_wraparound = private$.filtor$needed_input(params$mu)  # need this many indivs pre-filter when 'generations' are reached and all indivs are sampled new.
 
       repeat {
         last_gen = max(inst$archive$data$dob, na.rm = TRUE)
@@ -263,7 +263,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
           # generation cycle is over; kill all individuals, sample new ones.
           keep_alive= 0
           sample_new = pre_filter_size_wraparound
-          filter_down_to = mu
+          filter_down_to = params$mu
         } else {
           keep_alive = survivors
           sample_new = pre_filter_size
