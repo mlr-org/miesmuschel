@@ -65,6 +65,8 @@ tinytest::run_test_file("inst/tinytest/test_mies_init_population.R")
 
 tinytest::run_test_file("inst/tinytest/test_mies_survival_comma.R")
 
+tinytest::run_test_file("inst/tinytest/test_filtor_proxy.R")
+
 
 objective <- ObjectiveRFun$new(
   fun = function(xs) list(x = xs$x + 10),

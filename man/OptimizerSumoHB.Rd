@@ -243,7 +243,7 @@ The objects of this class are cloneable with this method.
 \subsection{Method \code{new()}}{
 Initialize the \code{TunerSumoHB} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TunerSumoHB$new(surrogate_learner = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TunerSumoHB$new(filtor = FiltorProxy$new())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
