@@ -67,7 +67,7 @@ Filtor = R6Class("Filtor",
     needed_input = function(output_size) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       assert_int(output_size, tol = 1e-100, lower = 1)
-      assert_int(private$.needed_input(output_size), tol = 1e-100, lower = output_size)
+      (assert_int(private$.needed_input(output_size), tol = 1e-100, lower = output_size))
     }
   ),
   active = list(
@@ -90,7 +90,8 @@ Filtor = R6Class("Filtor",
         known_values = as.data.table(known_values)
       }
 
-      if ("single-crit" %in% self$supported && test_numeric(fitnesses, any.missing = FALSE, len = nrow(known_values))) {
+      if ("single-crit" %in% self$supported && test_numeric(fitnesses) && !test_matrix(fitnesses)) {
+        assert_numeric(fitnesses, any.missing = FALSE, len = nrow(known_values))
         fitnesses = matrix(fitnesses, ncol = 1)
       }
 
