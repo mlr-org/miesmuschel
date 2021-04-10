@@ -52,7 +52,7 @@ fp$param_set$values$operation = ftr("null")
 fp$prime(p)
 fp$operate(new_data, known_data, fitnesses, 1)
 
-fp$param_set$values$operation = ftr("progsur", lrn("regr.lm"), filter_rate_first = 2)
+fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter_rate_first = 2)
 fp$operate(new_data, known_data, fitnesses, 1)
 }
 \seealso{
