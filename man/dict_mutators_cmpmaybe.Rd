@@ -66,18 +66,19 @@ mcm2$operate(data)
 Other mutators: 
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
+\code{\link{dict_mutators_erase}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
+\code{\link{dict_mutators_proxy}},
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
-\code{\link{MutatorProxy}},
 \code{\link{OperatorCombination}},
-\code{\link{dict_mutators_maybe}}
+\code{\link{dict_mutators_maybe}},
+\code{\link{dict_mutators_proxy}}
 }
 \concept{mutator wrappers}
 \concept{mutators}

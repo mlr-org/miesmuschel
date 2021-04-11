@@ -23,6 +23,7 @@
 #' @templateVar id maybe
 #' @templateVar additional , <recombinator> \[, <recombinator_not>\]
 #' @template autoinfo_prepare_rec
+#'
 #' @section Supported Operand Types:
 #'
 #' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `recombinator` and `recombinator_not`.

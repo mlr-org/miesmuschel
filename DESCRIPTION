@@ -24,16 +24,25 @@ Suggests:
   tinytest,
   mlr3tuning,
   mlr3,
+  mlr3learners,
+  ranger,
+  xgboost,
   rpart
 Remotes:
   mlr-org/bbotk
 RoxygenNote: 7.1.1
 Collate: 
-    'MiesOperator.R'
     'dictionaries.R'
+    'MiesOperator.R'
+    'Filtor.R'
+    'FiltorMaybe.R'
+    'FiltorNull.R'
+    'FiltorProxy.R'
+    'FiltorSurrogateProgressive.R'
     'Mutator.R'
     'MutatorCmpMaybe.R'
     'MutatorDiscreteUniform.R'
+    'MutatorErase.R'
     'MutatorGauss.R'
     'MutatorMaybe.R'
     'MutatorNull.R'
@@ -44,6 +53,7 @@ Collate:
     'Selector.R'
     'mies_methods.R'
     'OptimizerMies.R'
+    'OptimizerSumoHB.R'
     'RecombinatorCrossoverUniform.R'
     'RecombinatorMaybe.R'
     'RecombinatorNull.R'
@@ -54,6 +64,7 @@ Collate:
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
     'TunerMies.R'
+    'TunerSumoHB.R'
     'bibentries.R'
     'utils.R'
     'zzz.R'

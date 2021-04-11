@@ -11,7 +11,7 @@ mies_survival_comma(inst, mu, survival_selector, n_elite, elite_selector, ...)
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr
-Population target size.}
+Population target size, non-negative integer.}
 
 \item{survival_selector}{(\code{\link{Selector}})\cr
 \code{\link{Selector}} operator that selects surviving individuals depending on configuration values
@@ -49,7 +49,9 @@ selecting survivors from the latest generation only, using a \code{\link{Selecto
 "elites" from survivors from previous generations using a different \code{\link{Selector}} operator.
 
 When \code{n_elite} is greater than the number of alive individuals from previous generations,
-then all these individuals from previous generations survive. Similarly, when \code{mu - n_elite} is greater
+then all these individuals from previous generations survive. In this case, it is
+possible that more than \code{mu - n_elite} individuals from the current generation survive.
+Similarly, when \code{mu} is greater
 than the number of alive individuals from the last generation, then all these individuals survive.
 }
 \examples{

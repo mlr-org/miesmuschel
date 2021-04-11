@@ -9,6 +9,8 @@ mies_prime_operators(
   mutators = list(),
   recombinators = list(),
   selectors = list(),
+  filtors = list(),
+  ...,
   additional_components = NULL,
   budget_id = NULL
 )
@@ -25,6 +27,12 @@ Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{\link[bbot
 
 \item{selectors}{(\code{list} of \code{\link{Selector}})\cr
 \code{\link{Selector}} objects to prime. May be empty (default).}
+
+\item{filtors}{(\code{list} of \code{\link{Filtor}})\cr
+\code{\link{Filtor}} objects to prime. May be empty (default).}
+
+\item{...}{(any)\cr
+Must not be given. Other operators may be added in the future, so the following arguments should be passed by name.}
 
 \item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
 Additional components to optimize over, not included in \code{search_space}, but possibly used for self-adaption. This must be the \code{\link[paradox:ParamSet]{ParamSet}}
@@ -70,9 +78,10 @@ m = mut("gauss")
 r = rec("xounif")
 s1 = sel("best")
 s2 = sel("random")
+f = ftr("null")
 
 mies_prime_operators(search_space, mutators = list(m),
-  recombinators = list(r), selectors = list(s1, s2),
+  recombinators = list(r), selectors = list(s1, s2), filtors = list(f),
   additional_components = additional_components, budget_id = budget_id
 )
 
@@ -83,4 +92,5 @@ r$primed_ps
 # contain also the budget parameter
 s1$primed_ps
 s2$primed_ps
+f$primed_ps
 }
