@@ -47,6 +47,9 @@ jobs:
         id: install-r
         with:
           r-version: ${{ matrix.r }}
+      - if: runner.os == 'Linux'
+        name: apt-get update
+        run: sudo apt-get update
       - name: Install curl for Ubuntu  
         # necessary for pkgdown & covr, so we do that on ubuntu 20.04 / R release only
         if: ${{ matrix.r == 'release' && matrix.os == 'ubuntu-20.04' }}
