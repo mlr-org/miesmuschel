@@ -81,6 +81,28 @@ Other recombinator wrappers:
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorMaybe}
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{mutator}}{(\code{\link{Recombinator}})\cr
+\code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{p} (configuration parameter).}
+
+\item{\code{mutator_not}}{(\code{\link{Recombinator}})\cr
+Alternative \code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{1 - p} (configuration parameter).}
+}
+\if{html}{\out{</div>}}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{mutator}}{(\code{\link{Recombinator}})\cr
+\code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{p} (configuration parameter).}
+
+\item{\code{mutator_not}}{(\code{\link{Recombinator}})\cr
+Alternative \code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{1 - p} (configuration parameter).}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -93,6 +115,8 @@ Other recombinator wrappers:
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -110,7 +134,8 @@ Initialize the \code{RecombinatorMaybe} object.
 \describe{
 \item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
 \code{\link{Recombinator}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$recombinator} field will reflect this value.}
 
 \item{\code{recombinator_not}}{(\code{\link{Recombinator}})\cr
 Another \code{\link{Recombinator}} to wrap. This operator runs when \code{recombinator} is not chosen. By
@@ -119,7 +144,8 @@ to match \code{recombinator}. This does not work when \code{recombinator} has \c
 case this argument must be set explicitly.
 With the default behaviour, the \code{RecombinatorMaybe} object applies the \code{recombinator} operation with probability \code{p}, and
 no operation at all otherwise.\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$recombinator_not} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }

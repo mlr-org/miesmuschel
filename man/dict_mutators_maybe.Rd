@@ -84,6 +84,17 @@ Other mutator wrappers:
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Mutator]{miesmuschel::Mutator}} -> \code{MutatorMaybe}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{mutator}}{(\code{\link{Mutator}})\cr
+\code{\link{Mutator}} being wrapped. This operator gets run with probability \code{p} (configuration parameter).}
+
+\item{\code{mutator_not}}{(\code{\link{Mutator}})\cr
+Alternative \code{\link{Mutator}} being wrapped. This operator gets run with probability \code{1 - p} (configuration parameter).}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -96,6 +107,8 @@ Other mutator wrappers:
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -112,15 +125,17 @@ Initialize the \code{MutatorMaybe} object.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{mutator}}{(\code{\link{Mutator}})\cr
-\code{\link{Mutator}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
-The constructed object gets a \emph{clone} of this argument.}
+\code{\link{Mutator}} to wrap. This operator gets run with probability \code{p} (configuration parameter).\cr
+The constructed object gets a \emph{clone} of this argument.\cr
+The \verb{$mutator} field will reflect this value.}
 
 \item{\code{mutator_not}}{(\code{\link{Mutator}})\cr
 Another \code{\link{Mutator}} to wrap. This operator runs when \code{mutator} is not chosen. By
 default, this is \code{\link{MutatorNull}}, i.e. no operation. With this default, the
 \code{MutatorMaybe} object applies the \code{mutator} operation with probability \code{p}, and
 no operation at all otherwise.\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$mutator_not} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }

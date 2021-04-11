@@ -36,6 +36,7 @@ Other base classes:
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{Recombinator}},
+\code{\link{Scalor}},
 \code{\link{Selector}}
 }
 \concept{base classes}
@@ -47,6 +48,18 @@ Configuration parameters of the \code{MiesOperator} object. Read-only.}
 
 \item{\code{param_classes}}{(\code{character})\cr
 Classes of parameters that the operator can handle, contains any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}. Read-only.}
+
+\item{\code{packages}}{(\code{character})\cr
+Packages needed for the operator. Read-only.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of this class in its respective \code{\link[mlr3misc:Dictionary]{Dictionary}}.
+Is \code{NULL} if this class it not (known to be) in a \code{\link[mlr3misc:Dictionary]{Dictionary}}. Read-only.}
+
+\item{\code{dict_shortaccess}}{(\code{character(1)} | \code{NULL})\cr
+Name of \code{\link[mlr3misc:Dictionary]{Dictionary}} short-access function where an object of this class can be retrieved.
+Is \code{NULL} if this class is not (known to be) in a \code{\link[mlr3misc:Dictionary]{Dictionary}}
+with a short-access function. Read-only.}
 
 \item{\code{endomorphism}}{(\code{logical(1)})\cr
 Whether the output of \verb{$operate()} is a \code{data.frame} / \code{\link[data.table:data.table]{data.table}} in the same domain as its input. Read-only.}
@@ -64,6 +77,8 @@ Whether the \code{MiesOperator} was primed before. Is \code{FALSE} exactly when 
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{MiesOperator$new()}}
+\item \href{#method-repr}{\code{MiesOperator$repr()}}
+\item \href{#method-print}{\code{MiesOperator$print()}}
 \item \href{#method-prime}{\code{MiesOperator$prime()}}
 \item \href{#method-operate}{\code{MiesOperator$operate()}}
 \item \href{#method-clone}{\code{MiesOperator$clone()}}
@@ -78,6 +93,10 @@ Initialize base class components of the \code{MiesOperator}.
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
+  packages = character(0),
+  dict_entry = NULL,
+  dict_shortaccess = NULL,
+  own_param_set = quote(self$param_set),
   endomorphism = TRUE
 )}\if{html}{\out{</div>}}
 }
@@ -99,6 +118,30 @@ These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\
 Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
 The \verb{$param_set} field will reflect this value.}
 
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\n
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{dict_shortaccess}}{(\code{character(1)} | \code{NULL})\cr
+Name of the \code{\link[mlr3misc:Dictionary]{Dictionary}} short access function in which the operator is registered.
+This is used to inform the user about how to construct a given object. Should ordinarily be one of
+\code{"mut"}, \code{"rec"}, \code{"sel"}.\n
+The \verb{$dict_shortaccess} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
+
 \item{\code{endomorphism}}{(\code{logical(1)})\cr
 Whether the private \verb{$.operate()} operation creates a \code{\link[data.table:data.table]{data.table}} with the same columns as the input
 (i.e. conforming to the primed \code{\link[paradox:ParamSet]{ParamSet}}). If this is \code{TRUE} (default), then the return value of \verb{$.operate()}
@@ -107,6 +150,29 @@ The \verb{$endomorphsim} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-repr"></a>}}
+\if{latex}{\out{\hypertarget{method-repr}{}}}
+\subsection{Method \code{repr()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$repr(
+  skip_defaults = TRUE,
+  show_params = TRUE,
+  show_constructor_args = TRUE,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
+\subsection{Method \code{print()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$print(verbose = FALSE, ...)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-prime"></a>}}

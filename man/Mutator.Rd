@@ -30,6 +30,7 @@ Other base classes:
 \code{\link{MutatorNumeric}},
 \code{\link{OperatorCombination}},
 \code{\link{Recombinator}},
+\code{\link{Scalor}},
 \code{\link{Selector}}
 
 Other mutators: 
@@ -61,6 +62,8 @@ Other mutators:
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -72,7 +75,10 @@ Initialize base class components of the \code{Mutator}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Mutator$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
-  param_set = ps()
+  param_set = ps(),
+  packages = character(0),
+  dict_entry = NULL,
+  own_param_set = quote(self$param_set)
 )}\if{html}{\out{</div>}}
 }
 
@@ -92,6 +98,24 @@ possibly referencing \code{self} and \code{private}.
 These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\link[paradox:ParamSetCollection]{ParamSetCollection}}.
 Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
 The \verb{$param_set} field will reflect this value.}
+
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\n
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
 }
 \if{html}{\out{</div>}}
 }

@@ -5,7 +5,7 @@
 \alias{SelectorBest}
 \title{Best Value Selector}
 \description{
-Selector that selects the top \code{n_select} individuals based on the  fitness value. When \code{n_select} is larger than the number
+\code{\link{Selector}} that selects the top \code{n_select} individuals based on the  fitness value. When \code{n_select} is larger than the number
 of individuals, the selection wraps around: All \code{nrow(values)} individuals are selected at least \code{floor(nrow(values) / n_select)}
 times, with the top \code{nrow(values) \%\% n_select} individuals being selected one more time.
 }
@@ -68,6 +68,8 @@ Other selectors:
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }
