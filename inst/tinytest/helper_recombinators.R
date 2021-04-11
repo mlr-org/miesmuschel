@@ -27,6 +27,7 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
   pbigvals_allowed = generate_design_random(pbig_allowed, 3 * rec$n_indivs_in)$data
 
   rec$prime(pbig_allowed)
+  expect_equal(rec$primed_ps, pbig_allowed)
   expect_error(rec$operate(pvals_allowed), "Must be a permutation of set")
 
   rec$prime(p_allowed)

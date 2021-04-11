@@ -147,7 +147,19 @@ assert_optim_instance = function(inst) {
   invisible(inst)
 }
 
+
 # vector-domain
 p_vct = function(lower = -Inf, upper = Inf, min.len = 1, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
   p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper, min.len, .parent = topenv()), tags = tags, depends = depends, trafo = trafo)
+}
+
+check_fidelity_schedule = function(x) {
+  if (test_data_frame(x, ncols = 3, min.rows = 1) &&
+      test_names(colnames(x), identical.to = c("generation", "budget_new", "budget_survivors")) &&
+      test_integerish(x$generation, tol = 1e-100, any.missing = FALSE, unique = TRUE) &&
+      1 %in% x$generation) {
+    TRUE
+  } else {
+    "must be a data.frame with integer column 'generation' (with unique non-missing values and at least one row with value 1) and columns 'budget_new', 'budget_survivors'."
+  }
 }

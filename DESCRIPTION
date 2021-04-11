@@ -12,7 +12,7 @@ Roxygen: list(markdown = TRUE)
 ByteCompile: yes
 Version: 0.0.0-9000
 Depends:
-  paradox (>= 0.7.0-9000)
+  paradox (>= 0.7.1)
 Imports:
   mlr3misc (>= 0.5.0),
   checkmate (>= 1.9.0),
@@ -25,17 +25,25 @@ Suggests:
   tinytest,
   mlr3tuning,
   mlr3,
+  mlr3learners,
+  ranger,
+  xgboost,
   rpart
 Remotes:
-  mlr-org/bbotk,
-  mlr-org/paradox
+  mlr-org/bbotk
 RoxygenNote: 7.1.1
 Collate: 
-    'MiesOperator.R'
     'dictionaries.R'
+    'MiesOperator.R'
+    'Filtor.R'
+    'FiltorMaybe.R'
+    'FiltorNull.R'
+    'FiltorProxy.R'
+    'FiltorSurrogateProgressive.R'
     'Mutator.R'
     'MutatorCmpMaybe.R'
     'MutatorDiscreteUniform.R'
+    'MutatorErase.R'
     'MutatorGauss.R'
     'MutatorMaybe.R'
     'MutatorNull.R'
@@ -46,6 +54,7 @@ Collate:
     'Selector.R'
     'mies_methods.R'
     'OptimizerMies.R'
+    'OptimizerSumoHB.R'
     'RecombinatorCrossoverUniform.R'
     'RecombinatorMaybe.R'
     'RecombinatorNull.R'
@@ -60,6 +69,7 @@ Collate:
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
     'TunerMies.R'
+    'TunerSumoHB.R'
     'bibentries.R'
     'repr.R'
     'utils.R'

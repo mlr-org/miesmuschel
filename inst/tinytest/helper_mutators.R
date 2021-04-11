@@ -30,6 +30,7 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
   pbigvals_allowed = generate_design_random(pbig_allowed, 3)$data
 
   mut$prime(pbig_allowed)
+  expect_equal(mut$primed_ps, pbig_allowed)
   expect_error(mut$operate(pvals_allowed), "Must be a permutation of set")
 
   mut$prime(p_allowed)

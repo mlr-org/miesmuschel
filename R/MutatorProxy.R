@@ -2,6 +2,8 @@
 #'
 #' @include Mutator.R
 #'
+#' @name dict_mutators_proxy
+#'
 #' @description
 #' Mutator that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s mutation operation fully parametrizable.
@@ -31,7 +33,6 @@
 #' mp$operate(data)  # default operation: null
 #'
 #' mp$param_set$values$operation = mut("gauss", sdev = 5)
-#' mp$prime(p)
 #' mp$operate(data)
 #' @export
 MutatorProxy = R6Class("MutatorProxy",

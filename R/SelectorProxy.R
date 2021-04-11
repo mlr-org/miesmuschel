@@ -1,6 +1,8 @@
-#' @title Proxy-Selector that Selects According to its Configuration parameter
+#' @title Proxy-Selector that Selects According to its Configuration Parameter
 #'
 #' @include Selector.R
+#'
+#' @name dict_selectors_proxy
 #'
 #' @description
 #' [`Selector`] that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
@@ -34,7 +36,6 @@
 #' sp$operate(data, fitnesses, 2)
 #'
 #' sp$param_set$values$operation = sel("best")
-#' sp$prime(p)
 #' sp$operate(data, fitnesses, 2)
 #' @export
 SelectorProxy = R6Class("SelectorProxy",

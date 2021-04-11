@@ -69,3 +69,14 @@ expect_equal(oib$archive$data$b, rep(c(1, 1, 4, 2, 6), each = 2))
 # generations: initial, first offspring, re-eval, second offspring, re-eval
 expect_equal(oib$archive$data$dob, rep(c(1, 2, 2, 3, 3), each = 2))
 
+# terminator_get_generations
+
+tg = TerminatorGenerations$new()
+tg$param_set$values$generations = 10
+expect_equal(terminator_get_generations(tg), 10)
+tc = TerminatorCombo$new(list(tg, TerminatorEvals$new()))
+expect_equal(terminator_get_generations(tc), 10)
+tc$param_set$values$any = FALSE
+expect_equal(terminator_get_generations(tc), Inf)
+
+expect_error(terminator_get_generations(10), "Invalid terminator given")

@@ -43,6 +43,12 @@ expect_equal(oibigmax$archive$data, archive_before[c(5, 8), eol := 3])
 expect_equal(mies_survival_plus(oibigmax, 1, sb), oibigmax$archive$data)
 expect_equal(oibigmax$archive$data, archive_before[6, eol := 3])
 
+# killing all individuals
+expect_equal(mies_survival_plus(oibigmax, 0, sb), oibigmax$archive$data)
+expect_equal(oibigmax$archive$data, archive_before[9, eol := 3])
+
+expect_error(mies_survival_plus(oibigmax, 0, sb), "No alive individuals")
+
 # multiobjective
 
 archive_before = copy(oibigmultiboth$archive$data)

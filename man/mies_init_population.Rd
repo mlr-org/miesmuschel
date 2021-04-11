@@ -18,7 +18,7 @@ mies_init_population(
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr
-Population target size.}
+Population target size, non-negative integer.}
 
 \item{initializer}{(\code{function})\cr
 Function that generates a \code{\link[paradox:Design]{Design}} object, with arguments \code{param_set} and \code{n}, functioning like \code{\link[paradox:generate_design_random]{paradox::generate_design_random}}

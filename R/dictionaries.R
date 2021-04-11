@@ -31,6 +31,14 @@ dict_scalors = R6Class("DictionaryScalor",
   cloneable = FALSE
 )$new()
 
+#' @title Dictionary of Filtors
+#'
+#' @export
+dict_filtors = R6Class("DictionaryFiltor",
+  inherit = Dictionary,
+  cloneable = FALSE
+)$new()
+
 #' @title Short Access Forms for Operators
 #'
 #' @description
@@ -97,4 +105,16 @@ scl = function(.key, ...) {
 #' @export
 scls = function(.key, ...) {
   dictionary_sugar_mget(dict_scalors, .key, ...)
+}
+
+#' @rdname mut
+#' @export
+ftr = function(.key, ...) {
+  dictionary_sugar(dict_filtors, .key, ...)
+}
+
+#' @rdname mut
+#' @export
+ftrs = function(.key, ...) {
+  dictionary_sugar_mget(dict_filtors, .key, ...)
 }
