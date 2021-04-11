@@ -31,7 +31,7 @@ Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{\link[bbot
 \item{filtors}{(\code{list} of \code{\link{Filtor}})\cr
 \code{\link{Filtor}} objects to prime. May be empty (default).}
 
-\item{...}{\cr
+\item{...}{(any)\cr
 Must not be given. Other operators may be added in the future, so the following arguments should be passed by name.}
 
 \item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr

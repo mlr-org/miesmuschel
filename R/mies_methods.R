@@ -539,7 +539,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #'   [`Selector`] objects to prime. May be empty (default).
 #' @param filtors (`list` of [`Filtor`])\cr
 #'   [`Filtor`] objects to prime. May be empty (default).
-#' @param ... \cr
+#' @param ... (any)\cr
 #'   Must not be given. Other operators may be added in the future, so the following arguments should be passed by name.
 #' @template param_additional_components
 #' @param budget_id (`character(1)` | `NULL`)\cr
