@@ -285,26 +285,6 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
   )
 )
 
-terminator_get_generations = function(x) {
-  UseMethod("terminator_get_generations")
-}
-
-terminator_get_generations.default = function(x) {
-  stop("Invalid terminator given.")
-}
-
-terminator_get_generations.Terminator = function(x) Inf  # normie terminator not limiting generations in any way
-
-terminator_get_generations.TerminatorGenerations = function(x) x$param_set$values$generations
-
-terminator_get_generations.TerminatorCombo = function(x) {
-  if (x$param_set$values$any) {
-    # Terminate on "any" condition being true --> minimum of generations of child objects
-    min(sapply(x$terminators, terminator_get_generations))
-  } else {
-    max(sapply(x$terminators, terminator_get_generations))
-  }
-}
 
 recycle_fidelity_schedule = function(fidelity_schedule_base, last_gen, generations) {
   current_cycle = floor(last_gen / generations)

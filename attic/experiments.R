@@ -88,4 +88,5 @@ oi$eval_batch(data.table(x = 1, y = 2))
 
 oi$archive$data
 
+
 covr::report(xx <- covr::package_coverage(type = "tests"))

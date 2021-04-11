@@ -67,3 +67,39 @@ TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,
     }
   )
 )
+
+#' @title Get the Numger of Generations that a Terminator Allows
+#'
+#' @description
+#' Get the number of generations of a [`TerminatorGenerations`]. When the [`TerminatorGenerations`]
+#' is wrapped in a [`TerminatorCombo`][bbotk::TerminatorCombo], then the minimum number of generations
+#' allowed by it are retrieved. This is the minimum of all `terminator_get_generations` if `$any` is set
+#' to `TRUE`, and the maximum if `$any` is set to `FALSE`.
+#'
+#' The number of generations allowed by other [`Terminator`][bbotk::Terminator]s is infinity.
+#'
+#' @export
+terminator_get_generations = function(x) {
+  UseMethod("terminator_get_generations")
+}
+
+#' @export
+terminator_get_generations.default = function(x) {
+  stop("Invalid terminator given.")
+}
+
+#' @export
+terminator_get_generations.Terminator = function(x) Inf  # normie terminator not limiting generations in any way
+
+#' @export
+terminator_get_generations.TerminatorGenerations = function(x) x$param_set$values$generations
+
+#' @export
+terminator_get_generations.TerminatorCombo = function(x) {
+  if (x$param_set$values$any) {
+    # Terminate on "any" condition being true --> minimum of generations of child objects
+    min(sapply(x$terminators, terminator_get_generations))
+  } else {
+    max(sapply(x$terminators, terminator_get_generations))
+  }
+}
