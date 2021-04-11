@@ -25,6 +25,7 @@ Suggests:
   mlr3tuning,
   mlr3,
   mlr3learners,
+  ranger,
   rpart
 Remotes:
   mlr-org/bbotk
