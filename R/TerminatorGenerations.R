@@ -78,6 +78,10 @@ TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,
 #'
 #' The number of generations allowed by other [`Terminator`][bbotk::Terminator]s is infinity.
 #'
+#' @param x ([`Terminator`][bbotk::Terminator])\cr
+#'   [`Terminator`][bbotk::Terminator] to query.
+#' @return `numeric(1)`: The theoretical maximum number of generations allowed by the [`Terminator`][bbotk::Terminator].
+#'
 #' @export
 terminator_get_generations = function(x) {
   UseMethod("terminator_get_generations")

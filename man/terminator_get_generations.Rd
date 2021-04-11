@@ -6,6 +6,13 @@
 \usage{
 terminator_get_generations(x)
 }
+\arguments{
+\item{x}{(\code{\link[bbotk:Terminator]{Terminator}})\cr
+\code{\link[bbotk:Terminator]{Terminator}} to query.}
+}
+\value{
+\code{numeric(1)}: The theoretical maximum number of generations allowed by the \code{\link[bbotk:Terminator]{Terminator}}.
+}
 \description{
 Get the number of generations of a \code{\link{TerminatorGenerations}}. When the \code{\link{TerminatorGenerations}}
 is wrapped in a \code{\link[bbotk:mlr_terminators_combo]{TerminatorCombo}}, then the minimum number of generations

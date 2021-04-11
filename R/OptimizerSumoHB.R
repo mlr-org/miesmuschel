@@ -63,6 +63,12 @@
 #' \donttest{
 #' lgr::threshold("warn")
 #'
+#' #####
+#' # Optimizing a Function
+#' #####
+#'
+#' library("bbotk")
+#'
 #' # Define the objective to optimize
 #' # The 'budget' here simulates averaging 'b' samples from a noisy function
 #' objective <- ObjectiveRFun$new(
@@ -295,6 +301,7 @@ recycle_fidelity_schedule = function(fidelity_schedule_base, last_gen, generatio
     # build the new fidelity schedule: it goes from last_gen + 1 .. last_gen + generations.
     # BUT: formal requirement for fidelity_schedule is that '1' also occurs in 'generations' column, so we just
     # copy the fidelity_schedule_base.
+    generation = NULL
     rbind(fidelity_schedule_base[generation == 1], copy(fidelity_schedule_base)[, generation := generation + generations * current_cycle])
   }
 }

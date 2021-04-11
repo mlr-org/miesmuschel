@@ -68,6 +68,12 @@ Whether to perform filtering with the maximum fidelity value found in the archiv
 \donttest{
 lgr::threshold("warn")
 
+#####
+# Optimizing a Function
+#####
+
+library("bbotk")
+
 # Define the objective to optimize
 # The 'budget' here simulates averaging 'b' samples from a noisy function
 objective <- ObjectiveRFun$new(
