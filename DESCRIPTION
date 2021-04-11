@@ -24,6 +24,7 @@ Suggests:
   tinytest,
   mlr3tuning,
   mlr3,
+  mlr3learners,
   rpart
 Remotes:
   mlr-org/bbotk
