@@ -23,7 +23,7 @@ expect_true(mean(operated$b == 4) < .25)
 expect_true(cor.test(as.numeric(operated$x), as.numeric(as.logical(operated$y)))$p.value > .05)
 
 # works with mutator component-wise maybe
-merasemaybe = MutatorCmpMaybe$new(munif)
+merasemaybe = MutatorCmpMaybe$new(merase)
 merasemaybe$param_set$values$p = .5
 merasemaybe$prime(p)
 operated = merasemaybe$operate(indata)
