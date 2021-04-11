@@ -29,8 +29,17 @@ expect_error(opt$optimize(oi), "When fidelity_steps is 0")
 oi$terminator = trm("combo", list(trm("evals", n_evals = 100), trm("gens", generations = 3)), any = FALSE)
 expect_error(opt$optimize(oi), "When fidelity_steps is 0")
 
-set.seed(1)
+oi$terminator = trm("combo", list(trm("evals", n_evals = 100), trm("gens", generations = 0)), any = TRUE)
+
+expect_error(opt$optimize(oi), "At least one generation")
+
 oi$terminator = trm("combo", list(trm("evals", n_evals = 100), trm("gens", generations = 3)), any = TRUE)
+opt$param_set$values$survival_fraction = 0.9
+expect_error(opt$optimize(oi), "Number of survivors equals the total")
+
+opt$param_set$values$survival_fraction = 0.5
+
+set.seed(1)
 opt$optimize(oi)
 
 
