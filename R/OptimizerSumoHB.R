@@ -159,7 +159,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
         fidelity_steps = p_int(0, tags = "required"),
         filter_with_max_budget = p_lgl(tags = "required")
       )
-      param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_lhs, fidelity_steps = 0, filter_with_max_budget = FALSE)
+      param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_random, fidelity_steps = 0, filter_with_max_budget = FALSE)
 
       private$.own_param_set = param_set
 
