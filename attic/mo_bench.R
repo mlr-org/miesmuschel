@@ -39,6 +39,16 @@ results4 <- lapply(3:5, function(d) {
 })
 )
 
+results5 <- lapply(3:5, function(d) {
+  sapply((1:6) * 100, function(n) {
+    data = nplex(n, d)
+    bmr <- microbenchmark(baseline(data), weighted(data),
+      check = "equal", times = 3, unit = "ms")
+    c(n = n, d = d, summary(bmr)[, "median"])
+  })
+})
+
+
 library("data.table")
 ptx4 <- rbindlist(lapply(results4, function(x) as.data.frame(t(x))))
 library("ggplot2")
