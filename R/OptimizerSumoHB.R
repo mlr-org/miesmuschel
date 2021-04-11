@@ -258,7 +258,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       pre_filter_size = private$.filtor$needed_input(lambda)
       pre_filter_size_wraparound = private$.filtor$needed_input(params$mu)  # need this many indivs pre-filter when 'generations' are reached and all indivs are sampled new.
 
-      repeat {
+      while (!inst$is_terminated) {
         last_gen = max(inst$archive$data$dob, na.rm = TRUE)
         if (last_gen %% generations == 0) {
           fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
@@ -315,6 +315,6 @@ recycle_fidelity_schedule = function(fidelity_schedule_base, last_gen, generatio
     # build the new fidelity schedule: it goes from last_gen + 1 .. last_gen + generations.
     # BUT: formal requirement for fidelity_schedule is that '1' also occurs in 'generations' column, so we just
     # copy the fidelity_schedule_base.
-    rbind(fidelity_schedule_base, copy(fidelity_schedule_base)[, generation := generation + generations * current_cycle])
+    rbind(fidelity_schedule_base[generation == 1], copy(fidelity_schedule_base)[, generation := generation + generations * current_cycle])
   }
 }

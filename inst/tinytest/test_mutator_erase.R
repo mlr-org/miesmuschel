@@ -40,3 +40,8 @@ expect_true(mean(operated$b == 4) < .125)
 
 
 
+merase$param_set$values$initializer = generate_design_random_increasing
+
+p = ps(x = p_lgl(), y = p_fct(c("TRUE", "FALSE")), p1 = p_dbl(0, 10))
+merase$prime(p)
+expect_equal(merase$operate(data.table(x = rep(TRUE, 10), y = rep("FALSE", 10), p1 = rep(0, 10)))$p1, 1:10)
