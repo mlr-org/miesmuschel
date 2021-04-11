@@ -66,7 +66,8 @@ Filtor = R6Class("Filtor",
     },
     needed_input = function(output_size) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
-      assert_int(output_size, tol = 1e-100, lower = 1)
+      assert_int(output_size, tol = 1e-100, lower = 0)
+      if (output_size == 0) return(0)
       (assert_int(private$.needed_input(output_size), tol = 1e-100, lower = output_size))
     }
   ),
@@ -100,7 +101,9 @@ Filtor = R6Class("Filtor",
         mode = "numeric", any.missing = FALSE
       )
 
-      assert_int(n_filter, lower = 0, upper = nrow(known_values), tol = 1e-100)
+      assert_int(n_filter, lower = 0, tol = 1e-100)
+
+      if (n_filter == 0) return(integer(0))
 
       needed_input = self$needed_input(n_filter)
       if (nrow(values) < needed_input) stopf("Needs at least %s individuals to select %s individuals, but got %s.", needed_input, n_filter, nrow(values))

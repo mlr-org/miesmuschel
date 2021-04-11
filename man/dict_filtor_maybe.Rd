@@ -21,7 +21,7 @@ When \code{random_choice} is \code{TRUE}, then \verb{$needed_input()} is conside
 \verb{$needed_input()} is monotonically increasing in its input argument.
 
 To make the worst case less extreme, the number of individuals chosen with \code{random_choice} set to \code{TRUE} is limited to
-\code{qbinom(-20, n_filter, log.p = TRUE)} (with \code{lower.tail} \code{FALSE} and \code{TRUE} for \verb{$filtor} and \verb{$filtor_not}, respectively), which distorts the binomial
+\code{qbinom(-20, n_filter, p, log.p = TRUE)} (with \code{lower.tail} \code{FALSE} and \code{TRUE} for \verb{$filtor} and \verb{$filtor_not}, respectively), which distorts the binomial
 distribution with probability \code{1 - exp(-20)} or about \code{1 - 0.5e-9}.
 }
 \section{Configuration Parameters}{

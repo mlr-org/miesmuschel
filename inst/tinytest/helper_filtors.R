@@ -21,11 +21,13 @@ expect_filtor = function(ftr, filtor_name, is_primed = FALSE) {
 
   if (!is_primed) {
     expect_error(ftr$operate(pvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "must be primed first", info = filtor_name)
+    expect_error(ftr$needed_input(1), "must be primed first", info = filtor_name)
   }
 
   pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(ftr$param_classes, "."), paste0(ftr$param_classes, ".1")))
 
   ftr$prime(pbig_allowed)
+  expect_equal(ftr$primed_ps, pbig_allowed)
 
   expect_int({datasize = ftr$needed_input(4)}, lower = 1, tol = 1e-100)
 
@@ -40,7 +42,7 @@ expect_filtor = function(ftr, filtor_name, is_primed = FALSE) {
   expect_error(ftr$operate(pbigvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "Parameter .*\\.1.*not available")
 
   expect_error(ftr$operate(pvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed) + 1), 1), "fitnesses.*Must have length .*but has length ")
-  expect_error(ftr$operate(pvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed)), nrow(pvals_allowed) + 1), "n_filter.*Element 1 is not <= ")
+  expect_error(ftr$operate(pvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed)), nrow(pvals_allowed) + 1), "Needs at least .* individuals, but got .*")
 
   expect_error(ftr$operate(first(pvals_allowed, datasize - 1), pvals_allowed, seq_len(nrow(pvals_allowed)), 4), "Needs at least .* individuals to select .* individuals, but got .*")
 
@@ -97,7 +99,7 @@ FiltorDebug = R6::R6Class("FiltorDebug",
     ni = NULL,
     initialize = function(handler, ni, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {
       self$handler = assert_function(handler, args = c("v", "k", "f", "n", "p"), ordered = TRUE)
-      self$ni = assert_function(ni, args = c("o"), ordered = TRUE)
+      self$ni = assert_function(ni, args = c("o", "p"), ordered = TRUE)
       super$initialize(param_classes = param_classes, param_set = param_set, supported = supported)
     }
   ),
@@ -105,6 +107,6 @@ FiltorDebug = R6::R6Class("FiltorDebug",
     .filter = function(values, known_values, fitnesses, n_select) {
       self$handler(v = values, k = known_values, f = fitnesses, n = n_select, p = self$param_set$values)
     },
-    .needed_input = function(output_size) self$ni(output_size)
+    .needed_input = function(output_size) self$ni(o = output_size, p = self$param_set$values)
   )
 )

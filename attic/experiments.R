@@ -11,6 +11,7 @@ devtools::run_examples(run_donttest = TRUE)
 
 
 
+source("inst/tinytest/setup.R", local = TRUE, chdir = TRUE)
 
 
 pp = ps(a = p_dbl(0, 10), b = p_dbl(-10, 0))
@@ -50,6 +51,8 @@ rec("xounif")$prime(pp)$operate(des)
 
 tinytest::test_all()
 
+tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
+
 tinytest::run_test_file("inst/tinytest/test_recombinator_maybe.R")
 
 tinytest::run_test_file("inst/tinytest/test_mutator_gauss.R")
@@ -67,6 +70,10 @@ tinytest::run_test_file("inst/tinytest/test_mies_survival_comma.R")
 
 tinytest::run_test_file("inst/tinytest/test_filtor_proxy.R")
 
+tinytest::run_test_file("inst/tinytest/test_mies_prime_operators.R")
+
+tinytest::run_test_file("inst/tinytest/test_mies_filter_offspring.R")
+
 
 objective <- ObjectiveRFun$new(
   fun = function(xs) list(x = xs$x + 10),
@@ -78,3 +85,5 @@ oi <- OptimInstanceSingleCrit$new(objective, terminator = trm("none"))
 oi$eval_batch(data.table(x = 1, y = 2))
 
 oi$archive$data
+
+covr::report(xx <- covr::package_coverage(type = "tests"))

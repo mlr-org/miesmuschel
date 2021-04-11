@@ -34,3 +34,8 @@ expect_equal(bbotk::opt("mies"), OptimizerMies$new())
 expect_equal(bbotk::trm("gens"), TerminatorGenerations$new())
 expect_equal(bbotk::trm("budget"), TerminatorBudget$new())
 
+expect_equal(ftr("null"), FiltorNull$new())
+fp = FiltorMaybe$new(filtor = FiltorNull$new())
+fp$param_set$values$p = 0.7
+expect_equal(ftr("maybe", p = 0.7, filtor = ftr("null")), fp)
+expect_equal(ftrs(c("null", "proxy")), list(FiltorNull$new(), FiltorProxy$new()))

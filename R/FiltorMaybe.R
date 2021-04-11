@@ -21,7 +21,7 @@
 #' `$needed_input()` is monotonically increasing in its input argument.
 #'
 #' To make the worst case less extreme, the number of individuals chosen with `random_choice` set to `TRUE` is limited to
-#' `qbinom(-20, n_filter, log.p = TRUE)` (with `lower.tail` `FALSE` and `TRUE` for `$filtor` and `$filtor_not`, respectively), which distorts the binomial
+#' `qbinom(-20, n_filter, p, log.p = TRUE)` (with `lower.tail` `FALSE` and `TRUE` for `$filtor` and `$filtor_not`, respectively), which distorts the binomial
 #' distribution with probability `1 - exp(-20)` or about `1 - 0.5e-9`.
 #'
 #' @section Configuration Parameters:
@@ -114,8 +114,8 @@ FiltorMaybe = R6Class("FiltorMaybe",
       params = self$param_set$get_values()
 
       if (params$random_choice) {
-        filter_min = qbinom(-20, n_filter, log.p = TRUE, lower.tail = TRUE)
-        filter_max = qbinom(-20, n_filter, log.p = TRUE, lower.tail = FALSE)
+        filter_min = qbinom(-20, n_filter, params$p, log.p = TRUE, lower.tail = TRUE)
+        filter_max = qbinom(-20, n_filter, params$p, log.p = TRUE, lower.tail = FALSE)
 
         filtering = rbinom(1, n_filter, params$p)
         filtering = min(max(filtering, filter_min), filter_max)
@@ -138,8 +138,8 @@ FiltorMaybe = R6Class("FiltorMaybe",
     .needed_input = function(output_size) {
       params = self$param_set$get_values()
       if (params$random_choice) {
-        filter_min = qbinom(-20, output_size, log.p = TRUE, lower.tail = TRUE)
-        filter_max = qbinom(-20, output_size, log.p = TRUE, lower.tail = FALSE)
+        filter_min = qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = TRUE)
+        filter_max = qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = FALSE)
         # worst case: take filter_max from .wrapped, and take output_size - filter_min from .wrapped_not.
         #
         # This is even a bit worse than the worst case, since the needed_input arguments of both wrapped functions

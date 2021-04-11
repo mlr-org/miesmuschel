@@ -26,6 +26,7 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
   pbigvals_allowed = generate_design_random(pbig_allowed, 3)$data
 
   sel$prime(pbig_allowed)
+  expect_equal(sel$primed_ps, pbig_allowed)
   expect_error(sel$operate(pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "Must be a permutation of set")
 
   sel$prime(p_allowed)

@@ -70,8 +70,9 @@ FiltorProxy = R6Class("FiltorProxy",
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
         # In that case we try to stay safe by priming again.
-        operation$prime(private$.primed_ps)
-        private$.primed_with = operation$primed_ps
+        # Note: this is never actually executed in the current setup, because .needed_input runs first.
+        operation$prime(private$.primed_ps)  # nocov
+        private$.primed_with = operation$primed_ps  # nocov
       }
       operation$operate(values, known_values, fitnesses, n_filter)
     },

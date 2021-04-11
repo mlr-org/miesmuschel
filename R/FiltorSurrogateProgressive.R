@@ -112,6 +112,7 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter) {
       params = self$param_set$get_values()
+      primed = self$primed_ps
       values = first(values, self$needed_input(n_filter))
       fcolname = "fitnesses"
       while (fcolname %in% colnames(known_values)) {
@@ -119,8 +120,8 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
       }
       known_values[[fcolname]] = c(fitnesses)
       surrogate_prediction = self$surrogate_learner$train(
-        mlr3::TaskRegr$new("surrogate", known_values, target = fcolname)
-      )$predict_newdata(values)$data$response
+        mlr3::TaskRegr$new("surrogate", with_factor_cols(known_values, primed), target = fcolname)
+      )$predict_newdata(with_factor_cols(values, primed))$data$response
       selected = integer(0)
       for (i in seq_len(n_filter)) {
         population_size = round(params$filter_rate_first + params$filter_rate_per_sample * (i - 1))
@@ -143,3 +144,15 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
   )
 )
 dict_filtors$add("surprog", FiltorSurrogateProgressive)
+
+with_factor_cols = function(table, param_set) {
+  table = copy(table)
+  pclass  = param_set$class
+  fcols = names(pclass)[pclass == "ParamFct"]
+  plevels = param_set$levels
+
+  for (col in fcols) {
+    set(table, , col, factor(table[[col]], plevels[[col]]))
+  }
+  table
+}

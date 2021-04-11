@@ -11,7 +11,6 @@ fp$prime(p)
 expect_equal(fp$primed_ps, p)
 data = data.table(x = seq(0, 1, length.out = 10), y = seq(-1, 0, length.out = 10))
 
-set.seed(1)
 expect_equal(fp$operate(data, data, seq(0, 1, length.out = 10), 5), 1:5)
 
 # auto-priming
@@ -87,7 +86,7 @@ expect_equal(ni, 5)
 
 
 # changing operator actually does something different
-fd = FiltorDebug$new(function(v, k, f, n, p) rev(seq_len(n)), function(o) o + 1)
+fd = FiltorDebug$new(function(v, k, f, n, p) rev(seq_len(n)), function(o, p) o + 1)
 
 fp$param_set$values$operation = fd
 

@@ -128,7 +128,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   data = inst$archive$data
   current_gen = max(data$dob, 0, na.rm = TRUE) + 1
   ocols = colnames(offspring)
-  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = survivor_budget)  # TODO: must not include survivor_budget, but can include other things
+  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)  # TODO: must not include survivor_budget, but can include other things
 
   reeval = integer(0)  # individuals to be killed; only becomes relevant when `step_fidelity` is `TRUE`
 
@@ -607,7 +607,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
   mutators = lapply(mutators, function(x) x$prime(nobudget_search_space))
   recombinators = lapply(recombinators, function(x) x$prime(nobudget_search_space))
 
-  invisible(list(mutators = mutators, recombinators = recombinators, selectors = selectors))
+  invisible(list(mutators = mutators, recombinators = recombinators, selectors = selectors, filtors = filtors))
 }
 
 #' @title Initialize MIES Optimization
@@ -1192,17 +1192,17 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
   individuals_dt = as.data.table(assert_data_frame(individuals, min.rows = lambda))
   assert_r6(filtor, "Filtor", null.ok = TRUE)
   data = inst$archive$data
+  if (!nrow(data)) stop("mies_filter_offspring does not work with empty OptimInstance.")
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
 
-  assert_subset(colnames(individuals_dt), colnames(data))
+  assert_names(colnames(individuals), must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id, subset.of = colnames(data))
 
   current_gen = max(data$dob, 0, na.rm = TRUE)
 
-  if (lambda == 0) if (get_indivs) individuals[0] else integer(0)
+  if (lambda == 0) if (get_indivs) individuals_dt[0] else integer(0)
   if (!is.null(budget_id)) {
     if (is.null(fidelity_schedule)) {
-      if (!nrow(data)) stop("When 'budget_id' is given but 'inst' has no evaluations then 'fidelity_schedule' must also be given.")
       fidelity = max(data[[budget_id]])
     } else {
       assert(check_fidelity_schedule(fidelity_schedule))
@@ -1213,15 +1213,13 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
     }
     individuals_dt[, (budget_id) := fidelity]
   }
-  assert_subset(ss_ids, colnames(individuals_dt))
 
   if (is.null(filtor)) {
     filtor = FiltorNull$new()$prime(inst$search_space)
-    if (setdiff(colnames(individuals_dt), ss_ids)) stop("filtor must be given when individuals contain additional components.")
+    if (any(colnames(individuals_dt) %nin% ss_ids)) stop("filtor must be given when individuals contain additional components.")
   }
 
   f_ids = filtor$primed_ps$ids()
-  assert_subset(ss_ids, f_ids)
   assert_set_equal(f_ids, colnames(individuals_dt))
 
   known_values = inst$archive$data[, f_ids, with = FALSE]

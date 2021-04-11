@@ -1,11 +1,10 @@
-
 source("setup.R", local = TRUE)
 
 library("mlr3misc")
 
-baseclasses = c("Recombinator", "Mutator", "Selector")
-dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors)
-shortforms = list(Mutator = mut, Recombinator = rec, Selector = sel)
+baseclasses = c("Recombinator", "Mutator", "Selector", "Filtor")
+dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors, Filtor = dict_filtors)
+shortforms = list(Mutator = mut, Recombinator = rec, Selector = sel, Filtor = ftr)
 abstracts = c(baseclasses, "MutatorNumeric", "MutatorDiscrete")
 # the constructors of the following don't know about their inheritance
 exceptions = c("MutatorCombination", "RecombinatorCombination")
@@ -15,7 +14,9 @@ initargs = list(
   MutatorCmpMaybe = list(mutator = mut("gauss")),
   MutatorCombination = list(operators = list(ParamAny = mut("gauss"))),
   RecombinatorMaybe = list(recombinator = rec("xounif")),
-  RecombinatorCombination = list(operators = list(ParamAny = rec("xounif")))
+  RecombinatorCombination = list(operators = list(ParamAny = rec("xounif"))),
+  FiltorMaybe = list(filtor = ftr("null")),
+  FiltorSurrogateProgressive = list(surrogate_learner = mlr3::lrn("regr.featureless"))
 )
 
 # check if something inherits from any <baseclasses> without constructing it
