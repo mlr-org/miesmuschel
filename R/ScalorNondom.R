@@ -38,9 +38,7 @@ ScalorNondom = R6Class("ScalorNondom",
         epsilon = p_vct(lower = 0, tags = "required"),
         scale_output = p_lgl(),
         jitter = p_lgl(),
-        tiebreak = p_fct(c("crowding-dist", "hv-contrib", "domcount", "none")),
-
-
+        tiebreak = p_fct(c("crowding-dist", "hv-contrib", "domcount", "none")))
       super$initialize(dict_entry = "nondom")
     }
   ),

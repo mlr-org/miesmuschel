@@ -5,7 +5,7 @@ ScalorTransform = R6Class("ScalorTransform",
   public = list(
     initialize = function(scalor) {
       # TODO
-    },
+    }
   ),
   private = list(
     .scale = function(values, fitnesses) {

@@ -109,7 +109,7 @@ dist_crowding = function(fitnesses) {
 #' Individuals that are less than another individual more than `epsilon` in any dimension have hypervolume contribution
 #' of 0.
 #'
-#' @template_param_fitnesses
+#' @template param_fitnesses
 #' @param nadir (`numeric`)\cr
 #'   Lowest fitness point up to which to calculate dominated hypervolume. May be a scalar, in which case
 #'   it is used for all dimensions, or a vector, in which case its length must match the number of dimensions.
