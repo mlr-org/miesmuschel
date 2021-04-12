@@ -52,7 +52,7 @@
 #' library("mlr3")
 #' library("mlr3learners")
 #'
-#' fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter_rate_first = 2), p = 0.5)
+#' fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter_pool_first = 2), p = 0.5)
 #' p = ps(x = p_dbl(-5, 5))
 #' known_data = data.frame(x = 1:5)
 #' fitnesses = 1:5

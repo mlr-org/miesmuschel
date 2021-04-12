@@ -54,8 +54,8 @@ tuner_sumo <- OptimizerSumoHB$new(lrn("regr.ranger"))
 
 oi$clear()
 
-tuner_sumo$param_set$values$filter_rate_first = 100
-tuner_sumo$param_set$values$filter_rate_per_sample = 100
+tuner_sumo$param_set$values$filter_pool_first = 100
+tuner_sumo$param_set$values$filter_pool_per_sample = 100
 tuner_sumo$param_set$values$survival_fraction = 2/3
 tuner_sumo$param_set$values$mu = 10
 
