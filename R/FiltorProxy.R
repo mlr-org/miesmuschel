@@ -36,7 +36,7 @@
 #' fp$prime(p)
 #' fp$operate(new_data, known_data, fitnesses, 1)
 #'
-#' fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter_rate_first = 2)
+#' fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter_pool_first = 2)
 #' fp$operate(new_data, known_data, fitnesses, 1)
 #' @export
 FiltorProxy = R6Class("FiltorProxy",
