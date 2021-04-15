@@ -38,7 +38,7 @@ FiltorNull = R6Class("FiltorNull",
   inherit = Filtor,
   public = list(
     initialize = function() {
-      super$initialize()
+      super$initialize(dict_entry = "null")
     }
   ),
   private = list(

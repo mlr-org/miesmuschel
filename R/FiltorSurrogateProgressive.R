@@ -33,11 +33,11 @@
 #' leading to a tradeoff between "exploration" and "exploitation".
 #'
 #' When `filter_pool_per_sample` is set to 0, then the method is equivalent to sampling the top `n_filter` individuals from `filter_pool_first`
-#' sampled ones. When `filter_pool_per_sample` is 1 and `filter_pool_first` is 0, then the method is equivalent to random sampling.
+#' sampled ones. When `filter_pool_per_sample` and `filter_pool_first` are both 1, then the method is equivalent to random sampling.
 #'
 #' `filter_pool_first` and `filter_pool_per_sample` may be fractional; the total number of individuals to select from when selecting the `i`th
-#' individuals is always `round(filter_pool_first + (filter_pool_per_sample - 1) * (i - 1))`. However, `filter_pool_first` must
-#' be at least 1, and `filter_pool_first + filter_pool_per_sample * (n_filter - 1)` must be at least `n_filter`.
+#' individuals is always `round(filter_pool_first + (filter_pool_per_sample - 1) * (i - 1))`. When `filter_pool_first + filter_pool_per_sample * (n_filter - 1)` is
+#' smaller or equal to `n_filter`, then the pool of individuals to choose `n_filter` individuals from is too small, so random individuals are sampled instead.
 #'
 #' @section Configuration Parameters:
 #' `FiltorSurrogateProgressive`'s configuration parameters are the hyperparameters of the `surrogate_learner` [`Learner`][mlr3::Learner], as well as:
@@ -57,8 +57,12 @@
 #'
 #' @template autoinfo_dict
 #'
-#' @param surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
-#'   Regression learner for the surrogate model filtering algorithm.
+#' @param surrogate_learner ([`mlr3::LearnerRegr`])\cr
+#'   Regression learner for the surrogate model filtering algorithm.\cr
+#'   The `$surrogate_learner` field will reflect this value.
+#' @param surrogate_selector ([`Selector`])
+#'   Regression learner for the surrogate model filtering algorithm.\cr
+#'   The `$surrogate_selector` field will reflect this value.
 #'
 #' @family filtors
 #'
@@ -82,9 +86,9 @@
 FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
   inherit = Filtor,
   public = list(
-    initialize = function(surrogate_learner) {
-      # TODO: could be extended with selector and then support multi-crit.
+    initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new()) {
       private$.surrogate_learner = assert_r6(surrogate_learner, "LearnerRegr")
+      private$.surrogate_selector = assert_r6(surrogate_selector, "Selector")
       private$.own_param_set = ps(
         filter_pool_first = p_dbl(1, tags = "required"),
         filter_pool_per_sample = p_dbl(0, tags = "required")
@@ -92,54 +96,68 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
       private$.own_param_set$values = list(filter_pool_first = 1, filter_pool_per_sample = 1)
 
       param_classes = c("ParamInt", "ParamDbl", "ParamLgl", "ParamFct")
-      if (!is.null(surrogate_learner)) {
-        param_classes = param_classes[c("integer", "numeric", "logical", "factor") %in% surrogate_learner$feature_types]
-      }
+      param_classes = param_classes[c("integer", "numeric", "logical", "factor") %in% surrogate_learner$feature_types]
+      param_classes = intersect(param_classes, surrogate_selector$param_classes)
 
-      super$initialize(param_classes, alist(private$.own_param_set, private$.surrogate_learner$param_set), supported = "single-crit")
+      super$initialize(param_classes, alist(private$.own_param_set,
+        private$.surrogate_selector$param_set, private$.surrogate_learner$param_set),
+        supported = surrogate_selector$supported,
+        packages = c("mlr3", surrogate_selector$packages, surrogate_learner$packages),
+        dict_entry = "surprog", own_param_set = quote(private$.own_param_set)
+      )
     }
   ),
   active = list(
-    #' @field surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
+    #' @field surrogate_learner ([`mlr3::LearnerRegr`])\cr
     #' Regression learner for the surrogate model filtering algorithm.
     surrogate_learner = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.surrogate_learner)) {
         stop("surrogate_learner is read-only.")
       }
       private$.surrogate_learner
-    }
+    },
+    #' @field surrogate_selector ([`Selector`])\cr
+    #' Selector with which to select using surrogate-predicted performance
+    surrogate_selector = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.surrogate_selector)) {
+        stop("surrogate_learner is read-only.")
+      }
+      private$.surrogate_selector
+    },
   ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter) {
       params = self$param_set$get_values()
       primed = self$primed_ps
       values = first(values, self$needed_input(n_filter))
+      if (nrow(values) == n_filter) return(seq_len(n_filter))
       fcolname = "fitnesses"
       while (fcolname %in% colnames(known_values)) {
         fcolname = paste0(".", fcolname)
       }
-      known_values[[fcolname]] = c(fitnesses)
-      surrogate_prediction = self$surrogate_learner$train(
-        mlr3::TaskRegr$new("surrogate", with_factor_cols(known_values, primed), target = fcolname)
-      )$predict_newdata(with_factor_cols(values, primed))$data$response
+      surrogate_prediction = apply(fitnesses, 2, function(f) {
+        known_values[[fcolname]] = f
+        self$surrogate_learner$train(
+          mlr3::TaskRegr$new("surrogate", with_factor_cols(known_values, primed), target = fcolname)
+        )$predict_newdata(with_factor_cols(values, primed))$data$response
+      })
+      surrogate_prediction = matrix(surrogate_prediction, nrow = nrow(values), ncol = ncol(fitnesses))
       selected = integer(0)
       for (i in seq_len(n_filter)) {
-        population_size = round(params$filter_pool_first + params$filter_pool_per_sample * (i - 1))
-        consider = first(surrogate_prediction, population_size)
-        selected[[i]] = which.max(consider)
-        assert_true(is.finite(consider[[selected[[i]]]]))
-        surrogate_prediction[[selected[[i]]]] = -Inf
+        population_size = max(round(params$filter_pool_first + params$filter_pool_per_sample * (i - 1)), i)
+        cpop = first(values, population_size)
+        cfitness = first(surrogate_prediction, population_size)
+        selected[[i]] = private$.surrogate_selector$operate(cpop[-selected], cfitness[-selected, , drop = FALSE])
       }
       selected
     },
     .needed_input = function(output_size) {
       params = self$param_set$get_values()
       requested = params$filter_pool_first + params$filter_pool_per_sample * (output_size - 1)
-      if (requested < output_size) stopf("filter_pool_first (which is %s) + filter_pool_per_sample (which is %s) times (output_size (which is %s) minus one) must at least be output_size.",
-        params$filter_pool_first, params$filter_pool_per_sample, output_size)
-      round(requested)
+      max(round(requested), output_size)
     },
     .surrogate_learner = NULL,
+    .surrogate_selector = NULL,
     .own_param_set = NULL
   )
 )

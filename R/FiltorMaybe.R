@@ -79,12 +79,14 @@ FiltorMaybe = R6Class("FiltorMaybe",
     #' @param filtor ([`Filtor`])\cr
     #'   [`Filtor`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$filtor` field will reflect this value.
     #' @param filtor_not ([`Filtor`])\cr
     #'   Another [`Filtor`] to wrap. This operator runs when `filtor` is not chosen. By
     #'   default, this is [`FiltorNull`], i.e. no filtering. With this default, the
     #'   `FiltorMaybe` object applies the `filtor` operation with probability / proportion `p`, and
     #'   no operation at all otherwise.\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$filtor_not` field will reflect this value.
     initialize = function(filtor, filtor_not = FiltorNull$new()) {
       private$.wrapped = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(filtor_not, "Filtor")$clone(deep = TRUE)
@@ -94,7 +96,9 @@ FiltorMaybe = R6Class("FiltorMaybe",
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"), random_choice = p_lgl(tags = "required"))
       private$.maybe_param_set$values = list(p = 1, random_choice = FALSE)
       super$initialize(intersect(filtor$param_classes, filtor_not$param_classes),
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set))
+        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        packages = c("stats", filtor$packages, filtor_not$packages), dict_entry = "maybe",
+        own_param_set = quote(private$.maybe_param_set))
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
@@ -107,6 +111,20 @@ FiltorMaybe = R6Class("FiltorMaybe",
       private$.wrapped_not$prime(param_set)
       super$prime(param_set)
       invisible(self)
+    }
+  ),
+  active = list(
+    #' @field filtor ([`Filtor`])\cr
+    #' [`Filtor`] being wrapped. This operator gets run with probability / proportion `p` (configuration parameter).
+    filtor = function(val) {
+      if (!missing(val)) stop("mutator is read-only.")
+      private$.wrapped
+    },
+    #' @field filtor_not ([`Filtor`])\cr
+    #' Alternative [`Filtor`] being wrapped. This operator gets run with probability / proportion `1 - p` (configuration parameter).
+    filtor_not = function(val) {
+      if (!missing(val)) stop("mutator_not is read-only.")
+      private$.wrapped_not
     }
   ),
   private = list(

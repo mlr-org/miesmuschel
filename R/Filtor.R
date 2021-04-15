@@ -58,11 +58,14 @@ Filtor = R6Class("Filtor",
     #'   Subset of `"single-crit"` and `"multi-crit"`, indicating wether single and / or multi-criterion optimization is supported.
     #'   Default both of them.\cr
     #'   The `$supported` field will reflect this value.
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_own_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
-      super$initialize(param_classes, param_set, endomorphism = FALSE)
+      super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "sel", own_param_set = own_param_set)
     },
     needed_input = function(output_size) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
