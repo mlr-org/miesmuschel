@@ -31,7 +31,7 @@ library("mlr3learners")
 # For this, 100 individuals are sampled randomly, and the top 10, according
 # to the surrogate model, are used.
 sumohb_opt <- opt("sumohb", filtor = ftr("surprog", surrogate_learner = mlr3::lrn("regr.ranger"),
-    filter_rate_first = 100, filter_rate_per_sample = 0),
+    filter_pool_first = 100, filter_pool_per_sample = 0),
   mu = 30, survival_fraction = 2/3
 )
 
@@ -74,7 +74,7 @@ ti = TuningInstanceSingleCrit$new(
 
 sumohb_tune <- tnr("sumohb", filtor = ftr("maybe", p = 0.5,
     ftr("surprog", surrogate_learner = lrn("regr.ranger"),
-      filter_rate_first = 100, filter_rate_per_sample = 0
+      filter_pool_first = 100, filter_pool_per_sample = 0
     )),
   mu = 20, survival_fraction = 0.5
 )

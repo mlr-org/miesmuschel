@@ -19,28 +19,28 @@ The filtering is "progressive" in that successive values are filtered more agres
 Given the number \code{n_filter} of of individuals to sample, progressive surrogate model filtering proceeds as follows:
 \enumerate{
 \item Train the \code{surrogate_learner} \code{\link[mlr3:LearnerRegr]{LearnerRegr}} on the \code{known_values} and their \code{fitnesses}.
-\item Take \code{filter_rate_first} configurations, predict their expected performance using the surrogate model, and put them
+\item Take \code{filter_pool_first} configurations, predict their expected performance using the surrogate model, and put them
 into a pool \code{P} of configurations to consider.
 \item Take the individual that is optimal according to predicted performance, remove it from \code{P} and add it to solution set \code{S}.
 \item If the number of solutions in \code{S} equals \code{n_filter}, quit.
-\item Take the next \code{filter_rate_per_sample} configurations, predict their expected performance using the surrogate model, and add them to \code{P}.
+\item Take the next \code{filter_pool_per_sample} configurations, predict their expected performance using the surrogate model, and add them to \code{P}.
 \item Jump to 3.
 }
 
 (The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally
 equivalent).
 
-The \code{filter_rate_first} and \code{filter_rate_per_sample} configuration parameters of this algorithm determine how agressively the surrogate model is used to
-filter out sampled configurations. If the filtering is agressive (\code{filter_rate_first} is large), then more "exploitation" at the cost of "exploration" is performed.
-When \code{filter_rate_first} is small but \code{filter_rate_per_sample} is large, then successive individuals are filtered successively more agressively, potentially
+The \code{filter_pool_first} and \code{filter_pool_per_sample} configuration parameters of this algorithm determine how agressively the surrogate model is used to
+filter out sampled configurations. If the filtering is agressive (\code{filter_pool_first} is large), then more "exploitation" at the cost of "exploration" is performed.
+When \code{filter_pool_first} is small but \code{filter_pool_per_sample} is large, then successive individuals are filtered successively more agressively, potentially
 leading to a tradeoff between "exploration" and "exploitation".
 
-When \code{filter_rate_per_sample} is set to 0, then the method is equivalent to sampling the top \code{n_filter} individuals from \code{filter_rate_first}
-sampled ones. When \code{filter_rate_per_sample} is 1 and \code{filter_rate_first} is 0, then the method is equivalent to random sampling.
+When \code{filter_pool_per_sample} is set to 0, then the method is equivalent to sampling the top \code{n_filter} individuals from \code{filter_pool_first}
+sampled ones. When \code{filter_pool_per_sample} is 1 and \code{filter_pool_first} is 0, then the method is equivalent to random sampling.
 
-\code{filter_rate_first} and \code{filter_rate_per_sample} may be fractional; the total number of individuals to select from when selecting the \code{i}th
-individuals is always \code{round(filter_rate_first + (filter_rate_per_sample - 1) * (i - 1))}. However, \code{filter_rate_first} must
-be at least 1, and \code{filter_rate_first + filter_rate_per_sample * (n_filter - 1)} must be at least \code{n_filter}.
+\code{filter_pool_first} and \code{filter_pool_per_sample} may be fractional; the total number of individuals to select from when selecting the \code{i}th
+individuals is always \code{round(filter_pool_first + (filter_pool_per_sample - 1) * (i - 1))}. However, \code{filter_pool_first} must
+be at least 1, and \code{filter_pool_first + filter_pool_per_sample * (n_filter - 1)} must be at least \code{n_filter}.
 }
 
 \section{Configuration Parameters}{

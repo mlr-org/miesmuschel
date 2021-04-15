@@ -44,8 +44,8 @@ expect_error(mies_filter_offspring(oibigmin, individuals_min, 1, fn), "Must be e
 # FiltorSurrogateProgressive
 library("mlr3learners")
 fs = FiltorSurrogateProgressive$new(mlr3::lrn("regr.lm"))
-fs$param_set$values$filter_rate_first = 7
-fs$param_set$values$filter_rate_per_sample = 2
+fs$param_set$values$filter_pool_first = 7
+fs$param_set$values$filter_pool_per_sample = 2
 fs$prime(p)
 expect_equal(mies_filter_offspring(oibig, individuals, 0, fs, get_indivs = FALSE), integer(0))
 expect_equal(mies_filter_offspring(oibig, individuals, 1, fs, get_indivs = FALSE), 7)
