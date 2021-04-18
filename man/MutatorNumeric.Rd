@@ -23,6 +23,7 @@ of integer components by 0.5, applying their operation, and rounding resulting v
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},

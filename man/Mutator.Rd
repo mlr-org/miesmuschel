@@ -24,6 +24,7 @@ In many cases, it is advisable to inherit from one of the abstract subclasses, s
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},

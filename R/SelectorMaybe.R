@@ -8,7 +8,7 @@
 #' [`Selector`] that wraps two other [`Selector`]s given during construction and uses both for selection proportionally.
 #' Each of the resulting `n_select` individuals is chosen either from `$selector`, or from `$selector_not`.
 #'
-#' This makes it possible to implement filter methods such as random interleaving, where only a fraction of `p`
+#' This makes it possible to implement selection methods such as random interleaving, where only a fraction of `p`
 #' individuals were selected by a criterion, while the others are taken randomly.
 #'
 #' @section Algorithm:
@@ -112,8 +112,8 @@ SelectorMaybe = R6Class("SelectorMaybe",
         p_in = p_dbl(0, 1, tags = "required"),
         p_out = p_dbl(0, 1),
         shuffle_input = p_lgl(tags = "required"),
-        proportion_in = p_fct(c("random", "exact")tags = "required"),
-        proportion_out = p_fct(c("random", "exact", "oddsequal")tags = "required"),
+        proportion_in = p_fct(c("random", "exact"), tags = "required"),
+        proportion_out = p_fct(c("random", "exact", "oddsequal"), tags = "required"),
         try_unique = p_lgl(tags = "required")
       )
       private$.maybe_param_set$values = list(p_in = 1, shuffle_input = TRUE,
@@ -195,7 +195,6 @@ SelectorMaybe = R6Class("SelectorMaybe",
           }
         }
       )
-
       if (params$try_unique) {
         # make sure:
         # 1) n_selector_out >= n_selector_in

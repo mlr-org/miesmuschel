@@ -84,10 +84,12 @@ fm$operate(new_data, known_data, fitnesses, 3)
 }
 \seealso{
 Other filtors: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtourn}}
 
 Other filtor wrappers: 
 \code{\link{dict_filtors_proxy}}
@@ -96,6 +98,17 @@ Other filtor wrappers:
 \concept{filtors}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Filtor]{miesmuschel::Filtor}} -> \code{FiltorMaybe}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{filtor}}{(\code{\link{Filtor}})\cr
+\code{\link{Filtor}} being wrapped. This operator gets run with probability / proportion \code{p} (configuration parameter).}
+
+\item{\code{filtor_not}}{(\code{\link{Filtor}})\cr
+Alternative \code{\link{Filtor}} being wrapped. This operator gets run with probability / proportion \code{1 - p} (configuration parameter).}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -129,14 +142,16 @@ Initialize the \code{FiltorMaybe} object.
 \describe{
 \item{\code{filtor}}{(\code{\link{Filtor}})\cr
 \code{\link{Filtor}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$filtor} field will reflect this value.}
 
 \item{\code{filtor_not}}{(\code{\link{Filtor}})\cr
 Another \code{\link{Filtor}} to wrap. This operator runs when \code{filtor} is not chosen. By
 default, this is \code{\link{FiltorNull}}, i.e. no filtering. With this default, the
 \code{FiltorMaybe} object applies the \code{filtor} operation with probability / proportion \code{p}, and
 no operation at all otherwise.\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$filtor_not} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }

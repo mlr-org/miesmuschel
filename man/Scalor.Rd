@@ -39,6 +39,7 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},

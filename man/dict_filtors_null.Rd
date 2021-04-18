@@ -35,10 +35,12 @@ dict_filtors$get("null")
 
 \seealso{
 Other filtors: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtourn}}
 }
 \concept{filtors}
 \section{Super classes}{

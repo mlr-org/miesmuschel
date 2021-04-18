@@ -20,6 +20,7 @@ individual as a single \code{character} vector), and \code{levels} (a list of \c
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorNumeric}},

@@ -50,6 +50,7 @@ Typically, the \verb{$initialize()} function should also be overloaded, and opti
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
@@ -60,10 +61,12 @@ Other base classes:
 \code{\link{Selector}}
 
 Other filtors: 
+\code{\link{FiltorSurrogate}},
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtourn}}
 }
 \concept{base classes}
 \concept{filtors}
@@ -105,7 +108,10 @@ Initialize base class components of the \code{Filtor}.
 \if{html}{\out{<div class="r">}}\preformatted{Filtor$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
-  supported = c("single-crit", "multi-crit")
+  supported = c("single-crit", "multi-crit"),
+  packages = character(0),
+  dict_entry = NULL,
+  own_param_set = quote(self$param_set)
 )}\if{html}{\out{</div>}}
 }
 
@@ -130,6 +136,24 @@ The \verb{$param_set} field will reflect this value.}
 Subset of \code{"single-crit"} and \code{"multi-crit"}, indicating wether single and / or multi-criterion optimization is supported.
 Default both of them.\cr
 The \verb{$supported} field will reflect this value.}
+
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\n
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
 }
 \if{html}{\out{</div>}}
 }

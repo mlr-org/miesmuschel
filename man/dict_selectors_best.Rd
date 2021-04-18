@@ -49,6 +49,8 @@ sb$operate(data, fitnesses, 4)
 \seealso{
 Other selectors: 
 \code{\link{Selector}},
+\code{\link{dict_selector_maybe}},
+\code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}}
 }

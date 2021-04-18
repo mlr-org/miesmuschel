@@ -41,6 +41,7 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
@@ -51,7 +52,9 @@ Other base classes:
 \code{\link{Scalor}}
 
 Other selectors: 
+\code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}}
 }

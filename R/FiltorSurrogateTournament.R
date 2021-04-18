@@ -100,7 +100,7 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
         log(params$tournament_size),
         log(params$tournament_size_last %??% params$tournament_size),
         length.out = number_of_tournaments
-      )
+      ))
       pmax(tournament_size, params$per_tournament)
     },
     .surrogate_learner = NULL,

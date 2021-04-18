@@ -57,10 +57,12 @@ fp$operate(new_data, known_data, fitnesses, 1)
 }
 \seealso{
 Other filtors: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_null}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtourn}}
 
 Other filtor wrappers: 
 \code{\link{dict_filtor_maybe}}
@@ -69,6 +71,14 @@ Other filtor wrappers:
 \concept{filtors}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Filtor]{miesmuschel::Filtor}} -> \code{FiltorProxy}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{packages}}{(\code{character})\cr
+Packages needed for the operator. Retrieved from the \code{operation} configuration parameter. Read-only.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{

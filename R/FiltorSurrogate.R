@@ -70,7 +70,7 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
         stop("surrogate_learner is read-only.")
       }
       private$.surrogate_selector
-    },
+    }
   ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter) {
@@ -92,7 +92,7 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
       surrogate_prediction = matrix(surrogate_prediction, nrow = nrow(values), ncol = ncol(fitnesses))
       private$.filter_surrogate(values, surrogate_prediction, known_values, fitnesses, n_filter)
     },
-    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) stop("abstract.")
+    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) stop("abstract."),
     .surrogate_learner = NULL,
     .surrogate_selector = NULL,
     .own_param_set = NULL
