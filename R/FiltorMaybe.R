@@ -97,6 +97,7 @@ FiltorMaybe = R6Class("FiltorMaybe",
       private$.maybe_param_set$values = list(p = 1, random_choice = FALSE)
       super$initialize(intersect(filtor$param_classes, filtor_not$param_classes),
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        supported = intersect(filtor$supported, filtor_not$supported),
         packages = c("stats", filtor$packages, filtor_not$packages), dict_entry = "maybe",
         own_param_set = quote(private$.maybe_param_set))
     },
