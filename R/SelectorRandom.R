@@ -45,7 +45,7 @@ SelectorRandom = R6Class("SelectorRandom",
     initialize = function() {
       param_set = ps(replace = p_lgl(tags = "required"))
       param_set$values = list(replace = FALSE)
-      super$initialize(param_set, dict_entry = "random")
+      super$initialize(param_set = param_set, dict_entry = "random")
     }
   ),
   private = list(

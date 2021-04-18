@@ -150,7 +150,8 @@ assert_optim_instance = function(inst) {
 
 # vector-domain
 p_vct = function(lower = -Inf, upper = Inf, min.len = 1, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
-  p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper, min.len, .parent = topenv()), tags = tags, depends = depends, trafo = trafo)
+  if (!is.null(depends)) stop("depends support not in paradox yet")
+  p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper, min.len, .parent = topenv()), tags = tags, trafo = trafo)
 }
 
 check_fidelity_schedule = function(x) {

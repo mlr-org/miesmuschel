@@ -30,7 +30,7 @@ component (\code{TRUE}), or to draw from a normal distribution and then restrict
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are:
+Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}
 }
 
 \section{Dictionary}{
