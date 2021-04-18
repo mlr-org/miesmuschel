@@ -73,6 +73,23 @@ dict_filtors$get("surprog", <surrogate_learner> [, <surrogate_selector>])
 }
 }
 
+\examples{
+library("mlr3")
+library("mlr3learners")
+fp = ftr("surprog", lrn("regr.lm"), filter.pool_first = 2)
+
+p = ps(x = p_dbl(-5, 5))
+known_data = data.frame(x = 1:5)
+fitnesses = 1:5
+new_data = data.frame(x = c(2.5, 4.5))
+
+fp$prime(p)
+
+fp$needed_input(1)
+
+fp$operate(new_data, known_data, fitnesses, 1)
+
+}
 \seealso{
 Other filtors: 
 \code{\link{FiltorSurrogate}},

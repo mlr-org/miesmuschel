@@ -33,6 +33,22 @@ dict_filtors$get("null")
 }
 }
 
+\examples{
+fn = ftr("null")
+
+p = ps(x = p_dbl(-5, 5))
+known_data = data.frame(x = 1:5)
+fitnesses = 1:5
+
+new_data = data.frame(x = c(2.5, 4.5)
+
+fn$prime(p)
+
+fn$needed_input(1)
+
+fn$operate(new_data, known_data, fitnesses, 1)
+
+}
 \seealso{
 Other filtors: 
 \code{\link{FiltorSurrogate}},

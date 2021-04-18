@@ -62,7 +62,7 @@
 #'
 #' @family filtors
 #'
-#' @example
+#' @examples
 #' library("mlr3")
 #' library("mlr3learners")
 #' fp = ftr("surprog", lrn("regr.lm"), filter.pool_first = 2)

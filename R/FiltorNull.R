@@ -18,7 +18,7 @@
 #' @template autoinfo_dict
 #'
 #' @family filtors
-#' @example
+#' @examples
 #' fn = ftr("null")
 #'
 #' p = ps(x = p_dbl(-5, 5))

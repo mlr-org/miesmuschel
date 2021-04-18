@@ -44,7 +44,7 @@
 #'
 #' @family filtors
 #'
-#' @example
+#' @examples
 #' library("mlr3")
 #' library("mlr3learners")
 #' fp = ftr("surtourn", lrn("regr.lm"), filter.tournament_size = 2)
