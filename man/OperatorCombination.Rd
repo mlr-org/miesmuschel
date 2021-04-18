@@ -180,23 +180,27 @@ Other mutators:
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
 \code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}},
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_maybe}},
-\code{\link{dict_mutators_proxy}}
+\code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}}
 
 Other recombinators: 
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{dict_recombinators_maybe}},
-\code{\link{dict_recombinators_proxy}}
+\code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{base classes}
 \concept{mutator wrappers}

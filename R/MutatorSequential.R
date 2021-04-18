@@ -24,7 +24,7 @@
 #' @family mutators
 #' @family mutator wrappers
 #' @examples
-#' # TODO
+#' # TODO examples
 #' @export
 MutatorSequential = R6Class("MutatorSequential",
   inherit = Mutator,

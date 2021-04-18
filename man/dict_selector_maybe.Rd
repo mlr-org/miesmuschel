@@ -107,10 +107,12 @@ Other selectors:
 \code{\link{dict_selectors_best}},
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
-\code{\link{dict_selectors_random}}
+\code{\link{dict_selectors_random}},
+\code{\link{dict_selectors_sequential}}
 
 Other selector wrappers: 
-\code{\link{dict_selectors_proxy}}
+\code{\link{dict_selectors_proxy}},
+\code{\link{dict_selectors_sequential}}
 }
 \concept{selector wrappers}
 \concept{selectors}

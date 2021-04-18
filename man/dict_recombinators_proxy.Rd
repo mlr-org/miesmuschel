@@ -57,11 +57,13 @@ Other recombinators:
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_sequential}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{OperatorCombination}},
-\code{\link{dict_recombinators_maybe}}
+\code{\link{dict_recombinators_maybe}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{recombinator wrappers}
 \concept{recombinators}

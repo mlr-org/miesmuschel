@@ -52,7 +52,8 @@ Other recombinators:
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
-\code{\link{dict_recombinators_proxy}}
+\code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{recombinators}
 \section{Super classes}{

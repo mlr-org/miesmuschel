@@ -773,9 +773,9 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   }
 
   if (mu_remaining < 0) {
-    # TODO: we are currently killing the earliest evals, maybe do something smarter.
-    # TODO: also we are not doing anything about budget here, we just hope the user knows what he's doing.
-    # TODO: also also the additional component handling above depends on killing earliest now.
+    # we are currently killing the earliest evals, maybe do something smarter (issue #35)
+    # also we are not doing anything about budget here, we just hope the user knows what he's doing.
+    # also also the additional component handling above depends on killing earliest now.
     inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
   } else if (mu_remaining > 0) {
     sample_space = inst$search_space

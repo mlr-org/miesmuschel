@@ -69,6 +69,7 @@ Other mutators:
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
 \code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}},
 \code{\link{dict_mutators_unif}}
 }
 \concept{mutators}

@@ -72,12 +72,14 @@ Other mutators:
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_null}},
 \code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}},
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
-\code{\link{dict_mutators_proxy}}
+\code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}}
 }
 \concept{mutator wrappers}
 \concept{mutators}
