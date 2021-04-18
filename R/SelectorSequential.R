@@ -41,7 +41,7 @@
 #'   Whether to do reduction by factor (`TRUE`) or absolute number (`FALSE`), as described in **Algorithm**. Initialized to `TRUE`.
 #'
 #' @templateVar id sequential
-#' @templateVar additional , <selectors>
+#' @templateVar additional , \<selectors\>
 #' @template autoinfo_prepare_sel
 #'
 #' @section Supported Operand Types:

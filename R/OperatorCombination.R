@@ -47,7 +47,7 @@
 #' Configuration parameter names are prefixed with the name of the [`MiesOperator`] in the `operators` list.
 #'
 #' @templateVar id combine
-#' @templateVar additional , <operators>, ...
+#' @templateVar additional , \<operators\>, ...
 #' @template autoinfo_prepare_mut
 #' @template autoinfo_dict
 #' @template autoinfo_prepare_rec

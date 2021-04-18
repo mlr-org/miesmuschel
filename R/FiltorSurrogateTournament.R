@@ -31,7 +31,7 @@
 #'   i.e. all tournaments have the same size.
 #'
 #' @templateVar id surtourn
-#' @templateVar additional , <surrogate_learner> \[, <surrogate_selector>\]
+#' @templateVar additional , \<surrogate_learner\> \[, \<surrogate_selector\>\]
 #' @template autoinfo_prepare_ftr
 #'
 #' @section Supported Operand Types:

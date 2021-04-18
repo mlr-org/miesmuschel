@@ -74,7 +74,7 @@
 #'   generates an error. Initialized to `TRUE`.
 #'
 #' @templateVar id maybe
-#' @templateVar additional , <selector> \[, <selector_not>\]
+#' @templateVar additional , \<selector\> \[, \<selector_not\>\]
 #' @template autoinfo_prepare_ftr
 #'
 #' @section Supported Operand Types:

@@ -18,7 +18,7 @@
 #'   Probability per individual with which to apply the operator given to the `mutator` construction argument.
 #'
 #' @templateVar id maybe
-#' @templateVar additional , <mutator> \[, <mutator_not>\]
+#' @templateVar additional , \<mutator\> \[, \<mutator_not\>\]
 #' @template autoinfo_prepare_mut
 #'
 #' @section Supported Operand Types:

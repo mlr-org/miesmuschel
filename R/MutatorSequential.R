@@ -12,7 +12,7 @@
 #' argument are prefixed with `"mutator_1"`, `"mutator_2"`, ... up to `"mutator_#"`, where `#` is `length(mutators)`.
 #'
 #' @templateVar id sequential
-#' @templateVar additional , <mutators>
+#' @templateVar additional , \<mutators\>
 #' @template autoinfo_prepare_mut
 #'
 #' @section Supported Operand Types:

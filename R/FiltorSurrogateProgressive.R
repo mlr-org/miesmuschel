@@ -49,7 +49,7 @@
 #'   When not given, it defaults to `filter.pool_factor`, equivalent to taking the top `n_filter` from `n_filter * pool_factor` individuals.
 #'
 #' @templateVar id surprog
-#' @templateVar additional , <surrogate_learner> \[, <surrogate_selector>\]
+#' @templateVar additional , \<surrogate_learner\> \[, \<surrogate_selector\>\]
 #' @template autoinfo_prepare_ftr
 #'
 #' @section Supported Operand Types:

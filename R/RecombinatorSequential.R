@@ -28,7 +28,7 @@
 #'   Whether to reorder `values` between invocations of recombinators. Initialized to `TRUE`.
 #'
 #' @templateVar id sequential
-#' @templateVar additional , <recombinators>
+#' @templateVar additional , \<recombinators\>
 #' @template autoinfo_prepare_rec
 #'
 #' @section Supported Operand Types:

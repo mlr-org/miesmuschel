@@ -37,7 +37,7 @@
 #'   Initialized to `FALSE`.
 #'
 #' @templateVar id maybe
-#' @templateVar additional , <filtor> \[, <filtor_not>\]
+#' @templateVar additional , \<filtor\> \[, \<filtor_not\>\]
 #' @template autoinfo_prepare_ftr
 #'
 #' @section Supported Operand Types:

@@ -21,7 +21,7 @@
 #'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument.
 #'
 #' @templateVar id maybe
-#' @templateVar additional , <recombinator> \[, <recombinator_not>\]
+#' @templateVar additional , \<recombinator\> \[, \<recombinator_not\>\]
 #' @template autoinfo_prepare_rec
 #'
 #' @section Supported Operand Types:
