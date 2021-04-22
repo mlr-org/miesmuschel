@@ -72,20 +72,19 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
       )
       own_param_set$values = list(per_tournament = 1, tournament_size = 1)
 
-      super$initialize(surrogate_learner = surrogate_learner, surrogate_selector = surrogate_selector,
-        own_param_set = param_set, dict_entry = "surprog"
-      )
+      super$initialize(surrogate_learner = surrogate_learner, param_set = own_param_set, surrogate_selector = surrogate_selector, dict_entry = "surprog")
     }
   ),
   private = list(
     .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) {
       params = private$.own_param_set$get_values()
       tournament_size = private$.tournament_size(n_filter)
-      tournament_windows = split(seq_len(sum(tournament_size)), rep(seq_along(tournament_size), each = tournament_size))
+      tournament_windows = split(seq_len(sum(tournament_size)), rep(seq_along(tournament_size), tournament_size))
       selected = vector("list", length(tournament_size))
+
       for (i in seq_along(tournament_windows)) {
         tw = tournament_windows[[i]]
-        selected_from_window = private$.surrogate_selector$operate(values[tw], surrogate_prediction[tw, , drop = FALSE])
+        selected_from_window = private$.surrogate_selector$operate(values[tw], surrogate_prediction[tw, , drop = FALSE], params$per_tournament)
         selected[[i]] = tw[selected_from_window][sample.int(length(selected_from_window))]
       }
       first(unlist(selected, recursive = FALSE, use.names = FALSE), n_filter)
@@ -96,17 +95,14 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
     .tournament_size = function(output_size) {
       params = private$.own_param_set$get_values()
       number_of_tournaments = ceiling(output_size / params$per_tournament)
-      tournament_size = exp(seq(
+      tournament_size = round(exp(seq(
         log(params$tournament_size),
         log(params$tournament_size_last %??% params$tournament_size),
         length.out = number_of_tournaments
-      ))
+      )))
       pmax(tournament_size, params$per_tournament)
-    },
-    .surrogate_learner = NULL,
-    .surrogate_selector = NULL,
-    .own_param_set = NULL
+    }
   )
 )
-dict_filtors$add("surtour", FiltorSurrogateProgressive)
+dict_filtors$add("surtour", FiltorSurrogateTournament)
 

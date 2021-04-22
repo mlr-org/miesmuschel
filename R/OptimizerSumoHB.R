@@ -150,8 +150,9 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
   public = list(
     #' @description
     #' Initialize the 'OptimizerSumoHB' object.
-    initialize = function(filtor = FiltorProxy$new()) {
+    initialize = function(filtor = FiltorProxy$new(), selector = SelectorProxy$new()) {
       private$.filtor = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
+      private$.selector = assert_r6(selector, "Selector")$clone(deep = TRUE)
       param_set = ps(
         mu = p_int(1, tags = "required"),
         survival_fraction = p_dbl(0, 1, tags = "required"),
@@ -165,13 +166,13 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       self$filtor$param_set$set_id = "filtor"
 
-      private$.param_set_source = alist(private$.own_param_set, private$.filtor$param_set)
+      private$.param_set_source = alist(private$.own_param_set, private$.selector$param_set, private$.filtor$param_set)
 
       can_dependencies = TRUE  # TODO filtor needs to announce this
 
       super$initialize(
         param_set = self$param_set, param_classes = private$.filtor$param_classes,
-        properties = c(if (can_dependencies) "dependencies", "single-crit"),
+        properties = c(if (can_dependencies) "dependencies", c("single-crit", "multi-crit")),
         packages = "miesmuschel"  # TODO: packages from filtor, this is in a different branch currently
       )
     }
@@ -246,11 +247,10 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       mutator = MutatorErase$new()
       mutator$param_set$values$initializer = params$sampling
-      survival_selector = SelectorBest$new()
       parent_selector = SelectorRandom$new()
       parent_selector$param_set$values$replace = TRUE
 
-      mies_prime_operators(mutators = list(mutator), selectors = list(survival_selector, parent_selector), filtors = list(private$.filtor),
+      mies_prime_operators(mutators = list(mutator), selectors = list(private$.selector, parent_selector), filtors = list(private$.filtor),
         search_space = inst$search_space, budget_id = budget_id)
 
       mies_init_population(inst, mu = params$mu, initializer = params$sampling, fidelity_schedule = fidelity_schedule,
@@ -278,7 +278,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
           filter_down_to = lambda
         }
         offspring = mies_generate_offspring(inst, lambda = sample_new, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
-        mies_survival_plus(inst, mu = keep_alive, survival_selector = survival_selector)
+        mies_survival_plus(inst, mu = keep_alive, survival_selector = private$.selector)
         offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
           fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)
@@ -287,6 +287,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
     .own_param_set = NULL,
     .param_set_id = NULL,
     .param_set_source = NULL,
+    .selector = NULL,
     .filtor = NULL
   )
 )

@@ -37,8 +37,9 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
   inherit = Filtor,
   public = list(
     initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new(), param_set = ps(), packages = character(0), dict_entry = NULL) {
-      private$.surrogate_learner = assert_r6(surrogate_learner, "LearnerRegr")
-      private$.surrogate_selector = assert_r6(surrogate_selector, "Selector")
+      private$.surrogate_learner = assert_r6(surrogate_learner, "LearnerRegr")$clone(deep = TRUE)
+      private$.surrogate_selector = assert_r6(surrogate_selector, "Selector")$clone(deep = TRUE)
+      private$.surrogate_selector$param_set$set_id = "select"
       private$.own_param_set = param_set
       private$.own_param_set$set_id = "filter"
 
@@ -52,6 +53,17 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
         packages = c("mlr3", surrogate_selector$packages, surrogate_learner$packages, packages),
         dict_entry = dict_entry, own_param_set = quote(private$.own_param_set)
       )
+    },
+    #' @description
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operator
+    #' given to `surrogate_selector` during construction.
+    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #'   Passed to [`MiesOperator`]`$prime()`.
+    #' @return [invisible] `self`.
+    prime = function(param_set) {
+      private$.surrogate_selector$prime(param_set)
+      super$prime(param_set)
+      invisible(self)
     }
   ),
   active = list(

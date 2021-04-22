@@ -89,30 +89,32 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
       )
       own_param_set$values = list(pool_factor= 1)
 
-      super$initialize(surrogate_learner = surrogate_learner, surrogate_selector = surrogate_selector,
-        own_param_set = param_set, dict_entry = "surprog"
-      )
+      super$initialize(surrogate_learner = surrogate_learner, param_set = own_param_set, surrogate_selector = surrogate_selector, dict_entry = "surprog")
     }
   ),
   private = list(
     .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) {
       params = private$.own_param_set$get_values()
       poolsizes = round(exp(seq(log(params$pool_factor), log(params$pool_factor_last %??% params$pool_factor), length.out = n_filter)) * n_filter) - seq_len(n_filter) + 1
-      selected = integer(n_filter)
+      original_indices = seq_len(nrow(values))
+      selected = integer(0)
       for (i in seq_len(n_filter)) {
-        cpop = first(values[-selected], poolsizes[[i]])
-        cfitness = first(surrogate_prediction[-selected, , drop = FALSE], poolsizes[[i]])
-        selected[[i]] = private$.surrogate_selector$operate(cpop, cfitness)
+        cpop = first(values, poolsizes[[i]])
+        cfitness = first(surrogate_prediction, poolsizes[[i]])
+        selecting = private$.surrogate_selector$operate(cpop, cfitness, 1)
+        # we may have removed things before, in which case we need to adjust the index.
+        selected[[i]] = original_indices[selecting]
+        # don't consider the selected value any more
+        surrogate_prediction = surrogate_prediction[-selecting, , drop = FALSE]
+        values = values[-selecting]
+        original_indices = original_indices[-selecting]
       }
       selected
     },
     .needed_input = function(output_size) {
       params = private$.own_param_set$get_values()
       round(max(params$pool_factor, params$pool_factor_last ) * output_size)
-    },
-    .surrogate_learner = NULL,
-    .surrogate_selector = NULL,
-    .own_param_set = NULL
+    }
   )
 )
 dict_filtors$add("surprog", FiltorSurrogateProgressive)

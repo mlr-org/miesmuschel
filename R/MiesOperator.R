@@ -54,7 +54,8 @@ MiesOperator = R6Class("MiesOperator",
       private$.packages = unique(assert_character(packages, any.missing = FALSE))
       private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
       private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
-      private$.own_param_set = own_param_set
+      assert_true(is.language(own_param_set))
+      private$.own_param_set_symbol = own_param_set
       private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
       private$.endomorphism = assert_flag(endomorphism)
     },
@@ -68,7 +69,7 @@ MiesOperator = R6Class("MiesOperator",
       deviantparams = list()
 
       selfnames = names(self)
-      ownps = eval(private$.own_param_set)
+      ownps = eval(private$.own_param_set_symbol)
       pnames = ownps$ids()
       representable = (!show_constructor_args || all(names(initformals) %in% selfnames)) &&
         !is.null(self$dict_entry) && !is.null(self$dict_shortaccess) &&
@@ -273,7 +274,7 @@ MiesOperator = R6Class("MiesOperator",
     .packages = NULL,
     .dict_entry = NULL,
     .dict_shortaccess = NULL,
-    .own_param_set = NULL,
+    .own_param_set_symbol = NULL,
     .own_defaults = NULL,
     .endomorphism = NULL
   )

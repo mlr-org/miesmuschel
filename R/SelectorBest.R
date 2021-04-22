@@ -36,14 +36,29 @@ SelectorBest = R6Class("SelectorBest",
   public = list(
     #' @description
     #' Initialize the `SelectorBest` object.
-    initialize = function() {
-      super$initialize(supported = "single-crit", dict_entry = "best")
+    initialize = function(scalor = ScalorProxy$new()) {
+      private$.scalor = assert_r6(scalor, "Scalor")$clone(deep = TRUE)
+      super$initialize(supported = private$.scalor$supported,
+        param_set = alist(private$.scalor$param_set),
+        packages = scalor$packages, dict_entry = "best")
+    },
+    #' @description
+    #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operator
+    #' given to `scalor` during construction.
+    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
+    #'   Passed to [`MiesOperator`]`$prime()`.
+    #' @return [invisible] `self`.
+    prime = function(param_set) {
+      private$.scalor$prime(param_set)
+      super$prime(param_set)
+      invisible(self)
     }
   ),
   private = list(
     .select = function(values, fitnesses, n_select) {
-      order(fitnesses, decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
-    }
+      order(private$.scalor$operate(values, fitnesses), decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
+    },
+    .scalor = NULL
   )
 )
 dict_selectors$add("best", SelectorBest)

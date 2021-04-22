@@ -36,15 +36,35 @@ ScalorNondom = R6Class("ScalorNondom",
     initialize = function() {
       param_set = ps(
         epsilon = p_vct(lower = 0, tags = "required"),
-        scale_output = p_lgl(),
-        jitter = p_lgl(),
+        scale_output = p_lgl(tags = "required"),
+        jitter = p_lgl(tags = "required"),
         tiebreak = p_fct(c("crowding-dist", "hv-contrib", "domcount", "none")))
-      super$initialize(dict_entry = "nondom")
+      param_set$values = list(epsilon = 0, scale_output = FALSE, jitter = TRUE, tiebreak= "crowding-dist")
+      super$initialize(param_set = param_set, dict_entry = "nondom")
     }
   ),
   private = list(
     .scale = function(values, fitnesses) {
+      params = self$param_set$get_values()
+      if (params$jitter) {
+        fitnesses = fitnesses *
+          (1 + runif(length(fitnesses)) * sqrt(.Machine$double.eps))
+      }
       sorted = order_nondominated(fitnesses)$fronts
+      sorted = switch(params$tiebreak,
+        `crowding-dist` = {
+          fronts = lapply(split(as.data.frame(fitnesses), sorted), as.matrix)
+          subranks = lapply(fronts, function(x) rank(dist_crowding(x)) / (length(x) + 1))
+          for (i in seq_along(subranks)) {
+            sr = subranks[[i]]
+            sorted[sorted == i] = i + sr
+          }
+          sorted
+        },
+        `hv-contrib` = stop("not supported yet"),
+        domcount = stop("not supported yet"),
+        none = sorted
+      )
       max(sorted) + 1 - sorted  # want high front values for high fitnesses, so reverse ordering here
     }
   )
