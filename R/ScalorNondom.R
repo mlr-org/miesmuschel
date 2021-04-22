@@ -50,21 +50,23 @@ ScalorNondom = R6Class("ScalorNondom",
         fitnesses = fitnesses *
           (1 + runif(length(fitnesses)) * sqrt(.Machine$double.eps))
       }
-      sorted = order_nondominated(fitnesses)$fronts
-      sorted = switch(params$tiebreak,
-        `crowding-dist` = {
-          fronts = lapply(split(as.data.frame(fitnesses), sorted), as.matrix)
-          subranks = lapply(fronts, function(x) rank(dist_crowding(x)) / (length(x) + 1))
-          for (i in seq_along(subranks)) {
-            sr = subranks[[i]]
-            sorted[sorted == i] = i + sr
-          }
-          sorted
-        },
-        `hv-contrib` = stop("not supported yet"),
-        domcount = stop("not supported yet"),
-        none = sorted
-      )
+      nadir = 0
+      ond = order_nondominated(fitnesses, epsilon = params$epsilon)
+      sorted = ond$fronts
+      if (params$tiebreak != "none") {
+        fronts = lapply(split(as.data.frame(fitnesses), sorted), as.matrix)
+        subrank = switch(params$tiebreak,
+          `crowding-dist` = lapply(fronts, function(x) rank(dist_crowding(x)) / (nrow(x) + 1)),
+          `hv-contrib` = lapply(fonts, function(x) rank(domhv_contribution(x, nadir = nadir, epsilon = epsilon))),
+          domcount = ond$domcount,  # TODO
+          none = sorted
+        )
+        for (i in seq_along(subranks)) {
+          sr = subranks[[i]]
+          sorted[sorted == i] = i + sr
+        }
+
+      }
       max(sorted) + 1 - sorted  # want high front values for high fitnesses, so reverse ordering here
     }
   )

@@ -119,11 +119,42 @@ dist_crowding = function(fitnesses) {
 #'   be a scalar, in which case it is used for all dimensions, or a vector, in which case its length must match
 #'   the number of dimensions. Default 0.
 #' @return `numeric`: The vector of dominated hypervolume contributions for each individual in `fitnesses`.
+#' @examples
+#' # TODO example
+#' @export
 domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
   assert(check_number(nadir, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
   assert(check_number(epsilon, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+  has_epsilon = any(epsilon > 0)
 
+  nd = nondominated(fitnesses, epsilon = epsilon)
+  nonzeroes = nd$front
+  strongfront = fitnesses[nd$strongfront, , drop = FALSE]
+  result = numeric(nrow(fitnesses))
+
+  volume_baseline = domhv(strongfront, nadir, prefilter = FALSE)
+
+  result[nonzeroes] = map_dbl(nonzeroes, function(nz) {
+    replace = which(nz == nd$strongfront)
+    if (has_epsilon) {
+      if (length(replace)) {
+        strongfront[replace, ] = strongfront[replace, ] + epsilon
+      } else {
+        strongfront = rbind(strongfront, fitnesses[nz, ] + epsilon)
+      }
+      volume_with = domhv(strongfront, nadir, prefilter = FALSE)
+    } else {
+      volume_with = volume_baseline
+    }
+    if (length(replace)) {
+      volume_without = domhv(strongfront[-replace, , drop = FALSE], nadir, prefilter = FALSE)
+    } else {
+      volume_without = volume_baseline
+    }
+    volume_with - volume_without
+  })
+  result
 }
 
 domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
