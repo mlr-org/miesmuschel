@@ -5,11 +5,14 @@
 #' @name dict_scalors_domcount
 #'
 #' @description
-#' [`Scalor`] that returns a the number of (weakly, epsilon-) dominating individuals for each individuum.
+#' [`Scalor`] that returns a the number of (weakly, epsilon-) dominated or dominating individuals for each individuum.
 #'
 #' @section Configuration Parameters:
 #'
+#' * `output`
 #' * `epsilon`
+#' * `jitter`
+#' * `scale_output`
 #'
 #' @templateVar id domcount
 #' @template autoinfo_prepare_scl
@@ -27,6 +30,7 @@ ScalorDomcount = R6Class("ScalorDomcount",
     #' Initialize the `ScalorNondom` object.
     initialize = function() {
       param_set = ps(
+        output = p_fct(c("count_dominated", "count_not_dominating")),
         epsilon = p_vct(lower = 0, tags = "required"),
         jitter = p_lgl(tags = "required"),
         scale_output = p_lgl(tags = "required"),
@@ -42,9 +46,16 @@ ScalorDomcount = R6Class("ScalorDomcount",
         fitnesses = fitnesses *
           (1 + runif(length(fitnesses)) * sqrt(.Machine$double.eps))
       }
-      nadir = 0
-      rnd = rank_nondominated(fitnesses, epsilon = params$epsilon)
-      # TODO
+      if (params$output == "number_dominated") {
+        domcount = rank_nondominated(-fitnesses, epsilon = params$epsilon)$domcount
+      } else {
+        domcount = nrow(fitnesses) - rank_nondominated(fitnesses, epsilon = params$epsilon)$domcount
+      }
+      if (params$scale_output) {
+        domcount / nrow(fitnesses)
+      } else {
+        domcount
+      }
     }
   )
 )
