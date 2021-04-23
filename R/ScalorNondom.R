@@ -9,7 +9,10 @@
 #' indocate higher fitnesses and therefore "better" individuals.
 #'
 #' @section Configuration Parameters:
-#' This operator has no configuration parameters.
+#' * `epsilon`
+#' * `jitter`
+#' * `scale_output`
+#' * `tiebreak`
 #'
 #' @templateVar id nondom
 #' @template autoinfo_prepare_scl
