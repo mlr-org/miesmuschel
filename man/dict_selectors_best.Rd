@@ -63,6 +63,7 @@ Other selectors:
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{SelectorBest$new()}}
+\item \href{#method-prime}{\code{SelectorBest$prime()}}
 \item \href{#method-clone}{\code{SelectorBest$clone()}}
 }
 }
@@ -70,7 +71,6 @@ Other selectors:
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
@@ -82,9 +82,31 @@ Other selectors:
 \subsection{Method \code{new()}}{
 Initialize the \code{SelectorBest} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new(scalor = ScalorProxy$new())}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-prime}{}}}
+\subsection{Method \code{prime()}}{
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operator
+given to \code{scalor} during construction.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$prime(param_set)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\link{invisible} \code{self}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

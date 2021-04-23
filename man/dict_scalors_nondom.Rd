@@ -10,7 +10,12 @@ indocate higher fitnesses and therefore "better" individuals.
 }
 \section{Configuration Parameters}{
 
-This operator has no configuration parameters.
+\itemize{
+\item \code{epsilon}
+\item \code{jitter}
+\item \code{scale_output}
+\item \code{tiebreak}
+}
 }
 
 \section{Supported Operand Types}{
@@ -45,8 +50,10 @@ so$operate(data, fitnesses)
 }
 \seealso{
 Other scalors: 
+\code{\link{ScalorAggregate}},
 \code{\link{ScalorProxy}},
 \code{\link{Scalor}},
+\code{\link{dict_scalors_domcount}},
 \code{\link{dict_scalors_one}}
 }
 \concept{scalors}

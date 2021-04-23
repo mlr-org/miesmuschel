@@ -7,7 +7,7 @@ oi = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
 
 
 
-opt = OptimizerSumoHB$new()
+opt = OptimizerSmash$new()
 
 opt$param_set$values$mu = 4
 opt$param_set$values$survival_fraction = 0.5
@@ -117,7 +117,7 @@ ftraccount = FiltorDebug$new(handler = function(v, k, f, n, p) {
   seq_len(n) * 2
 }, ni = function(o, p) o * 2)
 
-opt = OptimizerSumoHB$new(ftraccount)
+opt = OptimizerSmash$new(ftraccount)
 
 opt$param_set$values$mu = 6
 opt$param_set$values$survival_fraction = 0.5
@@ -188,7 +188,7 @@ expect_equal(account$archive, expected_archive)
 
 # cloning, paramsets handled properly
 
-opt = OptimizerSumoHB$new(filtor = ftr("surprog", mlr3::lrn("regr.rpart")))
+opt = OptimizerSmash$new(filtor = ftr("surprog", mlr3::lrn("regr.rpart")))
 
 opt$param_set$set_id = "test"
 
@@ -216,7 +216,7 @@ expect_equal(opt$param_set$set_id, "test")
 
 fdblint = FiltorDebug$new(handler = function(v, k, f, n, p) seq_len(n), ni = function(o, p) o, param_classes = c("ParamDbl", "ParamInt"), param_set = ps(plus = p_dbl()))
 
-opt2 = OptimizerSumoHB$new(filtor = fdblint)
+opt2 = OptimizerSmash$new(filtor = fdblint)
 
 expect_equal(opt2$param_classes, c("ParamDbl", "ParamInt"))
 expect_equal(opt2$properties, c("dependencies", "single-crit"))

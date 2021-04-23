@@ -135,7 +135,7 @@ The constructed object gets a \emph{clone} of this argument. The \verb{$selector
 \if{latex}{\out{\hypertarget{method-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operators
-given to \code{selector} and \code{selector_not} during construction.
+given to \code{selectors} during construction.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{SelectorSequential$prime(param_set)}\if{html}{\out{</div>}}
 }
