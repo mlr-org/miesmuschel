@@ -24,7 +24,7 @@
 #'   `$domcount`: Length N vector counting the number of individuals that dominate the given individual.
 #'
 #' @export
-order_nondominated = function(fitnesses, epsilon = 0) {
+rank_nondominated = function(fitnesses, epsilon = 0) {
   # this may or may not be similar to https://core.ac.uk/download/pdf/30341871.pdf ; haven't read the paper,
   # but at first glance it looks like what I'm doing here so I don't think I am doing something dumb.
   # They suggest binary search for fronts, which is probably a neat idea.
@@ -266,7 +266,7 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
   prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
 }
 
-# similar to order_nondominated, but return only the first front.
+# similar to rank_nondominated, but return only the first front.
 # @return named `list`: `front` (`integer`): indices of epsilon-nondominated front; `strong_front` (`integer`): indices of dominating front (without epsilon)
 nondominated = function(fitnesses, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
