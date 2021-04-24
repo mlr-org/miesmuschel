@@ -30,12 +30,12 @@ ScalorDomcount = R6Class("ScalorDomcount",
     #' Initialize the `ScalorNondom` object.
     initialize = function() {
       param_set = ps(
-        output = p_fct(c("count_dominated", "count_not_dominating")),
+        output = p_fct(c("count_dominated", "count_not_dominating"), tags = "required"),
         epsilon = p_vct(lower = 0, tags = "required"),
         jitter = p_lgl(tags = "required"),
-        scale_output = p_lgl(tags = "required"),
+        scale_output = p_lgl(tags = "required")
       )
-      param_set$values = list(epsilon = 0, jitter = TRUE, scale_output = TRUE)
+      param_set$values = list(output = "count_not_dominating", epsilon = 0, jitter = TRUE, scale_output = TRUE)
       super$initialize(param_set = param_set, dict_entry = "domcount")
     }
   ),

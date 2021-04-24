@@ -62,7 +62,7 @@ ScalorAggregate = R6Class("ScalorAggregate",
       private$.own_param_set$values = c(named_list(pnames, 1), list(scaling = "linear", scale_output = FALSE))
 
       ps_alist = c(alist(private$.own_param_set),
-        lapply(seq_along(scalors), function(i) substitute(private$.wrapped[[i]], list(i = i)))
+        lapply(seq_along(scalors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
       )
 
       private$.own_param_set$values = list()
@@ -140,4 +140,4 @@ ScalorAggregate = R6Class("ScalorAggregate",
     .own_param_set = NULL
   )
 )
-dict_selectors$add("aggregate", ScalorAggregate)
+dict_scalors$add("aggregate", ScalorAggregate)

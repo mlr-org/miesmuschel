@@ -61,7 +61,7 @@ RecombinatorSequential = R6Class("RecombinatorSequential",
       private$.own_param_set = ps(shuffle_between = p_lgl(tags = "required"))
       private$.own_param_set$values = list(shuffle_between = TRUE)
       ps_alist = c(alist(private$.own_param_set),
-        lapply(seq_along(recombinators), function(i) substitute(private$.wrapped[[i]], list(i = i)))
+        lapply(seq_along(recombinators), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
       )
 
       # how often is each recombinator called?
@@ -136,7 +136,7 @@ Either match input and output sizes using a RecombinatorNull, or allow rescaling
     .multiplicities = NULL
   )
 )
-dict_recombinators$add("sequential", RecombinatorMaybe)
+dict_recombinators$add("sequential", RecombinatorSequential)
 
 gcd = function(a, b) {
   if (a > b) {

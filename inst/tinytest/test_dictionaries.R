@@ -2,10 +2,10 @@ source("setup.R", local = TRUE)
 
 library("mlr3misc")
 
-baseclasses = c("Recombinator", "Mutator", "Selector", "Filtor")
-dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors, Filtor = dict_filtors)
-shortforms = list(Mutator = mut, Recombinator = rec, Selector = sel, Filtor = ftr)
-abstracts = c(baseclasses, "MutatorNumeric", "MutatorDiscrete")
+baseclasses = c("Recombinator", "Mutator", "Selector", "Filtor", "Scalor")
+dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors, Filtor = dict_filtors, Scalor = dict_scalors)
+shortforms = list(Mutator = mut, Recombinator = rec, Selector = sel, Filtor = ftr, Scalor = scl)
+abstracts = c(baseclasses, "MutatorNumeric", "MutatorDiscrete", "FiltorSurrogate")
 # the constructors of the following don't know about their inheritance
 exceptions = c("MutatorCombination", "RecombinatorCombination")
 
@@ -13,10 +13,16 @@ initargs = list(
   MutatorMaybe = list(mutator = mut("gauss")),
   MutatorCmpMaybe = list(mutator = mut("gauss")),
   MutatorCombination = list(operators = list(ParamAny = mut("gauss"))),
+  MutatorSequential = list(mutators = list(mut("null"))),
   RecombinatorMaybe = list(recombinator = rec("xounif")),
   RecombinatorCombination = list(operators = list(ParamAny = rec("xounif"))),
+  RecombinatorSequential = list(recombinators = list(rec("null"))),
   FiltorMaybe = list(filtor = ftr("null")),
-  FiltorSurrogateProgressive = list(surrogate_learner = mlr3::lrn("regr.featureless"))
+  FiltorSurrogateProgressive = list(surrogate_learner = mlr3::lrn("regr.featureless")),
+  FiltorSurrogateTournament = list(surrogate_learner = mlr3::lrn("regr.featureless")),
+  SelectorSequential = list(selectors = list(sel("random"))),
+  SelectorMaybe = list(selector = sel("random")),
+  ScalorAggregate = list(scalors = list(scl("one")))
 )
 
 # check if something inherits from any <baseclasses> without constructing it
@@ -76,7 +82,13 @@ for (opinfo in dicts) {
 
   test_obj = do.call(constructor$new, constargs)
 
-  expect_inherits(test_obj, opinfo$base)  # inherits from the correct base class
+  expect_inherits(test_obj, opinfo$base, info = opinfo$operator)  # inherits from the correct base class
+  if (opinfo$operator %in% exceptions) {
+    # some operators do weird things with class
+    expect_inherits(test_obj, opinfo$operator)  # name of constructor and some part of class match (for exceptions)
+  } else {
+    expect_equal(class(test_obj)[[1]], opinfo$operator)  # name of constructor and (topmost) class match
+  }
 
   # check that dict_***$get()  gives the same object as **$new() does
   expect_equal(do.call(dict$get, c(list(dictname), constargs)), test_obj, info = dictname)
@@ -93,11 +105,16 @@ for (opinfo in dicts) {
   if (length(eligible_params)) {
     testingparam = eligible_params[[1]]
     origval = test_obj$param_set$values[[testingparam$id]]
-    # we want to construct an object where the parameter value is different from the construction value
-    # For this we take a few candidate values and filter for feasibility and inequality with original value
-    candidates = c(as.list(testingparam$levels), list(testingparam$lower, testingparam$upper,
-      testingparam$lower + 1, 0, testingparam$upper - 1, if (is.atomic(origval)) origval + 1))
-    val = Filter(function(x) testingparam$test(x) && !is.na(x) && is.finite(x) && (!is.atomic(origval) || origval != x), candidates)[[1]]
+    if (testingparam$is_number) {
+      # we want to construct an object where the parameter value is different from the construction value
+      # For this we take a few candidate values and filter for feasibility and inequality with original value
+      candidates = c(as.list(testingparam$levels), list(testingparam$lower, testingparam$upper,
+        testingparam$lower + 1, 0, testingparam$upper - 1, if (is.atomic(origval)) origval + 1))
+      val = Filter(function(x) testingparam$test(x) && !is.na(x) && is.finite(x) && (!is.atomic(origval) || origval != x), candidates)[[1]]
+    } else {
+      val = setdiff(testingparam$levels, origval)[[1]]
+    }
+
 
     constargs[[testingparam$id]] = val
 
