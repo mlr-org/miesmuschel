@@ -113,7 +113,7 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
     },
     .needed_input = function(output_size) {
       params = private$.own_param_set$get_values()
-      round(max(params$pool_factor, params$pool_factor_last ) * output_size)
+      round(max(params$pool_factor, if (output_size > 1) params$pool_factor_last) * output_size)
     }
   )
 )
