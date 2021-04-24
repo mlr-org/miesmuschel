@@ -76,6 +76,8 @@ tinytest::run_test_file("inst/tinytest/test_mies_filter_offspring.R")
 
 tinytest::run_test_file("inst/tinytest/test_mutator_erase.R")
 
+tinytest::run_test_file("inst/tinytest/test_filtor_surprog.R")
+
 
 objective <- ObjectiveRFun$new(
   fun = function(xs) list(x = xs$x + 10),
