@@ -4,7 +4,9 @@ library("mlr3misc")
 
 baseclasses = c("Recombinator", "Mutator", "Selector", "Filtor", "Scalor")
 dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors, Filtor = dict_filtors, Scalor = dict_scalors)
-shortforms = list(Mutator = mut, Recombinator = rec, Selector = sel, Filtor = ftr, Scalor = scl)
+shortformnames = list(Mutator = "mut", Recombinator = "rec", Selector = "sel", Filtor = "ftr", Scalor = "scl")
+
+
 abstracts = c(baseclasses, "MutatorNumeric", "MutatorDiscrete", "FiltorSurrogate")
 # the constructors of the following don't know about their inheritance
 exceptions = c("MutatorCombination", "RecombinatorCombination")
@@ -46,6 +48,7 @@ operators = Filter(function(x) {
   "R6ClassGenerator" %in% class(objgen) && inherits_from_base(objgen)
 }, ls(pkgenv, all.names = TRUE))
 
+shortforms = lapply(shortformnames, get, pkgenv)
 operators = setdiff(intersect(operators, exports), abstracts)
 
 
@@ -116,6 +119,9 @@ for (opinfo in dicts) {
 
   test_obj = do.call(constructor$new, constargs)
   expand(test_obj)
+
+  expect_equal(test_obj$dict_shortaccess, shortformnames[[opinfo$base]], info = opinfo$operator)
+  expect_equal(test_obj$dict_entry, dictname, info = opinfo$operator)
 
   expect_inherits(test_obj, opinfo$base, info = opinfo$operator)  # inherits from the correct base class
   if (opinfo$operator %in% exceptions) {
