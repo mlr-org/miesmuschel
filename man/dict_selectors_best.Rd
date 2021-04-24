@@ -5,7 +5,7 @@
 \alias{SelectorBest}
 \title{Best Value Selector}
 \description{
-Selector that selects the top \code{n_select} individuals based on the  fitness value. When \code{n_select} is larger than the number
+\code{\link{Selector}} that selects the top \code{n_select} individuals based on the  fitness value. When \code{n_select} is larger than the number
 of individuals, the selection wraps around: All \code{nrow(values)} individuals are selected at least \code{floor(nrow(values) / n_select)}
 times, with the top \code{nrow(values) \%\% n_select} individuals being selected one more time.
 }
@@ -49,8 +49,11 @@ sb$operate(data, fitnesses, 4)
 \seealso{
 Other selectors: 
 \code{\link{Selector}},
+\code{\link{dict_selector_maybe}},
+\code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
-\code{\link{dict_selectors_random}}
+\code{\link{dict_selectors_random}},
+\code{\link{dict_selectors_sequential}}
 }
 \concept{selectors}
 \section{Super classes}{
@@ -60,6 +63,7 @@ Other selectors:
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{SelectorBest$new()}}
+\item \href{#method-prime}{\code{SelectorBest$prime()}}
 \item \href{#method-clone}{\code{SelectorBest$clone()}}
 }
 }
@@ -67,7 +71,8 @@ Other selectors:
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -77,9 +82,31 @@ Other selectors:
 \subsection{Method \code{new()}}{
 Initialize the \code{SelectorBest} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new(scalor = ScalorProxy$new())}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-prime}{}}}
+\subsection{Method \code{prime()}}{
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operator
+given to \code{scalor} during construction.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$prime(param_set)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\link{invisible} \code{self}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

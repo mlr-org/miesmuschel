@@ -18,7 +18,7 @@
 #' @template autoinfo_dict
 #'
 #' @family filtors
-#' @example
+#' @examples
 #' fn = ftr("null")
 #'
 #' p = ps(x = p_dbl(-5, 5))
@@ -38,7 +38,7 @@ FiltorNull = R6Class("FiltorNull",
   inherit = Filtor,
   public = list(
     initialize = function() {
-      super$initialize()
+      super$initialize(dict_entry = "null")
     }
   ),
   private = list(

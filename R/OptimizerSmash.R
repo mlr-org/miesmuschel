@@ -1,4 +1,4 @@
-#' @title Surrogate Model Assisted Hyperband Optimizer
+#' @title Surrogate Model Asisted Hyperband Optimizer
 #'
 #' @description
 #' Perform Surrogate Model Assisted Hyperband Optimization.
@@ -35,7 +35,7 @@
 #' when `fidelity_steps` is 0) between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
 #'
 #' @section Configuration Parameters:
-#' `OptimizerSumoHB`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
+#' `OptimizerSmash`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
 #'
 #' * `mu` :: `integer(1)`\cr
 #'   Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
@@ -57,6 +57,11 @@
 #'   [`Filtor`] for the filtering algorithm. Default is [`FiltorProxy`], which exposes the operation as
 #'   a configuration parameter of the optimizer itself.\cr
 #'   The `$filtor` field will reflect this value.
+#' @param selector ([`Selector`])\cr
+#'   [`Selector`] that chooses which individuals survive to the next higher fidelity step.
+#'   Note this is potentially different from the selection done in `filtor` (although the common case
+#'   would be to use the same [`Selector`] in both).
+#'   The `$selector` field will reflect this value.
 #'
 #' @family optimizers
 #' @examples
@@ -100,13 +105,13 @@
 #' # of which survive, while 10 are sampled new.
 #' # For this, 100 individuals are sampled randomly, and the top 10, according
 #' # to the surrogate model, are used.
-#' sumohb_opt <- opt("sumohb", ftr("surprog",
+#' smash_opt <- opt("smash", ftr("surprog",
 #'     surrogate_learner = mlr3::lrn("regr.ranger"),
 #'     filter_pool_first = 100, filter_pool_per_sample = 0),
 #'   mu = 30, survival_fraction = 2/3
 #' )
-#' # sumohb_opt$optimize performs SumoHB optimization and returns the optimum
-#' sumohb_opt$optimize(oi)
+#' # smash_opt$optimize performs Smash optimization and returns the optimum
+#' smash_opt$optimize(oi)
 #'
 #' #####
 #' # Optimizing a Machine Learning Method
@@ -136,22 +141,23 @@
 #' )
 #'
 #' # use ftr("maybe") for random interleaving: only 50% of proposed points are filtered.
-#' sumohb_tune <- tnr("sumohb", ftr("maybe", p = 0.5, filtor = ftr("surprog",
+#' smash_tune <- tnr("smash", ftr("maybe", p = 0.5, filtor = ftr("surprog",
 #'     surrogate_learner = lrn("regr.ranger"),
 #'     filter_pool_first = 100, filter_pool_per_sample = 0)),
 #'   mu = 20, survival_fraction = 0.5
 #' )
-#' # sumohb_tune$optimize performs SumoHB optimization and returns the optimum
-#' sumohb_tune$optimize(ti)
+#' # smash_tune$optimize performs Smash optimization and returns the optimum
+#' smash_tune$optimize(ti)
 #'
 #' }
 #' @export
-OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
+OptimizerSmash = R6Class("OptimizerSmash", inherit = Optimizer,
   public = list(
     #' @description
-    #' Initialize the 'OptimizerSumoHB' object.
-    initialize = function(filtor = FiltorProxy$new()) {
+    #' Initialize the 'OptimizerSmash' object.
+    initialize = function(filtor = FiltorProxy$new(), selector = SelectorProxy$new()) {
       private$.filtor = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
+      private$.selector = assert_r6(selector, "Selector")$clone(deep = TRUE)
       param_set = ps(
         mu = p_int(1, tags = "required"),
         survival_fraction = p_dbl(0, 1, tags = "required"),
@@ -165,13 +171,13 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       self$filtor$param_set$set_id = "filtor"
 
-      private$.param_set_source = alist(private$.own_param_set, private$.filtor$param_set)
+      private$.param_set_source = alist(private$.own_param_set, private$.selector$param_set, private$.filtor$param_set)
 
       can_dependencies = TRUE  # TODO filtor needs to announce this
 
       super$initialize(
         param_set = self$param_set, param_classes = private$.filtor$param_classes,
-        properties = c(if (can_dependencies) "dependencies", "single-crit"),
+        properties = c(if (can_dependencies) "dependencies", c("single-crit", "multi-crit")),
         packages = "miesmuschel"  # TODO: packages from filtor, this is in a different branch currently
       )
     }
@@ -183,6 +189,15 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       ret = private$.filtor
       if (!missing(rhs) && !identical(rhs, ret)) {
         stop("filtor is read-only.")
+      }
+      ret
+    },
+    #' @field selector ([`Selector`])\cr
+    #' Survival selector used between fidelity steps.
+    selector = function(rhs) {
+      ret = private$.selector
+      if (!missing(rhs) && !identical(rhs, ret)) {
+        stop("selector is read-only.")
       }
       ret
     },
@@ -246,11 +261,10 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       mutator = MutatorErase$new()
       mutator$param_set$values$initializer = params$sampling
-      survival_selector = SelectorBest$new()
       parent_selector = SelectorRandom$new()
       parent_selector$param_set$values$replace = TRUE
 
-      mies_prime_operators(mutators = list(mutator), selectors = list(survival_selector, parent_selector), filtors = list(private$.filtor),
+      mies_prime_operators(mutators = list(mutator), selectors = list(private$.selector, parent_selector), filtors = list(private$.filtor),
         search_space = inst$search_space, budget_id = budget_id)
 
       mies_init_population(inst, mu = params$mu, initializer = params$sampling, fidelity_schedule = fidelity_schedule,
@@ -278,7 +292,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
           filter_down_to = lambda
         }
         offspring = mies_generate_offspring(inst, lambda = sample_new, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
-        mies_survival_plus(inst, mu = keep_alive, survival_selector = survival_selector)
+        mies_survival_plus(inst, mu = keep_alive, survival_selector = private$.selector)
         offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
           fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)
@@ -287,6 +301,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
     .own_param_set = NULL,
     .param_set_id = NULL,
     .param_set_source = NULL,
+    .selector = NULL,
     .filtor = NULL
   )
 )

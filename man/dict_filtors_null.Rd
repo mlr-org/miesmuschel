@@ -33,12 +33,30 @@ dict_filtors$get("null")
 }
 }
 
+\examples{
+fn = ftr("null")
+
+p = ps(x = p_dbl(-5, 5))
+known_data = data.frame(x = 1:5)
+fitnesses = 1:5
+
+new_data = data.frame(x = c(2.5, 4.5)
+
+fn$prime(p)
+
+fn$needed_input(1)
+
+fn$operate(new_data, known_data, fitnesses, 1)
+
+}
 \seealso{
 Other filtors: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtourn}}
 }
 \concept{filtors}
 \section{Super classes}{
@@ -56,6 +74,8 @@ Other filtors:
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="Filtor" data-id="needed_input">}\href{../../miesmuschel/html/Filtor.html#method-needed_input}{\code{miesmuschel::Filtor$needed_input()}}\out{</span>}
 }
 \out{</details>}

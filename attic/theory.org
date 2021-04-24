@@ -1,0 +1,9 @@
+
+
+
+- what is the average distance from known points when doing tournamint filtoring?
+- read paper(s) about surrogate assisted EAs and see how they solve this
+  - e.g. Loshchilov, Branke
+  - Y. Jin, M. Olhofer, B. Sendhoff, “A framework for evolutionary optimization with approximate fitness function”, IEEE Transactions on Evolutionary Computation, 6(5):481-494, 2002.
+  - Y. S. Ong, P. B. Nair, and A. J. Keane, “Evolutionary optimization of computationally expensive problems via surrogate modeling”, American Institute of Aeronautics and Astronautics Journal, 41(4):687-696, 2003.
+  - 

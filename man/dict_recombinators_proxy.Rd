@@ -57,16 +57,26 @@ Other recombinators:
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_sequential}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{OperatorCombination}},
-\code{\link{dict_recombinators_maybe}}
+\code{\link{dict_recombinators_maybe}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{recombinator wrappers}
 \concept{recombinators}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorProxy}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{packages}}{(\code{character})\cr
+Packages needed for the operator. Retrieved from the \code{operation} configuration parameter. Read-only.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -80,6 +90,8 @@ Other recombinator wrappers:
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }

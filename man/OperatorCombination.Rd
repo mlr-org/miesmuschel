@@ -160,12 +160,14 @@ op$operate(data2)
 }
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
 \code{\link{Recombinator}},
+\code{\link{Scalor}},
 \code{\link{Selector}}
 
 Other mutators: 
@@ -178,23 +180,27 @@ Other mutators:
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
 \code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}},
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_maybe}},
-\code{\link{dict_mutators_proxy}}
+\code{\link{dict_mutators_proxy}},
+\code{\link{dict_mutators_sequential}}
 
 Other recombinators: 
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{dict_recombinators_maybe}},
-\code{\link{dict_recombinators_proxy}}
+\code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{base classes}
 \concept{mutator wrappers}
@@ -242,6 +248,8 @@ See the construction argument. Can be changed during the object's lifetime.}
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }
@@ -258,7 +266,9 @@ Initialize the \code{OperatorCombination} object.
   binary_fct_as_logical = FALSE,
   on_type_not_present = "warn",
   on_name_not_present = "stop",
-  granularity = 1
+  granularity = 1,
+  dict_entry = NULL,
+  dict_shortaccess = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -311,6 +321,19 @@ The writable \verb{$on_name_not_present} field will reflect this value.}
 At what granularity to query \code{adaptions} for sets of individuals. Functions in \code{adaptions} are always called once per \code{granularity} individuals
 in input \code{values}, and the function argument in these calls will then have \code{granularity} number of rows. This is used internally, it is set to
 1 for \code{MutatorCombination}, and to \verb{$n_indivs_in} for \code{RecombinatorCombination}.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\n
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{dict_shortaccess}}{(\code{character(1)} | \code{NULL})\cr
+Name of the \code{\link[mlr3misc:Dictionary]{Dictionary}} short access function in which the operator is registered.
+This is used to inform the user about how to construct a given object. Should ordinarily be one of
+\code{"mut"}, \code{"rec"}, \code{"sel"}.\n
+The \verb{$dict_shortaccess} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }
@@ -370,6 +393,8 @@ The objects of this class are cloneable with this method.
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../miesmuschel/html/OperatorCombination.html#method-prime}{\code{miesmuschel::OperatorCombination$prime()}}\out{</span>}
 }
 \out{</details>}
@@ -451,6 +476,8 @@ Number of individuals produced for each group of \verb{$n_indivs_in} individuals
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../miesmuschel/html/OperatorCombination.html#method-prime}{\code{miesmuschel::OperatorCombination$prime()}}\out{</span>}
 }
 \out{</details>}

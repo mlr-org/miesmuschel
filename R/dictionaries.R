@@ -23,6 +23,14 @@ dict_selectors = R6Class("DictionarySelector",
   cloneable = FALSE
 )$new()
 
+#' @title Dictionary of Scalors
+#'
+#' @export
+dict_scalors = R6Class("DictionaryScalor",
+  inherit = Dictionary,
+  cloneable = FALSE
+)$new()
+
 #' @title Dictionary of Filtors
 #'
 #' @export
@@ -45,11 +53,14 @@ dict_filtors = R6Class("DictionaryFiltor",
 #' * list of [`Recombinator`] for `recs()`.
 #' * [`Selector`] for `sel()`.
 #' * list of [`Selector`] for `sels()`.
+#' * [`Scalor`] for `scl()`.
+#' * list of [`Scalor`] for `scls()`.
 #' @export
 #' @examples
 #' mut("gauss", sdev = 0.5)
 #' rec("xounif")
 #' sel("random")
+#' scl("nondom")
 mut = function(.key, ...) {
   dictionary_sugar(dict_mutators, .key, ...)
 }
@@ -82,6 +93,18 @@ sel = function(.key, ...) {
 #' @export
 sels = function(.key, ...) {
   dictionary_sugar_mget(dict_selectors, .key, ...)
+}
+
+#' @rdname mut
+#' @export
+scl = function(.key, ...) {
+  dictionary_sugar(dict_scalors, .key, ...)
+}
+
+#' @rdname mut
+#' @export
+scls = function(.key, ...) {
+  dictionary_sugar_mget(dict_scalors, .key, ...)
 }
 
 #' @rdname mut

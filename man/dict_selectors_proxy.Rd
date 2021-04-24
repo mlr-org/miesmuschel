@@ -3,9 +3,9 @@
 \name{dict_selectors_proxy}
 \alias{dict_selectors_proxy}
 \alias{SelectorProxy}
-\title{Proxy-Selectior that Selects According to its Configuration Parameter}
+\title{Proxy-Selector that Selects According to its Configuration Parameter}
 \description{
-Selector that performs the operation in its \code{operation} configuration parameter. This is useful, e.g., to make
+\code{\link{Selector}} that performs the operation in its \code{operation} configuration parameter. This is useful, e.g., to make
 \code{\link{OptimizerMies}}'s selection operations fully parametrizable.
 }
 \section{Configuration Parameters}{
@@ -57,13 +57,28 @@ sp$operate(data, fitnesses, 2)
 \seealso{
 Other selectors: 
 \code{\link{Selector}},
+\code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},
-\code{\link{dict_selectors_random}}
+\code{\link{dict_selectors_null}},
+\code{\link{dict_selectors_random}},
+\code{\link{dict_selectors_sequential}}
+
+Other selector wrappers: 
+\code{\link{dict_selector_maybe}},
+\code{\link{dict_selectors_sequential}}
 }
 \concept{selector wrappers}
 \concept{selectors}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{SelectorProxy}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{packages}}{(\code{character})\cr
+Packages needed for the operator. Retrieved from the \code{operation} configuration parameter. Read-only.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -77,6 +92,8 @@ Other selectors:
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 }
 \out{</details>}
 }

@@ -94,3 +94,66 @@ ggplot(ti$archive$data, aes(x = dob, y = classif.acc, group = id, color = as.num
 #
 # multicrit
 #
+
+
+
+# Define the objective to optimize
+# The 'budget' here simulates averaging 'b' samples from a noisy function
+objective.mo <- ObjectiveRFun$new(
+  fun = function(xs) {
+    list(
+      obj1 = xs$x * sin(xs$y) + rnorm(1, sd = 1 / sqrt(xs$b)),
+      obj2 = xs$x * cos(xs$y) + rnorm(1, sd = 1 / sqrt(xs$b))
+    )
+  },
+  domain = ps(x = p_dbl(0, 1), y = p_dbl(0, 2 * pi), b = p_int(1)),
+  codomain = ps(obj1 = p_dbl(tags = "maximize"), obj2 = p_dbl(tags = "maximize"))
+)
+
+search_space = objective.mo$domain$search_space(list(
+  x = to_tune(),
+  y = to_tune(),
+  b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
+))
+
+# Get a new OptimInstance. Here we determine that the optimizatoin goes
+# for 10 generations.
+oi <- OptimInstanceMultiCrit$new(objective.mo,
+  search_space = search_space,
+  terminator = trm("gens", generations = 10)
+)
+
+library("mlr3learners")
+# use the 'regr.ranger' as surrogate.
+# The following settings have 30 individuals in a batch, the 20 best
+# of which survive, while 10 are sampled new.
+# For this, 100 individuals are sampled randomly, and the top 10, according
+# to the surrogate model, are used.
+sumohb_opt <- opt("sumohb", filtor = ftr("surtour",
+    surrogate_learner = mlr3::lrn("regr.ranger"),
+    surrogate_selector = sel("best", scalor = scl("nondom")),
+    filter.tournament_size = 20),
+  selector = sel("best", scalor = scl("nondom")),
+  mu = 100, survival_fraction = 2/3
+)
+
+# sumohb_opt$optimize performs SumoHB optimization and returns the optimum
+sumohb_opt$optimize(oi)
+
+print(oi$archive$data, nrows = 300)
+
+library("ggplot2")
+
+
+oi$archive$data
+
+oi$archive$data[, id := sapply(paste(x, y), function(x) substr(digest::digest(x), 1, 5))]
+
+
+ggplot(oi$archive$data, aes(x = obj1, y = obj2, color = dob, group = id)) + geom_point() + geom_line()
+
+ggplot(oi$archive$data[dob > 8], aes(x = obj1, y = obj2, color = dob, group = id)) + geom_point() + geom_line()
+
+
+
+oi$archive$data

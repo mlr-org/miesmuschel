@@ -38,7 +38,7 @@ lg = NULL
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
   mlr_optimizers$add("mies", OptimizerMies)
-  mlr_optimizers$add("sumohb", OptimizerSumoHB)
+  mlr_optimizers$add("smash", OptimizerSmash)
 
   mlr_terminators = utils::getFromNamespace("mlr_terminators", ns = "bbotk")
   mlr_terminators$add("gens", TerminatorGenerations)
@@ -49,7 +49,7 @@ reg_mlr3tuning = function(...) {  # nocov start
   if (requireNamespace("mlr3tuning", quietly = TRUE)) {
     mlr_tuners = utils::getFromNamespace("mlr_tuners", ns = "mlr3tuning")
     mlr_tuners$add("mies", TunerMies)
-    mlr_tuners$add("sumohb", TunerSumoHB)
+    mlr_tuners$add("smash", TunerSmash)
   }
 }  # nocov end
 

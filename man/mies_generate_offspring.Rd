@@ -10,7 +10,8 @@ mies_generate_offspring(
   parent_selector = NULL,
   mutator = NULL,
   recombinator = NULL,
-  budget_id = NULL
+  budget_id = NULL,
+  shuffle_after_select = TRUE
 )
 }
 \arguments{
@@ -49,6 +50,11 @@ When this is \code{NULL} (default), then a \code{\link{RecombinatorNull}} is use
 Budget compnent when doing multi-fidelity optimization. This component of the search space is removed from
 individuals sampled from the archive in \code{inst} before giving it to \code{mutator} and \code{recombinator}.
 Should be \code{NULL} when not doing multi-fidelity.}
+
+\item{shuffle_after_select}{(\code{logical(1)})\cr
+Whether to shuffle individuals selected by \code{parent_selector} before giving them to \code{recombinator}. May be set
+to false, in which case one may consider using a \code{\link{SelectorSequential}} that performs some shuffling after selection.
+Default \code{TRUE}.}
 }
 \value{
 \code{\link[data.table:data.table]{data.table}}: A table of configurations proposed as offspring to be evaluated

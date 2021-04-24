@@ -16,12 +16,12 @@ ti = mlr3tuning::TuningInstanceSingleCrit$new(
   terminator = bbotk::trm("gens", generations = 10)
 )
 
-sumohb_tune <- mlr3tuning::tnr("sumohb", filtor = ftr("surprog", surrogate_learner = mlr3::lrn("regr.ranger")),
+smash_tune <- mlr3tuning::tnr("smash", filtor = ftr("surprog", surrogate_learner = mlr3::lrn("regr.ranger")),
   mu = 10, survival_fraction = 0.5
 )
 
 set.seed(1)
-sumohb_tune$optimize(ti)
+smash_tune$optimize(ti)
 
 expect_set_equal(names(ti$result_x_domain), c("mtry", "max.depth", "num.trees"))
 expect_true(ti$result$classif.acc > 0.9)

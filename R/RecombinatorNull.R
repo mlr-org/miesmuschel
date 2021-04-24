@@ -53,7 +53,7 @@ RecombinatorNull = R6Class("RecombinatorNull",
     initialize = function(n_indivs_in = 1, n_indivs_out = n_indivs_in) {
       assert_int(n_indivs_out, lower = 1, tol = 1e-100)
       assert_int(n_indivs_in, lower = n_indivs_out, tol = 1e-100)
-      super$initialize(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out)
+      super$initialize(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out, dict_entry = "null")
     }
   ),
   private = list(

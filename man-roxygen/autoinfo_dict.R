@@ -4,9 +4,9 @@
 #' [`<%= dictname %>`] in the following way:
 #' ```
 #' # preferred:
-#' <%= shortname %>("<%= id %>"<%= tryCatch(additional, error = function(e) "") %>)
-#' <%= shortnameplural %>("<%= id %>"<%= tryCatch(additional, error = function(e) "") %>)  # takes vector IDs, returns list of <%= classname %>s
+#' <%= shortname %>("<%= id %>"<%= tryCatch(gsub("\\\\([<>])", "\\1", additional), error = function(e) "") %>)
+#' <%= shortnameplural %>("<%= id %>"<%= tryCatch(gsub("\\\\([<>])", "\\1", additional), error = function(e) "") %>)  # takes vector IDs, returns list of <%= classname %>s
 #'
 #' # long form:
-#' <%= dictname %>$get("<%= id %>"<%= tryCatch(additional, error = function(e) "") %>)
+#' <%= dictname %>$get("<%= id %>"<%= tryCatch(gsub("\\\\([<>])", "\\1", additional), error = function(e) "") %>)
 #' ```

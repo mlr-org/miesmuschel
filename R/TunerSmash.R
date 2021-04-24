@@ -1,0 +1,13 @@
+#' @include OptimizerSmash.R
+#' @rdname OptimizerSmash
+#' @export
+TunerSmash = R6Class("TunerSmash", inherit = mlr3tuning::TunerFromOptimizer,
+  public = list(
+    #' @description
+    #' Initialize the `TunerSmash` object.
+    #' @param surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)
+    initialize = function(filtor = FiltorProxy$new(), selector = SelectorProxy$new()) {
+      super$initialize(OptimizerSmash$new(filtor = filtor, selector = selector))
+    }
+  )
+)

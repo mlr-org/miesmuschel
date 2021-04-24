@@ -1,11 +1,11 @@
-#' @title Proxy-Selectior that Selects According to its Configuration Parameter
+#' @title Proxy-Selector that Selects According to its Configuration Parameter
 #'
 #' @include Selector.R
 #'
 #' @name dict_selectors_proxy
 #'
 #' @description
-#' Selector that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
+#' [`Selector`] that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s selection operations fully parametrizable.
 #'
 #' @section Configuration Parameters:
@@ -47,7 +47,7 @@ SelectorProxy = R6Class("SelectorProxy",
       param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Selector")))
       param_set$values = list(operation = SelectorBest$new())
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set)
+      super$initialize(param_set = param_set, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -63,6 +63,14 @@ SelectorProxy = R6Class("SelectorProxy",
       private$.operation = operation  # only change operation once everything else succeeded
       private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
       invisible(self)
+    }
+  ),
+  active = list(
+    #' @field packages (`character`)\cr
+    #' Packages needed for the operator. Retrieved from the `operation` configuration parameter. Read-only.
+    packages = function(val) {
+      if (!missing(val)) stop("packages is read-only.")
+      self$param_set$values$operation$packages
     }
   ),
   private = list(
