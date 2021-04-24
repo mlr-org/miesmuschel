@@ -25,6 +25,9 @@ initargs = list(
   ScalorAggregate = list(scalors = list(scl("one")))
 )
 
+# for repr-checks: these need to be looked up because the objects are not representable.
+special_objects = list(`<LearnerRegrFeatureless>` = mlr3::lrn("regr.featureless"))
+
 # check if something inherits from any <baseclasses> without constructing it
 inherits_from_base = function(r6cg) {
   if (r6cg$classname %in% baseclasses) return(TRUE)
@@ -73,6 +76,37 @@ for (type in names(dictionaries)) {
   expect_true(length(unexported) == 0, info = sprintf("%s in dictionary that is not exported: %s", type, str_collapse(unexported)))
 }
 
+# make sure all active bindings are executed, normalise pre / post cloning state
+expand = function(obj) {
+  if (!(is.list(obj) || is.environment(obj)) || is.null(names(obj)) || anyDuplicated(names(obj))) return(obj)
+  for (n in names(obj)[!grepl("^\\.", names(obj))]) {
+    if (is.list(obj[[n]])) {
+      tryCatch({
+        obj[[n]] = expand(obj[[n]])
+      }, error = function(e) NULL)
+    } else {
+      expand(obj[[n]])
+    }
+  }
+  # handle special case: '.own_defaults' content is not touched sometimes
+  if (!is.null(obj$.__enclos_env__$private$.own_defaults)) {
+    obj$.__enclos_env__$private$.own_defaults = expand(obj$.__enclos_env__$private$.own_defaults)
+  }
+  # handle special case: .param_set_id is constructed as NULL and only becomes "" after clone if not changed.
+  if (".param_set_id" %in% names(obj$.__enclos_env__$private) && is.null(obj$.__enclos_env__$private$.param_set_id)) {
+    obj$.__enclos_env__$private$.param_set_id = ""
+  }
+  obj
+}
+
+construct_from_repr = function(rep) {
+  constructed = eval(rep, envir = list(stop = function(x) {
+    if (x %in% names(special_objects)) special_objects[[x]] else stop(sprintf("Non-representable object: %s", x))
+  }), enclos = .GlobalEnv)
+  expand(constructed)
+  constructed
+}
+
 # check whether we can construct each operator from dictionary and from itself, and get the same result.
 for (opinfo in dicts) {
   constructor = get(opinfo$operator, pkgenv)  # constructor as found in pkg namespace
@@ -81,6 +115,7 @@ for (opinfo in dicts) {
   dict = dictionaries[[opinfo$base]]
 
   test_obj = do.call(constructor$new, constargs)
+  expand(test_obj)
 
   expect_inherits(test_obj, opinfo$base, info = opinfo$operator)  # inherits from the correct base class
   if (opinfo$operator %in% exceptions) {
@@ -91,7 +126,9 @@ for (opinfo in dicts) {
   }
 
   # check that dict_***$get()  gives the same object as **$new() does
-  expect_equal(do.call(dict$get, c(list(dictname), constargs)), test_obj, info = dictname)
+  fromdict = do.call(dict$get, c(list(dictname), constargs))
+  expand(fromdict)
+  expect_equal(fromdict, test_obj, info = dictname)
 
   # check that hyperparameters can be changed on construction
   # We do this by automatically generating a hyperparameter value that deviates from the automatically constructed one
@@ -102,6 +139,10 @@ for (opinfo in dicts) {
     # (Note numeric parameters have 0 levels, discrete parameters have lower == upper == NA)
     length(p$levels) < 2 && isTRUE(all.equal(p$lower, p$upper))
   })
+
+  expect_equal(construct_from_repr(repr(test_obj)), test_obj, info = opinfo$operator)
+  expect_equal(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), test_obj, info = opinfo$operator)
+
   if (length(eligible_params)) {
     testingparam = eligible_params[[1]]
     origval = test_obj$param_set$values[[testingparam$id]]
@@ -119,9 +160,14 @@ for (opinfo in dicts) {
     constargs[[testingparam$id]] = val
 
     pv_obj = do.call(shortforms[[opinfo$base]], c(list(dictname), constargs))
+    expand(pv_obj)
     expect_false(isTRUE(all.equal(test_obj, pv_obj)))
     test_obj$param_set$values[[testingparam$id]] = val
     expect_true(isTRUE(all.equal(test_obj, pv_obj)))
+
+    expect_equal(construct_from_repr(repr(test_obj)), pv_obj, info = opinfo$operator)
+    expect_equal(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), pv_obj, info = opinfo$operator)
+
   }
 }
 

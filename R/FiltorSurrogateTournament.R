@@ -72,7 +72,7 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
       )
       own_param_set$values = list(per_tournament = 1, tournament_size = 1)
 
-      super$initialize(surrogate_learner = surrogate_learner, param_set = own_param_set, surrogate_selector = surrogate_selector, dict_entry = "surprog")
+      super$initialize(surrogate_learner = surrogate_learner, param_set = own_param_set, surrogate_selector = surrogate_selector, dict_entry = "surtour")
     }
   ),
   private = list(

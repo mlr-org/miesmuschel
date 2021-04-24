@@ -65,7 +65,7 @@ Filtor = R6Class("Filtor",
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
-      super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "sel", own_param_set = own_param_set)
+      super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "ftr", own_param_set = own_param_set)
     },
     needed_input = function(output_size) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")

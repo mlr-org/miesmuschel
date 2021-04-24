@@ -52,12 +52,14 @@ RecombinatorSequential = R6Class("RecombinatorSequential",
     #'   The constructed object gets a *clone* of this argument. The `$recombinators` field will reflect this value.
     #' @param allow_lcm_packing (`logical(1)`)\cr
     #'   Whether to allow lowest common multiple packing. Default `FALSE`.
+    #'   The `$allow_lcm_packing` field will reflect this value.
     initialize = function(recombinators, allow_lcm_packing = FALSE) {
       private$.wrapped = imap(unname(assert_list(recombinators, types = "Recombinator", min.len = 1)), function(x, i) {
         x$clone(deep = TRUE)
         x$param_set$set_id = sprintf("recombinator_%s", i)
         x
       })
+      private$.allow_lcm_packing = assert_flag(allow_lcm_packing)  # only for repr()
       private$.own_param_set = ps(shuffle_between = p_lgl(tags = "required"))
       private$.own_param_set$values = list(shuffle_between = TRUE)
       ps_alist = c(alist(private$.own_param_set),
@@ -115,6 +117,12 @@ Either match input and output sizes using a RecombinatorNull, or allow rescaling
     recombinators = function(val) {
       if (!missing(val)) stop("recombinators is read-only.")
       private$.wrapped
+    },
+    #' @field allow_lcm_packing (`logical(1)`)\cr
+    #'   Whether to allow lowest common multiple packing.
+    allow_lcm_packing = function(val) {
+      if (!missing(val)) stop("allow_lcm_packing is read-only.")
+      private$.allow_lcm_packing
     }
   ),
   private = list(
@@ -133,7 +141,8 @@ Either match input and output sizes using a RecombinatorNull, or allow rescaling
     },
     .wrapped = NULL,
     .own_param_set = NULL,
-    .multiplicities = NULL
+    .multiplicities = NULL,
+    .allow_lcm_packing = NULL
   )
 )
 dict_recombinators$add("sequential", RecombinatorSequential)

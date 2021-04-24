@@ -76,7 +76,7 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
       private$.surrogate_learner
     },
     #' @field surrogate_selector ([`Selector`])\cr
-    #' Selector with which to select using surrogate-predicted performance
+    #' [`Selector`] with which to select using surrogate-predicted performance
     surrogate_selector = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.surrogate_selector)) {
         stop("surrogate_selector is read-only.")
