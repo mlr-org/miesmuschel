@@ -1,43 +1,4 @@
 
-# demo objective
-
-# Define the objective to optimize
-# The 'budget' here simulates averaging 'b' samples from a noisy function
-
-# single objective
-objective <- ObjectiveRFun$new(
-  fun = function(xs) {
-    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
-    z <- z + rnorm(1, sd = 1 / sqrt(xs$b))
-    list(Obj = z)
-  },
-  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), b = p_int(1)),
-  codomain = ps(Obj = p_dbl(tags = "maximize"))
-)
-
-search_space = objective$domain$search_space(list(
-  x = to_tune(),
-  y = to_tune(),
-  b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
-))
-
-# multi-objective
-objective.mo <- ObjectiveRFun$new(
-  fun = function(xs) {
-    list(
-      obj1 = xs$x * sin(xs$y) + rnorm(1, sd = 1 / sqrt(xs$b)),
-      obj2 = xs$x * cos(xs$y) + rnorm(1, sd = 1 / sqrt(xs$b))
-    )
-  },
-  domain = ps(x = p_dbl(0, 1), y = p_dbl(0, 2 * pi), b = p_int(1)),
-  codomain = ps(obj1 = p_dbl(tags = "maximize"), obj2 = p_dbl(tags = "maximize"))
-)
-
-search_space.mo = objective.mo$domain$search_space(list(
-  x = to_tune(),
-  y = to_tune(),
-  b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
-))
 
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
@@ -55,9 +16,6 @@ suggested_meta_searchspace = ps(
   random_interleave_fraction = p_dbl(0, 1),
   random_interleave_random = p_lgl()
 )
-
-
-
 
 opt_objective <- function(objective, search_space, budget_limit, budget_log_step,
     survival_fraction, mu, sample,
@@ -102,7 +60,10 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
 
   survivors = max(round(survival_fraction * mu), 1)
   lambda = mu - survivors
-  if (lambda < 1) return("infeasible: no new samples per generation")
+  if (lambda < 1) {
+    # return("infeasible: no new samples per generation")
+    survival_fraction <- 1 - 1 / mu
+  }
 
   oiclass = if (objective.mo$codomain$length == 1) OptimInstanceSingleCrit else OptimInstanceMultiCrit
   oi <- oiclass$new(objective, search_space,
@@ -136,16 +97,51 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   )
 
   optimizer$optimize(oi)
+  oi
+}
+
+opt_objective_optimizable <- function(objective, test_objective, search_space, budget_limit, budget_log_step,
+    survival_fraction, mu, sample,
+    filter_algorithm, surrogate_learner, filter_with_max_budget, filter_factor_first, filter_factor_last, filter_select_per_tournament,
+    random_interleave_fraction, random_interleave_random, highest_budget_only, nadir = 0) {
+
+  assert_flag(highest_budget_only)
+
+  multiobjective <- objective$codomain$length > 1
+
+  oi <- opt_objective(objective, search_space, budget_limit, budget_log_step,
+    survival_fraction, mu, sample,
+    filter_algorithm, surrogate_learner, filter_with_max_budget, filter_factor_first, filter_factor_last, filter_select_per_tournament,
+    random_interleave_fraction, random_interleave_random)
+
+  om <- oi$objective_multiplicator
+
+  archdata <- oi$archive$data
+  budgetparam <- oi$search_space$ids(tags = "budget")
+  if (highest_budget_only) {
+    archdata <- archdata[get(budgetparam) == max(get(budgetparam))]
+  }
+
+  objvalues <- archdata[, names(om), with = FALSE]
+  objmat <- as.matrix(sweep(objvalues, 2, om, `*`)) * -1
+
+  ndo <- miesmuschel::order_nondominated(objmat)$fronts
+  selarch <- ndo == 1
+
+  if (!multiobjective) {
+    selarch <- which(selarch)[[1]]
+  }
+
+  design <- archdata[selarch, x_domain]
+
+  fitnesses <- as.matrix(sweep(test_objective$eval_many(design), 2, om, `*`)) * -1
+
+  if (multiobjective) {
+    miesmuschel::domhv(fitnesses, nadir = nadir)
+  } else {
+    c(fitnesses)
+  }
 }
 
 
-# Example call:
-# res <- opt_objective(objective.mo, search_space.mo, budget_limit = 2^13, budget_log_step = log(2), survival_fraction = .5, mu = 20, sample = "random", filter_algorithm = "tournament", surrogate_learner = lrn("regr.ranger"), filter_with_max_budget = FALSE, filter_factor_first = 1, filter_factor_last = 100, filter_select_per_tournament = 1, random_interleave_fraction = 0.1, random_interleave_random = TRUE)
 
-# Example call for tuning
-# numopts = 10
-# calls <- generate_design_random(suggested_meta_searchspace, numopts)$transpose()
-# ## multiobjective
-# res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective.mo, search_space.mo, budget_limit = 2^13, .args = ci))
-# ## singleobjective
-# res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective, search_space, budget_limit = 2^13, .args = ci))
