@@ -65,13 +65,13 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
     survival_fraction <- 1 - 1 / mu
   }
 
-  oiclass = if (objective.mo$codomain$length == 1) OptimInstanceSingleCrit else OptimInstanceMultiCrit
+  oiclass = if (objective$codomain$length == 1) OptimInstanceSingleCrit else OptimInstanceMultiCrit
   oi <- oiclass$new(objective, search_space,
     terminator = trm("budget", budget = budget_limit, aggregate = function(x) sum(exp(as.numeric(x))))  # budget in archive is in log-scale!
   )
 
   # scalor: scalarizes multi-objective results. "one": take the single objective. "nondom": nondominated sorting w/ crowding distance tie breaker
-  scalor = if (objective.mo$codomain$length == 1) scl("one") else scl("nondom")
+  scalor = if (objective$codomain$length == 1) scl("one") else scl("nondom")
   # selector: take the best, according to scalarized objective
   selector = sel("best", scalor)
   # filtor: use surtour or surprog, depending on filter_algorithm config argument
@@ -134,7 +134,7 @@ opt_objective_optimizable <- function(objective, test_objective, search_space, b
 
   design <- archdata[selarch, x_domain]
 
-  fitnesses <- as.matrix(sweep(test_objective$eval_many(design), 2, om, `*`)) * -1
+  fitnesses <- as.matrix(sweep(test_objective$eval_many(design)[, test_objective$codomain$ids(), with = FALSE], 2, om, `*`)) * -1
 
   if (multiobjective) {
     miesmuschel::domhv(fitnesses, nadir = nadir)

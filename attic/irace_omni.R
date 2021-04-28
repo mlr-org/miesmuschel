@@ -6,7 +6,7 @@ library(data.table)
 library(mlr3learners)
 library("checkmate")
 
-source("optim2.R")
+source("attic/optim2.R")
 
 # lcbench
 workdir = "./attic/data/"
@@ -71,19 +71,30 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
         nadir = vapply(objective$codomain$tags, function(x) ifelse("minimize" %in% x, 1, 0), 0)
 
         search_space = objective$domain$search_space(list(
-          batch_size = to_tune(logscale = TRUE),
-          learning_rate = to_tune(logscale = TRUE),
+          batch_size = to_tune(),
+          learning_rate = to_tune(),
           momentum = to_tune(),
           weight_decay = to_tune(),
           num_layers = to_tune(),
-          max_units = to_tune(logscale = TRUE),
-          max_dropout = to_tune(),
-          epoch = to_tune(p_int(1, 52, logscale = TRUE, tags = "budget"))
+          max_units = to_tune(),
+          max_dropout = to_tune()
         ))
 
-        performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, test_objective = test_objective,
+        search_space$add(ParamDbl$new("epoch", 1, log(52), tags = "budget"))
+
+        search_space$trafo = function(x, param_set) {
+          x$batch_size = as.integer(round(exp(x$batch_size)))
+          x$learning_rate = exp(x$learning_rate)
+          x$max_units = as.integer(round(exp(x$max_units)))
+          x$epoch = as.integer(exp(x$epoch))
+          x
+        }
+
+        budget_limit = search_space$length * 10 * 52
+
+        performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, test_objective = test_objective, budget_limit = budget_limit,
           search_space = search_space, highest_budget_only = highest_budget_only, nadir = nadir,
-          args = xs)
+          .args = xs)
         list(y = performance)
       }
     )
@@ -103,4 +114,4 @@ optimize_irace <- function(objective_targets, test_targets, instance_parameter, 
   irace_instance
 }
 
-# optimize_irace("val_balanced_accuracy", "test_balanced_accuracy", "OpenML_task_id", cfg, 300)
+optimize_irace("val_balanced_accuracy", "test_balanced_accuracy", "OpenML_task_id", cfg, 300)
