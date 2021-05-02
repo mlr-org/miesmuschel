@@ -137,9 +137,9 @@ opt_objective_optimizable <- function(objective, test_objective, search_space, b
   fitnesses <- as.matrix(sweep(test_objective$eval_many(design)[, test_objective$codomain$ids(), with = FALSE], 2, om, `*`)) * -1
 
   if (multiobjective) {
-    miesmuschel::domhv(fitnesses, nadir = nadir)
+    miesmuschel:::domhv(fitnesses, nadir = nadir)
   } else {
-    c(fitnesses)
+    fitnesses
   }
 }
 

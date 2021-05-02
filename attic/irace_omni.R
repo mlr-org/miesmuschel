@@ -1,17 +1,12 @@
 library(bbotk) # @irace
 library(R6)
-library(miesmuschel)
-library(mfsurrogates)
+library(miesmuschel) # @multiobjective_hb
+library(mfsurrogates) 
 library(data.table)
 library(mlr3learners)
-library("checkmate")
+library(checkmate)
 
 source("attic/optim2.R")
-
-# lcbench
-workdir = "./attic/data/"
-cfg = cfgs("lcbench", workdir = workdir)
-cfg$setup()
 
 # sumo hyperband configuration parameter search space
 meta_search_space = ps(
@@ -90,7 +85,7 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
           x
         }
 
-        budget_limit = search_space$length * 10 * 52
+        budget_limit = search_space$length * 100 * 52
 
         performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, test_objective = test_objective, budget_limit = budget_limit,
           search_space = search_space, highest_budget_only = highest_budget_only, nadir = nadir,
@@ -106,12 +101,18 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
 }
 
 # instance_parameter = `cfg$param_set[[instance_parameter]]` is the parameter indicating irace instance, e.g. one of many objectives
-optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300) {
+optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300, file) {
   assert_choice(instance_parameter, cfg$param_set$ids())
   irace_instance = makeIraceOI(objective_targets, test_targets, cfg, evals)
-  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels)
+  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, parallel = 10)
   optimizer_irace$optimize(irace_instance)
+  saveRDS(irace_instance, file)
   irace_instance
 }
 
-optimize_irace("val_balanced_accuracy", "test_balanced_accuracy", "OpenML_task_id", cfg, 300)
+# lcbench
+workdir = "./attic/data/"
+cfg = cfgs("lcbench", workdir = workdir)
+cfg$setup()
+
+res = optimize_irace(c("val_accuracy", "val_cross_entropy", "val_balanced_accuracy"), c("test_cross_entropy", "test_balanced_accuracy"), "OpenML_task_id", cfg, 900, "./attic/irace_instance_02_05_multi.rda")
