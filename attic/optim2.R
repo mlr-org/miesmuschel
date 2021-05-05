@@ -96,7 +96,7 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
     fidelity_steps = fidelity_steps + 1, filter_with_max_budget = filter_with_max_budget
   )
 
-  null = capture.output(ptimizer$optimize(oi))
+  null = capture.output(optimizer$optimize(oi))
   oi
 }
 
