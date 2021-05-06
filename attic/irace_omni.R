@@ -46,10 +46,8 @@ meta_domain = ps(
 # test_targets: target(s) to do test evaluation on by smashy
 # cfg: ...
 makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
-
   assert_character(objective_targets, any.missing = FALSE, min.len = 1)
   assert_character(test_targets, any.missing = FALSE, len = length(objective_targets))
-
 
   ObjectiveIrace = R6Class("ObjectiveIrace", inherit = bbotk::Objective,
     public = list(
@@ -58,39 +56,46 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
     ),
 
      private = list(
-      .eval = function(xs) {
-        # CONFIGURE THIS FOR THE OBJECTIVE
-        objective = cfg$get_objective(task = self$irace_instance, target_variables = objective_targets)
-        test_objective = cfg$get_objective(task = self$irace_instance, target_variables = test_targets)
-        highest_budget_only = TRUE
-        nadir = vapply(objective$codomain$tags, function(x) ifelse("minimize" %in% x, 1, 0), 0)
+      .eval_many = function(xss) {
 
-        search_space = objective$domain$search_space(list(
-          batch_size = to_tune(),
-          learning_rate = to_tune(),
-          momentum = to_tune(),
-          weight_decay = to_tune(),
-          num_layers = to_tune(),
-          max_units = to_tune(),
-          max_dropout = to_tune()
-        ))
+        eval = function(xs, instance) {
+          t0 = Sys.time()
+          # CONFIGURE THIS FOR THE OBJECTIVE
+          objective = cfg$get_objective(task = instance, target_variables = objective_targets)
+          test_objective = cfg$get_objective(task = instance, target_variables = test_targets)
+          highest_budget_only = TRUE
+          nadir = vapply(objective$codomain$tags, function(x) ifelse("minimize" %in% x, 1, 0), 0)
 
-        search_space$add(ParamDbl$new("epoch", 1, log(52), tags = "budget"))
+          search_space = objective$domain$search_space(list(
+            batch_size = to_tune(),
+            learning_rate = to_tune(),
+            momentum = to_tune(),
+            weight_decay = to_tune(),
+            num_layers = to_tune(),
+            max_units = to_tune(),
+            max_dropout = to_tune()
+          ))
 
-        search_space$trafo = function(x, param_set) {
-          x$batch_size = as.integer(round(exp(x$batch_size)))
-          x$learning_rate = exp(x$learning_rate)
-          x$max_units = as.integer(round(exp(x$max_units)))
-          x$epoch = as.integer(exp(x$epoch))
-          x
+          search_space$add(ParamDbl$new("epoch", 1, log(52), tags = "budget"))
+
+          search_space$trafo = function(x, param_set) {
+            x$batch_size = as.integer(round(exp(x$batch_size)))
+            x$learning_rate = exp(x$learning_rate)
+            x$max_units = as.integer(round(exp(x$max_units)))
+            x$epoch = as.integer(exp(x$epoch))
+            x
+          }
+
+          budget_limit = search_space$length * 10 * 52
+
+          performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, 
+            test_objective = test_objective, budget_limit = budget_limit, search_space = search_space, 
+            highest_budget_only = highest_budget_only, nadir = nadir, .args = xs)
+          time = as.numeric(difftime(Sys.time(), t0, units = "secs"))
+          list(y = performance, time = time)
         }
-
-        budget_limit = search_space$length * 100 * 52
-
-        performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, test_objective = test_objective, budget_limit = budget_limit,
-          search_space = search_space, highest_budget_only = highest_budget_only, nadir = nadir,
-          .args = xs)
-        list(y = performance)
+        res = future.apply::future_mapply(eval, xss, self$irace_instance)
+        as.data.table(t(res))
       }
     )
   )
@@ -104,7 +109,7 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
 optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300, instance_file, log_file) {
   assert_choice(instance_parameter, cfg$param_set$ids())
   irace_instance = makeIraceOI(objective_targets, test_targets, cfg, evals)
-  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, logFile = log_file, deterministic = TRUE)
+  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, logFile = log_file, deterministic = FALSE)
   optimizer_irace$optimize(irace_instance)
   saveRDS(irace_instance, instance_file)
   irace_instance
