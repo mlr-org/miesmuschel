@@ -104,7 +104,7 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
 optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300, instance_file, log_file) {
   assert_choice(instance_parameter, cfg$param_set$ids())
   irace_instance = makeIraceOI(objective_targets, test_targets, cfg, evals)
-  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, logFile = log_file, deterministic = 1)
+  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, logFile = log_file, deterministic = TRUE)
   optimizer_irace$optimize(irace_instance)
   saveRDS(irace_instance, instance_file)
   irace_instance
