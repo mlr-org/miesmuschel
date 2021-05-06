@@ -86,7 +86,7 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
             x
           }
 
-          budget_limit = search_space$length * 10 * 52
+          budget_limit = search_space$length * 100 * 52
 
           performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, 
             test_objective = test_objective, budget_limit = budget_limit, search_space = search_space, 
