@@ -1,4 +1,4 @@
-library(bbotk) # @irace
+library(bbotk)
 library(R6)
 library(miesmuschel) # @multiobjective_hb
 library(mfsurrogates) 
@@ -101,12 +101,12 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
 }
 
 # instance_parameter = `cfg$param_set[[instance_parameter]]` is the parameter indicating irace instance, e.g. one of many objectives
-optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300, file) {
+optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300, instance_file, log_file) {
   assert_choice(instance_parameter, cfg$param_set$ids())
   irace_instance = makeIraceOI(objective_targets, test_targets, cfg, evals)
-  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, parallel = 10)
+  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, logFile = log_file, deterministic = 1)
   optimizer_irace$optimize(irace_instance)
-  saveRDS(irace_instance, file)
+  saveRDS(irace_instance, instance_file)
   irace_instance
 }
 
@@ -115,4 +115,4 @@ workdir = "./attic/data/"
 cfg = cfgs("lcbench", workdir = workdir)
 cfg$setup()
 
-res = optimize_irace(c("val_accuracy", "val_cross_entropy", "val_balanced_accuracy"), c("test_cross_entropy", "test_balanced_accuracy"), "OpenML_task_id", cfg, 900, "./attic/irace_instance_02_05_multi.rda")
+
