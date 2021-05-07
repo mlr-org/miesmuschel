@@ -47,7 +47,7 @@ meta_domain = ps(
 # cfg: ...
 makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
   assert_character(objective_targets, any.missing = FALSE, min.len = 1)
-  assert_character(test_targets, any.missing = FALSE, len = length(objective_targets))
+  assert_character(test_targets, any.missing = FALSE, min.len = 1)
 
   ObjectiveIrace = R6Class("ObjectiveIrace", inherit = bbotk::Objective,
     public = list(
@@ -105,11 +105,9 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
   OptimInstanceSingleCrit$new(objective = irace_objective, search_space = meta_search_space, terminator = trm("evals", n_evals = evals))
 }
 
-# instance_parameter = `cfg$param_set[[instance_parameter]]` is the parameter indicating irace instance, e.g. one of many objectives
-optimize_irace <- function(objective_targets, test_targets, instance_parameter, cfg, evals = 300, instance_file, log_file) {
-  assert_choice(instance_parameter, cfg$param_set$ids())
+optimize_irace <- function(objective_targets, test_targets, instances, cfg, evals = 300, instance_file, log_file) {
   irace_instance = makeIraceOI(objective_targets, test_targets, cfg, evals)
-  optimizer_irace = opt("irace", instances = cfg$param_set$params[[instance_parameter]]$levels, logFile = log_file, deterministic = FALSE)
+  optimizer_irace = opt("irace", instances = instances, logFile = log_file)
   optimizer_irace$optimize(irace_instance)
   saveRDS(irace_instance, instance_file)
   irace_instance
@@ -119,5 +117,8 @@ optimize_irace <- function(objective_targets, test_targets, instance_parameter, 
 workdir = "./attic/data/"
 cfg = cfgs("lcbench", workdir = workdir)
 cfg$setup()
+
+
+
 
 
