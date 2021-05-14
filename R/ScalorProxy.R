@@ -70,7 +70,7 @@ ScalorProxy = R6Class("ScalorProxy",
     }
   ),
   private = list(
-    .scale = function(values, fitnesses) {
+    .scale = function(values, fitnesses, context) {
       operation = self$param_set$get_values()$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.

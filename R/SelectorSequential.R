@@ -109,7 +109,7 @@ SelectorSequential = R6Class("SelectorSequential",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select, context) {
       params = private$.own_param_set$get_values()
       pnames = sprintf("reduction_%s", seq_along(selectors))
 

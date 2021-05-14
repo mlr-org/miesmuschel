@@ -45,7 +45,7 @@ ScalorOne = R6Class("ScalorOne",
     }
   ),
   private = list(
-    .scale = function(values, fitnesses) {
+    .scale = function(values, fitnesses, context) {
       pvals = self$param_set$get_values()
       fitnesses[, pvals$objective]
     }

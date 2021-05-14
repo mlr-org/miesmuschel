@@ -118,7 +118,7 @@ Either match input and output sizes using a RecombinatorNull, or allow rescaling
     }
   ),
   private = list(
-    .recombine = function(values) {
+    .recombine = function(values, context) {
       for (r in private$.wrapped) {
         values = r$operate(values)
       }

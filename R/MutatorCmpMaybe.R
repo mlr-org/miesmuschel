@@ -107,7 +107,7 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
     }
   ),
   private = list(
-    .mutate = function(values) {
+    .mutate = function(values, context) {
       mutated = private$.wrapped$operate(values)
       mutated_not = private$.wrapped_not$operate(values)
       p = self$param_set$get_values()$p

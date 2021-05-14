@@ -8,7 +8,7 @@ ScalorTransform = R6Class("ScalorTransform",
     }
   ),
   private = list(
-    .scale = function(values, fitnesses) {
+    .scale = function(values, fitnesses, context) {
 
     }
   )

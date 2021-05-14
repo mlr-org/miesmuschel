@@ -66,7 +66,7 @@ Recombinator = R6Class("Recombinator",
   private = list(
     .n_indivs_in = NULL,
     .n_indivs_out = NULL,
-    .recombine = function(values) stop(".recombine needs to be implemented by inheriting class."),
+    .recombine = function(values, context) stop(".recombine needs to be implemented by inheriting class."),
     .operate = function(values, context) {
       assert_true(nrow(values) %% self$n_indivs_in == 0)
       rbindlist(

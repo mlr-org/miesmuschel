@@ -107,7 +107,7 @@ MutatorMaybe = R6Class("MutatorMaybe",
     }
   ),
   private = list(
-    .mutate = function(values) {
+    .mutate = function(values, context) {
       mutating = stats::runif(nrow(values)) < self$param_set$get_values()$p
       if (any(mutating)) {
         mutated = private$.wrapped$operate(values[mutating])

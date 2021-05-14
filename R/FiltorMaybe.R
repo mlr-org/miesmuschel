@@ -129,7 +129,7 @@ FiltorMaybe = R6Class("FiltorMaybe",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_filter) {
+    .filter = function(values, known_values, fitnesses, n_filter, context) {
       params = self$param_set$get_values()
 
       if (params$random_choice) {

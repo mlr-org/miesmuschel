@@ -57,7 +57,7 @@ RecombinatorNull = R6Class("RecombinatorNull",
     }
   ),
   private = list(
-    .recombine = function(values) first(values, self$n_indivs_out)
+    .recombine = function(values, context) first(values, self$n_indivs_out)
   )
 )
 dict_recombinators$add("null", RecombinatorNull)

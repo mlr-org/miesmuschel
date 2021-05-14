@@ -42,7 +42,7 @@ FiltorNull = R6Class("FiltorNull",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_filter) {
+    .filter = function(values, known_values, fitnesses, n_filter, context) {
       seq_len(n_filter)
     },
     .needed_input = function(output_size) output_size

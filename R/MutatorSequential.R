@@ -68,7 +68,7 @@ MutatorSequential = R6Class("MutatorSequential",
     }
   ),
   private = list(
-    .mutate = function(values) {
+    .mutate = function(values, context) {
       for (m in private$.wrapped) {
         values = m$operate(values)
       }
