@@ -57,6 +57,10 @@ reg_mlr3tuning = function(...) {  # nocov start
   reg_bbotk()
   reg_mlr3tuning()
 
+  if (is.null(paradox::ps()$context_available)) stop("Need paradox with ContextPV for this version of miesmuschel. Do:
+remotes::install_github(\"mlr-org/paradox@expression_params\")
+and try again.")
+
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
