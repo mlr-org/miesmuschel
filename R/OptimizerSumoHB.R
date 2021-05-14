@@ -261,8 +261,6 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
         stop("Number of survivors equals the total population size. survival_fraction must be lower or mu must be larger.")
       }
       lambda = params$mu - survivors
-      pre_filter_size = private$.filtor$needed_input(lambda)
-      pre_filter_size_wraparound = private$.filtor$needed_input(params$mu)  # need this many indivs pre-filter when 'generations' are reached and all indivs are sampled new.
 
       while (!inst$is_terminated) {
         last_gen = max(inst$archive$data$dob, na.rm = TRUE)
@@ -270,11 +268,11 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
           fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
           # generation cycle is over; kill all individuals, sample new ones.
           keep_alive= 0
-          sample_new = pre_filter_size_wraparound
+          sample_new = private$.filtor$needed_input(params$mu, context = list(inst = inst))
           filter_down_to = params$mu
         } else {
           keep_alive = survivors
-          sample_new = pre_filter_size
+          sample_new = private$.filtor$needed_input(lambda, context = list(inst = inst))
           filter_down_to = lambda
         }
         offspring = mies_generate_offspring(inst, lambda = sample_new, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)

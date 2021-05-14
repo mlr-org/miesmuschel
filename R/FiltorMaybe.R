@@ -52,7 +52,7 @@
 #' library("mlr3")
 #' library("mlr3learners")
 #'
-#' fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter_pool_first = 2), p = 0.5)
+#' fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2), p = 0.5)
 #' p = ps(x = p_dbl(-5, 5))
 #' known_data = data.frame(x = 1:5)
 #' fitnesses = 1:5
@@ -146,8 +146,8 @@ FiltorMaybe = R6Class("FiltorMaybe",
       } else if (filtering == n_filter) {
         private$.wrapped$operate(values, known_values, fitnesses, n_filter, context = context)
       } else {
-        for_wrapped = seq_len(private$.wrapped$needed_input(filtering))
-        for_wrapped_not = seq.int(length(for_wrapped) + 1, length.out = private$.wrapped_not$needed_input(n_filter - filtering))
+        for_wrapped = seq_len(private$.wrapped$needed_input(filtering, context))
+        for_wrapped_not = seq.int(length(for_wrapped) + 1, length.out = private$.wrapped_not$needed_input(n_filter - filtering, context))
         c(
             private$.wrapped$operate(values[for_wrapped], known_values, fitnesses, filtering, context = context),
             length(for_wrapped) + private$.wrapped_not$operate(values[for_wrapped_not], known_values, fitnesses, n_filter - filtering, context = context)
@@ -165,11 +165,11 @@ FiltorMaybe = R6Class("FiltorMaybe",
         # do not sum to output_size. In theory we could iterate through filter_min:filter_max and calculate the
         # max of '.wrapped$needed_input(i) + .wrapped_not$needed_input(output_size - i)', but that is probably
         # more wasteful so we don't do that here.
-        private$.wrapped$needed_input(filter_max) + private$.wrapped_not$needed_input(output_size - filter_min)
+        private$.wrapped$needed_input(filter_max, context) + private$.wrapped_not$needed_input(output_size - filter_min, context)
       } else {
         filtering = round(output_size * params$p)
         # we know exactly how many elements each filter needs.
-        private$.wrapped$needed_input(filtering) + private$.wrapped_not$needed_input(output_size - filtering)
+        private$.wrapped$needed_input(filtering, context) + private$.wrapped_not$needed_input(output_size - filtering, context)
       }
     },
     .wrapped = NULL,
