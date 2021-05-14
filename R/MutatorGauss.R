@@ -55,7 +55,7 @@ MutatorGauss = R6Class("MutatorGauss",
   ),
   private = list(
     .mutate_numeric = function(values, lowers, uppers, context) {
-      params = self$param_set$get_values()
+      params = self$param_set$get_values(context = context)
       sdev = params$sdev
       sdev = pmax(sdev, 0)
       if (length(sdev) == 1) {

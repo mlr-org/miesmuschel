@@ -123,7 +123,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
   ),
   private = list(
     .recombine = function(values, context) {
-      if (stats::runif(1) < self$param_set$get_values()$p) {
+      if (stats::runif(1) < self$param_set$get_values(context = context)$p) {
         private$.wrapped$operate(values)
       } else {
         private$.wrapped_not$operate(values)

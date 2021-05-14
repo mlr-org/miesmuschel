@@ -155,7 +155,7 @@ SelectorMaybe = R6Class("SelectorMaybe",
   ),
   private = list(
     .select = function(values, fitnesses, n_select, context) {
-      params = private$.maybe_param_set$get_values()
+      params = private$.maybe_param_set$get_values(context = context)
       params$p_out = params$p_out %??% params$p_in
 
       if (params$p_in %in% c(0, 1) && params$p_out != params$p_in) {

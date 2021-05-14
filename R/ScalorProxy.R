@@ -52,7 +52,7 @@ ScalorProxy = R6Class("ScalorProxy",
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
     prime = function(param_set) {
-      primed_with = self$param_set$get_values()$operation
+      primed_with = self$param_set$get_values(context = context)$operation
       operation = primed_with$clone(deep = TRUE)
       operation$prime(param_set)
       super$prime(param_set)
@@ -71,7 +71,7 @@ ScalorProxy = R6Class("ScalorProxy",
   ),
   private = list(
     .scale = function(values, fitnesses, context) {
-      operation = self$param_set$get_values()$operation
+      operation = self$param_set$get_values(context = context)$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
         # In that case we try to stay safe by priming again.
