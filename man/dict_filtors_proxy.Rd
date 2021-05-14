@@ -52,7 +52,7 @@ fp$param_set$values$operation = ftr("null")
 fp$prime(p)
 fp$operate(new_data, known_data, fitnesses, 1)
 
-fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter_pool_first = 2)
+fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2)
 fp$operate(new_data, known_data, fitnesses, 1)
 }
 \seealso{
@@ -62,7 +62,7 @@ Other filtors:
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_surprog}},
-\code{\link{dict_filtors_surtourn}}
+\code{\link{dict_filtors_surtour}}
 
 Other filtor wrappers: 
 \code{\link{dict_filtor_maybe}}

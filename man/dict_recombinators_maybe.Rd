@@ -83,24 +83,13 @@ Other recombinator wrappers:
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorMaybe}
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{mutator}}{(\code{\link{Recombinator}})\cr
-\code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{p} (configuration parameter).}
-
-\item{\code{mutator_not}}{(\code{\link{Recombinator}})\cr
-Alternative \code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{1 - p} (configuration parameter).}
-}
-\if{html}{\out{</div>}}
-}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{mutator}}{(\code{\link{Recombinator}})\cr
+\item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
 \code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{p} (configuration parameter).}
 
-\item{\code{mutator_not}}{(\code{\link{Recombinator}})\cr
+\item{\code{recombinator_not}}{(\code{\link{Recombinator}})\cr
 Alternative \code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{1 - p} (configuration parameter).}
 }
 \if{html}{\out{</div>}}

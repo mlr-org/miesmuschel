@@ -45,7 +45,7 @@ Other filtors:
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}},
-\code{\link{dict_filtors_surtourn}}
+\code{\link{dict_filtors_surtour}}
 }
 \concept{base classes}
 \concept{filtors}

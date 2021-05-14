@@ -40,7 +40,7 @@ p = ps(x = p_dbl(-5, 5))
 known_data = data.frame(x = 1:5)
 fitnesses = 1:5
 
-new_data = data.frame(x = c(2.5, 4.5)
+new_data = data.frame(x = c(2.5, 4.5))
 
 fn$prime(p)
 
@@ -56,7 +56,7 @@ Other filtors:
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}},
-\code{\link{dict_filtors_surtourn}}
+\code{\link{dict_filtors_surtour}}
 }
 \concept{filtors}
 \section{Super classes}{

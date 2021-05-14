@@ -76,7 +76,7 @@ dict_filtors$get("surprog", <surrogate_learner> [, <surrogate_selector>])
 \examples{
 library("mlr3")
 library("mlr3learners")
-fp = ftr("surprog", lrn("regr.lm"), filter.pool_first = 2)
+fp = ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2)
 
 p = ps(x = p_dbl(-5, 5))
 known_data = data.frame(x = 1:5)
@@ -97,7 +97,7 @@ Other filtors:
 \code{\link{dict_filtor_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surtourn}}
+\code{\link{dict_filtors_surtour}}
 }
 \concept{filtors}
 \section{Super classes}{
