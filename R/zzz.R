@@ -83,3 +83,4 @@ utils::globalVariables(c("dob", "eol"))
 if (!Sys.getenv("DEVTOOLS_LOAD") == "true") {
   leanify_package()
 }
+

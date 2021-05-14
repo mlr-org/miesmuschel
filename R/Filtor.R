@@ -84,7 +84,7 @@ Filtor = R6Class("Filtor",
   ),
   private = list(
     .supported = NULL,
-    .operate = function(values, known_values, fitnesses, n_filter) {
+    .operate = function(values, known_values, fitnesses, n_filter, context) {
       assert_data_table(values, min.rows = 1)
 
       private$.primed_ps$assert_dt(known_values)
@@ -111,11 +111,11 @@ Filtor = R6Class("Filtor",
       needed_input = self$needed_input(n_filter)
       if (nrow(values) < needed_input) stopf("Needs at least %s individuals to select %s individuals, but got %s.", needed_input, n_filter, nrow(values))
 
-      selected = private$.filter(values, known_values, fitnesses, n_filter)
+      selected = private$.filter(values, known_values, fitnesses, n_filter, context)
 
       assert_integerish(selected, tol = 1e-100, lower = 1, upper = nrow(values), any.missing = FALSE, len = n_filter, unique = TRUE)
     },
-    .filter = function(values, known_values, fitnesses, n_filter) stop(".filter needs to be implemented by inheriting class."),
+    .filter = function(values, known_values, fitnesses, n_filter, context) stop(".filter needs to be implemented by inheriting class."),
     .needed_input = function(output_size) stop(".needed_input needs to be implemented by inheriting class.")
   )
 )

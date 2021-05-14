@@ -69,7 +69,7 @@ Selector = R6Class("Selector",
   ),
   private = list(
     .supported = NULL,
-    .operate = function(values, fitnesses, n_select) {
+    .operate = function(values, fitnesses, n_select, context) {
       assert_data_table(values, min.rows = 1)
       if ("single-crit" %in% self$supported && test_numeric(fitnesses) && !test_matrix(fitnesses)) {
         assert_numeric(fitnesses, any.missing = FALSE, len = nrow(values))
@@ -81,9 +81,9 @@ Selector = R6Class("Selector",
       )
 
       assert_int(n_select, lower = 0, tol = 1e-100)
-      selected = private$.select(values, fitnesses, n_select)
+      selected = private$.select(values, fitnesses, n_select, context)
       assert_integerish(selected, tol = 1e-100, lower = 1, upper = nrow(values), any.missing = FALSE, len = n_select)
     },
-    .select = function(values, fitnesses, n_select) stop(".select needs to be implemented by inheriting class.")
+    .select = function(values, fitnesses, n_select, context) stop(".select needs to be implemented by inheriting class.")
   )
 )

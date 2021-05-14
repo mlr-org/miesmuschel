@@ -412,7 +412,7 @@ OperatorCombination = R6Class("OperatorCombination",
     .on_name_not_present = NULL,
     .mapping = NULL,
     .granularity = NULL,
-    .operate = function(values, ...) {
+    .operate = function(values, ..., context) {
       granularity = if (!length(private$.adaptions)) nrow(values) else private$.granularity
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
@@ -420,7 +420,7 @@ OperatorCombination = R6Class("OperatorCombination",
           adaption_values = lapply(private$.adaptions, function(f) f(vs))
           self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
-            self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE])
+            self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE], context = context)
           })))
         }),
         use.names = TRUE
@@ -501,9 +501,9 @@ RecombinatorCombination = R6Class("RecombinatorCombination",
     .n_indivs_in = NULL,
     .n_indivs_out = NULL
   # --- copy-paste end
-    ## .operate = function(values) {
+    ## .operate = function(values, context) {
     ##   assert_true(nrow(values) == self$n_indivs_in)  # combinator handles granularity
-    ##   values = private$.recombine(values)
+    ##   values = private$.recombine(values, context)
     ##   assert_data_table(values, nrows = self$n_indivs_out)
     ## }
   )

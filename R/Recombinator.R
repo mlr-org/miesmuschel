@@ -67,11 +67,11 @@ Recombinator = R6Class("Recombinator",
     .n_indivs_in = NULL,
     .n_indivs_out = NULL,
     .recombine = function(values) stop(".recombine needs to be implemented by inheriting class."),
-    .operate = function(values) {
+    .operate = function(values, context) {
       assert_true(nrow(values) %% self$n_indivs_in == 0)
       rbindlist(
         lapply(split(values, rep(seq_len(nrow(values) / self$n_indivs_in), each = self$n_indivs_in)), function(vs) {
-          vs = private$.recombine(vs)
+          vs = private$.recombine(vs, context)
           assert_data_table(vs, nrows = self$n_indivs_out)
         }), use.names = TRUE)
     }
