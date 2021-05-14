@@ -91,7 +91,7 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       super$initialize(recombinator$param_classes,
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         recombinator$n_indivs_in, recombinator$n_indivs_out,
-        packages = c("stats", mutator$packages, mutator_not$packages), dict_entry = "maybe",
+        packages = c("stats", recombinator$packages, recombinator_not$packages), dict_entry = "maybe",
         own_param_set = quote(private$.maybe_param_set))
     },
     #' @description
@@ -108,13 +108,13 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     }
   ),
   active = list(
-    #' @field mutator ([`Recombinator`])\cr
+    #' @field recombinator ([`Recombinator`])\cr
     #' [`Recombinator`] being wrapped. This operator gets run with probability `p` (configuration parameter).
     recombinator = function(val) {
       if (!missing(val)) stop("recombinator is read-only.")
       private$.wrapped
     },
-    #' @field mutator_not ([`Recombinator`])\cr
+    #' @field recombinator_not ([`Recombinator`])\cr
     #' Alternative [`Recombinator`] being wrapped. This operator gets run with probability `1 - p` (configuration parameter).
     recombinator_not = function(val) {
       if (!missing(val)) stop("recombinator_not is read-only.")

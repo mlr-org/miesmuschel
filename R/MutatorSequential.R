@@ -84,4 +84,4 @@ MutatorSequential = R6Class("MutatorSequential",
     .wrapped = NULL
   )
 )
-dict_mutators$add("sequential", MutatorMaybe)
+dict_mutators$add("sequential", MutatorSequential)

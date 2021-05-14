@@ -25,7 +25,7 @@
 #' known_data = data.frame(x = 1:5)
 #' fitnesses = 1:5
 #'
-#' new_data = data.frame(x = c(2.5, 4.5)
+#' new_data = data.frame(x = c(2.5, 4.5))
 #'
 #' fn$prime(p)
 #'
@@ -45,7 +45,7 @@ FiltorNull = R6Class("FiltorNull",
     .filter = function(values, known_values, fitnesses, n_filter, context) {
       seq_len(n_filter)
     },
-    .needed_input = function(output_size) output_size
+    .needed_input = function(output_size, context) output_size
   )
 )
 dict_filtors$add("null", FiltorNull)

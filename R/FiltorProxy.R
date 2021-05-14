@@ -36,7 +36,7 @@
 #' fp$prime(p)
 #' fp$operate(new_data, known_data, fitnesses, 1)
 #'
-#' fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter_pool_first = 2)
+#' fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2)
 #' fp$operate(new_data, known_data, fitnesses, 1)
 #' @export
 FiltorProxy = R6Class("FiltorProxy",
@@ -63,7 +63,6 @@ FiltorProxy = R6Class("FiltorProxy",
         # if primed_with is context-dependent then we need to prime during operation.
         operation = primed_with$clone(deep = TRUE)
         operation$prime(param_set)
-        private$.operation = operation  # only change operation once everything else succeeded
         private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
       }
       invisible(self)

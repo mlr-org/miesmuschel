@@ -59,7 +59,6 @@ MutatorProxy = R6Class("MutatorProxy",
         # if primed_with is context-dependent then we need to prime during operation.
         operation = primed_with$clone(deep = TRUE)
         operation$prime(param_set)
-        private$.operation = operation  # only change operation once everything else succeeded
         private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
       }
       invisible(self)

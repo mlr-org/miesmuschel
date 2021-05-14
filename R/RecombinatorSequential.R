@@ -136,7 +136,7 @@ Either match input and output sizes using a RecombinatorNull, or allow rescaling
     .multiplicities = NULL
   )
 )
-dict_recombinators$add("sequential", RecombinatorMaybe)
+dict_recombinators$add("sequential", RecombinatorSequential)
 
 gcd = function(a, b) {
   if (a > b) {

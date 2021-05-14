@@ -153,4 +153,4 @@ SelectorSequential = R6Class("SelectorSequential",
     .own_param_set = NULL
   )
 )
-dict_selectors$add("sequential", SelectorMaybe)
+dict_selectors$add("sequential", SelectorSequential)

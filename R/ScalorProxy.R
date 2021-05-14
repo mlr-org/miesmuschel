@@ -58,7 +58,6 @@ ScalorProxy = R6Class("ScalorProxy",
         # if primed_with is context-dependent then we need to prime during operation.
         operation = primed_with$clone(deep = TRUE)
         operation$prime(param_set)
-        private$.operation = operation  # only change operation once everything else succeeded
         private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
       }
       invisible(self)
@@ -83,7 +82,6 @@ ScalorProxy = R6Class("ScalorProxy",
       }
       operation$operate(values, fitnesses, context = context)
     },
-    .operation = NULL,
     .primed_with = NULL,
     deep_clone = function(name, value) {
       if (name == ".primed_with") return(NULL)  # don't even bother cloning this

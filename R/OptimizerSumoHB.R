@@ -102,7 +102,7 @@
 #' # to the surrogate model, are used.
 #' sumohb_opt <- opt("sumohb", ftr("surprog",
 #'     surrogate_learner = mlr3::lrn("regr.ranger"),
-#'     filter_pool_first = 100, filter_pool_per_sample = 0),
+#'     filter.pool_factor = 10),
 #'   mu = 30, survival_fraction = 2/3
 #' )
 #' # sumohb_opt$optimize performs SumoHB optimization and returns the optimum
@@ -138,7 +138,7 @@
 #' # use ftr("maybe") for random interleaving: only 50% of proposed points are filtered.
 #' sumohb_tune <- tnr("sumohb", ftr("maybe", p = 0.5, filtor = ftr("surprog",
 #'     surrogate_learner = lrn("regr.ranger"),
-#'     filter_pool_first = 100, filter_pool_per_sample = 0)),
+#'     filter.pool_factor = 10)),
 #'   mu = 20, survival_fraction = 0.5
 #' )
 #' # sumohb_tune$optimize performs SumoHB optimization and returns the optimum

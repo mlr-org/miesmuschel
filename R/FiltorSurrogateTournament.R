@@ -2,7 +2,7 @@
 #'
 #' @include FiltorSurrogate.R
 #'
-#' @name dict_filtors_surtourn
+#' @name dict_filtors_surtour
 #'
 #' @description
 #' Performs tournament surrogate model filtering. A surrogate model is used, as described in the parent class [`FiltorSurrogate`].
@@ -30,7 +30,7 @@
 #'   Tournament size used for the last tournament, see description of `tournament_size`. Defaults to `tournament_size` when not given,
 #'   i.e. all tournaments have the same size.
 #'
-#' @templateVar id surtourn
+#' @templateVar id surtour
 #' @templateVar additional , \<surrogate_learner\> \[, \<surrogate_selector\>\]
 #' @template autoinfo_prepare_ftr
 #'
@@ -47,7 +47,7 @@
 #' @examples
 #' library("mlr3")
 #' library("mlr3learners")
-#' fp = ftr("surtourn", lrn("regr.lm"), filter.tournament_size = 2)
+#' fp = ftr("surtour", lrn("regr.lm"), filter.tournament_size = 2)
 #'
 #' p = ps(x = p_dbl(-5, 5))
 #' known_data = data.frame(x = 1:5)
