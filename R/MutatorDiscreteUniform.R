@@ -46,7 +46,7 @@ MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
     }
   ),
   private = list(
-    .mutate_discrete = function(values, levels) {
+    .mutate_discrete = function(values, levels, context) {
       params = self$param_set$get_values()
       unlist(pmap(list(values, levels), function(v, l) {
         if (!params$can_mutate_to_same) l = setdiff(l, v)
