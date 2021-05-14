@@ -67,11 +67,11 @@ Filtor = R6Class("Filtor",
       private$.supported = supported
       super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "sel", own_param_set = own_param_set)
     },
-    needed_input = function(output_size) {
+    needed_input = function(output_size, context = list(inst = NULL)) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       assert_int(output_size, tol = 1e-100, lower = 0)
       if (output_size == 0) return(0)
-      (assert_int(private$.needed_input(output_size), tol = 1e-100, lower = output_size))
+      (assert_int(private$.needed_input(output_size, context), tol = 1e-100, lower = output_size))
     }
   ),
   active = list(
@@ -108,7 +108,7 @@ Filtor = R6Class("Filtor",
 
       if (n_filter == 0) return(integer(0))
 
-      needed_input = self$needed_input(n_filter)
+      needed_input = self$needed_input(n_filter, context)
       if (nrow(values) < needed_input) stopf("Needs at least %s individuals to select %s individuals, but got %s.", needed_input, n_filter, nrow(values))
 
       selected = private$.filter(values, known_values, fitnesses, n_filter, context)
@@ -116,6 +116,6 @@ Filtor = R6Class("Filtor",
       assert_integerish(selected, tol = 1e-100, lower = 1, upper = nrow(values), any.missing = FALSE, len = n_filter, unique = TRUE)
     },
     .filter = function(values, known_values, fitnesses, n_filter, context) stop(".filter needs to be implemented by inheriting class."),
-    .needed_input = function(output_size) stop(".needed_input needs to be implemented by inheriting class.")
+    .needed_input = function(output_size, context) stop(".needed_input needs to be implemented by inheriting class.")
   )
 )

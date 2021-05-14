@@ -93,8 +93,8 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
     }
   ),
   private = list(
-    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) {
-      params = private$.own_param_set$get_values()
+    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter, context) {
+      params = private$.own_param_set$get_values(context)
       poolsizes = round(exp(seq(log(params$pool_factor), log(params$pool_factor_last %??% params$pool_factor), length.out = n_filter)) * n_filter) - seq_len(n_filter) + 1
       original_indices = seq_len(nrow(values))
       selected = integer(0)
@@ -111,9 +111,9 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
       }
       selected
     },
-    .needed_input = function(output_size) {
-      params = private$.own_param_set$get_values()
-      round(max(params$pool_factor, params$pool_factor_last ) * output_size)
+    .needed_input = function(output_size, context) {
+      params = private$.own_param_set$get_values(context)
+      round(max(params$pool_factor, params$pool_factor_last) * output_size)
     }
   )
 )

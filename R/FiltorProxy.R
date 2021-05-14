@@ -79,7 +79,7 @@ FiltorProxy = R6Class("FiltorProxy",
   ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter, context) {
-      operation = self$param_set$get_values()$operation
+      operation = self$param_set$get_values(context)$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
         # In that case we try to stay safe by priming again.
@@ -89,15 +89,15 @@ FiltorProxy = R6Class("FiltorProxy",
       }
       operation$operate(values, known_values, fitnesses, n_filter)
     },
-    .needed_input = function(output_size) {
-      operation = self$param_set$get_values()$operation
+    .needed_input = function(output_size, context) {
+      operation = self$param_set$get_values(context)$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
         # In that case we try to stay safe by priming again.
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$needed_input(output_size)
+      operation$needed_input(output_size, context)
     },
     .primed_with = NULL,
     deep_clone = function(name, value) {
