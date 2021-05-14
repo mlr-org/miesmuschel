@@ -73,10 +73,15 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
     prime = function(param_set) {
-      operation = self$param_set$get_values(context = context)$operation
-      operation$prime(param_set)
+      primed_with = self$param_set$values$operation
       super$prime(param_set)
-      private$.primed_with = operation$primed_ps  # keep uncloned copy of primed ParamSet for check in `.recombine()`
+      if (inherits(primed_with, "MiesOperator")) {
+        # if primed_with is context-dependent then we need to prime during operation.
+        operation = primed_with$clone(deep = TRUE)
+        operation$prime(param_set)
+        private$.operation = operation  # only change operation once everything else succeeded
+        private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
+      }
       invisible(self)
     }
   ),
