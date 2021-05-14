@@ -1,7 +1,7 @@
 library(bbotk)
 library(R6)
 library(miesmuschel) # @multiobjective_hb
-library(mfsurrogates) 
+library(mfsurrogates)
 library(data.table)
 library(mlr3learners)
 library(checkmate)
@@ -19,10 +19,17 @@ meta_search_space = ps(
     ranger = mlr3::lrn("regr.ranger"),
     knn = mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))),
   filter_with_max_budget = p_lgl(),
+
   filter_factor_first = p_dbl(1, 100, logscale = TRUE),
   filter_factor_last = p_dbl(1, 100, logscale = TRUE),
   filter_select_per_tournament = p_int(1, 10, logscale = TRUE),
   random_interleave_fraction = p_dbl(0, 1),
+
+  filter_factor_first.end = p_dbl(1, 100, logscale = TRUE),
+  filter_factor_last.end = p_dbl(1, 100, logscale = TRUE),
+  filter_select_per_tournament.end = p_int(1, 10, logscale = TRUE),
+  random_interleave_fraction.end = p_dbl(0, 1),
+
   random_interleave_random = p_lgl()
 )
 
@@ -38,6 +45,12 @@ meta_domain = ps(
   filter_factor_last = p_dbl(1),
   filter_select_per_tournament = p_int(1),
   random_interleave_fraction = p_dbl(0, 1),
+
+  filter_factor_first.end = p_dbl(1),
+  filter_factor_last.end = p_dbl(1),
+  filter_select_per_tournament.end = p_int(1),
+  random_interleave_fraction.end = p_dbl(0, 1),
+
   random_interleave_random = p_lgl()
 )
 
@@ -88,8 +101,8 @@ makeIraceOI <- function(objective_targets, test_targets, cfg, evals = 300) {
 
           budget_limit = search_space$length * 100 * 52
 
-          performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective, 
-            test_objective = test_objective, budget_limit = budget_limit, search_space = search_space, 
+          performance <- mlr3misc::invoke(opt_objective_optimizable, objective = objective,
+            test_objective = test_objective, budget_limit = budget_limit, search_space = search_space,
             highest_budget_only = highest_budget_only, nadir = nadir, .args = xs)
           time = as.numeric(difftime(Sys.time(), t0, units = "secs"))
           list(y = performance, time = time)

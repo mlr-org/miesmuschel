@@ -40,7 +40,7 @@ MiesOperator = R6Class("MiesOperator",
     #'   (i.e. conforming to the primed [`ParamSet`][paradox::ParamSet]). If this is `TRUE` (default), then the return value of `$.operate()`
     #'   is checked for this and columns are put in the correct order.\cr
     #'   The `$endomorphsim` field will reflect this value.
-      initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(),
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(),
         packages = character(0), dict_entry = NULL, dict_shortaccess = NULL, own_param_set = quote(self$param_set), endomorphism = TRUE) {
       assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
@@ -56,6 +56,9 @@ MiesOperator = R6Class("MiesOperator",
       private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
       private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
       assert_true(is.language(own_param_set))
+      if (!inherits(param_set, "ParamSet")) {
+        eval(substitute({own_param_set$context_available = "inst"}, list(own_param_set = own_param_set)))  # TODO: there has to be a better way
+      }
       private$.own_param_set_symbol = own_param_set
       private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
       private$.endomorphism = assert_flag(endomorphism)
@@ -188,13 +191,14 @@ MiesOperator = R6Class("MiesOperator",
     #' Configuration parameters of the `MiesOperator` object. Read-only.
     param_set = function(val) {
       if (is.null(private$.param_set)) {
+        # TODO: need test that checks that all paramset elements have good context
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))
         if (length(sourcelist) > 1) {
           private$.param_set = ParamSetCollection$new(sourcelist)
         } else {
           private$.param_set = sourcelist[[1]]
         }
-        private$.param_set$context_available = "inst"
+
 
         if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
       }

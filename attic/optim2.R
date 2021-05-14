@@ -14,16 +14,48 @@ suggested_meta_searchspace = ps(
   filter_factor_last = p_dbl(1, 100, logscale = TRUE),
   filter_select_per_tournament = p_int(1, 10, logscale = TRUE),
   random_interleave_fraction = p_dbl(0, 1),
+
+  filter_factor_first.end = p_dbl(1, 100, logscale = TRUE),
+  filter_factor_last.end = p_dbl(1, 100, logscale = TRUE),
+  filter_select_per_tournament.end = p_int(1, 10, logscale = TRUE),
+  random_interleave_fraction.end = p_dbl(0, 1),
+
   random_interleave_random = p_lgl()
 )
 
+
+# for simulated annealing
+get_progress <- function(inst) {
+  prog = inst$terminator$status(inst$archive)
+  if (prog["max_steps"] <= 0) return(1)
+  min(1, max(0, prog["current_steps"] / prog["max_steps"]))
+}
+
+# interpolate context param value
+interpolate_cpv <- function(beginning, end, logscale = FALSE, round = FALSE) {
+  ContextPV(function(inst) {
+    prog = get_progress(inst)
+    result = if (logscale) {
+      exp(prog * log(end) + (1 - prog) * log(beginning))
+    } else {
+      prog * end + (1 - prog) * beginning
+    }
+    if (round) result = round(result)
+    result
+  }, beginning, end, get_progress, logscale, round)
+}
+
 opt_objective <- function(objective, search_space, budget_limit, budget_log_step,
     survival_fraction, mu, sample,
-    filter_algorithm, surrogate_learner, filter_with_max_budget, filter_factor_first, filter_factor_last, filter_select_per_tournament,
-    random_interleave_fraction, random_interleave_random) {
+    filter_algorithm, surrogate_learner, filter_with_max_budget,
+    filter_factor_first, filter_factor_last, filter_select_per_tournament, random_interleave_fraction,
+    filter_factor_first.end = filter_factor_first, filter_factor_last.end = filter_factor_last,
+    filter_select_per_tournament.end = filter_select_per_tournament, random_interleave_fraction.end = random_interleave_fraction,
+    random_interleave_random) {
   library("checkmate")
   library("miesmuschel")
   library("mlr3learners")
+
 
   # Objective Parameters
   assert_r6(objective, "Objective")  # to optimize, single- or multi-objective
@@ -44,11 +76,16 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   assert_flag(filter_with_max_budget)
   # How big is the pool from which the first individual / of the last individual is sampled from? (Relative to select_per_tournament)
   assert_number(filter_factor_first, lower = 1)
+  assert_number(filter_factor_first.end, lower = 1)
   assert_number(filter_factor_last, lower = 1)
+  assert_number(filter_factor_last.end, lower = 1)
   assert_int(filter_select_per_tournament, lower = 1)  # tournament size, only really used if `filter_algorithm` is "tournament"
+  assert_int(filter_select_per_tournament.end, lower = 1)
 
   assert_number(random_interleave_fraction, lower = 0, upper = 1)  # fraction of individuals sampled with random interleaving
+  assert_number(random_interleave_fraction.end, lower = 0, upper = 1)  # fraction of individuals sampled with random interleaving
   assert_flag(random_interleave_random)  # whether the number of random interleaved individuals is drawn from a binomial distribution, or the same each generation
+
 
   # We change the lower limit of the budget parameter:
   # suppose: budget_step is 2, budget param goes from 1 to 6
@@ -77,17 +114,27 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   # filtor: use surtour or surprog, depending on filter_algorithm config argument
   filtor = switch(filter_algorithm,
     tournament = ftr("surtour", surrogate_learner = surrogate_learner, surrogate_selector = selector,
-      filter.per_tournament = filter_select_per_tournament,
-      filter.tournament_size = filter_factor_first * filter_select_per_tournament,
-      filter.tournament_size_last = filter_factor_last * filter_select_per_tournament
+      filter.per_tournament = interpolate_cpv(filter_select_per_tournament, filter_select_per_tournament.end, logscale = TRUE, round = TRUE),
+      filter.tournament_size = interpolate_cpv(
+        filter_factor_first * filter_select_per_tournament,
+        filter_factor_first.end * filter_select_per_tournament.end,
+        logscale = TRUE
+      ),
+      filter.tournament_size_last = interpolate_cpv(
+        filter_factor_last * filter_select_per_tournament,
+        filter_factor_last.end * filter_select_per_tournament.end,
+        logscale = TRUE
+      )
     ),
     progressive = ftr("surprog", surrogate_learner = surrogate_learner, surrogate_selector = selector,
-      filter.pool_factor = filter_factor_first,
-      filter.pool_factor_last = filter_factor_last
+      filter.pool_factor = interpolate_cpv(filter_factor_first, filter_factor_first.end, logscale = TRUE),
+      filter.pool_factor_last = interpolate_cpv(filter_factor_last, filter_factor_last.end, logscale = TRUE)
     )
   )
 
-  interleaving_filtor = ftr("maybe", filtor, p = random_interleave_fraction, random_choice = random_interleave_random)
+  random_interleave_fraction_cpv  = interpolate_cpv(random_interleave_fraction, random_interleave_fraction.end)  # linear scale
+
+  interleaving_filtor = ftr("maybe", filtor, p = random_interleave_fraction_cpv, random_choice = random_interleave_random)
 
   sampling_fun = switch(sample, random = paradox::generate_design_random, lhs = paradox::generate_design_lhs)
 
@@ -100,19 +147,13 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   oi
 }
 
-opt_objective_optimizable <- function(objective, test_objective, search_space, budget_limit, budget_log_step,
-    survival_fraction, mu, sample,
-    filter_algorithm, surrogate_learner, filter_with_max_budget, filter_factor_first, filter_factor_last, filter_select_per_tournament,
-    random_interleave_fraction, random_interleave_random, highest_budget_only, nadir = 0) {
+opt_objective_optimizable <- function(objective, test_objective, search_space, ..., highest_budget_only, nadir = 0) {
 
   assert_flag(highest_budget_only)
 
   multiobjective <- objective$codomain$length > 1
 
-  oi <- opt_objective(objective, search_space, budget_limit, budget_log_step,
-    survival_fraction, mu, sample,
-    filter_algorithm, surrogate_learner, filter_with_max_budget, filter_factor_first, filter_factor_last, filter_select_per_tournament,
-    random_interleave_fraction, random_interleave_random)
+  oi <- opt_objective(objective, search_space, ...)
 
   om <- oi$objective_multiplicator
 
