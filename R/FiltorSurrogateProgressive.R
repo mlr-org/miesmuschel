@@ -101,7 +101,7 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
       for (i in seq_len(n_filter)) {
         cpop = first(values, poolsizes[[i]])
         cfitness = first(surrogate_prediction, poolsizes[[i]])
-        selecting = private$.surrogate_selector$operate(cpop, cfitness, 1)
+        selecting = private$.surrogate_selector$operate(cpop, cfitness, 1, context = context)
         # we may have removed things before, in which case we need to adjust the index.
         selected[[i]] = original_indices[selecting]
         # don't consider the selected value any more

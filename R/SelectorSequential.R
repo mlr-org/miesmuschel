@@ -135,7 +135,7 @@ SelectorSequential = R6Class("SelectorSequential",
       for (i in seq_along(private$.wrapped)) {
         op = private$.wrapped[[i]]
         on = outputs[[i]]
-        selected = op$operate(values, fitnesses, on)
+        selected = op$operate(values, fitnesses, on, context = context)
         values = values[selected]
         fitnesses = fitnesses[selected, , drop = FALSE]
         outputmap = outputmap[selected]

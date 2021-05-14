@@ -124,9 +124,9 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
   private = list(
     .recombine = function(values, context) {
       if (stats::runif(1) < self$param_set$get_values(context = context)$p) {
-        private$.wrapped$operate(values)
+        private$.wrapped$operate(values, context = context)
       } else {
-        private$.wrapped_not$operate(values)
+        private$.wrapped_not$operate(values, context = context)
       }
     },
     .wrapped = NULL,

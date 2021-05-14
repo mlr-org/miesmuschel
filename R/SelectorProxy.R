@@ -85,7 +85,7 @@ SelectorProxy = R6Class("SelectorProxy",
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$operate(values, fitnesses, n_select)
+      operation$operate(values, fitnesses, n_select, context = context)
     },
     .operation = NULL,
     .primed_with = NULL,

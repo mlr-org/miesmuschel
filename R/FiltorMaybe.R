@@ -142,15 +142,15 @@ FiltorMaybe = R6Class("FiltorMaybe",
         filtering = round(n_filter * params$p)
       }
       if (filtering == 0) {
-        private$.wrapped_not$operate(values, known_values, fitnesses, n_filter)
+        private$.wrapped_not$operate(values, known_values, fitnesses, n_filter, context = context)
       } else if (filtering == n_filter) {
-        private$.wrapped$operate(values, known_values, fitnesses, n_filter)
+        private$.wrapped$operate(values, known_values, fitnesses, n_filter, context = context)
       } else {
         for_wrapped = seq_len(private$.wrapped$needed_input(filtering))
         for_wrapped_not = seq.int(length(for_wrapped) + 1, length.out = private$.wrapped_not$needed_input(n_filter - filtering))
         c(
-            private$.wrapped$operate(values[for_wrapped], known_values, fitnesses, filtering),
-            length(for_wrapped) + private$.wrapped_not$operate(values[for_wrapped_not], known_values, fitnesses, n_filter - filtering)
+            private$.wrapped$operate(values[for_wrapped], known_values, fitnesses, filtering, context = context),
+            length(for_wrapped) + private$.wrapped_not$operate(values[for_wrapped_not], known_values, fitnesses, n_filter - filtering, context = context)
         )
       }
     },

@@ -976,7 +976,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 
   fitnesses = mies_get_fitnesses(inst, rows)
 
-  selected = selector$operate(indivs, fitnesses, n_select)
+  selected = selector$operate(indivs, fitnesses, n_select, context = context)
   if (get_indivs) {
     indivs[selected]
   } else {
@@ -1154,10 +1154,10 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   if (shuffle_after_select) {
     parents = parents[sample.int(nrow(parents))]
   }
-  recombined = recombinator$operate(parents)
+  recombined = recombinator$operate(parents, context = context)
   recombined = first(recombined, lambda)  # throw away things if we have too many (happens when n_indivs_out is not a divider of lambda)
 
-  mutator$operate(recombined)
+  mutator$operate(recombined, context = context)
 }
 
 #' @title Filter Offspring
@@ -1231,7 +1231,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
 
   known_values = inst$archive$data[, f_ids, with = FALSE]
   fitnesses = mies_get_fitnesses(inst)
-  selected = filtor$operate(individuals_dt, known_values, fitnesses, lambda)
+  selected = filtor$operate(individuals_dt, known_values, fitnesses, lambda, context = context)
   if (get_indivs) {
     individuals[selected, ]
   } else {

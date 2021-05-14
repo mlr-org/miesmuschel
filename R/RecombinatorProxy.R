@@ -102,7 +102,7 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$operate(values)
+      operation$operate(values, context = context)
     },
     .primed_with = NULL,
     deep_clone = function(name, value) {

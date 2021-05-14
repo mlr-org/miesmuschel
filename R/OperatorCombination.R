@@ -420,7 +420,7 @@ OperatorCombination = R6Class("OperatorCombination",
           adaption_values = lapply(private$.adaptions, function(f) f(vs))
           self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
-            self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE], context = context)
+            self$operators[[op]]$operate(vs[, match(pars, names(vs, context = context), 0), with = FALSE], context = context)
           })))
         }),
         use.names = TRUE

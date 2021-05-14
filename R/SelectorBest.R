@@ -56,7 +56,7 @@ SelectorBest = R6Class("SelectorBest",
   ),
   private = list(
     .select = function(values, fitnesses, n_select, context) {
-      order(private$.scalor$operate(values, fitnesses), decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
+      order(private$.scalor$operate(values, fitnesses, context = context), decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
     },
     .scalor = NULL
   )

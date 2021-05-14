@@ -87,7 +87,7 @@ FiltorProxy = R6Class("FiltorProxy",
         operation$prime(private$.primed_ps)  # nocov
         private$.primed_with = operation$primed_ps  # nocov
       }
-      operation$operate(values, known_values, fitnesses, n_filter)
+      operation$operate(values, known_values, fitnesses, n_filter, context = context)
     },
     .needed_input = function(output_size, context) {
       operation = self$param_set$get_values(context = context)$operation

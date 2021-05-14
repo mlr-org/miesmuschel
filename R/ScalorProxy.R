@@ -81,7 +81,7 @@ ScalorProxy = R6Class("ScalorProxy",
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$operate(values, fitnesses)
+      operation$operate(values, fitnesses, context = context)
     },
     .operation = NULL,
     .primed_with = NULL,

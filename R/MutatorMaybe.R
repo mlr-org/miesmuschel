@@ -110,12 +110,12 @@ MutatorMaybe = R6Class("MutatorMaybe",
     .mutate = function(values, context) {
       mutating = stats::runif(nrow(values)) < self$param_set$get_values(context = context)$p
       if (any(mutating)) {
-        mutated = private$.wrapped$operate(values[mutating])
+        mutated = private$.wrapped$operate(values[mutating], context = context)
       } else {
         mutated = values[mutating]
       }
       if (any(!mutating)) {
-        mutated_not = private$.wrapped_not$operate(values[!mutating])
+        mutated_not = private$.wrapped_not$operate(values[!mutating], context = context)
       } else {
         mutated_not = values[!mutating]
       }
