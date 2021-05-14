@@ -11,12 +11,15 @@ exceptions = c("MutatorCombination", "RecombinatorCombination")
 
 initargs = list(
   MutatorMaybe = list(mutator = mut("gauss")),
+  MutatorSequential = list(mutators = muts("gauss")),
   MutatorCmpMaybe = list(mutator = mut("gauss")),
   MutatorCombination = list(operators = list(ParamAny = mut("gauss"))),
   RecombinatorMaybe = list(recombinator = rec("xounif")),
+  RecombinatorSequential = list(recombinators = recs("xounif")),
   RecombinatorCombination = list(operators = list(ParamAny = rec("xounif"))),
   FiltorMaybe = list(filtor = ftr("null")),
-  FiltorSurrogateProgressive = list(surrogate_learner = mlr3::lrn("regr.featureless"))
+  FiltorSurrogateProgressive = list(surrogate_learner = mlr3::lrn("regr.featureless")),
+  FiltorSurrogateTournament = list(surrogate_learner = mlr3::lrn("regr.featureless"))
 )
 
 # check if something inherits from any <baseclasses> without constructing it

@@ -104,9 +104,9 @@ FiltorDebug = R6::R6Class("FiltorDebug",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_select) {
+    .filter = function(values, known_values, fitnesses, n_select, context) {
       self$handler(v = values, k = known_values, f = fitnesses, n = n_select, p = self$param_set$values)
     },
-    .needed_input = function(output_size) self$ni(o = output_size, p = self$param_set$values)
+    .needed_input = function(output_size, context) self$ni(o = output_size, p = self$param_set$values)
   )
 )

@@ -3,7 +3,7 @@ source("setup.R", local = TRUE)
 
 sbest = SelectorBest$new()
 expect_selector(sbest, "SelectorBest", can_oversample = TRUE)
-expect_equal(sbest$supported, "single-crit")
+expect_equal(sbest$supported, c("single-crit", "multi-crit"))
 
 p = ps(x = p_dbl(0, 1))
 data = data.table(x = rep(1, 100))

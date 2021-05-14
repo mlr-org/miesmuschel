@@ -43,7 +43,7 @@ ft = Filtor$new()
 expect_read_only(ft, c("param_classes", "endomorphism", "is_primed", "param_set", "supported"))
 ft$prime(ps(a = p_dbl()))
 expect_error(ft$needed_input(1), "\\.needed_input needs to be implemented by inheriting class")
-ft2 = R6::R6Class("FiltorDummy", inherit = Filtor, private = list(.needed_input = function(x) x))$new()
+ft2 = R6::R6Class("FiltorDummy", inherit = Filtor, private = list(.needed_input = function(x, context) x))$new()
 ft2$prime(ps(a = p_dbl()))
 expect_error(ft2$operate(data.table(a = 1), data.table(a = 1), 1, 1), "\\.filter needs to be implemented by inheriting class")
 

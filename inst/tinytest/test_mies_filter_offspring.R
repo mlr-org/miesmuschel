@@ -40,83 +40,83 @@ expect_equal(mies_filter_offspring(oibig, individuals, 3, fn, get_indivs = FALSE
 # error when not primed correctly
 expect_error(mies_filter_offspring(oibigmin, individuals_min, 1, fn), "Must be equal to set .* but is")
 
+# TODO
+## # FiltorSurrogateProgressive
+## library("mlr3learners")
+## fs = FiltorSurrogateProgressive$new(mlr3::lrn("regr.lm"))
+## fs$param_set$values$filter_pool_first = 7
+## fs$param_set$values$filter_pool_per_sample = 2
+## fs$prime(p)
+## expect_equal(mies_filter_offspring(oibig, individuals, 0, fs, get_indivs = FALSE), integer(0))
+## expect_equal(mies_filter_offspring(oibig, individuals, 1, fs, get_indivs = FALSE), 7)
+## expect_equal(mies_filter_offspring(oibig, individuals, 2, fs, get_indivs = FALSE), c(7, 9))
+## expect_equal(mies_filter_offspring(oibig, individuals, 3, fs, get_indivs = FALSE), c(7, 9, 10))
 
-# FiltorSurrogateProgressive
-library("mlr3learners")
-fs = FiltorSurrogateProgressive$new(mlr3::lrn("regr.lm"))
-fs$param_set$values$filter_pool_first = 7
-fs$param_set$values$filter_pool_per_sample = 2
-fs$prime(p)
-expect_equal(mies_filter_offspring(oibig, individuals, 0, fs, get_indivs = FALSE), integer(0))
-expect_equal(mies_filter_offspring(oibig, individuals, 1, fs, get_indivs = FALSE), 7)
-expect_equal(mies_filter_offspring(oibig, individuals, 2, fs, get_indivs = FALSE), c(7, 9))
-expect_equal(mies_filter_offspring(oibig, individuals, 3, fs, get_indivs = FALSE), c(7, 9, 10))
-
-# minimization returns indivs with smallest instead of largest p1
-fs$prime(oibigmin$search_space)
-expect_equal(mies_filter_offspring(oibigmin, individuals_min, 0, fs, get_indivs = FALSE), integer(0))
-expect_equal(mies_filter_offspring(oibigmin, individuals_min, 1, fs, get_indivs = FALSE), 1)
-expect_equal(mies_filter_offspring(oibigmin, individuals_min, 2, fs, get_indivs = FALSE), c(1, 2))
-expect_equal(mies_filter_offspring(oibigmin, individuals_min, 3, fs, get_indivs = FALSE), c(1, 2, 11))
-
-
-# budget
-individuals_nobudget = copy(individuals)[, bud := NULL]
-fs$prime(p_nobudget)
-expect_error(mies_filter_offspring(oibig, individuals_nobudget, 0, fs, budget_id = "bud"), ".*bud.* but is .*")
-
-fs$prime(p)
-expect_error(mies_filter_offspring(oibig, individuals_nobudget, 0, fs, budget_id = "bud2"), "budget_id.*failed: Must be.*'bud'.* but is .*bud2")
-
-expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 0, fs, budget_id = "bud", get_indivs = FALSE), integer(0))
-
-expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fs, budget_id = "bud", get_indivs = FALSE), c(7, 9, 10))
+## # minimization returns indivs with smallest instead of largest p1
+## fs$prime(oibigmin$search_space)
+## expect_equal(mies_filter_offspring(oibigmin, individuals_min, 0, fs, get_indivs = FALSE), integer(0))
+## expect_equal(mies_filter_offspring(oibigmin, individuals_min, 1, fs, get_indivs = FALSE), 1)
+## expect_equal(mies_filter_offspring(oibigmin, individuals_min, 2, fs, get_indivs = FALSE), c(1, 2))
+## expect_equal(mies_filter_offspring(oibigmin, individuals_min, 3, fs, get_indivs = FALSE), c(1, 2, 11))
 
 
-fdp_record = new.env()
-fdp = FiltorDebug$new(
-  function(v, k, f, n, p) {
-    fdp_record$v = v
-    fdp_record$k = k
-    fdp_record$f = f
-    seq_len(n)
-  },
-  function(o, p) o
-)
+## # budget
+## individuals_nobudget = copy(individuals)[, bud := NULL]
+## fs$prime(p_nobudget)
+## expect_error(mies_filter_offspring(oibig, individuals_nobudget, 0, fs, budget_id = "bud"), ".*bud.* but is .*")
 
-fdp$prime(p)
-expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fdp, budget_id = "bud", get_indivs = FALSE), 1:3)
-expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fdp, budget_id = "bud", get_indivs = TRUE), individuals_nobudget[1:3])  # budget not included in return
+## fs$prime(p)
+## expect_error(mies_filter_offspring(oibig, individuals_nobudget, 0, fs, budget_id = "bud2"), "budget_id.*failed: Must be.*'bud'.* but is .*bud2")
 
-# no fidelity_schedule: given maximum budget found in data
-expect_equal(fdp_record$f, matrix(oibig$archive$data$pout1, ncol = 1, dimnames = list(NULL, "pout1")))
-expect_equal(fdp_record$k, oibig$archive$data[, p$ids(), with = FALSE], ignore.col.order = TRUE)
-expect_equal(fdp_record$v, cbind(individuals_nobudget, bud = max(oibig$archive$data$bud)), ignore.col.order = TRUE)
+## expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 0, fs, budget_id = "bud", get_indivs = FALSE), integer(0))
+
+## expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fs, budget_id = "bud", get_indivs = FALSE), c(7, 9, 10))
 
 
+## fdp_record = new.env()
+## fdp = FiltorDebug$new(
+##   function(v, k, f, n, p) {
+##     fdp_record$v = v
+##     fdp_record$k = k
+##     fdp_record$f = f
+##     seq_len(n)
+##   },
+##   function(o, p) o
+## )
 
-# with fidelity schedule: use survivor budget of current generation (4)
+## fdp$prime(p)
+## expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fdp, budget_id = "bud", get_indivs = FALSE), 1:3)
+## expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fdp, budget_id = "bud", get_indivs = TRUE), individuals_nobudget[1:3])  # budget not included in return
 
-fidelity_schedule = data.table(generation = c(1, 3, 4, 5), budget_new = c(0.1, 0.2, 0.3, 0.4), budget_survivors = c(1, 2, 3, 4))
-expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fdp, budget_id = "bud", fidelity_schedule = fidelity_schedule, get_indivs = FALSE), 1:3)
-expect_equal(fdp_record$f, matrix(oibig$archive$data$pout1, ncol = 1, dimnames = list(NULL, "pout1")))
-expect_equal(fdp_record$k, oibig$archive$data[, p$ids(), with = FALSE], ignore.col.order = TRUE)
-expect_equal(fdp_record$v, cbind(individuals_nobudget, bud = 3), ignore.col.order = TRUE)
-
-# multicrit
-fdp$prime(oibigmulti$search_space)
-expect_equal(mies_filter_offspring(oibigmulti, individuals_multi, 3, fdp, get_indivs = FALSE), 1:3)
-expect_equal(fdp_record$f, as.matrix(oibigmulti$archive$data[, .(pout1 = -pout1, pout2 = pout2)]))
-expect_equal(fdp_record$k, oibigmulti$archive$data[, oibigmulti$search_space$ids(), with = FALSE], ignore.col.order = TRUE)
-expect_equal(fdp_record$v, individuals_multi)
+## # no fidelity_schedule: given maximum budget found in data
+## expect_equal(fdp_record$f, matrix(oibig$archive$data$pout1, ncol = 1, dimnames = list(NULL, "pout1")))
+## expect_equal(fdp_record$k, oibig$archive$data[, p$ids(), with = FALSE], ignore.col.order = TRUE)
+## expect_equal(fdp_record$v, cbind(individuals_nobudget, bud = max(oibig$archive$data$bud)), ignore.col.order = TRUE)
 
 
 
-# reject empty OptimInstance
-oibig_clear = oibig$clone(deep = TRUE)
-oibig_clear$clear()
-expect_error(mies_filter_offspring(oibig_clear, individuals_nobudget, 3, fdp, budget_id = "bud", get_indivs = FALSE),
-  "mies_filter_offspring does not work with empty OptimInstance.")
+## # with fidelity schedule: use survivor budget of current generation (4)
+
+## fidelity_schedule = data.table(generation = c(1, 3, 4, 5), budget_new = c(0.1, 0.2, 0.3, 0.4), budget_survivors = c(1, 2, 3, 4))
+## expect_equal(mies_filter_offspring(oibig, individuals_nobudget, 3, fdp, budget_id = "bud", fidelity_schedule = fidelity_schedule, get_indivs = FALSE), 1:3)
+## expect_equal(fdp_record$f, matrix(oibig$archive$data$pout1, ncol = 1, dimnames = list(NULL, "pout1")))
+## expect_equal(fdp_record$k, oibig$archive$data[, p$ids(), with = FALSE], ignore.col.order = TRUE)
+## expect_equal(fdp_record$v, cbind(individuals_nobudget, bud = 3), ignore.col.order = TRUE)
+
+## # multicrit
+## fdp$prime(oibigmulti$search_space)
+## expect_equal(mies_filter_offspring(oibigmulti, individuals_multi, 3, fdp, get_indivs = FALSE), 1:3)
+## expect_equal(fdp_record$f, as.matrix(oibigmulti$archive$data[, .(pout1 = -pout1, pout2 = pout2)]))
+## expect_equal(fdp_record$k, oibigmulti$archive$data[, oibigmulti$search_space$ids(), with = FALSE], ignore.col.order = TRUE)
+## expect_equal(fdp_record$v, individuals_multi)
 
 
-expect_equal(oibig_clone, oibig)
+
+## # reject empty OptimInstance
+## oibig_clear = oibig$clone(deep = TRUE)
+## oibig_clear$clear()
+## expect_error(mies_filter_offspring(oibig_clear, individuals_nobudget, 3, fdp, budget_id = "bud", get_indivs = FALSE),
+##   "mies_filter_offspring does not work with empty OptimInstance.")
+
+
+## expect_equal(oibig_clone, oibig)

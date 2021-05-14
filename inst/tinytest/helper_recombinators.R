@@ -86,7 +86,7 @@ RecombinatorDebug = R6::R6Class("RecombinatorDebug",
     }
   ),
   private = list(
-    .recombine = function(values) {
+    .recombine = function(values, context) {
       as.data.table(sapply(names(values), function(n) self$handler(n, values[[n]], self$param_set$values), simplify = FALSE))
     }
   )

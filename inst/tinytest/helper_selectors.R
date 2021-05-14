@@ -85,7 +85,7 @@ SelectorDebug = R6::R6Class("SelectorDebug",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select, context) {
       self$handler(v = values, f = fitnesses, n = n_select, p = self$param_set$values)
     }
   )

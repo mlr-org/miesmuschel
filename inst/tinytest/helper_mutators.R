@@ -83,7 +83,7 @@ MutatorDebug = R6::R6Class("MutatorDebug",
     }
   ),
   private = list(
-    .mutate = function(values) {
+    .mutate = function(values, context) {
       as.data.table(sapply(names(values), function(n) self$handler(n, values[[n]], self$param_set$values), simplify = FALSE))
     }
   )
