@@ -67,6 +67,7 @@ Selector with which to select using surrogate-predicted performance}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{FiltorSurrogate$new()}}
+\item \href{#method-prime}{\code{FiltorSurrogate$prime()}}
 \item \href{#method-clone}{\code{FiltorSurrogate$clone()}}
 }
 }
@@ -74,7 +75,6 @@ Selector with which to select using surrogate-predicted performance}
 \out{<details open ><summary>Inherited methods</summary>}
 \itemize{
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="Filtor" data-id="needed_input">}\href{../../miesmuschel/html/Filtor.html#method-needed_input}{\code{miesmuschel::Filtor$needed_input()}}\out{</span>}
@@ -124,6 +124,28 @@ is not entered in a dictionary.\n
 The \verb{$dict_entry} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-prime}{}}}
+\subsection{Method \code{prime()}}{
+See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operator
+given to \code{surrogate_selector} during construction.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogate$prime(param_set)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
+Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\link{invisible} \code{self}.
 }
 }
 \if{html}{\out{<hr>}}

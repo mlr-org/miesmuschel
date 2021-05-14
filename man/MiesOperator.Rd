@@ -207,7 +207,7 @@ May only contiain \code{\link[paradox:ParamSet]{Param}} objects that conform to 
 Operate on the given individuals. This calls private \verb{$.operate()}, which must be overloaded by an inheriting class,
 passing through all function arguments after performing some checks.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$operate(values, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$operate(values, ..., context = list(inst = NULL))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -219,6 +219,9 @@ and may not have any missing components.}
 
 \item{\code{...}}{(any)\cr
 Depending on the concrete class, passed on to \verb{$.operate()}.}
+
+\item{\code{context}}{(named \code{list})\cr
+Context information. Should have one named entry, \code{"inst"}: The \code{\link[paradox:OptimInstance]{OptimInstance}} being optimized.}
 }
 \if{html}{\out{</div>}}
 }

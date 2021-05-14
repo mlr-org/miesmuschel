@@ -192,7 +192,7 @@ Configuration parameters of the optimization algorithm.}
 \subsection{Method \code{new()}}{
 Initialize the 'OptimizerSumoHB' object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{OptimizerSumoHB$new(filtor = FiltorProxy$new())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{OptimizerSumoHB$new(filtor = FiltorProxy$new(), selector = SelectorProxy$new())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
