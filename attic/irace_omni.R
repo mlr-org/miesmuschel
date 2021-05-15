@@ -127,9 +127,9 @@ optimize_irace <- function(objective_targets, test_targets, instances, cfg, eval
 }
 
 # lcbench
-workdir = "./attic/data/"
-cfg = cfgs("lcbench", workdir = workdir)
-cfg$setup()
+# workdir = "./attic/data/"
+# cfg = cfgs("lcbench", workdir = workdir)
+# cfg$setup()
 
 
 
