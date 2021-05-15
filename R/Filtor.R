@@ -87,7 +87,7 @@ Filtor = R6Class("Filtor",
     .operate = function(values, known_values, fitnesses, n_filter, context) {
       assert_data_table(values, min.rows = 1)
 
-      private$.primed_ps$assert_dt(known_values)
+#      private$.primed_ps$assert_dt(known_values)
       assert_names(colnames(known_values), permutation.of = private$.primed_ps$ids())
       if (!is.data.table(known_values)) {
         # don't change input by reference

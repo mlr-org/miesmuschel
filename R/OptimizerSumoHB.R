@@ -245,13 +245,8 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
 
       fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
 
-      mutator = MutatorErase$new()
-      mutator$param_set$values$initializer = params$sampling
-      parent_selector = SelectorRandom$new()
-      parent_selector$param_set$values$replace = TRUE
-
-      mies_prime_operators(mutators = list(mutator), selectors = list(private$.selector, parent_selector), filtors = list(private$.filtor),
-        search_space = inst$search_space, budget_id = budget_id)
+      nonbudget_searchspace = ParamSetShadow$new(inst$search_space, budget_id)
+      mies_prime_operators(selectors = list(private$.selector), filtors = list(private$.filtor), search_space = inst$search_space, budget_id = budget_id)
 
       mies_init_population(inst, mu = params$mu, initializer = params$sampling, fidelity_schedule = fidelity_schedule,
         budget_id = budget_id)
@@ -275,7 +270,7 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
           sample_new = private$.filtor$needed_input(lambda, context = list(inst = inst))
           filter_down_to = lambda
         }
-        offspring = mies_generate_offspring(inst, lambda = sample_new, parent_selector = parent_selector, mutator = mutator, budget_id = budget_id)
+        offspring = assert_data_table(params$sampling(nonbudget_searchspace, sample_new)$data, nrows = sample_new)
         mies_survival_plus(inst, mu = keep_alive, survival_selector = private$.selector)
         offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
           fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)

@@ -83,3 +83,25 @@ search_space.mo = objective.mo$domain$search_space(list(
 # res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective.mo, search_space.mo, budget_limit = 2^13, .args = ci))
 # ## singleobjective
 # res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective, search_space, budget_limit = 2^13, .args = ci))
+
+
+calls <- calls[[1]]
+
+calls
+
+calls$filter_factor_first <- 100
+calls$filter_factor_first.end <- 100
+
+calls$filter_factor_last <- 100
+calls$filter_factor_last.end <- 100
+
+calls$filter_select_per_tournament <- 1
+calls$filter_select_per_tournament.end <- 1
+
+calls$filter_algorithm <- "tournament"
+
+calls$budget_log_step <- .01
+
+prr <- profvis::profvis(res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective, search_space, budget_limit = 2^13, .args = ci)), interval = .005)
+
+prr

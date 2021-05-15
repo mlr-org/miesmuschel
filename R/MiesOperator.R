@@ -166,7 +166,7 @@ MiesOperator = R6Class("MiesOperator",
     operate = function(values, ..., context = list(inst = NULL)) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       ids = private$.primed_ps$ids()
-      private$.primed_ps$assert_dt(values)
+#      private$.primed_ps$assert_dt(values)
       assert_names(colnames(values), permutation.of = private$.primed_ps$ids())
       convert = !is.data.table(values)
       if (convert) {
@@ -178,7 +178,7 @@ MiesOperator = R6Class("MiesOperator",
       # make sure input / output cols are in the order as inndicated by paramset --> use `match` on input (and output if endomorphic)
       values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ..., context = context)
       if (self$endomorphism) {
-        values = private$.primed_ps$assert_dt(values)[, match(ids, colnames(values), 0), with = FALSE]
+#        values = private$.primed_ps$assert_dt(values)[, match(ids, colnames(values), 0), with = FALSE]
         if (convert) {
           setDF(values)
         }
