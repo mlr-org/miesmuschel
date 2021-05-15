@@ -85,23 +85,28 @@ search_space.mo = objective.mo$domain$search_space(list(
 # res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective, search_space, budget_limit = 2^13, .args = ci))
 
 
-calls <- calls[[1]]
+## calls <- calls[[1]]
 
-calls
+## calls
 
-calls$filter_factor_first <- 100
-calls$filter_factor_first.end <- 100
+## calls$filter_factor_first <- 1000
+## calls$filter_factor_first.end <- 1
 
-calls$filter_factor_last <- 100
-calls$filter_factor_last.end <- 100
+## calls$filter_factor_last <- 1000
+## calls$filter_factor_last.end <- 1
 
-calls$filter_select_per_tournament <- 1
-calls$filter_select_per_tournament.end <- 1
+## calls$filter_select_per_tournament <- 1
+## calls$filter_select_per_tournament.end <- 1
 
-calls$filter_algorithm <- "tournament"
+## calls$filter_algorithm <- "tournament"
 
-calls$budget_log_step <- .01
+## calls$budget_log_step <- log(2)/4
 
-prr <- profvis::profvis(res <- lapply(calls, function(ci) mlr3misc::invoke(opt_objective, objective, search_space, budget_limit = 2^13, .args = ci)), interval = .005)
+## calls$random_interleave_fraction <- 1
+## calls$random_interleave_fraction.end <- 1
+## calls$survival_fraction <- .01
+## calls$mu <- 100
 
-prr
+## prr <- profvis::profvis(res <- lapply(list(calls), function(ci) mlr3misc::invoke(opt_objective, objective, search_space, budget_limit = 2^13, .args = ci)), interval = .005)
+
+## prr
