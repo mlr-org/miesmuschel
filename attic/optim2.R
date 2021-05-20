@@ -31,20 +31,16 @@ suggested_meta_domain = ps(
 #  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_fct(c("tournament", "progressive")),
-  surrogate_learner = p_fct(list(
-    ranger = mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")),
-    knn = mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))),  # try others as well? # the k = 2 is necessary because kknn crashes when k < trainingset size
+  surrogate_learner = p_uty(),
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000),
   filter_factor_last = p_dbl(1, 1000),
   filter_select_per_tournament = p_int(1, 10),
   random_interleave_fraction = p_dbl(0, 1),
-
   filter_factor_first.end = p_dbl(1, 1000),
   filter_factor_last.end = p_dbl(1, 1000),
   filter_select_per_tournament.end = p_int(1, 10),
   random_interleave_fraction.end = p_dbl(0, 1),
-
   random_interleave_random = p_lgl()
 )
 
