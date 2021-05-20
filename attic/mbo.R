@@ -44,7 +44,7 @@ objective <- bbotk::ObjectiveRFun$new(
   codomain = ps(yval = p_dbl(tags = "maximize"))
 )
 
-oi <- bbotk::OptimInstanceSingleCrit$new(objective, suggested_meta_searchspace, terminator = bbotk::trm("evals", n_evals = 10))
+oi <- bbotk::OptimInstanceSingleCrit$new(objective, suggested_meta_searchspace, terminator = bbotk::trm("run_time", secs = 60 * 60 * 70))
 
 bbotk::opt(algo)$optimize(oi)
 

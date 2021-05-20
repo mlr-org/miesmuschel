@@ -152,9 +152,9 @@ rbdict <- readRDS("/dss/dsshome1/lxc08/di25pic2/motherfucking_surrogates/rbv2_su
 
 problem <- cx$get_objective(tinstnao$level, target_variables = tinstnao$target)
 randomval <- rawdata[sample(which(get(cx$task_col) == tinstnao$level), 100000)]
-randomval <- rawdata[sample(which(get(cx$task_col) == tinstnao$level & repl == 10), 10000)]
-randomval <- rawdata[get(cx$task_col) == tinstnao$level & repl == 10]
-randomval <- rawdata[repl == 10]
+# randomval <- rawdata[sample(which(get(cx$task_col) == tinstnao$level & repl == 10), 10000)]
+# randomval <- rawdata[get(cx$task_col) == tinstnao$level & repl == 10]
+# randomval <- rawdata[repl == 10]
 randomvalin <- randomval[, problem$domain$ids(), with = FALSE]
 
 
