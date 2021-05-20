@@ -150,8 +150,6 @@ cx <- cfgs(tinstnao$cfg, workdir = workdir)
 rawdata <- readRDS(cx$data_path)
 rbdict <- readRDS("/dss/dsshome1/lxc08/di25pic2/motherfucking_surrogates/rbv2_super/dicts_compressed.rds")
 
-td <-
-
 problem <- cx$get_objective(tinstnao$level, target_variables = tinstnao$target)
 randomval <- rawdata[sample(which(get(cx$task_col) == tinstnao$level), 100000)]
 randomval <- rawdata[sample(which(get(cx$task_col) == tinstnao$level & repl == 10), 10000)]
