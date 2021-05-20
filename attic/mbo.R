@@ -1,12 +1,12 @@
 library("parallelMap")
 library("mlrintermbo")
 
+problem_count <- 38
+
+
 parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
 
 parallelSource("load_objectives.R")
-
-
-problem_count <- 38
 
 curseed <- as.numeric(commandArgs(trailingOnly = TRUE)[[1]])
 
