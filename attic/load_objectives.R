@@ -9,8 +9,11 @@ library("checkmate")
 source("quantileinfo.R")
 source("optim2.R")
 
-options(width=170)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 
+options(width=170)
+options(error=function()traceback(2))
 
 workdir <- "/dss/dsshome1/lxc08/di25pic2/motherfucking_surrogates"
 
@@ -31,8 +34,6 @@ surrogates <- lapply(seq_len(nrow(tinst)), function(i) {
 qis <- lapply(seq_len(nrow(tinst)), function(i) {
   readRDS(sprintf("problem_%i_seed_1.rds", i))
 })
-
-
 
 evaluate_miesmuschel <- function(problem, metaconf, seed, budgetfactor = 30) {
   set.seed(1)
