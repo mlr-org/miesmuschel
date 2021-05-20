@@ -1,4 +1,6 @@
 
+library("mlr3learners")
+library("paradox")
 
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
@@ -7,7 +9,7 @@ suggested_meta_searchspace = ps(
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_fct(c("tournament", "progressive")),
   surrogate_learner = p_fct(list(
-    ranger = mlr3::lrn("regr.ranger"),
+    ranger = mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))),
     knn = mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))),  # try others as well? # the k = 2 is necessary because kknn crashes when k < trainingset size
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
