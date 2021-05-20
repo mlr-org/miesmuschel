@@ -5,7 +5,7 @@ library("paradox")
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
   mu = p_int(2, 200, logscale = TRUE),
-  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
+#  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_fct(c("tournament", "progressive")),
   surrogate_learner = p_fct(list(
@@ -20,6 +20,29 @@ suggested_meta_searchspace = ps(
   filter_factor_first.end = p_dbl(1, 1000, logscale = TRUE),
   filter_factor_last.end = p_dbl(1, 1000, logscale = TRUE),
   filter_select_per_tournament.end = p_int(1, 10, logscale = TRUE),
+  random_interleave_fraction.end = p_dbl(0, 1),
+
+  random_interleave_random = p_lgl()
+)
+
+suggested_meta_domain = ps(
+  budget_log_step = p_dbl(log(2) / 4, log(2) * 4),
+  mu = p_int(2, 200),
+#  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
+  survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
+  filter_algorithm = p_fct(c("tournament", "progressive")),
+  surrogate_learner = p_fct(list(
+    ranger = mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")),
+    knn = mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))),  # try others as well? # the k = 2 is necessary because kknn crashes when k < trainingset size
+  filter_with_max_budget = p_lgl(),
+  filter_factor_first = p_dbl(1, 1000),
+  filter_factor_last = p_dbl(1, 1000),
+  filter_select_per_tournament = p_int(1, 10),
+  random_interleave_fraction = p_dbl(0, 1),
+
+  filter_factor_first.end = p_dbl(1, 1000),
+  filter_factor_last.end = p_dbl(1, 1000),
+  filter_select_per_tournament.end = p_int(1, 10),
   random_interleave_fraction.end = p_dbl(0, 1),
 
   random_interleave_random = p_lgl()

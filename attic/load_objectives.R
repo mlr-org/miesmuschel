@@ -86,7 +86,7 @@ evaluate_miesmuschel <- function(problem, metaconf, seed, budgetfactor = 30) {
 
   }
 
-  result <- mlr3misc::invoke(opt_objective_optimizable, cursur, cursur, search_space, budget_limit = budget_limit, highest_budget_only = TRUE, .args = metaconf)
+  result <- mlr3misc::invoke(opt_objective_optimizable, cursur, cursur, search_space, budget_limit = budget_limit, highest_budget_only = TRUE, sample = "random", .args = metaconf)
 
 
   log2.improvement.over.rs <- -log2(fulleval_equivalents * toQuantile(-c(result), curqi))
