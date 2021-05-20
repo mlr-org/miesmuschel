@@ -72,10 +72,11 @@ evaluate_miesmuschel <- function(problem, metaconf, seed, budgetfactor = 30) {
 
   } else {
     # randombot special code
+    search_space$params[["trainsize"]]$lower <- 3^-3
+
     search_space$params[[budget_id]]$lower <- log(search_space$params[[budget_id]]$lower)
     search_space$params[[budget_id]]$upper <- log(search_space$params[[budget_id]]$upper)
 
-    search_space$params[["trainsize"]]$lower <- 3^-3
     cursur$trafo_dict$logloss$retrafo <- function(x) { ret <- -log(x) ; ret[ret > 1e20] <- 1e20 ; ret }  # way faster than pmin
     search_space$trafo <- mlr3misc::crate(function(x, param_set) {
       x <- prevtrafo(x)
