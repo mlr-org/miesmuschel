@@ -28,7 +28,7 @@ evaluate_metaconf <- function(metaconf) {
 
   metaconf <- generate_design_random(suggested_meta_searchspace, 1)$transpose()[[1]]
 
-  curseed <- curseed + 1
+  curseed <<- curseed + 1
   evalresults <- parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = 30))
 
 
