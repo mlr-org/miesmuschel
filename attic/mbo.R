@@ -64,3 +64,7 @@ file.rename(tmpname, filename)
 ## colnames(oi$archive$data)
 ## ggplot(oi$archive$data, aes(x = , y = yval)) + geom_point()
 ## ggplot(oi$archive$data, aes(x = random_interleave_random, y = yval)) + geom_boxplot()
+
+dse <- generate_design_random(suggested_meta_searchspace, 10)
+
+evaluate_miesmuschel(10, seed = 10, metaconf = dse$transpose()[[1]], budgetfactor = 3)
