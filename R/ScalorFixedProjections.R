@@ -19,11 +19,11 @@
 #' @templateVar id fixedprojection
 #' @template autoinfo_prepare_scl
 #' @template autoinfo_operands
-#' @template autoinfo_dicts
+#' @template autoinfo_dict
 #'
 #' @family scalors
 #' @family scalor wrappers
-#' @example
+#' @examples
 #' set.seed(1)
 #' @export
 ScalorFixedProjection = R6Class("ScalorFixedProjection",
@@ -33,7 +33,7 @@ ScalorFixedProjection = R6Class("ScalorFixedProjection",
     #' Initialize the `ScalorFixedProjection` object.
     initialize = function() {
       param_set = ps(scalarization = p_uty(custom_check = function(x) check_function(x, args = c("fitnesses", "weights"))))
-      param_set$values = list(scalarization = scalarize_linear)
+      param_set$values = list(scalarization = scalarize_linear())
       super$initialize(param_set = param_set, dict_entry = "fixedprojection")
     },
     #' @description
@@ -49,15 +49,16 @@ ScalorFixedProjection = R6Class("ScalorFixedProjection",
       if (param_set$class[[weight_id]] != "ParamUty") stopf("scalarization_weights parameter must be ParamUty but is %s", param_set$class[[weight_id]])
       super$prime(param_set)
     }
-  )
+  ),
   private = list(
     .scale = function(values, fitnesses, context) {
       scalarization = self$param_set$get_values(context = context)$scalarization
 
-
     }
   )
 )
+dict_scalors$add("fixedprojection", ScalorFixedProjection)
+
 
 make_scalarizer = function(name, fn) {
   assert_function(fn, args = c("fitnesses", "weights"))
@@ -101,4 +102,3 @@ scalarizer_chebyshev = function(rho = 0.05) {
   })
 }
 
-#'

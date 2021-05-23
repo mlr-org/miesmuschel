@@ -67,6 +67,7 @@ Collate:
     'ScalorAggregate.R'
     'ScalorCrowdingDistance.R'
     'ScalorDomcount.R'
+    'ScalorFixedProjections.R'
     'ScalorHVContrib.R'
     'ScalorNondom.R'
     'ScalorOne.R'
