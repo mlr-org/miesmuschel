@@ -1,6 +1,14 @@
 
 library("mlr3learners")
 library("paradox")
+library("mlr3pipelines")
+
+imputepl <- po("imputeoor", offset = 1, multiplier = 10) %>>% po("fixfactors") %>>% po("imputesample")
+learnerlist <- list(
+  ranger = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
+  knn = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))
+)
+learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", class(x)) ; x })
 
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
@@ -8,9 +16,7 @@ suggested_meta_searchspace = ps(
 #  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_fct(c("tournament", "progressive")),
-  surrogate_learner = p_fct(list(
-    ranger = mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")),
-    knn = mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))),  # try others as well? # the k = 2 is necessary because kknn crashes when k < trainingset size
+  surrogate_learner = p_fct(learnerlist),
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
   filter_factor_last = p_dbl(1, 1000, logscale = TRUE),
@@ -31,10 +37,7 @@ suggested_meta_searchspace_numeric = ps(
 #  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_int(1, 2, trafo = function(x) c("tournament", "progressive")[x]),
-  surrogate_learner = p_int(1, 2, trafo = function(x) list(
-    ranger = mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")),
-    knn = mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))[[x]]
-  ),  # try others as well? # the k = 2 is necessary because kknn crashes when k < trainingset size
+  surrogate_learner = p_int(1, 2, trafo = function(x) learnerlist[[x]]),
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
   filter_factor_last = p_dbl(1, 1000, logscale = TRUE),
@@ -115,7 +118,7 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
 
   # Surrogate Options
   assert_choice(filter_algorithm, c("tournament", "progressive"))  # The two implemented filter algorithms
-  assert_r6(surrogate_learner, "LearnerRegr")
+  assert_r6(surrogate_learner, "Learner")
   # Whether to use surrogate predictions at the largest budget so far evaluated, or at the budget of the last evaluated budget.
   # (This only makes a difference after HB "restarts", i.e. when max-budget configs were already evaluated and HB samples new low-budget individuals.)
   assert_flag(filter_with_max_budget)
