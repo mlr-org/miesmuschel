@@ -643,3 +643,77 @@ BenchmarkConfigShekel$public_methods$get_objective
 # can currently use:
 # nasbench, lcbench
 
+
+
+# --------------------------------
+
+# check mlrintermbo
+
+# single objective
+library("bbotk")
+library("paradox")
+
+testobj <- ObjectiveRFun$new(
+  fun = function(xs) {
+    res <- if (xs$z == "one") {
+      xs$x^2 + xs$y^2 + 2 * xs$x - xs$y
+    } else {
+      0.2 * xs$x^2 + 0.1 * xs$y^2 + 0.2 * xs$x - 0.02 * xs$y
+    }
+    list(res = res)
+  },
+  domain = ps(x = p_dbl(-4, 4), y = p_dbl(-4, 4), z = p_fct(c("one", "two"))),
+  codomain = ps(res = p_dbl(tags = "minimize"))
+)
+
+testobjnum <- ObjectiveRFun$new(
+  fun = function(xs) {
+    res <- if (xs$z == 0) {
+      xs$x^2 + xs$y^2 + 2 * xs$x - xs$y
+    } else {
+      0.2 * xs$x^2 + 0.1 * xs$y^2 + 0.2 * xs$x - 0.02 * xs$y
+    }
+    list(res = res)
+  },
+  domain = ps(x = p_dbl(-4, 4), y = p_dbl(-4, 4), z = p_int(0, 1)),
+  codomain = ps(res = p_dbl(tags = "minimize"))
+)
+
+
+library("mlrintermbo")
+
+
+oi <- OptimInstanceSingleCrit$new(testobj, terminator = trm("evals", n_evals = 60))
+oin <- OptimInstanceSingleCrit$new(testobjnum, terminator = trm("evals", n_evals = 60))
+oir <- OptimInstanceSingleCrit$new(testobj, terminator = trm("evals", n_evals = 6000))
+oinr <- OptimInstanceSingleCrit$new(testobjnum, terminator = trm("evals", n_evals = 6000))
+
+oi
+
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
+
+opt("intermbo", initial.design.size = 30, infill.crit = "CB", infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)$optimize(oi)
+opt("intermbo", initial.design.size = 30, infill.crit = "CB", infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)$optimize(oin)
+
+#opt("random_search", batch_size = 1000)$optimize(oir)
+#opt("random_search", batch_size = 1000)$optimize(oinr)
+
+library("ggplot2")
+
+ggplot(oi$archive$data, aes(x = seq_along(res), y = res, color = z)) + geom_point()
+
+ggplot(oin$archive$data, aes(x = seq_along(res), y = res, color = as.factor(z))) + geom_point()
+
+
+cbres <- sapply(1:10, function(x) {
+  oi <- OptimInstanceSingleCrit$new(testobj, terminator = trm("evals", n_evals = 60))
+  opt("intermbo", initial.design.size = 30, infill.crit = "CB", infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)$optimize(oi)
+  oi$result_y
+})
+
+defaultres <- sapply(1:10, function(x) {
+  oi <- OptimInstanceSingleCrit$new(testobj, terminator = trm("evals", n_evals = 60))
+  opt("intermbo", initial.design.size = 30, infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)$optimize(oi)
+  oi$result_y
+})

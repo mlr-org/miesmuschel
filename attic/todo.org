@@ -1,0 +1,12 @@
+- [ ] does gp work better than rf?
+  -  with special uncertainty est?
+- [X] use CB infill? no, seems to perform worse in experiments
+- does the surrogate model work with dependencies?
+- [X] what does intermbo actually do? with RF model and with GP model
+  - seems so, things just kinda suck
+- what is the uncertainty of evals?
+- [X] other infill crit?
+- [X] multipoint proposal?
+  - parallelization is difficult, we're going to work with the old system
+- [ ] acceleration?
+

@@ -11,6 +11,8 @@ parallelSource("load_objectives.R")
 curseed <- as.numeric(commandArgs(trailingOnly = TRUE)[[1]])
 
 algo <- commandArgs(trailingOnly = TRUE)[[2]]
+searchspace <- commandArgs(trailingOnly = TRUE)[[3]]
+checkmate::assertChoice(searchspace, c("discrete", "numeric"))
 
 filename <- sprintf("run_%s_%s_seed_%s.rds", algo, gsub(":", "-", gsub(" ", "_", Sys.time())), curseed)
 tmpname <- paste0(filename, ".tmp")
@@ -25,28 +27,31 @@ evaluate_metaconf <- function(metaconf) {
   saveRDS(oi, tmpname)
   file.rename(tmpname, filename)
 
-
-  metaconf <- generate_design_random(suggested_meta_searchspace, 1)$transpose()[[1]]
-
   curseed <<- curseed + 1
   evalresults <- parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = 30))
-
 
   c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[, sprintf("%s.%s", cfg, level)]))
 }
 
-
 objective <- bbotk::ObjectiveRFun$new(
   fun = function(xs) {
-    evaluate_metaconf(metaconf)
+    evaluate_metaconf(xs)
   },
   domain = suggested_meta_domain,
   codomain = ps(yval = p_dbl(tags = "maximize"))
 )
 
-oi <- bbotk::OptimInstanceSingleCrit$new(objective, suggested_meta_searchspace, terminator = bbotk::trm("run_time", secs = 60 * 60 * 70))
+space <- switch(searchspace, discrete = suggested_meta_searchspace,  numeric = suggested_meta_searchspace_numeric, stop())
 
-bbotk::opt(algo)$optimize(oi)
+oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = 60 * 60 * 70))
+
+if (algo == "intermbo") {
+  opter <- bbotk::opt(algo, infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)
+} else {
+  opter <- bbotk::opt(algo)
+}
+
+opter$optimize(oi)
 
 saveRDS(oi, tmpname)
 file.rename(tmpname, filename)
