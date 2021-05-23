@@ -51,11 +51,11 @@ objective <- bbotk::ObjectiveRFun$new(
 
 space <- switch(searchspace, discrete = suggested_meta_searchspace,  numeric = suggested_meta_searchspace_numeric, stop())
 
-oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 20 else 60 * 60 * 70))
+oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 10 else 60 * 60 * 70))
 
 if (algo == "intermbo") {
   opter <- bbotk::opt(algo, infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)
-  if (short) opter$param_set$initial.design.size = 5
+  if (short) opter$param_set$values$initial.design.size = 5
 } else if (algo == "design_points") {
   design <- rbindlist(rep(list(generate_design_random(space, 10)$data), 100))
   opter <- bbotk::opt(algo, design = Design$new(space, design, FALSE))
