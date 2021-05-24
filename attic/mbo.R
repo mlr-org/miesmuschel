@@ -58,7 +58,7 @@ if (algo == "intermbo") {
   if (short) opter$param_set$values$initial.design.size = 5
 } else if (algo == "design_points") {
   design <- rbindlist(rep(list(generate_design_random(space, 10)$data), 100))
-  opter <- bbotk::opt(algo, design = Design$new(space, design, FALSE))
+  opter <- bbotk::opt(algo, design = design)
 } else {
   opter <- bbotk::opt(algo)
 }
