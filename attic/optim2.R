@@ -31,6 +31,10 @@ suggested_meta_searchspace = ps(
   random_interleave_random = p_lgl()
 )
 
+suggested_meta_searchspace_mo = miesmuschel:::ps_union(list(suggested_meta_searchspace,
+  ps(mo_selection_method = p_fct(c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon")))
+))
+
 suggested_meta_searchspace_numeric = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
   mu = p_int(2, 200, logscale = TRUE),
@@ -52,6 +56,20 @@ suggested_meta_searchspace_numeric = ps(
   random_interleave_random = p_lgl()
 )
 
+# This is probably relatively useless, it would be better to have a surrogate model that does one hot encoding preprocessing
+suggested_meta_searchspace_mo_numeric = miesmuschel:::ps_union(list(suggested_meta_searchspace_numeric,
+  ps(
+    mo_selection_method.nondom.crowding = p_dbl(0, 1),
+    mo_selection_method.nondom.hvcontrib = p_dbl(0, 1),
+    mo_selection_method.nondom.hvimprovement = p_dbl(0, 1),
+    mo_selection_method.nondom.amazon = p_dbl(0, 1),
+    .extra_trafo = function(x, param_set) {
+      list(mo_selection_method = c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon")[which.max(unlist(x))])
+    }
+  )
+))
+
+
 suggested_meta_domain = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4),
   mu = p_int(2, 200),
@@ -68,7 +86,8 @@ suggested_meta_domain = ps(
   filter_factor_last.end = p_dbl(1, 1000),
   filter_select_per_tournament.end = p_int(1, 10),
   random_interleave_fraction.end = p_dbl(0, 1),
-  random_interleave_random = p_lgl()
+  random_interleave_random = p_lgl(),
+  mo_selection_method = p_fct(c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon"))
 )
 
 
@@ -99,7 +118,7 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
     filter_factor_first, filter_factor_last, filter_select_per_tournament, random_interleave_fraction,
     filter_factor_first.end = filter_factor_first, filter_factor_last.end = filter_factor_last,
     filter_select_per_tournament.end = filter_select_per_tournament, random_interleave_fraction.end = random_interleave_fraction,
-    random_interleave_random) {
+    random_interleave_random, mo_selection_method = NULL, highest_budget_only = TRUE, mo_nadir = 0) {
   library("checkmate")
   library("miesmuschel")
   library("mlr3learners")
@@ -134,6 +153,9 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   assert_number(random_interleave_fraction.end, lower = 0, upper = 1)  # fraction of individuals sampled with random interleaving
   assert_flag(random_interleave_random)  # whether the number of random interleaved individuals is drawn from a binomial distribution, or the same each generation
 
+  assert_choice(mo_selection_method, c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon"), null.ok = TRUE)
+  assert_flag(highest_budget_only)
+
 
   # We change the lower limit of the budget parameter:
   # suppose: budget_step is 2, budget param goes from 1 to 6
@@ -155,10 +177,34 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
     terminator = bbotk::trm("budget", budget = budget_limit, aggregate = function(x) sum(exp(as.numeric(x))))  # budget in archive is in log-scale!
   )
 
-  # scalor: scalarizes multi-objective results. "one": take the single objective. "nondom": nondominated sorting w/ crowding distance tie breaker
-  scalor = if (objective$codomain$length == 1) scl("one") else scl("nondom")
+  additional_component_sampler = NULL
+
+  if (objective$codomain$length == 1) {
+    # scalor: scalarizes multi-objective results. "one": take the single objective.
+    scalor = scl("one")
+  } else {
+    selector = switch(mo_selection_method,
+      nondom.crowding = scl("nondom", tiebreak = "crowdingdist"),  # "nondom": nondominated sorting w/ crowding distance tie breaker
+      nondom.hvcontrib = scl("nondom", tiebreak = "hvcontrib", nadir = mo_nadir),  # hv contribution tie breaker
+      hvimprovement = scl("hypervolume", nadir = mo_nadir, baseline = ContextPV(function(inst) {
+        if (!nrow(inst$archive$data)) return(NULL)
+        if (highest_budget_only) {
+          budget_id = inst$search_space$ids(tags = "budget")
+          budgetvals = inst$archive$data[[budget_id]]
+          mies_get_fitnesses(inst, budgetvals == max(budgetvals))
+        } else {
+          mies_get_fitnesses(inst)
+        }
+      }, highest_budget_only)),
+      amazon = {
+        additional_component_sampler = SamplerRandomWeights(nobjectives = objective$codomain$length, nweights = 100)
+        scl("fixedprojection", scalarization = scalarizer_linear())
+      }
+    )
+  }
   # selector: take the best, according to scalarized objective
   selector = sel("best", scalor)
+
   # filtor: use surtour or surprog, depending on filter_algorithm config argument
   filtor = switch(filter_algorithm,
     tournament = ftr("surtour", surrogate_learner = surrogate_learner, surrogate_selector = selector,
@@ -188,7 +234,8 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
 
   optimizer = bbotk::opt("smashy", filtor = interleaving_filtor, selector = selector,
     mu = mu, survival_fraction = survival_fraction, sampling = sampling_fun,
-    fidelity_steps = fidelity_steps + 1, filter_with_max_budget = filter_with_max_budget
+    fidelity_steps = fidelity_steps + 1, filter_with_max_budget = filter_with_max_budget,
+    additional_component_sampler = additional_component_sampler
   )
 
   optimizer$optimize(oi)
@@ -201,7 +248,7 @@ opt_objective_optimizable <- function(objective, test_objective, search_space, .
 
   multiobjective <- objective$codomain$length > 1
 
-  oi <- opt_objective(objective, search_space, ...)
+  oi <- opt_objective(objective, search_space, ..., highest_budget_only = highest_budget_only, mo_nadir = nadir)
 
   om <- oi$objective_multiplicator
 

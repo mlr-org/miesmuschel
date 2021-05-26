@@ -164,3 +164,14 @@ check_fidelity_schedule = function(x) {
     "must be a data.frame with integer column 'generation' (with unique non-missing values and at least one row with value 1) and columns 'budget_new', 'budget_survivors'."
   }
 }
+
+
+# scale to 0-1, default to 1 if values are constant
+normie_scale = function(values) {
+  rng = range(values)
+  if (rng[[1]] == rng[[2]]) {
+    rep(1, length(values))
+  } else {
+    (values - rng[[1]]) / diff(rng)
+  }
+}

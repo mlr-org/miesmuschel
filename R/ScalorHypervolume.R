@@ -59,7 +59,13 @@ ScalorHypervolume = R6Class("ScalorHypervolume",
   private = list(
     .scale = function(values, fitnesses, context) {
       params = self$param_set$get_values(context = context)
-      # TODO
+      hv = domhv_improvement(fitnesses, baseline = params$baseline, nadir = params$nadir)
+      rng = range(hv)
+      if (params$scale_output) {
+        normie_scale(hv)
+      } else {
+        hv
+      }
     }
   )
 )
