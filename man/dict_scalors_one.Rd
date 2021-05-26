@@ -53,8 +53,10 @@ so$operate(data, fitnesses)
 \seealso{
 Other scalors: 
 \code{\link{ScalorFixedProjection}},
+\code{\link{ScalorAggregate}},
 \code{\link{ScalorProxy}},
 \code{\link{Scalor}},
+\code{\link{dict_scalors_domcount}},
 \code{\link{dict_scalors_nondom}}
 }
 \concept{scalors}

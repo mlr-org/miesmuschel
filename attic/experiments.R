@@ -84,9 +84,6 @@ tinytest::run_test_file("inst/tinytest/test_mutator_proxy.R")       # ...
 tinytest::run_test_file("inst/tinytest/test_OptimizerSumoHB.R")     # properties are wrong
 tinytest::run_test_file("inst/tinytest/test_recombinator_proxy.R")  # ...
 
-
-
-
 objective <- ObjectiveRFun$new(
   fun = function(xs) list(x = xs$x + 10),
   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),

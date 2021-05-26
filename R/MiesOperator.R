@@ -75,6 +75,12 @@ MiesOperator = R6Class("MiesOperator",
       selfnames = names(self)
       ownps = eval(private$.own_param_set_symbol)
       pnames = ownps$ids()
+      pnamesrep = pnames
+      if (ownps$set_id != "" && !identical(ownps, self$param_set)) {
+        pnamesrep = sprintf("%s.%s", ownps$set_id, pnames)
+      }
+      names(pnamesrep) = pnames
+
       representable = (!show_constructor_args || all(names(initformals) %in% selfnames)) &&
         !is.null(self$dict_entry) && !is.null(self$dict_shortaccess) &&
         !any(names(initformals) %in% pnames)
@@ -117,7 +123,8 @@ MiesOperator = R6Class("MiesOperator",
             FALSE
           })
           if (!skip_defaults || !validrep || !identical(truerep, repr(private$.own_defaults[[paramname]], skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...))) {
-            deviantparams[[paramname]] = truerep
+
+            deviantparams[[pnamesrep[[paramname]]]] = truerep
           }
         }
       }

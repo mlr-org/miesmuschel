@@ -1,4 +1,4 @@
-#' @title Surrogate Model Assisted Hyperband Optimizer
+#' @title Surrogate Model Asisted Hyperband Optimizer
 #'
 #' @description
 #' Perform Surrogate Model Assisted Hyperband Optimization.
@@ -35,7 +35,7 @@
 #' when `fidelity_steps` is 0) between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
 #'
 #' @section Configuration Parameters:
-#' `OptimizerSumoHB`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
+#' `OptimizerSmash`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
 #'
 #' * `mu` :: `integer(1)`\cr
 #'   Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
@@ -57,6 +57,11 @@
 #'   [`Filtor`] for the filtering algorithm. Default is [`FiltorProxy`], which exposes the operation as
 #'   a configuration parameter of the optimizer itself.\cr
 #'   The `$filtor` field will reflect this value.
+#' @param selector ([`Selector`])\cr
+#'   [`Selector`] that chooses which individuals survive to the next higher fidelity step.
+#'   Note this is potentially different from the selection done in `filtor` (although the common case
+#'   would be to use the same [`Selector`] in both).
+#'   The `$selector` field will reflect this value.
 #'
 #' @family optimizers
 #' @examples
@@ -100,13 +105,13 @@
 #' # of which survive, while 10 are sampled new.
 #' # For this, 100 individuals are sampled randomly, and the top 10, according
 #' # to the surrogate model, are used.
-#' sumohb_opt <- opt("sumohb", ftr("surprog",
+#' smash_opt <- opt("smash", ftr("surprog",
 #'     surrogate_learner = mlr3::lrn("regr.ranger"),
 #'     filter.pool_factor = 10),
 #'   mu = 30, survival_fraction = 2/3
 #' )
-#' # sumohb_opt$optimize performs SumoHB optimization and returns the optimum
-#' sumohb_opt$optimize(oi)
+#' # smash_opt$optimize performs Smash optimization and returns the optimum
+#' smash_opt$optimize(oi)
 #'
 #' #####
 #' # Optimizing a Machine Learning Method
@@ -136,20 +141,20 @@
 #' )
 #'
 #' # use ftr("maybe") for random interleaving: only 50% of proposed points are filtered.
-#' sumohb_tune <- tnr("sumohb", ftr("maybe", p = 0.5, filtor = ftr("surprog",
+#' smash_tune <- tnr("smash", ftr("maybe", p = 0.5, filtor = ftr("surprog",
 #'     surrogate_learner = lrn("regr.ranger"),
 #'     filter.pool_factor = 10)),
 #'   mu = 20, survival_fraction = 0.5
 #' )
-#' # sumohb_tune$optimize performs SumoHB optimization and returns the optimum
-#' sumohb_tune$optimize(ti)
+#' # smash_tune$optimize performs Smash optimization and returns the optimum
+#' smash_tune$optimize(ti)
 #'
 #' }
 #' @export
-OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
+OptimizerSmash = R6Class("OptimizerSmash", inherit = Optimizer,
   public = list(
     #' @description
-    #' Initialize the 'OptimizerSumoHB' object.
+    #' Initialize the 'OptimizerSmash' object.
     initialize = function(filtor = FiltorProxy$new(), selector = SelectorProxy$new()) {
       private$.filtor = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       private$.selector = assert_r6(selector, "Selector")$clone(deep = TRUE)
@@ -186,6 +191,15 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       ret = private$.filtor
       if (!missing(rhs) && !identical(rhs, ret)) {
         stop("filtor is read-only.")
+      }
+      ret
+    },
+    #' @field selector ([`Selector`])\cr
+    #' Survival selector used between fidelity steps.
+    selector = function(rhs) {
+      ret = private$.selector
+      if (!missing(rhs) && !identical(rhs, ret)) {
+        stop("selector is read-only.")
       }
       ret
     },

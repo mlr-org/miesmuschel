@@ -41,7 +41,7 @@ MutatorSequential = R6Class("MutatorSequential",
         x
       })
 
-      ps_alist = lapply(seq_along(mutators), function(i) substitute(private$.wrapped[[i]], list(i = i)))
+      ps_alist = lapply(seq_along(mutators), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
 
       super$initialize(Reduce(intersect, map(private$.wrapped, "param_classes")), ps_alist,
         packages = unique(unlist(map(private$.wrapped, "packages"), use.names = FALSE, recursive = FALSE)),

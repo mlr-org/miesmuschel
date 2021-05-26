@@ -51,7 +51,9 @@ Other base classes:
 
 Other scalors: 
 \code{\link{ScalorFixedProjection}},
+\code{\link{ScalorAggregate}},
 \code{\link{ScalorProxy}},
+\code{\link{dict_scalors_domcount}},
 \code{\link{dict_scalors_nondom}},
 \code{\link{dict_scalors_one}}
 }
