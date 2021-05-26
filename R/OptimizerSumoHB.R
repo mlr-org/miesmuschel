@@ -153,13 +153,15 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
     initialize = function(filtor = FiltorProxy$new(), selector = SelectorProxy$new()) {
       private$.filtor = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       private$.selector = assert_r6(selector, "Selector")$clone(deep = TRUE)
-      param_set = ps(
-        mu = p_int(1, tags = "required"),
-        survival_fraction = p_dbl(0, 1, tags = "required"),
-        sampling = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required")),
-        fidelity_steps = p_int(0, tags = "required"),
-        filter_with_max_budget = p_lgl(tags = "required")
-      )
+      param_set = do.call(ps, c(list(
+          mu = p_int(1, tags = "required"),
+          survival_fraction = p_dbl(0, 1, tags = "required"),
+          sampling = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required")),
+          fidelity_steps = p_int(0, tags = "required"),
+          filter_with_max_budget = p_lgl(tags = "required")),
+        list(
+          additional_component_sampler = p_uty(custom_check = function(x) if (is.null(x)) TRUE else check_r6(x, "Sampler")))
+      ))
       param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_random, fidelity_steps = 0, filter_with_max_budget = FALSE)
 
       private$.own_param_set = param_set
@@ -246,10 +248,12 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
       fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
 
       nonbudget_searchspace = ParamSetShadow$new(inst$search_space, budget_id)
-      mies_prime_operators(selectors = list(private$.selector), filtors = list(private$.filtor), search_space = inst$search_space, budget_id = budget_id)
+      additional_components = params$additional_component_sampler$param_set  # this is just NULL if not given, which is fine
+      mies_prime_operators(selectors = list(private$.selector), filtors = list(private$.filtor),
+        search_space = inst$search_space, additional_components = additional_components, budget_id = budget_id)
 
       mies_init_population(inst, mu = params$mu, initializer = params$sampling, fidelity_schedule = fidelity_schedule,
-        budget_id = budget_id)
+        budget_id = budget_id, additional_component_sampler = additional_component_sampler)
 
       survivors = max(round(params$survival_fraction * params$mu), 1)
       if (survivors == params$mu) {
@@ -271,6 +275,12 @@ OptimizerSumoHB = R6Class("OptimizerSumoHB", inherit = Optimizer,
           filter_down_to = lambda
         }
         offspring = assert_data_table(params$sampling(nonbudget_searchspace, sample_new)$data, nrows = sample_new)
+
+        if (!is.null(additional_component_sampler)) {
+          additional_components = assert_data_frame(additional_component_sampler$sample(sample_new)$data, nrows = sample_new)
+          offspring = cbind(offspring, additional_components)
+        }
+
         mies_survival_plus(inst, mu = keep_alive, survival_selector = private$.selector)
         offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
           fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)

@@ -37,7 +37,10 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
   inherit = Filtor,
   public = list(
     initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new(), param_set = ps(), packages = character(0), dict_entry = NULL) {
-      private$.surrogate_learner = assert_r6(surrogate_learner, "LearnerRegr")$clone(deep = TRUE)
+      private$.surrogate_learner = mlr3::as_learner(surrogate_learner, clone = TRUE)
+      # can't assert LearnerRegr because GraphLearner doesn't announce that. Instead, we check $task_type
+      assert_true(private$.surrogate_learner$task_type == "regr", .var.name = 'surrogate_learner$task_type == "regr"')
+
       private$.surrogate_selector = assert_r6(surrogate_selector, "Selector")$clone(deep = TRUE)
       private$.surrogate_selector$param_set$set_id = "select"
       private$.own_param_set = param_set
@@ -62,6 +65,9 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
     #' @return [invisible] `self`.
     prime = function(param_set) {
       private$.surrogate_selector$prime(param_set)
+      if (param_set$has_deps && "missings" %nin% private$.surrogate_learner$properties) {
+        stop("Surrogate learner %s needs to handle missing values for search space with dependencies", private$.surrogate_learner$id)
+      }
       super$prime(param_set)
       invisible(self)
     }
