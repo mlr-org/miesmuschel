@@ -186,7 +186,7 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
 
   sampling_fun = switch(sample, random = paradox::generate_design_random, lhs = paradox::generate_design_lhs)
 
-  optimizer = bbotk::opt("sumohb", filtor = interleaving_filtor, selector = selector,
+  optimizer = bbotk::opt("smashy", filtor = interleaving_filtor, selector = selector,
     mu = mu, survival_fraction = survival_fraction, sampling = sampling_fun,
     fidelity_steps = fidelity_steps + 1, filter_with_max_budget = filter_with_max_budget
   )

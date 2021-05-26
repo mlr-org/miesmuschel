@@ -108,7 +108,7 @@ ObjectiveIrace = R6Class("ObjectiveIrace", inherit = bbotk::Objective,
 
         sampling_fun = switch(xs$sample, random = paradox::generate_design_random, lhs = paradox::generate_design_lhs)
 
-        optimizer = opt("sumohb", filtor = interleaving_filtor, selector = selector,
+        optimizer = opt("smashy", filtor = interleaving_filtor, selector = selector,
           mu = xs$mu, survival_fraction = xs$survival_fraction, sampling = sampling_fun,
           fidelity_steps = fidelity_steps + 1, filter_with_max_budget = xs$filter_with_max_budget
         )

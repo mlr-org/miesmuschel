@@ -1,4 +1,4 @@
-#' @title Surrogate Model Asisted Hyperband Optimizer
+#' @title Surrogate Model Asisted Synchronized Hyperband Optimizer
 #'
 #' @description
 #' Perform Surrogate Model Assisted Hyperband Optimization.
@@ -35,7 +35,7 @@
 #' when `fidelity_steps` is 0) between run continuations, however, unless the fidelity bounds are also adjusted, since the continuation would then have a decrease in fidelity.
 #'
 #' @section Configuration Parameters:
-#' `OptimizerSmash`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
+#' `OptimizerSmashy`'s configuration parameters are the hyperparameters of the [`Filtor`] given to the `filtor` construction argument, as well as:
 #'
 #' * `mu` :: `integer(1)`\cr
 #'   Population size: Number of individuals that are sampled in the beginning, and which are re-evaluated in each fidelity step. Initialized to 2.
@@ -105,13 +105,13 @@
 #' # of which survive, while 10 are sampled new.
 #' # For this, 100 individuals are sampled randomly, and the top 10, according
 #' # to the surrogate model, are used.
-#' smash_opt <- opt("smash", ftr("surprog",
+#' smashy_opt <- opt("smashy", ftr("surprog",
 #'     surrogate_learner = mlr3::lrn("regr.ranger"),
 #'     filter.pool_factor = 10),
 #'   mu = 30, survival_fraction = 2/3
 #' )
-#' # smash_opt$optimize performs Smash optimization and returns the optimum
-#' smash_opt$optimize(oi)
+#' # smashy_opt$optimize performs Smashy optimization and returns the optimum
+#' smashy_opt$optimize(oi)
 #'
 #' #####
 #' # Optimizing a Machine Learning Method
@@ -141,20 +141,20 @@
 #' )
 #'
 #' # use ftr("maybe") for random interleaving: only 50% of proposed points are filtered.
-#' smash_tune <- tnr("smash", ftr("maybe", p = 0.5, filtor = ftr("surprog",
+#' smashy_tune <- tnr("smashy", ftr("maybe", p = 0.5, filtor = ftr("surprog",
 #'     surrogate_learner = lrn("regr.ranger"),
 #'     filter.pool_factor = 10)),
 #'   mu = 20, survival_fraction = 0.5
 #' )
-#' # smash_tune$optimize performs Smash optimization and returns the optimum
-#' smash_tune$optimize(ti)
+#' # smashy_tune$optimize performs Smashy optimization and returns the optimum
+#' smashy_tune$optimize(ti)
 #'
 #' }
 #' @export
-OptimizerSmash = R6Class("OptimizerSmash", inherit = Optimizer,
+OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
   public = list(
     #' @description
-    #' Initialize the 'OptimizerSmash' object.
+    #' Initialize the 'OptimizerSmashy' object.
     initialize = function(filtor = FiltorProxy$new(), selector = SelectorProxy$new()) {
       private$.filtor = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       private$.selector = assert_r6(selector, "Selector")$clone(deep = TRUE)
