@@ -10,6 +10,7 @@ learnerlist <- list(
 )
 learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", class(x)) ; x })
 
+
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
   mu = p_int(2, 200, logscale = TRUE),
