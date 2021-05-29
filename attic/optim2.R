@@ -8,6 +8,9 @@ learnerlist <- list(
   ranger = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))
 )
+learnerlist$knn$graph$pipeops$regr.kknn$param_set$context_available = "task"
+learnerlist$knn$param_set$values$regr.kknn.k = ContextPV(function(task) if (nrow(task) < 8) stop("need 8 samples") else 7)
+
 learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", class(x)) ; x })
 
 suggested_meta_searchspace = ps(
