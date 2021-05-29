@@ -29,6 +29,7 @@ saveRDS(Sys.time(), tmpname)
 lgr::get_logger("mlr3")$set_threshold("info")
 lgr::get_logger("bbotk")$set_threshold("info")
 
+set.seed(curseed)
 
 evaluate_metaconf <- function(metaconf) {
 
@@ -36,7 +37,15 @@ evaluate_metaconf <- function(metaconf) {
   file.rename(tmpname, filename)
 
   curseed <<- curseed + 1
-  evalresults <- parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = if (short) 3 else 30))
+  evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = if (short) 3 else 30)),
+    error = function(e) {
+    parallelStop()
+    parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
+    parallelSource("load_objectives.R")
+    lgr::get_logger("mlr3")$set_threshold("info")
+    lgr::get_logger("bbotk")$set_threshold("info")
+    parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = if (short) 3 else 30))
+  })
 
   c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[, sprintf("%s.%s", cfg, level)]))
 }

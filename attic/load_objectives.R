@@ -36,7 +36,7 @@ qis <- lapply(seq_len(nrow(tinst)), function(i) {
 })
 
 evaluate_miesmuschel <- function(problem, metaconf, seed, budgetfactor = 30) {
-  set.seed(1)
+  set.seed(seed)
   assertInt(problem, lower = 1, upper = nrow(tinst))
 
   cursur <- surrogates[[problem]]
