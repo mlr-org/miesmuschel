@@ -57,7 +57,8 @@ MiesOperator = R6Class("MiesOperator",
       private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
       assert_true(is.language(own_param_set))
       if (!inherits(param_set, "ParamSet")) {
-        eval(substitute({own_param_set$context_available = "inst"}, list(own_param_set = own_param_set)))  # TODO: there has to be a better way
+        # Doing the following in a less convoluted way gives `Error in ps()$context_available = "inst"` because of the default value of own_param_set.
+        eval(substitute({x = own_param_set ; x$context_available = "inst"}, list(own_param_set = own_param_set)))  # TODO: there has to be a better way
       }
       private$.own_param_set_symbol = own_param_set
       private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
