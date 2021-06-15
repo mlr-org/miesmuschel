@@ -86,7 +86,7 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
   ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter, context) {
-      params = self$param_set$get_values(context = context)
+      params = private$.own_param_set$get_values(context = context)
       primed = self$primed_ps
       values = first(values, self$needed_input(n_filter, context))
       if (nrow(values) == n_filter) return(seq_len(n_filter))
