@@ -212,7 +212,10 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
 
       cutat = matrixStats::weightedMedian(cutpoints, cutpointweights, interpolate = FALSE, ties = "min")  # n log(n), apparently does sorting internally, pathetic.
       if (cutat == max(cutpoints)) {
-        cutat = max(cutpoints[cutpoints != cutat])
+        otherpoints = cutpoints[cutpoints != cutat]
+        if (length(otherpoints)) {
+          cutat = max(otherpoints)
+        }
       }
     }
     #> cutat = sort(cutpoints)[(length(cutpoints) + 1L) / 2]
@@ -228,8 +231,13 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
     dimension = (dimension %% dim) + 1L
 
     # pre-emptively drop lower part for upper half
-    domhv_recurse(fitnesses_t[, dimpoints > cutat, drop = FALSE], cutnadir, zenith, dimension) +
-      domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
+    fitnesses_upper = fitnesses_t[, dimpoints > cutat, drop = FALSE]
+    if (length(fitnesses_upper)) {
+      result_upper = domhv_recurse(fitnesses_upper, cutnadir, zenith, dimension)
+    } else {
+      result_upper = 0
+    }
+    result_upper + domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
   }
 
   prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
