@@ -126,11 +126,16 @@ domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
 
 }
 
-domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
+domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "warn") {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
   dim = ncol(fitnesses)
   assert(check_number(nadir), check_numeric(nadir, len = dim))
-  if (any(t(fitnesses) < nadir)) stop("Found fitness worse than nadir")
+  assert_choice(on_worse_than_nadir, c("quiet", "warn", "stop"))
+
+  if (any(fitnesses < nadir)) {
+    switch(on_worse_than_nadir, quiet = identity, warn = warning, stop = stop)("Found fitness worse than nadir")
+    fitnesses = fitnesses[rowSums(fitnesses < nadir) == 0, , drop = FALSE]
+  }
   if (prefilter) {
     fitnesses = fitnesses[nondominated(fitnesses)$strong_front, , drop = FALSE]
 #    cat("prefiltered:\n")
