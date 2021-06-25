@@ -132,9 +132,9 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "
   assert(check_number(nadir), check_numeric(nadir, len = dim))
   assert_choice(on_worse_than_nadir, c("quiet", "warn", "stop"))
 
-  if (any(fitnesses < nadir)) {
+  if (any(t(fitnesses) < nadir)) {
     switch(on_worse_than_nadir, quiet = identity, warn = warning, stop = stop)("Found fitness worse than nadir")
-    fitnesses = fitnesses[rowSums(fitnesses < nadir) == 0, , drop = FALSE]
+    fitnesses = fitnesses[colSums(t(fitnesses) < nadir) == 0, , drop = FALSE]
   }
   if (prefilter) {
     fitnesses = fitnesses[nondominated(fitnesses)$strong_front, , drop = FALSE]
