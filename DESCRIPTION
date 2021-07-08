@@ -28,8 +28,6 @@ Suggests:
   ranger,
   xgboost,
   rpart
-Remotes:
-  mlr-org/bbotk
 RoxygenNote: 7.1.1
 Collate: 
     'dictionaries.R'
