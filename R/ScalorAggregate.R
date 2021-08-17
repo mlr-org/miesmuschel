@@ -119,12 +119,7 @@ ScalorAggregate = R6Class("ScalorAggregate",
         }
       )
       if (params$scale_output) {
-        rng = range(wsum)
-        if (rng[[1]] == rng[[2]]) {
-          rep(1, length(wsum))
-        } else {
-          (wsum - rng[[1]]) / diff(rng)
-        }
+        normie_scale(wsum)
       } else {
         wsum
       }
