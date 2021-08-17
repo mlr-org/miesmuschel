@@ -5,7 +5,7 @@
 #' @name dict_filtors_proxy
 #'
 #' @description
-#' Filtor that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make [`OptimizerSumoHB`]'s
+#' Filtor that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make [`OptimizerSmashy`]'s
 #' filtor operation fully parametrizable.
 #'
 #' @section Configuration Parameters:

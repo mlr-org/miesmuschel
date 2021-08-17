@@ -54,6 +54,16 @@ SelectorBest = R6Class("SelectorBest",
       invisible(self)
     }
   ),
+  active = list(
+    #' @field scalor ([`Scalor`])\cr
+    #' [`Scalor`] used to scalarize fitnesses for selection.
+    scalor = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.scalor)) {
+        stop("scalor is read-only.")
+      }
+      private$.scalor
+    }
+  ),
   private = list(
     .select = function(values, fitnesses, n_select, context) {
       order(private$.scalor$operate(values, fitnesses, context = context), decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]

@@ -60,7 +60,7 @@ objective <- bbotk::ObjectiveRFun$new(
 
 space <- switch(searchspace, discrete = suggested_meta_searchspace,  numeric = suggested_meta_searchspace_numeric, stop())
 
-oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 30 else 60 * 60 * 70))
+oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 10 else 60 * 60 * 70))
 
 if (algo == "intermbo") {
   opter <- bbotk::opt(algo, infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)
@@ -77,6 +77,14 @@ opter$optimize(oi)
 saveRDS(oi, tmpname)
 file.rename(tmpname, filename)
 
+# proposed config:
+## proposition <- list(budget_log_step = log(16), mu = 20, survival_fraction = 1/3, filter_algorithm = "progressive", surrogate_learner = learnerlist$knn,
+##   filter_with_max_budget = TRUE, filter_factor_first = 1000, filter_factor_last = 20, random_interleave_fraction = 2/3, random_interleave_random = FALSE,
+##   filter_select_per_tournament = 1)
+## --> rs-factor 6  ("64x better than RS") / 5.5 (45x) / 5 (32x) --> probably around 5.5
+## --> lcbench 126026, lcbench 7593 --> both around 7.3 / 6 / 8.2 --> probably around 7.3 ("160x better than RS")
+# Possible amendment: filter_factor_last.end = 300
+## --> 5.3 +- 1, lcbench 8.2 +- 1.3
 
 ## library("ggplot2")
 ## pl <- melt(oi$archive$data[, .SD, .SDcols = grepl("\\.", colnames(oi$archive$data))])

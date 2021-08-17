@@ -33,3 +33,6 @@ the same set but excluding I.
 Individuals that are less than another individual more than \code{epsilon} in any dimension have hypervolume contribution
 of 0.
 }
+\examples{
+# TODO example
+}

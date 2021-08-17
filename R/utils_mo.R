@@ -24,7 +24,7 @@
 #'   `$domcount`: Length N vector counting the number of individuals that dominate the given individual.
 #'
 #' @export
-order_nondominated = function(fitnesses, epsilon = 0) {
+rank_nondominated = function(fitnesses, epsilon = 0) {
   # this may or may not be similar to https://core.ac.uk/download/pdf/30341871.pdf ; haven't read the paper,
   # but at first glance it looks like what I'm doing here so I don't think I am doing something dumb.
   # They suggest binary search for fronts, which is probably a neat idea.
@@ -119,12 +119,96 @@ dist_crowding = function(fitnesses) {
 #'   be a scalar, in which case it is used for all dimensions, or a vector, in which case its length must match
 #'   the number of dimensions. Default 0.
 #' @return `numeric`: The vector of dominated hypervolume contributions for each individual in `fitnesses`.
+#' @examples
+#' # TODO example
+#' @export
 domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
   assert(check_number(nadir, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
   assert(check_number(epsilon, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+  has_epsilon = any(epsilon > 0)
 
+  nd = nondominated(fitnesses, epsilon = epsilon)
+  nonzeroes = nd$front
+  strongfront = fitnesses[nd$strongfront, , drop = FALSE]
+  result = numeric(nrow(fitnesses))
+
+  volume_baseline = domhv(strongfront, nadir, prefilter = FALSE)
+
+  result[nonzeroes] = map_dbl(nonzeroes, function(nz) {
+    replace = which(nz == nd$strongfront)
+    if (has_epsilon) {
+      if (length(replace)) {
+        strongfront[replace, ] = strongfront[replace, ] + epsilon
+      } else {
+        strongfront = rbind(strongfront, fitnesses[nz, ] + epsilon)
+      }
+      volume_with = domhv(strongfront, nadir, prefilter = FALSE)
+    } else {
+      volume_with = volume_baseline
+    }
+    if (length(replace)) {
+      volume_without = domhv(strongfront[-replace, , drop = FALSE], nadir, prefilter = FALSE)
+    } else {
+      volume_without = volume_baseline
+    }
+    volume_with - volume_without
+  })
+  result
 }
+
+#' @title Calculate Hypervolume Improvement
+#'
+#' @description
+#' Takes a `matrix` of fitness values and calculates the hypervolume improvement of individuals in that `matrix`, one by one,
+#' over the `baseline` individuals.
+#'
+#' The hypervolume improvement for each point is the measure of all points that have fitnesses that are
+#' * greater than the respective value in `nadir` in all dimensions, and
+#' * smaller than the respective value in the given point in all dimensions, and
+#' * greater than all points in `baseline` in at least one dimension.
+#'
+#' Individuals in `fitnesses` are considered independently of each other. A possible speedup is achieved because
+#' `baseline` individuals only need to be pre-filtered once.
+#'
+#' @template param_fitnesses
+#' @param baseline (`matrix` | `NULL`)\cr
+#'   Fitness-matrix with one column per objective, giving a population over which the hypervolume improvement should be calculated.
+#'   If `NULL`, the hypervolume of each individual in `fitnesses` is calculated.
+#' @param nadir (`numeric`)\cr
+#'   Lowest fitness point up to which to calculate dominated hypervolume. May be a scalar, in which case
+#'   it is used for all dimensions, or a vector, in which case its length must match the number of dimensions.
+#'   Default 0.
+#' @return `numeric`: The vector of dominated hypervolume contributions for each individual in `fitnesses`.
+#' @examples
+#' # TODO example
+#' @export
+domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
+  assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
+  assert(check_number(nadir, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+
+  if (is.null(baseline) || test_matrix(baseline, mode = "numeric", any.missing = FALSE, ncols = ncols(fitnesses), nrows = 0)) {
+    return(apply(fitnesses, 1, function(fi) {
+      prod(pmax(fi - nadir, 0))
+    }))
+  }
+
+  assert_matrix(baseline, mode = "numeric", any.missing = FALSE, ncols = ncols(fitnesses))
+
+  baseline = baseline[nondominated(baseline)$strong_front, , drop = FALSE]
+  blt = t(baseline)
+  blhv = domhv(baseline, nadir = nadir, prefilter = FALSE)
+  apply(fitnesses, 1, function(fi) {
+    # no HV improvement if:
+    # * there is an individual in baseline (i.e. blt) that has all values >= the fitness individual
+    # * fi is worse or equal nadir in any dimension
+    if (any(colSums(blt < fi) == 0) || any(nadir >= fi)) {
+      return(0)
+    }
+    domhv(cbind(baseline, fi), nadir = nadir, prefilter = FALSE) - blhv
+  })
+}
+
 
 domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
@@ -235,7 +319,7 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
   prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
 }
 
-# similar to order_nondominated, but return only the first front.
+# similar to rank_nondominated, but return only the first front.
 # @return named `list`: `front` (`integer`): indices of epsilon-nondominated front; `strong_front` (`integer`): indices of dominating front (without epsilon)
 nondominated = function(fitnesses, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)

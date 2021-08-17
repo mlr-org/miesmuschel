@@ -38,7 +38,7 @@ lg = NULL
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
   mlr_optimizers$add("mies", OptimizerMies)
-  mlr_optimizers$add("sumohb", OptimizerSumoHB)
+  mlr_optimizers$add("smash", OptimizerSmash)
 
   mlr_terminators = utils::getFromNamespace("mlr_terminators", ns = "bbotk")
   mlr_terminators$add("gens", TerminatorGenerations)
@@ -49,7 +49,7 @@ reg_mlr3tuning = function(...) {  # nocov start
   if (requireNamespace("mlr3tuning", quietly = TRUE)) {
     mlr_tuners = utils::getFromNamespace("mlr_tuners", ns = "mlr3tuning")
     mlr_tuners$add("mies", TunerMies)
-    mlr_tuners$add("sumohb", TunerSumoHB)
+    mlr_tuners$add("smash", TunerSmash)
   }
 }  # nocov end
 
@@ -57,9 +57,12 @@ reg_mlr3tuning = function(...) {  # nocov start
   reg_bbotk()
   reg_mlr3tuning()
 
-  if (is.null(paradox::ps()$context_available)) stop("Need paradox with ContextPV for this version of miesmuschel. Do:
+  if (is.null(paradox::ps()$context_available) ||  # need paradox context variable
+      !isTRUE(tryCatch({SamplerRandomWeights$new() ; TRUE}, error = function(e) FALSE))) {  # need samplers that allow ParamUty
+    stop("Need paradox with ContextPV for this version of miesmuschel. Do:
 remotes::install_github(\"mlr-org/paradox@expression_params\")
 and try again.")
+  }
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")

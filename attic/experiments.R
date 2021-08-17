@@ -65,6 +65,7 @@ tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
 
 tinytest::run_test_file("inst/tinytest/test_mies_init_population.R")
 
+
 tinytest::run_test_file("inst/tinytest/test_mies_survival_comma.R")
 
 tinytest::run_test_file("inst/tinytest/test_filtor_proxy.R")
@@ -75,13 +76,13 @@ tinytest::run_test_file("inst/tinytest/test_mies_filter_offspring.R")
 
 tinytest::run_test_file("inst/tinytest/test_mutator_erase.R")
 
+tinytest::run_test_file("inst/tinytest/test_filtor_surprog.R")
+
+tinytest::run_test_file("inst/tinytest/test_scalor_one.R")
 
 tinytest::run_test_file("inst/tinytest/test_mutator_proxy.R")       # ...
 tinytest::run_test_file("inst/tinytest/test_OptimizerSumoHB.R")     # properties are wrong
 tinytest::run_test_file("inst/tinytest/test_recombinator_proxy.R")  # ...
-
-
-
 
 objective <- ObjectiveRFun$new(
   fun = function(xs) list(x = xs$x + 10),

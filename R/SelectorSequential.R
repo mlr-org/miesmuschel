@@ -73,13 +73,13 @@ SelectorSequential = R6Class("SelectorSequential",
       pnames = sprintf("reduction_%s", seq_along(selectors))
 
       private$.own_param_set = do.call(paradox::ps, c(
-        named_list(pnames, p_dbl(0, tags = "required")),
-        list(reduction_by_factor = p_lgl(tags = "required"))
+        list(reduction_by_factor = p_lgl(tags = "required")),
+        named_list(pnames, p_dbl(0, tags = "required"))
       ))
       private$.own_param_set$values = c(named_list(pnames, 1), list(reduction_by_factor = TRUE))
 
       ps_alist = c(alist(private$.own_param_set),
-        lapply(seq_along(selectors), function(i) substitute(private$.wrapped[[i]], list(i = i)))
+        lapply(seq_along(selectors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
       )
 
       private$.own_param_set$values = list()
@@ -90,7 +90,7 @@ SelectorSequential = R6Class("SelectorSequential",
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
-    #' given to `selector` and `selector_not` during construction.
+    #' given to `selectors` during construction.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
@@ -111,7 +111,7 @@ SelectorSequential = R6Class("SelectorSequential",
   private = list(
     .select = function(values, fitnesses, n_select, context) {
       params = private$.own_param_set$get_values(context = context)
-      pnames = sprintf("reduction_%s", seq_along(selectors))
+      pnames = sprintf("reduction_%s", seq_along(private$.wrapped))
 
       reductions = unlist(params[pnames], use.names = FALSE, recursive = FALSE)
       if (sum(reductions)) {

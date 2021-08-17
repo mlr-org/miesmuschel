@@ -30,13 +30,13 @@ library("mlr3learners")
 # of which survive, while 10 are sampled new.
 # For this, 100 individuals are sampled randomly, and the top 10, according
 # to the surrogate model, are used.
-sumohb_opt <- opt("sumohb", filtor = ftr("surprog", surrogate_learner = mlr3::lrn("regr.ranger"),
+smashy_opt <- opt("smashy", filtor = ftr("surprog", surrogate_learner = mlr3::lrn("regr.ranger"),
     filter_pool_first = 100, filter_pool_per_sample = 0),
   mu = 30, survival_fraction = 2/3
 )
 
-# sumohb_opt$optimize performs SumoHB optimization and returns the optimum
-sumohb_opt$optimize(oi)
+# smashy_opt$optimize performs SumoHB optimization and returns the optimum
+smashy_opt$optimize(oi)
 
 print(oi$archive$data, nrows = 300)
 
@@ -72,14 +72,14 @@ ti = TuningInstanceSingleCrit$new(
   terminator = trm("gens", generations = 3)
 )
 
-sumohb_tune <- tnr("sumohb", filtor = ftr("maybe", p = 0.5,
+smashy_tune <- tnr("smashy", filtor = ftr("maybe", p = 0.5,
     ftr("surprog", surrogate_learner = lrn("regr.ranger"),
       filter_pool_first = 100, filter_pool_per_sample = 0
     )),
   mu = 20, survival_fraction = 0.5
 )
-# sumohb_tune$optimize performs SumoHB optimization and returns the optimum
-sumohb_tune$optimize(ti)
+# smashy_tune$optimize performs SumoHB optimization and returns the optimum
+smashy_tune$optimize(ti)
 
 ti$archive$data
 
@@ -129,7 +129,7 @@ library("mlr3learners")
 # of which survive, while 10 are sampled new.
 # For this, 100 individuals are sampled randomly, and the top 10, according
 # to the surrogate model, are used.
-sumohb_opt <- opt("sumohb", filtor = ftr("surtour",
+smashy_opt <- opt("smashy", filtor = ftr("surtour",
     surrogate_learner = mlr3::lrn("regr.ranger"),
     surrogate_selector = sel("best", scalor = scl("nondom")),
     filter.tournament_size = 20),
@@ -137,8 +137,8 @@ sumohb_opt <- opt("sumohb", filtor = ftr("surtour",
   mu = 100, survival_fraction = 2/3
 )
 
-# sumohb_opt$optimize performs SumoHB optimization and returns the optimum
-sumohb_opt$optimize(oi)
+# smashy_opt$optimize performs SumoHB optimization and returns the optimum
+smashy_opt$optimize(oi)
 
 print(oi$archive$data, nrows = 300)
 

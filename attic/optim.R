@@ -74,7 +74,7 @@ opt_objective <- function(objective, max_budget, budget_step, survival_fraction,
 
   sampling_fun = switch(sample, random = paradox::generate_design_random, lhs = paradox::generate_design_lhs)
 
-  optimizer = opt("sumohb", mu = mu, survival_fraction = survival_fraction, sampling = sampling_fun,
+  optimizer = opt("smashy", mu = mu, survival_fraction = survival_fraction, sampling = sampling_fun,
     fidelity_steps = fidelity_steps + 1, filter_with_max_budget = filter_with_max_budget,
     filtor = filtor
   )

@@ -36,11 +36,20 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     #' Initialize the `RecombinatorCrossoverUniform` object.
     #' @param keep_complement (`logical(1)`)\cr
     #'   Whether the operation should keep both individuals that were crossed over (`TRUE`), or only the first and discard
-    #'   the crossover complement (`FALSE`). Default `TRUE`
+    #'   the crossover complement (`FALSE`). Default `TRUE`.
+    #'   The `$keep_complement` field will reflect this value.
     initialize = function(keep_complement = TRUE) {
       param_set = ps(p = p_dbl(0, tags = "required"))
       param_set$values = list(p = 0.5)
       super$initialize(c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set, 2, if (keep_complement) 2 else 1, dict_entry = "xounif")
+    }
+  ),
+  active = list(
+    #' @field keep_complement (`logical(1)`)\cr
+    #' Whether the operation keeps both individuals that were crossed over or discards the crossover complement.
+    keep_complement = function(val) {
+      if (!missing(val)) stop("keep_complement is read-only.")
+      private$.n_indivs_out == 2
     }
   ),
   private = list(

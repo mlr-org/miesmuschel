@@ -215,7 +215,7 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 }
 \seealso{
 Other optimizers: 
-\code{\link{OptimizerSumoHB}}
+\code{\link{OptimizerSmash}}
 }
 \concept{optimizers}
 \section{Super class}{
