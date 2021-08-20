@@ -16,8 +16,7 @@ weight matrices (Nobjectives x Nweights) or vectors (if Nweights is 1).
 Function taking a fitness-matrix \code{fitnesses} (Nindivs x Nobjectives, with higher values indicating higher desirability)
 and a list of weight matrices \code{weights} (Nindivs elements of Nobjectives x Nweights matrices; positive weights should indicate a positive contribution
 to scale)
-and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability; possibly
-an Nindivs vector when Nweights is 1)
+and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability)
 }
 }
 
@@ -45,18 +44,30 @@ set.seed(1)
 }
 \seealso{
 Other scalors: 
+\code{\link{ScalorAggregate}},
 \code{\link{ScalorProxy}},
 \code{\link{Scalor}},
+\code{\link{dict_scalors_domcount}},
+\code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_nondom}},
 \code{\link{dict_scalors_one}}
 
 Other scalor wrappers: 
+\code{\link{ScalorAggregate}},
 \code{\link{ScalorProxy}}
 }
 \concept{scalor wrappers}
 \concept{scalors}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Scalor]{miesmuschel::Scalor}} -> \code{ScalorFixedProjection}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{weights_component_id}}{(\code{numeric(1)})\cr
+search space component identifying the weights by which to scalarize.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -81,9 +92,17 @@ Other scalor wrappers:
 \subsection{Method \code{new()}}{
 Initialize the \code{ScalorFixedProjection} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ScalorFixedProjection$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ScalorFixedProjection$new(weights_component_id = "scalarization_weights")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{weights_component_id}}{(\code{character(1)})\cr
+Id of the search space component identifying the weights by which to scalarize. Default \code{"scalarization_weights"}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-prime"></a>}}

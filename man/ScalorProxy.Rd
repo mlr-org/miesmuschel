@@ -53,16 +53,17 @@ sp$operate(data, fitnesses)
 }
 \seealso{
 Other scalors: 
-\code{\link{ScalorFixedProjection}},
 \code{\link{ScalorAggregate}},
+\code{\link{ScalorFixedProjection}},
 \code{\link{Scalor}},
 \code{\link{dict_scalors_domcount}},
+\code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_nondom}},
 \code{\link{dict_scalors_one}}
 
 Other scalor wrappers: 
+\code{\link{ScalorAggregate}},
 \code{\link{ScalorFixedProjection}}
-\code{\link{ScalorAggregate}}
 }
 \concept{scalor wrappers}
 \concept{scalors}

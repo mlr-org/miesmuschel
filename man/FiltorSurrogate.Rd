@@ -59,7 +59,7 @@ Other filtors:
 Regression learner for the surrogate model filtering algorithm.}
 
 \item{\code{surrogate_selector}}{(\code{\link{Selector}})\cr
-Selector with which to select using surrogate-predicted performance}
+\code{\link{Selector}} with which to select using surrogate-predicted performance}
 }
 \if{html}{\out{</div>}}
 }

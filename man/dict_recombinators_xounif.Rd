@@ -59,6 +59,14 @@ Other recombinators:
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorCrossoverUniform}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{keep_complement}}{(\code{logical(1)})\cr
+Whether the operation keeps both individuals that were crossed over or discards the crossover complement.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -90,7 +98,8 @@ Initialize the \code{RecombinatorCrossoverUniform} object.
 \describe{
 \item{\code{keep_complement}}{(\code{logical(1)})\cr
 Whether the operation should keep both individuals that were crossed over (\code{TRUE}), or only the first and discard
-the crossover complement (\code{FALSE}). Default \code{TRUE}}
+the crossover complement (\code{FALSE}). Default \code{TRUE}.
+The \verb{$keep_complement} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }
