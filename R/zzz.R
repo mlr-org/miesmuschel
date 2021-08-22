@@ -38,7 +38,7 @@ lg = NULL
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
   mlr_optimizers$add("mies", OptimizerMies)
-  mlr_optimizers$add("smash", OptimizerSmash)
+  mlr_optimizers$add("smash", OptimizerSmashy)
 
   mlr_terminators = utils::getFromNamespace("mlr_terminators", ns = "bbotk")
   mlr_terminators$add("gens", TerminatorGenerations)
