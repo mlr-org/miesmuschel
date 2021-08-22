@@ -48,7 +48,7 @@ PipeOpDensityRatio = R6Class("PipeOpDensityRatio",
   inherit = mlr3pipelines::PipeOp,
   public = list(
     initialize = function(id = "densityratio", param_vals = list()) {
-      param_set = ps(min_density = p_num(tags = c("predict", "required")))
+      param_set = ps(min_density = p_dbl(tags = c("predict", "required")))
       param_set$values = list(min_density = 1e-32)
       super$initialize(id, param_set = param_set, param_vals = param_vals,
         input = data.table(name = c("numerator", "denominator"), train = "NULL", predict = "PredictionDensity"),
@@ -58,13 +58,18 @@ PipeOpDensityRatio = R6Class("PipeOpDensityRatio",
     }
   ),
   private = list(
+    .train = function(inputs) {
+      self$state = list()
+      list(NULL)
+    },
     .predict = function(inputs) {
       assert_true(identical(inputs[[1]]$row_ids, inputs[[2]]$row_ids))
 
       pv = self$param_set$get_values(tags = "predict")
       lmd = log(pv$min_density)
 
-      list(mlr3::PredictionRegr$new(row_ids = inputs[[1]]$row_ids, response = exp(pmax(inputs$numerator$logprob, lmd) - pmax(inputs$denominator$logprob, lmd))))
+      list(mlr3::PredictionRegr$new(row_ids = inputs[[1]]$row_ids, truth = NA_real_,
+        response = exp(pmax(inputs$numerator$logprob, lmd) - pmax(inputs$denominator$logprob, lmd))))
     }
   )
 )

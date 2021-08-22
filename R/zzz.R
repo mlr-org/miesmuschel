@@ -68,10 +68,14 @@ reg_mlr3 = function(...) {  # nocov start
       mlr_reflections$learner_predict_types$density = list(prob = "prob")
       mlr_reflections$default_measures$density = "density.logloss"
     }
+    mlr_learners$add("density.featureless", LearnerDensityFeatureless)
+    mlr_learners$add("density.np", LearnerDensityNP)
+    mlr_tasks$add("faithful", load_faithful)
+    mlr_measures$add("density.logloss", MeasureDensityLogloss)
   }
 }  # nocov end
 
-regr_mlr3pipelines = function(...) {  # nocov start
+reg_mlr3pipelines = function(...) {  # nocov start
   if (requireNamespace("mlr3pipelines", quietly = TRUE)) {
     mlr_pipeops$add("densityratio", PipeOpDensityRatio)
     mlr_pipeops$add("densitysplit", PipeOpDensitySplit)
@@ -84,6 +88,7 @@ regr_mlr3pipelines = function(...) {  # nocov start
   reg_bbotk()
   reg_mlr3tuning()
   reg_mlr3()
+  reg_mlr3pipelines()
 
   if (is.null(paradox::ps()$context_available) ||  # need paradox context variable
       !isTRUE(tryCatch({SamplerRandomWeights$new() ; TRUE}, error = function(e) FALSE))) {  # need samplers that allow ParamUty
@@ -96,11 +101,12 @@ and try again.")
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
   setHook(packageEvent("mlr3", "onLoad"), reg_mlr3, action = "append")
+  setHook(packageEvent("mlr3pipelines", "onLoad"), reg_mlr3pipelines, action = "append")
   options(miesmuschel.testing = getOption("miesmuschel.testing") %??% FALSE)
 }  # nocov end
 
 .onUnload = function(libpath) {  # nocov start
-  for (pkg in c("bbotk", "mlr3tuning", "mlr3")) {
+  for (pkg in c("bbotk", "mlr3tuning", "mlr3", "mlr3pipelines")) {
     load_event = packageEvent(pkg, "onLoad")
     setHook(load_event,
       keep(getHook(load_event), function(x) environmentName(topenv(environment(x))) != "miesmuschel"),

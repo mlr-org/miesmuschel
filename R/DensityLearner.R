@@ -51,7 +51,7 @@ LearnerDensityFeatureless = R6Class("LearnerDensityFeatureless",
     }
   ),
   private = list(
-    .train = function(task) invisible(NULL),
+    .train = function(task) list(),
     .predict = function(task) {
       PredictionDensity$new(task = task, prob = .Machine$double.xmin)
     }

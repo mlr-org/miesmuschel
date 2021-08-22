@@ -48,7 +48,7 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
   inherit = mlr3pipelines::PipeOp,
   public = list(
     initialize = function(id = "densitysplit", param_vals = list()) {
-      param_set = ps(alpha = p_num(tags = c("train", "required")), min_size = p_int(1, tags = c("train", "required")))
+      param_set = ps(alpha = p_dbl(tags = c("train", "required")), min_size = p_int(1, tags = c("train", "required")))
       param_set$values = list(alpha = 0.15, min_size = 1)
       super$initialize(id, param_set = param_set, param_vals = param_vals,
         input = data.table(name = "input", train = "TaskRegr", predict = "TaskRegr"),
@@ -60,12 +60,10 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
   private = list(
     .train = function(inputs) {
       self$state = list()
-      private$.splittask(inputs[[1]], self$param_set$get_values(tags = "train"))
-    },
-    .predict = function(inputs) {
-      private$.splittask(inputs[[1]], self$param_set$get_values(tags = "predict"))
-    },
-    .splittask = function(task, pv) {
+
+      pv = self$param_set$get_values(tags = "train")
+      task = inputs[[1]]
+
       if (task$nrow <= pv$min_size) stopf("Task must have more than min_size (%s) samples, but has %s.", pv$min_size, task$nrow)
 
       target = task$data(cols = task$target_names)
@@ -78,7 +76,7 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
       rows_top = rows[order_target[seq_len(n_top)]]
       rows_bottom = rows[rev(order_target)[seq_len(n_top)]]
 
-      new_col_roles = task$col_roles[intersect(names(task$col_roles)), mlr_reflections$task_col_roles$density]
+      new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr_reflections$task_col_roles$density)]
 
       top = TaskDensity$new(paste0(task$id, ".top"), task$backend)
       top$filter(rows = rows_top)
@@ -89,6 +87,16 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
       bottom$col_roles = new_col_roles
 
       list(top, bottom)
+    },
+    .predict = function(inputs) {
+      task = inputs[[1]]
+      new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr_reflections$task_col_roles$density)]
+      task = TaskDensity$new(paste0(task$id, ".density"), task$backend)
+      task$col_roles = new_col_roles
+
+      list(task, task)
+    },
+    .splittask = function(task, pv) {
     }
   )
 )

@@ -49,18 +49,18 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
     #' Initialize the `LearnerDensityNP` object.
     initialize = function() {
       param_set = ps(
-        bwmethod = p_fct(c("cv.ml", "cv.ls", "normal-reference"), default = "cv.ml", tags = "train"),
-        bwtype = p_fct(c("fixed", "generalized_nn", "adaptive_nn"), default = "fixed", tags = "train"),
-        ckertype = p_fct(c("gaussian", "epanechnikov", "uniform"), default = "gaussian", tags = "train"),
-        ckerorder = p_int(2, 8, default = 2, tags = "train"),
-        ukertype = p_fct(c("aitchisonaitken", "liracine"), default = "aitchisonaitken", tags = "train"),
-        okertype = p_fct(c("liracine", "wangvanryzin"), default = "liracine", tags = "train"),
-        nmulti = p_int(0, tags = "train"),
-        remin = p_lgl(default = TRUE, tags = "train"),
-        itmax = p_int(0, default = 10000, tags = "train"),
-        ftol = p_dbl(0, default = 1e1 * sqrt(.Machine$double.eps)),
-        tol = p_dbl(0, default = 1e4 * sqrt(.Machine$double.eps)),
-        small = p_dbl(0, default = 1e3 * sqrt(.Machine$double.eps)),
+        bwmethod = p_fct(c("cv.ml", "cv.ls", "normal-reference"), default = "cv.ml", tags = c("train", "npudensbw")),
+        bwtype = p_fct(c("fixed", "generalized_nn", "adaptive_nn"), default = "fixed", tags = c("train", "npudensbw")),
+        ckertype = p_fct(c("gaussian", "epanechnikov", "uniform"), default = "gaussian", tags = c("train", "npudensbw")),
+        ckerorder = p_int(2, 8, default = 2, tags = c("train", "npudensbw")),
+        ukertype = p_fct(c("aitchisonaitken", "liracine"), default = "aitchisonaitken", tags = c("train", "npudensbw")),
+        okertype = p_fct(c("liracine", "wangvanryzin"), default = "liracine", tags = c("train", "npudensbw")),
+        nmulti = p_int(0, tags = c("train", "npudensbw")),
+        remin = p_lgl(default = TRUE, tags = c("train", "npudensbw")),
+        itmax = p_int(0, default = 10000, tags = c("train", "npudensbw")),
+        ftol = p_dbl(0, default = 1e1 * sqrt(.Machine$double.eps), tags = c("train", "npudensbw")),
+        tol = p_dbl(0, default = 1e4 * sqrt(.Machine$double.eps), tags = c("train", "npudensbw")),
+        small = p_dbl(0, default = 1e3 * sqrt(.Machine$double.eps), tags = c("train", "npudensbw")),
         min_bandwidth = p_dbl(0, tags = "train", default = 0),  # not part of the package.
         sampling_bw_factor = p_dbl(0, tags = "predict")  # oversmoothing bandwidth factor for sampling
       )
@@ -80,8 +80,12 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       pv = self$param_set$get_values(tags = "train")
       pv$min_bandwidth <- pv$min_bandwidth %??% 0
       dat = task$data()
+      # TODO: hack: do something with constant values, npudensbw can't handle them otherwise.
+      for (col in seq_along(dat)) {
+        if (is.numeric(dat[[col]]) && diff(range(dat[[col]])) == 0) dat[[col]][[1]] = dat[[col]][[1]] * (1 - 2 * .Machine$double.eps) + .Machine$double.eps
+      }
       np::npseed(as.integer(runif(1, -2^31 + 1, 2^31 - 1)))
-      bw = invoke(np::npudensbw, dat = dat, .args = pv)
+      bw = invoke(np::npudensbw, dat = dat, .args = self$param_set$get_values(tags = "npudensbw"))
       bw$call = NULL
 
       bw$bw[bw$bw < pv$min_bandwidth] <- pv$min_bandwidth
@@ -119,6 +123,7 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
         result
       }, prototypes, bw$bw, self$state$train_task$col_info[colnames(prototypes)]$type))
       colnames(dt) = colnames(self$model$dat)
+      dt
     }
   )
 )

@@ -59,8 +59,15 @@ as_prediction.PredictionDataDensity = function(x, check = TRUE, ...) {
 #' @exportS3Method mlr3::check_prediction_data
 check_prediction_data.PredictionDataDensity = function(pdata) {
   pdata$row_ids = assert_row_ids(pdata$row_ids)
-  assert_numeric(pdata$prob, lower = 0)
-  assert_true(all.equal(exp(pdata$logprob), pdata$prob))
+  if (is.null(pdata$prob)) {
+    pdata$prob = exp(assert_numeric(pdata$logprob))
+  } else if (is.null(pdata$logprob)) {
+    pdata$logprob = log(assert_numeric(pdata$prob, lower = 0))
+  } else {
+    assert_numeric(pdata$logprob)
+    assert_numeric(pdata$prob, lower = 0)
+    assert_true(all.equal(exp(pdata$logprob), pdata$prob))
+  }
   pdata
 }
 
@@ -74,7 +81,7 @@ c.PredictionDataDensity = function(..., keep_duplicates = TRUE) {
   args = list(...)
   assert_list(args, "PredictionDataDensity")
   assert_flag(keep_duplicates)
-  fulltable = rbindlist(dots)
+  fulltable = rbindlist(args)
   if (!keep_duplicates) fulltable = unique(fulltable, by = "row_ids", fromLast = TRUE)
   structure(as.list(fulltable), class = c("PredictionDataDensity", "PredictionData"))
 }
