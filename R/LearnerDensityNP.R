@@ -30,6 +30,10 @@
 #'   Optimization x-value relative tolerance, default `10000 * sqrt(.Machine$double.eps)`.
 #' * `small` :: `numeric(1)`\cr
 #'   Optimization x-value absolute tolerance (?), default `1000 * sqrt(.Machine$double.eps)`.
+#' * `min_bandwidth` :: `numeric(1)`\cr
+#'   Minimum bandwidth (all kerneltypes). Not part of np::npudensbw. Default 0. BOHB has this at `1e-3`.
+#' * `sampling_bw_factor` :: `numeric(1)`\cr
+#'   Oversmoothing bandwidth factor for sampling. Not part of np::npudensbw. Default 1. BOHB has this at 3.
 #'
 #' TODO: could also implement `lb{c,d}.{dir,init}`, `{c,d}fac.{dir,init}`, `dfc.dir`, `hbd.dir`, `hb{c,d}.init`, `init{c,d}.dir`, `scale.init.categorical.sample`.
 #'
@@ -56,7 +60,9 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
         itmax = p_int(0, default = 10000, tags = "train"),
         ftol = p_dbl(0, default = 1e1 * sqrt(.Machine$double.eps)),
         tol = p_dbl(0, default = 1e4 * sqrt(.Machine$double.eps)),
-        small = p_dbl(0, default = 1e3 * sqrt(.Machine$double.eps))
+        small = p_dbl(0, default = 1e3 * sqrt(.Machine$double.eps)),
+        min_bandwidth = p_dbl(0, tags = "train", default = 0),  # not part of the package.
+        sampling_bw_factor = p_dbl(0, tags = "predict")  # oversmoothing bandwidth factor for sampling
       )
       super$initialize(
         id = "density.np",
@@ -72,17 +78,28 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
   private = list(
     .train = function(task) {
       pv = self$param_set$get_values(tags = "train")
+      pv$min_bandwidth <- pv$min_bandwidth %??% 0
       dat = task$data()
       np::npseed(as.integer(runif(1, -2^31 + 1, 2^31 - 1)))
       bw = invoke(np::npudensbw, dat = dat, .args = pv)
       bw$call = NULL
+
+      bw$bw[bw$bw < pv$min_bandwidth] <- pv$min_bandwidth
+      bw$bandwidth$x[bw$bandwidth$x < pv$min_bandwidth] <- pv$min_bandwidth
+
       list(bw = bw, dat = dat)
     },
     .predict = function(task) {
-      list(prob = stats::fitted(np::npudens(bws = self$model$bw, tdat = self$model$dat, edat = task$data()))
+      list(prob = stats::fitted(np::npudens(bws = self$model$bw, tdat = self$model$dat, edat = task$data())))
     },
     .sample = function(n) {
       bw = self$model$bw
+      pv = self$param_set$get_values(tags = "predict")
+      bw_factor <- pv$sampling_bw_factor %??% 1
+
+      bw$bw <- bw$bw * bw_factor
+      bw$bandwidth$x <- bw$bandwidth$x * bw_factor
+
       if (!identical(bw$ckerorder, 2)) stop("Can only sample with kernel order 2.")
       # gaussian kernel: rnorm
       # epanechnikov kernel: repanechnikov
@@ -96,7 +113,7 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
         for (l in levels(dim)) {
           xlevel = which(dim == l)
           if (!length(xlevel)) next
-          sweights = npksum(txdat = dim[xlevel[[1]]], exdat = samplefrom)$ksum
+          sweights = np::npksum(bw, txdat = dim[xlevel[[1]]], exdat = samplefrom)$ksum
           result[xlevel] = samplefrom[sample.int(length(xlevel), length(sweights), replace = TRUE, prob = sweights)]
         }
         result
@@ -113,7 +130,7 @@ depanechnikov <- function(x, location = 0, scale = 1) {
 }
 
 pepanechnikov <- function(q, location = 0, scale = 1) {
-  z = (x - location) / scale
+  z = (q - location) / scale
   3 * (z - z^3 / 15) / (4 * sqrt(5))
 }
 
