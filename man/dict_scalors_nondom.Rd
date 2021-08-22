@@ -12,6 +12,7 @@ indocate higher fitnesses and therefore "better" individuals.
 
 \itemize{
 \item \code{epsilon}
+\item \code{nadir}
 \item \code{jitter}
 \item \code{scale_output}
 \item \code{tiebreak}
@@ -21,7 +22,7 @@ indocate higher fitnesses and therefore "better" individuals.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
+Supported \code{\link[paradox:Param]{Param}} classes are:
 }
 
 \section{Dictionary}{
@@ -50,11 +51,12 @@ so$operate(data, fitnesses)
 }
 \seealso{
 Other scalors: 
-\code{\link{ScalorFixedProjection}},
 \code{\link{ScalorAggregate}},
+\code{\link{ScalorFixedProjection}},
 \code{\link{ScalorProxy}},
 \code{\link{Scalor}},
 \code{\link{dict_scalors_domcount}},
+\code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_one}}
 }
 \concept{scalors}

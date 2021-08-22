@@ -59,7 +59,7 @@ objective <- bbotk::ObjectiveRFun$new(
 )
 
 space <- switch(searchspace, discrete = suggested_meta_searchspace,  numeric = suggested_meta_searchspace_numeric, stop())
-e
+
 oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 10 else 60 * 60 * 70))
 
 if (algo == "intermbo") {

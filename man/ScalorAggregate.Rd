@@ -30,13 +30,16 @@ dict_scalors$get("aggregate", <scalors>)
 }
 \seealso{
 Other scalors: 
+\code{\link{ScalorFixedProjection}},
 \code{\link{ScalorProxy}},
 \code{\link{Scalor}},
 \code{\link{dict_scalors_domcount}},
+\code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_nondom}},
 \code{\link{dict_scalors_one}}
 
 Other scalor wrappers: 
+\code{\link{ScalorFixedProjection}},
 \code{\link{ScalorProxy}}
 }
 \concept{scalor wrappers}

@@ -77,6 +77,9 @@ Other recombinator wrappers:
 \describe{
 \item{\code{recombinators}}{(\code{list} of \code{\link{Recombinator}})\cr
 \code{\link{Recombinator}}s being wrapped. These operators get run sequentially in order.}
+
+\item{\code{allow_lcm_packing}}{(\code{logical(1)})\cr
+Whether to allow lowest common multiple packing.}
 }
 \if{html}{\out{</div>}}
 }
@@ -114,7 +117,8 @@ Initialize the \code{RecombinatorSequential} object.
 The constructed object gets a \emph{clone} of this argument. The \verb{$recombinators} field will reflect this value.}
 
 \item{\code{allow_lcm_packing}}{(\code{logical(1)})\cr
-Whether to allow lowest common multiple packing. Default \code{FALSE}.}
+Whether to allow lowest common multiple packing. Default \code{FALSE}.
+The \verb{$allow_lcm_packing} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }
