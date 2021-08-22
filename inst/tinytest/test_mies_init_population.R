@@ -19,7 +19,7 @@ expect_error(mies_init_population(oismall, mu = 2,
 
 oilarge = as_oi(get_objective_passthrough("minimize", FALSE))
 mies_init_population(oilarge, mu = 3)
-expect_data_table(oilarge$archive$data, nrow = 3)
+expect_data_table(oilarge$archive$data, nrows = 3)
 expect_true(oilarge$search_space$check_dt(oilarge$archive$data[, oilarge$search_space$ids(), with = FALSE]))
 
 oilarge$archive$data[, dob := NULL]

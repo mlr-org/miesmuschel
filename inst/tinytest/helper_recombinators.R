@@ -31,6 +31,7 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
   expect_error(rec$operate(pvals_allowed), "Must be a permutation of set")
 
   rec$prime(p_allowed)
+
   expect_error(rec$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")
 
   recombined = rec$operate(as.data.frame(pvals_allowed))

@@ -22,10 +22,11 @@ expect_equal(fsp$needed_input(2), 10)
 expect_equal(fsp$needed_input(3), 15)
 
 
-## library("mlr3learners")
-## fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.lm"))
+library("mlr3learners")
+fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.lm"))
 
-## p = ps(x = p_dbl(-10, 10))
+p = ps(x = p_dbl(-10, 10))
+fsp$prime(p)
 
 ## fsp$param_set$values$filter_pool_first = 4
 ## fsp$param_set$values$filter_pool_per_sample = 2
@@ -34,8 +35,8 @@ fsp$param_set$values$filter.pool_factor = 2
 fsp$param_set$values$filter.pool_factor_last = 6
 
 
-## known_data = data.frame(x = c(1, -1))
-## fitnesses = c(1, 2)
+known_data = data.frame(x = c(1, -1))
+fitnesses = c(1, 2)
 
 ## data = data.table(x = c(1, 2, -1, -2, 10, -10, 8, -8))
 ## expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
@@ -64,15 +65,20 @@ expect_equal(fsp$operate(data.table(x = seq(10, -10)), known_data, fitnesses, 3)
 ## expect_equal(fsp$operate(data, known_data, fitnesses, 2), c(2, 5))
 ## expect_equal(fsp$operate(data, known_data, fitnesses, 3), c(2, 5, 7))
 
-expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
-expect_equal(fsp$operate(data, known_data, fitnesses, 1), 2)
-expect_equal(fsp$operate(data, known_data, fitnesses, 2), c(2, 5))
-expect_equal(fsp$operate(data, known_data, fitnesses, 3), c(5, 7, 14))
+expect_equal(fsp$operate(data, known_data, -fitnesses, 0), integer(0))
+expect_equal(fsp$operate(data, known_data, -fitnesses, 1), 2)
+expect_equal(fsp$operate(data, known_data, -fitnesses, 2), c(2, 5))
+expect_equal(fsp$operate(data, known_data, -fitnesses, 3), c(5, 7, 14))
+
+expect_equal(fsp$operate(-data, known_data, fitnesses, 0), integer(0))
+expect_equal(fsp$operate(-data, known_data, fitnesses, 1), 2)
+expect_equal(fsp$operate(-data, known_data, fitnesses, 2), c(2, 5))
+expect_equal(fsp$operate(-data, known_data, fitnesses, 3), c(5, 7, 14))
 
 # decreasing pool_factor: 6 .. 2
 fsp$param_set$values$filter.pool_factor_last = 2
 fsp$param_set$values$filter.pool_factor = 6
-fitnesses = -fitnesses
+## fitnesses = -fitnesses
 
 expect_equal(fsp$operate(data, known_data, fitnesses, 1), 6)  # select from 1:6
 expect_equal(fsp$operate(data.table(x = 6:1), known_data, fitnesses, 1), 6)  # select from 1:6

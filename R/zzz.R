@@ -96,6 +96,7 @@ and try again.")
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
   setHook(packageEvent("mlr3", "onLoad"), reg_mlr3, action = "append")
+  options(miesmuschel.testing = getOption("miesmuschel.testing") %??% FALSE)
 }  # nocov end
 
 .onUnload = function(libpath) {  # nocov start

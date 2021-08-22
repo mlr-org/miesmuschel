@@ -10,7 +10,7 @@ devtools::load_all()
 
 devtools::run_examples(run_donttest = TRUE)
 
-
+options(miesmuschel.testing = TRUE)
 
 source("inst/tinytest/setup.R", local = TRUE, chdir = TRUE)
 
