@@ -49,7 +49,7 @@ reg_mlr3tuning = function(...) {  # nocov start
   if (requireNamespace("mlr3tuning", quietly = TRUE)) {
     mlr_tuners = utils::getFromNamespace("mlr_tuners", ns = "mlr3tuning")
     mlr_tuners$add("mies", TunerMies)
-    mlr_tuners$add("smash", TunerSmash)
+    mlr_tuners$add("smash", TunerSmashy)
   }
 }  # nocov end
 

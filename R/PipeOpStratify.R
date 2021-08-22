@@ -57,7 +57,6 @@
 #' @family Multiplicity PipeOps
 #' @family Experimental Features
 #' @seealso https://mlr3book.mlr-org.com/list-pipeops.html
-#' @include PipeOp.R
 #' @export
 PipeOpStratify = R6Class("PipeOpStratify",
   inherit = mlr3pipelines::PipeOp,
