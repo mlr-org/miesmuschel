@@ -68,7 +68,15 @@ reg_mlr3 = function(...) {  # nocov start
       mlr_reflections$learner_predict_types$density = list(prob = "prob")
       mlr_reflections$default_measures$density = "density.logloss"
     }
+  }
+}  # nocov end
 
+regr_mlr3pipelines = function(...) {  # nocov start
+  if (requireNamespace("mlr3pipelines", quietly = TRUE)) {
+    mlr_pipeops$add("densityratio", PipeOpDensityRatio)
+    mlr_pipeops$add("densitysplit", PipeOpDensitySplit)
+    mlr_pipeops$add("stratify", PipeOpStratify)
+    mlr_pipeops$add("predictionunion", PipeOpPredictionUnion)
   }
 }  # nocov end
 
