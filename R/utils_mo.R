@@ -209,12 +209,17 @@ domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
   })
 }
 
-
-domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
+domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "warn") {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
   dim = ncol(fitnesses)
   assert(check_number(nadir, finite = TRUE), check_numeric(nadir, len = dim, any.missing = FALSE, finite = TRUE))
-  if (any(t(fitnesses) < nadir)) stop("Found fitness worse than nadir")
+  assert_choice(on_worse_than_nadir, c("quiet", "warn", "stop"))
+
+  if (any(t(fitnesses) < nadir)) {
+    switch(on_worse_than_nadir, quiet = identity, warn = warning, stop = stop)("Found fitness worse than nadir")
+    fitnesses = fitnesses[colSums(t(fitnesses) < nadir) == 0, , drop = FALSE]
+  }
+
   if (prefilter) {
     fitnesses = fitnesses[nondominated(fitnesses)$strong_front, , drop = FALSE]
 #    cat("prefiltered:\n")
@@ -296,7 +301,10 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
 
       cutat = matrixStats::weightedMedian(cutpoints, cutpointweights, interpolate = FALSE, ties = "min")  # n log(n), apparently does sorting internally, pathetic.
       if (cutat == max(cutpoints)) {
-        cutat = max(cutpoints[cutpoints != cutat])
+        otherpoints = cutpoints[cutpoints != cutat]
+        if (length(otherpoints)) {
+          cutat = max(otherpoints)
+        }
       }
     }
     #> cutat = sort(cutpoints)[(length(cutpoints) + 1L) / 2]
@@ -312,8 +320,13 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
     dimension = (dimension %% dim) + 1L
 
     # pre-emptively drop lower part for upper half
-    domhv_recurse(fitnesses_t[, dimpoints > cutat, drop = FALSE], cutnadir, zenith, dimension) +
-      domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
+    fitnesses_upper = fitnesses_t[, dimpoints > cutat, drop = FALSE]
+    if (length(fitnesses_upper)) {
+      result_upper = domhv_recurse(fitnesses_upper, cutnadir, zenith, dimension)
+    } else {
+      result_upper = 0
+    }
+    result_upper + domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
   }
 
   prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
