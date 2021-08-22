@@ -110,7 +110,7 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
     .mutate = function(values, context) {
       mutated = private$.wrapped$operate(values, context = context)
       mutated_not = private$.wrapped_not$operate(values, context = context)
-      p = self$param_set$get_values(context = context)$p
+      p = private$.maybe_param_set$get_values(context = context)$p
       p = pmin(pmax(p, 0), 1)
       if (!length(p) %in% c(1, ncol(values))) stop("p must have either length 1, or length of input.")
       mutating = sweep(matrix(stats::runif(nrow(values) * ncol(values)), nrow = nrow(values)), 2, p, `<`)

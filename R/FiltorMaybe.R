@@ -130,7 +130,7 @@ FiltorMaybe = R6Class("FiltorMaybe",
   ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter, context) {
-      params = self$param_set$get_values(context = context)
+      params = private$.maybe_param_set$get_values(context = context)
 
       if (params$random_choice) {
         filter_min = stats::qbinom(-20, n_filter, params$p, log.p = TRUE, lower.tail = TRUE)
@@ -155,7 +155,7 @@ FiltorMaybe = R6Class("FiltorMaybe",
       }
     },
     .needed_input = function(output_size, context) {
-      params = self$param_set$get_values(context = context)
+      params = private$.maybe_param_set$get_values(context = context)
       if (params$random_choice) {
         filter_min = stats::qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = TRUE)
         filter_max = stats::qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = FALSE)

@@ -236,7 +236,7 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
       value
     },
     .optimize = function(inst) {
-      params = self$param_set$get_values()
+      params = private$.own_param_set$get_values()
 
       budget_id = inst$search_space$ids(tags = "budget")
       if (length(budget_id) != 1) stopf("Need exactly one budget parameter for multifidelity method, but found %s: %s",
