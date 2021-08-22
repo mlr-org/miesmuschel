@@ -8,7 +8,7 @@
 #' Subset the input as a [`Multiplicity`], causing subsequent [`PipeOp`]s to be executed independently
 #' for each stratum according to `stratify_feature`.
 #'
-#' # TODO: missing: 'build only the model with the highest stratify param value'
+#' ` # TODO: missing: 'build only the model with the highest stratify param value' `
 #'
 #' @section Construction:
 #' ```

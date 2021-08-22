@@ -31,7 +31,7 @@ rank_nondominated = function(fitnesses, epsilon = 0) {
 
   # For large matrices this seems to be a little faster than ecr's C code
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
-  assert(check_number(epsilon, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+  assert(check_number(epsilon, lower = 0, finite = TRUE), check_numeric(epsilon, lower = 0, len = ncol(fitnesses), finite = TRUE, any.missing = FALSE))
   fitnesses_t = t(fitnesses)
   ordering = do.call(order, c(as.data.frame(unname(fitnesses)), list(decreasing = TRUE)))  # ordering along first dimension, tie break 2nd dimension, tie break .. nth dimension
   fronts = list()  # matrices of nondominated fronts. The matrices here are transposed for more efficient comparison (so they have ncol(fitnesses) rows)
@@ -124,8 +124,8 @@ dist_crowding = function(fitnesses) {
 #' @export
 domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
-  assert(check_number(nadir, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
-  assert(check_number(epsilon, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+  assert(check_number(nadir, lower = 0, finite = TRUE), check_numeric(epsilon, lower = 0, len = ncol(fitnesses), finite = TRUE, any.missing = FALSE))
+  assert(check_number(epsilon, lower = 0, finite = TRUE), check_numeric(epsilon, lower = 0, len = ncol(fitnesses), finite = TRUE, any.missing = FALSE))
   has_epsilon = any(epsilon > 0)
 
   nd = nondominated(fitnesses, epsilon = epsilon)
@@ -185,15 +185,15 @@ domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
 #' @export
 domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
-  assert(check_number(nadir, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+  assert(check_number(nadir, finite = TRUE), check_numeric(nadir, finite = TRUE, any.missing = FALSE, len = ncol(fitnesses)))
 
-  if (is.null(baseline) || test_matrix(baseline, mode = "numeric", any.missing = FALSE, ncols = ncols(fitnesses), nrows = 0)) {
+  if (is.null(baseline) || test_matrix(baseline, mode = "numeric", any.missing = FALSE, ncols = ncol(fitnesses), nrows = 0)) {
     return(apply(fitnesses, 1, function(fi) {
       prod(pmax(fi - nadir, 0))
     }))
   }
 
-  assert_matrix(baseline, mode = "numeric", any.missing = FALSE, ncols = ncols(fitnesses))
+  assert_matrix(baseline, mode = "numeric", any.missing = FALSE, ncols = ncol(fitnesses))
 
   baseline = baseline[nondominated(baseline)$strong_front, , drop = FALSE]
   blt = t(baseline)
@@ -205,7 +205,7 @@ domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
     if (any(colSums(blt < fi) == 0) || any(nadir >= fi)) {
       return(0)
     }
-    domhv(cbind(baseline, fi), nadir = nadir, prefilter = FALSE) - blhv
+    domhv(rbind(baseline, fi), nadir = nadir, prefilter = FALSE) - blhv
   })
 }
 
@@ -213,7 +213,7 @@ domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
 domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
   dim = ncol(fitnesses)
-  assert(check_number(nadir), check_numeric(nadir, len = dim))
+  assert(check_number(nadir, finite = TRUE), check_numeric(nadir, len = dim, any.missing = FALSE, finite = TRUE))
   if (any(t(fitnesses) < nadir)) stop("Found fitness worse than nadir")
   if (prefilter) {
     fitnesses = fitnesses[nondominated(fitnesses)$strong_front, , drop = FALSE]
@@ -323,7 +323,7 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE) {
 # @return named `list`: `front` (`integer`): indices of epsilon-nondominated front; `strong_front` (`integer`): indices of dominating front (without epsilon)
 nondominated = function(fitnesses, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
-  assert(check_number(epsilon, lower = 0), check_numeric(epsilon, lower = 0, len = ncol(fitnesses)))
+  assert(check_number(epsilon, lower = 0, finite = TRUE), check_numeric(epsilon, lower = 0, len = ncol(fitnesses), any.missing = FALSE, finite = TRUE))
   fitnesses_t = t(fitnesses)
   ordering = do.call(order, c(as.data.frame(unname(fitnesses)), list(decreasing = TRUE)))  # ordering along first dimension, tie break 2nd dimension, tie break .. nth dimension
   curfi = ordering[[1]]  # row indices of elements of nondominated fronts

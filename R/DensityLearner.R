@@ -35,7 +35,9 @@ LearnerDensity = R6Class("LearnerDensity", inherit = mlr3::Learner,
 #'
 #' @description
 #' Simple [`LearnerDensity`] fallback learner which gives all predictions the density `.Machine$double.xmin` (typically `2.225074e-308`).
-#' # TODO: could make this a hyperparameter.
+#'
+#' ` # TODO: could make this a hyperparameter. `
+#'
 #' @family density estimation classes
 #' @export
 LearnerDensityFeatureless = R6Class("LearnerDensityFeatureless",

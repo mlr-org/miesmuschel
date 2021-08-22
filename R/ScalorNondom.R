@@ -40,7 +40,7 @@ ScalorNondom = R6Class("ScalorNondom",
     initialize = function() {
       param_set = ps(
         epsilon = p_vct(lower = 0, tags = "required"),
-        nadir = p_vct(tags = "required", depends = tiebreak == "hv-contrib"),
+        nadir = p_vct(),  # TODO: add tags = "required", depends = tiebreak == "hv-contrib"), once p_vct supports that
         jitter = p_lgl(tags = "required"),
         scale_output = p_lgl(tags = "required"),
         tiebreak = p_fct(c("crowdingdist", "hvcontrib", "domcount", "none")))
@@ -67,15 +67,15 @@ ScalorNondom = R6Class("ScalorNondom",
             hvcontrib = lapply(fonts, function(x) rank(domhv_contribution(x, nadir = params$nadir, epsilon = epsilon))),
           )
         }
-        for (i in seq_along(subranks)) {
-          sr = subranks[[i]]
+        for (i in seq_along(subrank)) {
+          sr = subrank[[i]]
           ranked[ranked == i] = i + sr
         }
       }
-      if (scale_output) {
-        1 - (ranked - 1) / max(nd$fronts) # want high front values for high fitnesses, so reverse ordering here
+      if (params$scale_output) {
+        1 - (ranked - 1) / max(rnd$fronts) # want high front values for high fitnesses, so reverse ordering here
       } else {
-        max(nd$fronts) + 1 - ranked
+        max(rnd$fronts) + 1 - ranked
       }
     }
   )

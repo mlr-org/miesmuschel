@@ -8,7 +8,7 @@
 #' @family density estimation classes
 #' @export
 TaskDensity = R6Class("TaskDensity",
-  inherit = Task,
+  inherit = mlr3::Task,
   public = list(
     #' @description
     #' Initialize the `TaskDensity` object.

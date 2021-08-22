@@ -22,7 +22,7 @@ indocate higher fitnesses and therefore "better" individuals.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are:
+Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
 }
 
 \section{Dictionary}{

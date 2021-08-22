@@ -2,7 +2,7 @@
 % Please edit documentation in R/OptimizerSmashy.R, R/TunerSmash.R
 \name{OptimizerSmashy}
 \alias{OptimizerSmashy}
-\alias{TunerSmash}
+\alias{TunerSmashy}
 \title{Surrogate Model Asisted Synchronized Hyperband Optimizer}
 \description{
 Perform Surrogate Model Assisted Hyperband Optimization.
@@ -234,13 +234,13 @@ The objects of this class are cloneable with this method.
 }
 }
 \section{Super classes}{
-\code{\link[mlr3tuning:Tuner]{mlr3tuning::Tuner}} -> \code{\link[mlr3tuning:TunerFromOptimizer]{mlr3tuning::TunerFromOptimizer}} -> \code{TunerSmash}
+\code{\link[mlr3tuning:Tuner]{mlr3tuning::Tuner}} -> \code{\link[mlr3tuning:TunerFromOptimizer]{mlr3tuning::TunerFromOptimizer}} -> \code{TunerSmashy}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{TunerSmash$new()}}
-\item \href{#method-clone}{\code{TunerSmash$clone()}}
+\item \href{#method-new}{\code{TunerSmashy$new()}}
+\item \href{#method-clone}{\code{TunerSmashy$clone()}}
 }
 }
 \if{html}{
@@ -256,9 +256,9 @@ The objects of this class are cloneable with this method.
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
-Initialize the \code{TunerSmash} object.
+Initialize the \code{TunerSmashy} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TunerSmash$new(filtor = FiltorProxy$new(), selector = SelectorProxy$new())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TunerSmashy$new(filtor = FiltorProxy$new(), selector = SelectorProxy$new())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -275,7 +275,7 @@ Initialize the \code{TunerSmash} object.
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TunerSmash$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TunerSmashy$clone(deep = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
