@@ -23,7 +23,7 @@ PredictionDensity = R6Class("PredictionDensity", inherit = mlr3::Prediction,
     initialize = function(task = NULL, row_ids = mlr3::assert_task(task)$row_ids, prob = exp(logprob), logprob = log(prob), check = TRUE) {
       self$data = structure(list(row_ids = row_ids, prob = prob, logprob = logprob), class = c("PredictionDataDensity", "PredictionData"))
       if (check) {
-        self$data = check_prediction_data(self$data)
+        self$data = mlr3::check_prediction_data(self$data)
       }
       self$task_type = "density"
       self$man = "miesmuschel::PredictionDensity"
@@ -51,12 +51,12 @@ as.data.table.PredictionDensity = function(x, ...) {
   as.data.table(x$data[c("row_ids", "prob", "logprob")])
 }
 
-#' @export
+#' @exportS3Method mlr3::as_prediction
 as_prediction.PredictionDataDensity = function(x, check = TRUE, ...) {
   invoke(PredictionDensity$new, check = check, .args = x)
 }
 
-#' @export
+#' @exportS3Method mlr3::check_prediction_data
 check_prediction_data.PredictionDataDensity = function(pdata) {
   pdata$row_ids = assert_row_ids(pdata$row_ids)
   assert_numeric(pdata$prob, lower = 0)
@@ -64,7 +64,7 @@ check_prediction_data.PredictionDataDensity = function(pdata) {
   pdata
 }
 
-#' @export
+#' @exportS3Method mlr3::is_missing_prediction_data
 is_missing_prediction_data.PredictionDataDensity = function(pdata) {
   pdata$row_ids[is.na(pdata$prob) | is.na(pdata$logprob)]
 }

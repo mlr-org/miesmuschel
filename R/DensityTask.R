@@ -58,7 +58,7 @@ as_task_density.DataBackend = function(x, id = deparse1(substitute(x)), ...) {
 #'
 #' @format [R6::R6Class] inheriting from [`TaskDens`]
 #'
-#' @section Construction
+#' @section Construction:
 #' ```
 #' tsk("faithful")
 #' ```

@@ -7,6 +7,46 @@
 \description{
 Perform kernel density estimation using the \code{np} package.
 }
+\section{Hyperparameters}{
+
+\itemize{
+\item \code{bwmethod} :: \code{character(1)}\cr
+Bandwidth selection method. One of \code{"cv.ml"}, \code{"cv.ls"}, \code{"normal-reference"}. Default \code{"cv.ml"}.
+\item \code{bwtype} :: \code{character(1)}\cr
+Continuous variable bandwidth type, one of \code{"fixed"} (default), \code{"generalized_nn"}, \code{"adaptive_nn"}.
+\item \code{ckertype} :: \code{character(1)}\cr
+Continuous kernel type. One of \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"}.
+\item \code{ckerorder} :: \code{integer(1)}\cr
+Continuous Kernel order (only for gaussian and epanechnikov). One of 2 (default), 4, 6, 8.
+\item \code{ukertype} :: \code{character(1)}\cr
+Unordered categorical kernel type. One of \code{"aitchisonaitken"} (default) or \code{"liracine"}.
+\item \code{okertype} :: \code{character(1)}\cr
+Ordered kernel type. One of \code{"liracine"} (default), \code{"wangvanryzin"}.
+\item \code{nmulti} :: \code{integer(1)}\cr
+Number of random restarts for cross validation likelihood optimization. Default: number of features, at most 5. 0 disables restarts.
+\item \code{remin} :: \code{logical(1)}\cr
+Restart from located minima; Default \code{TRUE}.
+\item \code{itmax} :: \code{integer(1)}\cr
+Max optimization iters. Default 10000.
+\item \code{ftol} :: \code{numeric(1)}\cr
+Optimization y-value relative tolerance, default \code{10 * sqrt(.Machine$double.eps)}.
+\item \code{tol} :: \code{numeric(1)}\cr
+Optimization x-value relative tolerance, default \code{10000 * sqrt(.Machine$double.eps)}.
+\item \code{small} :: \code{numeric(1)}\cr
+Optimization x-value absolute tolerance (?), default \code{1000 * sqrt(.Machine$double.eps)}.
+\item \code{min_bandwidth} :: \code{numeric(1)}\cr
+Minimum bandwidth (all kerneltypes). Not part of np::npudensbw. Default 0. BOHB has this at \code{1e-3}.
+\item \code{sampling_bw_factor} :: \code{numeric(1)}\cr
+Oversmoothing bandwidth factor for sampling. Not part of np::npudensbw. Default 1. BOHB has this at 3.
+}
+
+TODO: could also implement \verb{lb\{c,d\}.\{dir,init\}}, \verb{\{c,d\}fac.\{dir,init\}}, \code{dfc.dir}, \code{hbd.dir}, \verb{hb\{c,d\}.init}, \verb{init\{c,d\}.dir}, \code{scale.init.categorical.sample}.
+
+TODO: \code{normal-reference} seems to disable optimization, consider putting that as a dependency on the optimization-related params.
+
+TODO: could add dependency for ckerorder on not-uniform.
+}
+
 \seealso{
 Other density estimation classes: 
 \code{\link{LearnerDensity}},

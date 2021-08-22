@@ -6,10 +6,29 @@
 \description{
 \code{\link{Scalor}} that applies multiple other \code{\link{Scalor}}s and calculates their weighted sum.
 }
-\section{Supported Operand Types}{
+\section{Configuration Parameters}{
 
+This operation has the configuration parameters of the \code{\link{Scalor}}s that it wraps: The configuration
+parameters of the operator given to the \code{scalors} construction argument are prefixed with \code{"scalor_1"},
+\code{"scalor_2"}, ... up to \code{"scalor_#"}, where \verb{#} is \code{length(scalors)}.
 
-Supported \code{\link[paradox:Param]{Param}} classes are:
+Additional configuration parameters:
+\itemize{
+\item \code{weight_1}, \code{weight_2}, ... :: \code{numeric(1)}\cr
+Weight factors of \code{scalors[[1]]}, \code{scalors[[2]]}, etc. Depending on \code{scaling}, the outputs of \code{scalors}
+is multiplied with this (when \code{scaling} is \code{"linear"} or \code{"rank"}), or ties between ranks are broken
+with it (when \code{scaling} is \code{"tiebreak"}). Initialized to 1.
+\item \code{scaling} :: \code{character(1)}\cr
+How to calculate output values, one of \code{"linear"}, \code{"rank"} or \code{"tiebreak"}. When \code{scaling} is \code{"linear"},
+then the output is calculated as the weighted sum of the outputs of \code{scalors}, weighted by \code{weight_1},
+\code{weight_2} etc. When \code{scaling} is \code{"rank"}, then the output is calculated as the weighted sum of the
+\code{rank()} of \code{scalors}, weighted by \code{weight_1}, \code{weight_2} etc., with ties broken by average. When \code{scaling}
+is \code{"tiebreak"}, then the output is calculated as the averaged \code{rank()} of the \code{scalors} with the
+highest \code{weight_#}, with ties broken by the average \code{rank()} of the second highest \code{weight_#}, with
+remaining ties broken by \code{scalors} with third highest \code{weight_#} etc. Initialized to \code{"linear"}.
+\item \code{scale_output} :: \code{logical(1)}\cr
+Whether to scale the output to lie between 0 and 1. Initialized to \code{FALSE}.
+}
 }
 
 \section{Dictionary}{

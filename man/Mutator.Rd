@@ -111,7 +111,7 @@ The \verb{$packages} field will reflect this values.}
 Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
 \code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
 be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
-is not entered in a dictionary.\n
+is not entered in a dictionary.\cr
 The \verb{$dict_entry} field will reflect this value.}
 
 \item{\code{own_param_set}}{(\code{language})\cr

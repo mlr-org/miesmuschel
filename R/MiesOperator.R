@@ -168,7 +168,7 @@ MiesOperator = R6Class("MiesOperator",
     #' @param ... (any)\cr
     #'   Depending on the concrete class, passed on to `$.operate()`.
     #' @param context (named `list`)\cr
-    #'   Context information. Should have one named entry, `"inst"`: The [`OptimInstance`][paradox::OptimInstance] being optimized.
+    #'   Context information. Should have one named entry, `"inst"`: The [`OptimInstance`][bbotk::OptimInstance] being optimized.
     #' @return `data.frame`: the result of the operation. If the input was a [`data.table`][data.table::data.table] instead of
     #'   a `data.frame`, the output is also [`data.table`][data.table::data.table].
     operate = function(values, ..., context = list(inst = NULL)) {

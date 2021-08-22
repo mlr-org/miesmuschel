@@ -9,6 +9,11 @@
 \description{
 A density estimation task for the \code{\link[datasets:faithful]{datasets::faithful}} dataset.
 }
+\section{Construction}{
+\preformatted{tsk("faithful")
+}
+}
+
 \seealso{
 Other density estimation classes: 
 \code{\link{LearnerDensity}},

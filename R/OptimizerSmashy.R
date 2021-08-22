@@ -262,7 +262,8 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
       fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
 
       nonbudget_searchspace = ParamSetShadow$new(inst$search_space, budget_id)
-      additional_components = params$additional_component_sampler$param_set  # this is just NULL if not given, which is fine
+      additional_component_sampler = params$additional_component_sampler
+      additional_components = additional_component_sampler$param_set  # this is just NULL if not given, which is fine
       mies_prime_operators(selectors = list(private$.selector), filtors = list(private$.filtor),
         search_space = inst$search_space, additional_components = additional_components, budget_id = budget_id)
 

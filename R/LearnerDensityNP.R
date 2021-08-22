@@ -5,7 +5,7 @@
 #' @description
 #' Perform kernel density estimation using the `np` package.
 #'
-#' @section Hyperparameters
+#' @section Hyperparameters:
 #' * `bwmethod` :: `character(1)`\cr
 #'   Bandwidth selection method. One of `"cv.ml"`, `"cv.ls"`, `"normal-reference"`. Default `"cv.ml"`.
 #' * `bwtype` :: `character(1)`\cr

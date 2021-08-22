@@ -5,7 +5,7 @@
 #' @description
 #' [`Scalor`] that applies multiple other [`Scalor`]s and calculates their weighted sum.
 #'
-#' @section Configuration Parameters
+#' @section Configuration Parameters:
 #' This operation has the configuration parameters of the [`Scalor`]s that it wraps: The configuration
 #' parameters of the operator given to the `scalors` construction argument are prefixed with `"scalor_1"`,
 #' `"scalor_2"`, ... up to `"scalor_#"`, where `#` is `length(scalors)`.
@@ -29,7 +29,6 @@
 #' @templateVar id aggregate
 #' @templateVar additional , \<scalors\>
 #' @template autoinfo_prepare_scl
-#' @template autoinfo_operands
 #' @template autoinfo_dict
 #'
 #' @family scalors

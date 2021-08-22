@@ -326,13 +326,13 @@ in input \code{values}, and the function argument in these calls will then have 
 Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
 \code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
 be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
-is not entered in a dictionary.\n
+is not entered in a dictionary.\cr
 The \verb{$dict_entry} field will reflect this value.}
 
 \item{\code{dict_shortaccess}}{(\code{character(1)} | \code{NULL})\cr
 Name of the \code{\link[mlr3misc:Dictionary]{Dictionary}} short access function in which the operator is registered.
 This is used to inform the user about how to construct a given object. Should ordinarily be one of
-\code{"mut"}, \code{"rec"}, \code{"sel"}.\n
+\code{"mut"}, \code{"rec"}, \code{"sel"}.\cr
 The \verb{$dict_shortaccess} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
