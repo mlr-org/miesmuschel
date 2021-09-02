@@ -93,5 +93,6 @@ Collate:
     'bibentries.R'
     'repr.R'
     'utils.R'
+    'utils_hb.R'
     'utils_mo.R'
     'zzz.R'

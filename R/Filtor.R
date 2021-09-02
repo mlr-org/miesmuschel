@@ -85,7 +85,6 @@ Filtor = R6Class("Filtor",
   private = list(
     .supported = NULL,
     .operate = function(values, known_values, fitnesses, n_filter, context) {
-      assert_data_table(values, min.rows = 1)
 
       if (getOption("miesmuschel.testing")) private$.primed_ps$assert_dt(known_values)
       assert_names(colnames(known_values), permutation.of = private$.primed_ps$ids())
@@ -107,6 +106,9 @@ Filtor = R6Class("Filtor",
       assert_int(n_filter, lower = 0, tol = 1e-100)
 
       if (n_filter == 0) return(integer(0))
+
+      assert_data_table(values, min.rows = 1)
+
 
       needed_input = self$needed_input(n_filter, context)
       if (nrow(values) < needed_input) stopf("Needs at least %s individuals to select %s individuals, but got %s.", needed_input, n_filter, nrow(values))

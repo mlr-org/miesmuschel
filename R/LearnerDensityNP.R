@@ -96,7 +96,7 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
     .predict = function(task) {
       list(prob = stats::fitted(np::npudens(bws = self$model$bw, tdat = self$model$dat, edat = task$data())))
     },
-    .sample = function(n) {
+    .sample = function(n, lower, upper) {
       bw = self$model$bw
       pv = self$param_set$get_values(tags = "predict")
       bw_factor <- pv$sampling_bw_factor %??% 1
@@ -107,21 +107,27 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       if (!identical(bw$ckerorder, 2)) stop("Can only sample with kernel order 2.")
       # gaussian kernel: rnorm
       # epanechnikov kernel: repanechnikov
-      prototypes = self$model$dat[sample.int(nrow(self$model$dat), replace = TRUE)]
-      csampler = switch(bw$ckertype, epanechnikov = repanechnikov, gaussian = rnorm)
-      dt = as.data.table(Map(function(dim, bandwidth, type) {
-        if (type == "numeric") return(csampler(n, dim, bandwidth))
-        result = dim
-        cons = switch(type, factor = factor, ordered = ordered, stopf("Unsupported feature type %s", type))
-        samplefrom = cons(levels(dim), levels = levels(dim))
-        for (l in levels(dim)) {
-          xlevel = which(dim == l)
-          if (!length(xlevel)) next
-          sweights = np::npksum(bw, txdat = dim[xlevel[[1]]], exdat = samplefrom)$ksum
-          result[xlevel] = samplefrom[sample.int(length(xlevel), length(sweights), replace = TRUE, prob = sweights)]
+      prototypes = self$model$dat[sample.int(nrow(self$model$dat), n, replace = TRUE)]
+      pfun = switch(bw$ckertype, epanechnikov = pepanechnikov, gaussian = pnorm)
+      dt = as.data.table(Map(function(dim, bandwidth, type, lx, ux) {
+        if (type == "numeric") {
+          rq = runif(n, pfun(lx, location = dim, scale = bandwidth), pfun(ux, location = dim, scale = bandwidth))
+          result = qepanechnikov(rq, location = dim, scale = bandwidth)
+          result[result < lx] = lx
+          result[result > ux] = ux
+        } else {
+          result = dim
+          cons = switch(type, factor = factor, ordered = ordered, stopf("Unsupported feature type %s", type))
+          samplefrom = cons(levels(dim), levels = levels(dim))
+          for (l in levels(dim)) {
+            xlevel = which(dim == l)
+            if (!length(xlevel)) next
+            sweights = np::npksum(bw, txdat = dim[xlevel[[1]]], exdat = samplefrom)$ksum
+            result[xlevel] = samplefrom[sample.int(length(xlevel), length(sweights), replace = TRUE, prob = sweights)]
+          }
         }
         result
-      }, prototypes, bw$bw, self$state$train_task$col_info[colnames(prototypes)]$type))
+      }, prototypes, bw$bw, self$state$train_task$col_info[colnames(prototypes)]$type), lower, upper)
       colnames(dt) = colnames(self$model$dat)
       dt
     }
@@ -136,7 +142,11 @@ depanechnikov <- function(x, location = 0, scale = 1) {
 
 pepanechnikov <- function(q, location = 0, scale = 1) {
   z = (q - location) / scale
-  3 * (z - z^3 / 15) / (4 * sqrt(5))
+  inrange = abs(z) < sqrt(5)
+  result = as.numeric(z > 0)
+  z = z[inrange]
+  result[inrange] = z * (3 - z^2 / 5) / (4 * sqrt(5)) + 0.5
+  result
 }
 
 qepanechnikov <- function(p, location = 0, scale = 1) {

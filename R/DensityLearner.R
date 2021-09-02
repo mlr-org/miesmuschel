@@ -17,15 +17,42 @@ LearnerDensity = R6Class("LearnerDensity", inherit = mlr3::Learner,
       super$initialize(id = id, task_type = "density", param_set = param_set, feature_types = feature_types,
         predict_types = predict_types, properties = properties, data_formats = data_formats, packages = packages, man = man)
     },
-    sample = function(n) {
+    #' @description
+    #' Sample from the fitted density.
+    #' @param n (`integer(1)`)\cr
+    #'   Number of samples to generate.
+    #' @param lower (`numeric` | `NULL`)\cr
+    #'   lower bounds, to sample truncated distributions. Must contain `NA` for non-numeric features. `NULL` (default): do not truncate.
+    #' @param upper (`numeric` | `NULL`)\cr
+    #'   upper bounds, to sample truncated distributions. Must contain `NA` for non-numeric features. `NULL` (default): do not truncate.
+    sample = function(n, lower = NULL, upper = NULL) {
       assertInt(n, tol = 1e-100)
       if (is.null(self$model)) stop("Learner is not trained.")
       if (!"sample" %in% self$properties) stop("sample() not supported.")
-      private$.sample(n)
+
+      types = self$state$train_task$feature_types[self$state$train_task$feature_names]$type
+      needs_na = types %nin% c("integer", "numeric")
+
+      assertNumeric(lower, null.ok = TRUE, len = length(need_na))
+      assertNumeric(upper, null.ok = TRUE, len = length(need_na))
+
+      if (!is.null(lower)) {
+        if (!all(is.na(lower) == needs_na)) stop("lower must be `NA` for train task columns that are not NA")
+      } else {
+        lower = ifelse(needs_na, NA_real_, -Inf)
+      }
+
+      if (!is.null(upper)) {
+        if (!all(is.na(upper) == needs_na)) stop("upper must be `NA` for train task columns that are not NA")
+      } else {
+        upper = ifelse(needs_na, NA_real_, Inf)
+      }
+
+      private$.sample(n, lower, upper)
     }
   ),
   private = list(
-    .sample = function(n) stop("sample() not implemented, even though \"sample\" property is given?!\nThis is a bug!")
+    .sample = function(n, lower, upper) stop("sample() not implemented, even though \"sample\" property is given?!\nThis is a bug!")
   )
 )
 

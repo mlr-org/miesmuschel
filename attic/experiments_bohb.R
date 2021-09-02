@@ -57,10 +57,26 @@ po()
 po("densitysplit")$train(list(tsk("mtcars")))
 
 
-gr <- po("densitysplit", min_size = 11) %>>% list(lrn("density.np", id = "d1"), lrn("density.np", id = "d2")) %>>% po("densityratio")
+gr <- po("densitysplit", min_size = 11) %>>%
+  list(lrn("density.np", id = "d1", bwmethod = "normal-reference"), lrn("density.np", id = "d2", bwmethod = "normal-reference")) %>>%
+  po("densityratio")
+
 
 gr$train(tsk("mtcars"))
 
 gr$predict(tsk("mtcars"))
 
 
+gr2 <- po("densitysplit", min_size = 11) %>>% po("multiplicityimply", 2) %>>%
+  lrn("density.np", bwmethod = "normal-reference") %>>% po("multiplicityexply", 2) %>>%
+  po("densityratio")
+
+gr2$train(tsk("mtcars"))
+
+gr2$predict(tsk("mtcars"))
+
+
+po("stratify")$param_set
+
+
+po("mutate", mutation = list(cyl = ~ cyl * 0.1))

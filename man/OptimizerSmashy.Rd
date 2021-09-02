@@ -58,6 +58,8 @@ This is equivalent to the \code{initializer} parameter of \code{\link[=mies_init
 \item \code{fidelity_steps} :: \code{integer(1)}\cr
 Number of fidelity steps. When it is 0, the number is determined from the \code{\link[bbotk:OptimInstance]{OptimInstance}}'s \code{\link[bbotk:Terminator]{Terminator}}. See the
 section \strong{Fidelity Steps} for more details. Initialized to 0.
+\item \code{synchronize_batches} :: \code{logical(1)}\cr
+Whether to use synchronized batches, as opposed to "Hyperband"-like successive halfing. Initialized to \code{TRUE}.
 \item \code{filter_with_max_budget} :: \code{logical(1)}\cr
 Whether to perform filtering with the maximum fidelity value found in the archive, as opposed the current \code{budget_survivors}. This has only an effect when
 \code{fidelity_steps} is greater than 1 and some evaluations are done when the archive already contains evaluations with greater fidelity. Initialized to \code{FALSE}.

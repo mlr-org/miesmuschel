@@ -1,8 +1,3 @@
-# !!!!!!!!!!!!!!!
-# this currently needs
-## remotes::install_github("mlr-org/miesmuschel@no_PSC_get_values")
-# !!!!!!!!!!!!!!!
-
 library("mlr3learners")
 library("paradox")
 library("mlr3pipelines")
@@ -10,18 +5,23 @@ library("mlr3pipelines")
 imputepl <- po("imputeoor", offset = 1, multiplier = 10) %>>% po("fixfactors") %>>% po("imputesample")
 learnerlist <- list(
   ranger = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
-  knn = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate")))
+  knn1 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 1, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
+  knn7 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 7, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
+  bohb = GraphLearner$new(po("imputesample") %>>%
+                          po("densitysplit", min_size = ContextPV(function(task) task$ncol + 1)) %>>% po("multiplicityimply", 2) %>>%
+                          lrn("density.np", bwmethod = "normal-reference") %>>% po("multiplicityexply", 2) %>>% po("densityratio"))
 )
-learnerlist$knn$graph$pipeops$regr.kknn$param_set$context_available = "task"
-learnerlist$knn$param_set$values$regr.kknn.k = ContextPV(function(task) if (task$nrow < 8) stop("need 8 samples") else 7)
+
+learnerlist$knn7$graph$pipeops$regr.kknn$param_set$context_available = "task"
+learnerlist$knn7$param_set$values$regr.kknn.k = ContextPV(function(task) if (task$nrow < 8) stop("need 8 samples") else 7)
 
 learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", class(x)) ; x })
-
 
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
   mu = p_int(2, 200, logscale = TRUE),
-#  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
+  sample = p_fct(c("random", "bohb")),
+  batch_method = p_fct(c("smashy", "hb")),
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_fct(c("tournament", "progressive")),
   surrogate_learner = p_fct(learnerlist),
@@ -46,7 +46,8 @@ suggested_meta_searchspace_mo = miesmuschel:::ps_union(list(suggested_meta_searc
 suggested_meta_searchspace_numeric = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
   mu = p_int(2, 200, logscale = TRUE),
-#  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
+  sample = p_int(1, 2, trafo = function(x) c("random", "bohb")[x]),
+  batch_method = p_int(1, 2, trafo = function(x) c("smashy", "hb")[x]),
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_int(1, 2, trafo = function(x) c("tournament", "progressive")[x]),
   surrogate_learner = p_int(1, 2, trafo = function(x) learnerlist[[x]]),
@@ -81,7 +82,8 @@ suggested_meta_searchspace_mo_numeric = miesmuschel:::ps_union(list(suggested_me
 suggested_meta_domain = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4),
   mu = p_int(2, 200),
-#  sample = p_fct(c("random")),  # we could try lhs, but (1) probably not that important and (2) very slow
+  sample = p_fct(c("random", "bohb")),
+  batch_method = p_fct(c("smashy", "hb")),
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   filter_algorithm = p_fct(c("tournament", "progressive")),
   surrogate_learner = p_uty(),
@@ -121,7 +123,7 @@ interpolate_cpv <- function(beginning, end, logscale = FALSE, round = FALSE) {
 }
 
 opt_objective <- function(objective, search_space, budget_limit, budget_log_step,
-    survival_fraction, mu, sample,
+    survival_fraction, mu, sample, batch_method,
     filter_algorithm, surrogate_learner, filter_with_max_budget,
     filter_factor_first, filter_factor_last, filter_select_per_tournament, random_interleave_fraction,
     filter_factor_first.end = filter_factor_first, filter_factor_last.end = filter_factor_last,
@@ -141,7 +143,9 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   assert_number(budget_log_step, lower = 0)  # log() of budget fidelity steps to make. E.g. log(2) for doubling
   assert_int(mu, lower = 2)  # population size
 #  assert_number(survival_fraction, lower = 0, upper = 1 - 0.5 / mu)  # fraction of individuals that survive. round(mu * survival_fraction) must be < survival_fraction
-  assert_choice(sample, c("random", "lhs"))  # sample points randomly or using LHS. I'm pretty sure this is not very important.
+  assert_choice(sample, c("random", "bohb"))  # sample points randomly or using BOHB's mechanism.
+  assert_choice(batch_method, c("smashy", "hb"))  # whether to use synchronized batches, or generalized hyperband
+  # (for true hyperband (up to rounding), set `budget_log_step` to `-log(survival_fraction)` and `mu` to `survival_fraction ^ -fidelity_steps` (note fidelity_steps is 0-based))
 
   # Surrogate Options
   assert_choice(filter_algorithm, c("tournament", "progressive"))  # The two implemented filter algorithms
@@ -238,11 +242,12 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
 
   interleaving_filtor = ftr("maybe", filtor, p = random_interleave_fraction_cpv, random_choice = random_interleave_random)
 
-  sampling_fun = switch(sample, random = paradox::generate_design_random, lhs = paradox::generate_design_lhs)
+  sampling_fun = switch(sample, random = paradox::generate_design_random, bohb = 0) #TODO
 
   optimizer = bbotk::opt("smashy", filtor = interleaving_filtor, selector = selector,
     mu = mu, survival_fraction = survival_fraction, sampling = sampling_fun,
-    fidelity_steps = fidelity_steps + 1, filter_with_max_budget = filter_with_max_budget,
+    fidelity_steps = fidelity_steps + 1, synchronize_batches = batch_method == "smashy",
+    filter_with_max_budget = filter_with_max_budget,
     additional_component_sampler = additional_component_sampler
   )
 

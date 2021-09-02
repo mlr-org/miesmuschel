@@ -72,10 +72,25 @@ Initialize the \code{LearnerDensity} object.
 \if{html}{\out{<a id="method-sample"></a>}}
 \if{latex}{\out{\hypertarget{method-sample}{}}}
 \subsection{Method \code{sample()}}{
+Sample from the fitted density.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LearnerDensity$sample(n)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LearnerDensity$sample(n, lower = NULL, upper = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{n}}{(\code{integer(1)})\cr
+Number of samples to generate.}
+
+\item{\code{lower}}{(\code{numeric} | \code{NULL})\cr
+lower bounds, to sample truncated distributions. Must contain \code{NA} for non-numeric features. \code{NULL} (default): do not truncate.}
+
+\item{\code{upper}}{(\code{numeric} | \code{NULL})\cr
+upper bounds, to sample truncated distributions. Must contain \code{NA} for non-numeric features. \code{NULL} (default): do not truncate.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

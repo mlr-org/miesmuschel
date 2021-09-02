@@ -49,6 +49,8 @@
 #' * `fidelity_steps` :: `integer(1)`\cr
 #'   Number of fidelity steps. When it is 0, the number is determined from the [`OptimInstance`][bbotk::OptimInstance]'s [`Terminator`][bbotk::Terminator]. See the
 #'   section **Fidelity Steps** for more details. Initialized to 0.
+#' * `synchronize_batches` :: `logical(1)`\cr
+#'   Whether to use synchronized batches, as opposed to "Hyperband"-like successive halfing. Initialized to `TRUE`.
 #' * `filter_with_max_budget` :: `logical(1)`\cr
 #'   Whether to perform filtering with the maximum fidelity value found in the archive, as opposed the current `budget_survivors`. This has only an effect when
 #'   `fidelity_steps` is greater than 1 and some evaluations are done when the archive already contains evaluations with greater fidelity. Initialized to `FALSE`.
@@ -163,11 +165,12 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
           survival_fraction = p_dbl(0, 1, tags = "required"),
           sampling = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required")),
           fidelity_steps = p_int(0, tags = "required"),
+          synchronize_batches = p_lgl(tags = "required"),
           filter_with_max_budget = p_lgl(tags = "required")),
         list(
           additional_component_sampler = p_uty(custom_check = function(x) if (is.null(x)) TRUE else check_r6(x, "Sampler")))
       ))
-      param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_random, fidelity_steps = 0, filter_with_max_budget = FALSE)
+      param_set$values = list(mu = 2, survival_fraction = 0.5, sampling = generate_design_random, fidelity_steps = 0, synchronize_batches = TRUE, filter_with_max_budget = FALSE)
 
       private$.own_param_set = param_set
 
@@ -242,21 +245,40 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
       if (length(budget_id) != 1) stopf("Need exactly one budget parameter for multifidelity method, but found %s: %s",
         length(budget_id), str_collapse(budget_id))
 
-      generations = params$fidelity_steps
-      if (generations == 0) generations = terminator_get_generations(inst$terminator)
-      if (!is.finite(generations)) {
-        stop("When fidelity_steps is 0, then the given OptimizationInstance must have a TerminatorGenerations, or a TerminatorCombo with 'any = TRUE' containing at least one TerminatorGenerations (possibly recursively).")
-      }
-      if (generations < 1) {
-        stopf("At least one generation must be evaluated (at full fidelity), but terminator had %s generations.", generations)
+      stages = params$fidelity_steps
+      if (stages == 0) {
+        if (params$synchronize_batches) {
+          # simple, synchronized evaluation: only one "bracket", so terminate after that
+          stages = terminator_get_stages(inst$terminator)
+        } else {
+          # hyperband-like schedule: there will be brackets of size `stages`, `stages - 1`, ... 1
+          # We want the terminator to make at least one full round of "hyperband", so we set the `generation`
+          # variable such that `stages * (stages + 1) / 2 <= <terminator stages>`
+          stages = (sqrt(1 + 8 * terminator_get_stages(inst$terminato)) - 1) / 2
+        }
       }
 
-      # use rev(seq(upper, lower)), so that with sequence length 1, we get the upper bound only.
-      budget_progression = rev(seq(inst$search_space$upper[[budget_id]], inst$search_space$lower[[budget_id]], length.out = generations))
-      fidelity_schedule_base = data.table(generation = seq_len(generations), budget_new = budget_progression, budget_survivors = budget_progression)
+      if (!is.finite(stages)) {
+        stop("When fidelity_steps is 0, then the given OptimizationInstance must have a TerminatorStages, or a TerminatorCombo with 'any = TRUE' containing at least one TerminatorStages (possibly recursively).")
+      }
+      if (stages < 1) {
+        stopf("At least one generation must be evaluated (at full fidelity), but terminator had %s stages.", stages)
+      }
+
+      if (params$synchronize_batches) {
+        evaluation_schedule = smashy_evaluation_schedule(params$mu, params$survival_fraction, inst$search_space$lower[[budget_id]], inst$search_space$upper[[budget_id]], stages)
+      } else {
+        evaluation_schedule = hb_evaluation_schedule(params$mu, params$survival_fraction, inst$search_space$lower[[budget_id]], inst$search_space$upper[[budget_id]], stages)
+      }
+
+      fidelity_schedule_base = evaluation_schedule[, .(generation = seq_len(nrow(schedule_info)), budget_new = fidelity, budget_survivors = fidelity)]
+      generations = nrow(fidelity_schedule_base)
+
 
       # if this is a continued run, then `inst$archie$data$dob` may already contain 'dob' values, and mies_init_population will perform
       # evaluations with 'max(inst$archive$data$dob) + 1`. fidelity_schedule then needs to be recycled, so we get the last available generation here.
+      #
+      # TODO: we currently don't really have a principle by which we do continuation, and this is probably broken.
       last_gen = max(inst$archive$data$dob, 0, na.rm = TRUE)
 
       fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
@@ -267,29 +289,21 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
       mies_prime_operators(selectors = list(private$.selector), filtors = list(private$.filtor),
         search_space = inst$search_space, additional_components = additional_components, budget_id = budget_id)
 
-      mies_init_population(inst, mu = params$mu, initializer = params$sampling, fidelity_schedule = fidelity_schedule,
+      # TODO: when the init population stuff is refactored the following should ideally be oriented on the evaluation_schedule
+      mies_init_population(inst, mu = evaluation_schedule$sample_new[[1]], initializer = params$sampling, fidelity_schedule = fidelity_schedule,
         budget_id = budget_id, additional_component_sampler = additional_component_sampler)
-
-      survivors = max(round(params$survival_fraction * params$mu), 1)
-      if (survivors == params$mu) {
-        stop("Number of survivors equals the total population size. survival_fraction must be lower or mu must be larger.")
-      }
-      lambda = params$mu - survivors
 
       while (!inst$is_terminated) {
         last_gen = max(inst$archive$data$dob, na.rm = TRUE)
-        if (last_gen %% generations == 0) {
+        effective_gen = last_gen %% generations + 1
+        if (effective_gen == 1) {
           fidelity_schedule = recycle_fidelity_schedule(fidelity_schedule_base, last_gen, generations)
-          # generation cycle is over; kill all individuals, sample new ones.
-          keep_alive= 0
-          sample_new = private$.filtor$needed_input(params$mu, context = list(inst = inst))
-          filter_down_to = params$mu
-        } else {
-          keep_alive = survivors
-          sample_new = private$.filtor$needed_input(lambda, context = list(inst = inst))
-          filter_down_to = lambda
         }
-        offspring = assert_data_table(params$sampling(nonbudget_searchspace, sample_new)$data, nrows = sample_new)
+        keep_alive = evaluation_schedule$survivors[[effective_gen]]
+        sample_new = evaluation_schedule$sample_new[[effective_gen]]
+
+        sample_prefilter = private$.filtor$needed_input(sample_new, context = list(inst = inst))
+        offspring = assert_data_table(params$sampling(nonbudget_searchspace, sample_prefilter)$data, nrows = sample_prefilter)
 
         if (!is.null(additional_component_sampler)) {
           additional_components = assert_data_frame(additional_component_sampler$sample(sample_new)$data, nrows = sample_new)
@@ -297,8 +311,10 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
         }
 
         mies_survival_plus(inst, mu = keep_alive, survival_selector = private$.selector)
+
         offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
           fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)
+
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)
       }
     },
