@@ -70,7 +70,7 @@ PipeOpStratify = R6Class("PipeOpStratify",
 
       param_set$values = list(min_size = 1, predict_choice = "exact")
 
-      super$initialize(id, param_vals = param_vals,
+      super$initialize(id, param_set = param_set, param_vals = param_vals,
         input = data.table(name = "input", train = "Task", predict = "Task"),
         output = data.table(name = c("output", "fallback"), train = c("[Task]", "Task"), predict = c("[Task]", "Task")),
         tags = c("target transform", "multiplicity")
@@ -83,26 +83,29 @@ PipeOpStratify = R6Class("PipeOpStratify",
       pv = self$param_set$get_values(tags = "train")
       if (pv$stratify_feature %nin% task$feature_names) stopf("stratify_feature '%s' not in Task's features.", pv$stratify_feature)
       stratcol = task$data(cols = pv$stratify_feature)
-      sample_numbers = stratcol[, .N, by = pv$stratify_feature]
+      sample_numbers = stratcol[, .N, by = c(pv$stratify_feature)]
       self$state = list(stratify_values = sample_numbers[[pv$stratify_feature]][sample_numbers$N >= pv$min_size])
 
       list(output = as.Multiplicity(sapply(self$state$stratify_values, function(l) {
-        task$clone(deep = TRUE)$filter(stratcol == l)
+        taskpart = task$clone(deep = TRUE)$filter(task$row_ids[stratcol[[1]] == l])
+        taskpart$col_roles$feature = setdiff(taskpart$col_roles$feature, pv$stratify_feature)
+        taskpart
       }, simplify = FALSE)), fallback = task)
-
-      list(as.Multiplicity(private$.splittask(task, self$state$levels)))
     },
     .predict = function(inputs) {
+      task = inputs[[1]]
       pv = self$param_set$get_values(tags = "predict")
-      stratcol = task$data(cols = pv$stratify_feature)
+      stratcol = task$data(cols = pv$stratify_feature)[[1]]
       if (pv$predict_choice != "exact" && !is.numeric(stratcol)) stopf("predict_choice can only be 'exact' for non-numeric features, but is '%s'.", pv$predict_choice)
       mapping = data.table(stratify_values = self$state$stratify_values)
       stratdest = mapping[J(stratcol), x.stratify_values, on = "stratify_values", roll = switch(pv$predict_choice,
         exact = FALSE, exact_or_less = Inf, exact_or_greater = -Inf, nearest = "nearest")]
 
       list(output = as.Multiplicity(sapply(self$state$stratify_values, function(l) {
-        task$clone(deep = TRUE)$filter(!is.na(stratdest) & stratdest == l)
-      }, simplify = FALSE)), fallback = task$clone(deep = TRUE)$filter(is.na(stratdest)))
+        taskpart = task$clone(deep = TRUE)$filter(task$row_ids[!is.na(stratdest) & stratdest == l])
+        taskpart$col_roles$feature = setdiff(taskpart$col_roles$feature, pv$stratify_feature)
+        taskpart
+      }, simplify = FALSE)), fallback = task$clone(deep = TRUE)$filter(task$row_ids[is.na(stratdest)]))
     }
   )
 )

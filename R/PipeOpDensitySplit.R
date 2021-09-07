@@ -73,10 +73,10 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
       n_bottom = max(task$nrow - n_top, pv$min_size)
       order_target = order(target)
 
-      rows_top = rows[order_target[seq_len(n_top)]]
-      rows_bottom = rows[rev(order_target)[seq_len(n_top)]]
+      rows_top = rows[rev(order_target)[seq_len(n_top)]]
+      rows_bottom = rows[order_target[seq_len(n_bottom)]]
 
-      new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr_reflections$task_col_roles$density)]
+      new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr3::mlr_reflections$task_col_roles$density)]
 
       top = TaskDensity$new(paste0(task$id, ".top"), task$backend)
       top$filter(rows = rows_top)
@@ -90,7 +90,7 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
     },
     .predict = function(inputs) {
       task = inputs[[1]]
-      new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr_reflections$task_col_roles$density)]
+      new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr3::mlr_reflections$task_col_roles$density)]
       task = TaskDensity$new(paste0(task$id, ".density"), task$backend)
       task$col_roles = new_col_roles
 

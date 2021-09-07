@@ -72,6 +72,7 @@ Collate:
     'RecombinatorNull.R'
     'RecombinatorProxy.R'
     'RecombinatorSequential.R'
+    'SamplerKD.R'
     'Scalor.R'
     'ScalorAggregate.R'
     'ScalorDomcount.R'

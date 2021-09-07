@@ -68,19 +68,19 @@ reg_mlr3 = function(...) {  # nocov start
       mlr_reflections$learner_predict_types$density = list(prob = "prob")
       mlr_reflections$default_measures$density = "density.logloss"
     }
-    mlr_learners$add("density.featureless", LearnerDensityFeatureless)
-    mlr_learners$add("density.np", LearnerDensityNP)
-    mlr_tasks$add("faithful", load_faithful)
-    mlr_measures$add("density.logloss", MeasureDensityLogloss)
+    mlr3::mlr_learners$add("density.featureless", LearnerDensityFeatureless)
+    mlr3::mlr_learners$add("density.np", LearnerDensityNP)
+    mlr3::mlr_tasks$add("faithful", load_faithful)
+    mlr3::mlr_measures$add("density.logloss", MeasureDensityLogloss)
   }
 }  # nocov end
 
 reg_mlr3pipelines = function(...) {  # nocov start
   if (requireNamespace("mlr3pipelines", quietly = TRUE)) {
-    mlr_pipeops$add("densityratio", PipeOpDensityRatio)
-    mlr_pipeops$add("densitysplit", PipeOpDensitySplit)
-    mlr_pipeops$add("stratify", PipeOpStratify)
-    mlr_pipeops$add("predictionunion", PipeOpPredictionUnion)
+    mlr3pipelines::mlr_pipeops$add("densityratio", PipeOpDensityRatio)
+    mlr3pipelines::mlr_pipeops$add("densitysplit", PipeOpDensitySplit)
+    mlr3pipelines::mlr_pipeops$add("stratify", PipeOpStratify)
+    mlr3pipelines::mlr_pipeops$add("predictionunion", PipeOpPredictionUnion)
   }
 }  # nocov end
 

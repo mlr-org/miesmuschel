@@ -33,8 +33,8 @@ LearnerDensity = R6Class("LearnerDensity", inherit = mlr3::Learner,
       types = self$state$train_task$feature_types[self$state$train_task$feature_names]$type
       needs_na = types %nin% c("integer", "numeric")
 
-      assertNumeric(lower, null.ok = TRUE, len = length(need_na))
-      assertNumeric(upper, null.ok = TRUE, len = length(need_na))
+      assertNumeric(lower, null.ok = TRUE, len = length(needs_na))
+      assertNumeric(upper, null.ok = TRUE, len = length(needs_na))
 
       if (!is.null(lower)) {
         if (!all(is.na(lower) == needs_na)) stop("lower must be `NA` for train task columns that are not NA")

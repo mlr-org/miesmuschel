@@ -17,7 +17,7 @@
 - random search
 - replicates
 * continuing
-- [ ] build sampler
+- [X] build sampler
 - [ ] check sampler works
 - [ ] finish bohb learner
 - [ ] check bohb learner works

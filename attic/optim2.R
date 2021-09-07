@@ -2,20 +2,47 @@ library("mlr3learners")
 library("paradox")
 library("mlr3pipelines")
 
+
+# --- possible surrogate learners
+
 imputepl <- po("imputeoor", offset = 1, multiplier = 10) %>>% po("fixfactors") %>>% po("imputesample")
 learnerlist <- list(
   ranger = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn1 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 1, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn7 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 7, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   bohb = GraphLearner$new(po("imputesample") %>>%
-                          po("densitysplit", min_size = ContextPV(function(task) task$ncol + 1)) %>>% po("multiplicityimply", 2) %>>%
-                          lrn("density.np", bwmethod = "normal-reference") %>>% po("multiplicityexply", 2) %>>% po("densityratio"))
+                          po("stratify") %>>%
+                          list(
+                            po("densitysplit") %>>%
+                            # would love to use a multiplicity here, but nested mults have problems when the outer one is empty, which can actually happen here.
+                            list(lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
+                              lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)) %>>%
+                            po("densityratio") %>>%
+                            po("predictionunion", collect_multiplicity = TRUE),
+                            lrn("regr.featureless")
+                          ) %>>% po("predictionunion", id = "fallback_union"))
 )
 
 learnerlist$knn7$graph$pipeops$regr.kknn$param_set$context_available = "task"
 learnerlist$knn7$param_set$values$regr.kknn.k = ContextPV(function(task) if (task$nrow < 8) stop("need 8 samples") else 7)
+learnerlist$bohb$graph$pipeops$stratify$param_set$context_available = "inputs"
+learnerlist$bohb$graph$pipeops$densitysplit$param_set$context_available = "inputs"
+learnerlist$bohb$graph$pipeops$stratify$param_set$values$min_size = ContextPV(function(task) inputs[[1]]$ncol + 2)
+learnerlist$bohb$graph$pipeops$densitysplit$param_set$values$min_size = ContextPV(function(task) inputs[[1]]$ncol + 1)
+learnerlist$bohb$graph$pipeops$stratify$param_set$values$stratify_feature = ContextPV(function() stop("needs to be set to the budget param"))
 
 learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", class(x)) ; x })
+
+# --- bohb-like sampling
+
+generate_design_bohb = ContextPV(function(inst) function(param_set, n) {
+  target = inst$archive$codomain$ids()
+
+  task = TaskRegr$new("archive", inst$archive$data[, c(inst$archive$search_space$ids(), target), with = FALSE], target = target)
+  sampler = SamplerKD$new(param_set, task, inst$archive$codomain$tags[[1]] == "minimize", alpha = .15, min_points_in_model = 0, bandwidth_factor = 3, min_bandwidth = 1e-3)
+  sampler$sample(n)
+})
+
 
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
@@ -242,14 +269,16 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
 
   interleaving_filtor = ftr("maybe", filtor, p = random_interleave_fraction_cpv, random_choice = random_interleave_random)
 
-  sampling_fun = switch(sample, random = paradox::generate_design_random, bohb = 0) #TODO
+  sampling_fun = switch(sample, random = paradox::generate_design_random, bohb = generate_design_bohb)
 
   optimizer = bbotk::opt("smashy", filtor = interleaving_filtor, selector = selector,
-    mu = mu, survival_fraction = survival_fraction, sampling = sampling_fun,
+    mu = mu, survival_fraction = survival_fraction,
     fidelity_steps = fidelity_steps + 1, synchronize_batches = batch_method == "smashy",
     filter_with_max_budget = filter_with_max_budget,
     additional_component_sampler = additional_component_sampler
   )
+  optimizer$param_set$context_available = "inst"
+  optimizer$param_set$values$sampling = sampling_fun
 
   optimizer$optimize(oi)
   oi

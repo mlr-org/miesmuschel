@@ -7,7 +7,9 @@
 #'
 #' @section Hyperparameters:
 #' * `bwmethod` :: `character(1)`\cr
-#'   Bandwidth selection method. One of `"cv.ml"`, `"cv.ls"`, `"normal-reference"`. Default `"cv.ml"`.
+#'   Bandwidth selection method. One of `"cv.ml"`, `"cv.ls"`, `"normal-reference"`, `"normal-reference-numeric"`. Default `"cv.ml"`.
+#'   `"normal-reference-numeric"` emulates (buggy, see `https://github.com/statsmodels/statsmodels/issues/3790`) behaviour of python statsmodels:
+#'   non-numeric columns are treated as numeric for bandwidth estimation.
 #' * `bwtype` :: `character(1)`\cr
 #'   Continuous variable bandwidth type, one of `"fixed"` (default), `"generalized_nn"`, `"adaptive_nn"`.
 #' * `ckertype` :: `character(1)`\cr
@@ -49,7 +51,7 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
     #' Initialize the `LearnerDensityNP` object.
     initialize = function() {
       param_set = ps(
-        bwmethod = p_fct(c("cv.ml", "cv.ls", "normal-reference"), default = "cv.ml", tags = c("train", "npudensbw")),
+        bwmethod = p_fct(c("cv.ml", "cv.ls", "normal-reference", "normal-reference-numeric"), default = "cv.ml", tags = c("train", "npudensbw")),
         bwtype = p_fct(c("fixed", "generalized_nn", "adaptive_nn"), default = "fixed", tags = c("train", "npudensbw")),
         ckertype = p_fct(c("gaussian", "epanechnikov", "uniform"), default = "gaussian", tags = c("train", "npudensbw")),
         ckerorder = p_int(2, 8, default = 2, tags = c("train", "npudensbw")),
@@ -85,7 +87,18 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
         if (is.numeric(dat[[col]]) && diff(range(dat[[col]])) == 0) dat[[col]][[1]] = dat[[col]][[1]] * (1 - 2 * .Machine$double.eps) + .Machine$double.eps
       }
       np::npseed(as.integer(runif(1, -2^31 + 1, 2^31 - 1)))
-      bw = invoke(np::npudensbw, dat = dat, .args = self$param_set$get_values(tags = "npudensbw"))
+      args = self$param_set$get_values(tags = "npudensbw")
+      numericize = identical(args$bwmethod, "normal-reference-numeric")
+      if (numericize) {
+        args$bwmethod = "normal-reference"
+        bw_numeric = invoke(np::npudensbw, dat = dat[, lapply(.SD, as.numeric)], .args = args)
+      }
+      bw = invoke(np::npudensbw, dat = dat, .args = args)
+      if (numericize) {
+        bw$bw = bw_numeric$bw
+        bw$bandwidth$x = bw_numeric$bandwidth$x
+      }
+
       bw$call = NULL
 
       bw$bw[bw$bw < pv$min_bandwidth] <- pv$min_bandwidth
@@ -109,10 +122,11 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       # epanechnikov kernel: repanechnikov
       prototypes = self$model$dat[sample.int(nrow(self$model$dat), n, replace = TRUE)]
       pfun = switch(bw$ckertype, epanechnikov = pepanechnikov, gaussian = pnorm)
-      dt = as.data.table(Map(function(dim, bandwidth, type, lx, ux) {
+      qfun = switch(bw$ckertype, epanechnikov = qepanechnikov, gaussian = qnorm)
+      dt = as.data.table(Map(function(dim, dimname, bandwidth, type, lx, ux) {
         if (type == "numeric") {
-          rq = runif(n, pfun(lx, location = dim, scale = bandwidth), pfun(ux, location = dim, scale = bandwidth))
-          result = qepanechnikov(rq, location = dim, scale = bandwidth)
+          rq = runif(n, pfun(lx, dim, bandwidth), pfun(ux, dim, bandwidth))
+          result = qfun(rq, dim, bandwidth)
           result[result < lx] = lx
           result[result > ux] = ux
         } else {
@@ -122,12 +136,18 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
           for (l in levels(dim)) {
             xlevel = which(dim == l)
             if (!length(xlevel)) next
-            sweights = np::npksum(bw, txdat = dim[xlevel[[1]]], exdat = samplefrom)$ksum
-            result[xlevel] = samplefrom[sample.int(length(xlevel), length(sweights), replace = TRUE, prob = sweights)]
+            protorow = xlevel[[1]]
+            origin = prototypes[protorow]
+            rep1s = rep(1, length(samplefrom))
+            exdat = origin[rep1s]
+            exdat[[dimname]] = samplefrom
+            sweights = np::npksum(bw, txdat = origin, exdat = exdat)$ksum
+            sweights[sweights < 0] = 0  # happens when the bandwidth is set too high, e.g. through bw_factor or normal-reference-numeric
+            result[xlevel] = samplefrom[sample.int(length(sweights), length(xlevel), replace = TRUE, prob = sweights)]
           }
         }
         result
-      }, prototypes, bw$bw, self$state$train_task$col_info[colnames(prototypes)]$type), lower, upper)
+      }, prototypes, names(prototypes), bw$bw, self$state$train_task$col_info[colnames(prototypes)]$type, lower, upper))
       colnames(dt) = colnames(self$model$dat)
       dt
     }

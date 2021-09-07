@@ -75,7 +75,7 @@ PipeOpPredictionUnion = R6Class("PipeOpPredictionUnion",
       assert_int(innum, lower = 0L)
 
       inname = if (innum) rep_suffix("input", innum) else "..."
-      intype = "Task"
+      intype = c("NULL", "Prediction")
 
       private$.collect = assert_flag(collect_multiplicity)
 
@@ -88,8 +88,8 @@ PipeOpPredictionUnion = R6Class("PipeOpPredictionUnion",
       }
 
       super$initialize(id, param_vals = param_vals,
-        input = data.table(name = inname, train = intype, predict = intype),
-        output = data.table(name = "output", train = "Task", predict = "Task"),
+        input = data.table(name = inname, train = intype[[1]], predict = intype[[2]]),
+        output = data.table(name = "output", train = "NULL", predict = "Prediction"),
         tags = "ensemble"
       )
     }
@@ -100,7 +100,8 @@ PipeOpPredictionUnion = R6Class("PipeOpPredictionUnion",
       list(NULL)
     },
     .predict = function(inputs) {
-      if (private$.collect) inputs = keep(unclass(inputs[[1]]), function(x) length(x$row_ids))
+      if (private$.collect) inputs = unclass(inputs[[1]])
+      inputs = keep(inputs, function(x) length(x$row_ids) > 0)
       if (!length(inputs)) return(list(Prediction$new()))
       if (length(unique(map_chr(inputs, "task_type"))) > 1) stop("Mixing Prediction task_type not possible.")
       if (length(unique(map_chr(inputs, function(x) paste(sort(x$predict_types), collapse = ",")))) > 1) stop("Mixing Prediction predict_types not possible.")
