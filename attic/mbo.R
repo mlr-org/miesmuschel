@@ -1,28 +1,70 @@
 library("parallelMap")
 library("mlrintermbo")
 
-problem_count <- 38
 
+curseed <- as.numeric(commandArgs(trailingOnly = TRUE)[[1]])
+algo <- commandArgs(trailingOnly = TRUE)[[2]]
+searchspace <- commandArgs(trailingOnly = TRUE)[[3]]
+runlen <- commandArgs(trailingOnly = TRUE)[[4]]
+objective <- commandArgs(trailingOnly = TRUE)[[5]]
+fixedmu <- commandArgs(trailingOnly = TRUE)[[6]]
+siman <- commandArgs(trailingOnly = TRUE)[[7]]
+batchmethod <- commandArgs(trailingOnly = TRUE)[[8]]
+cores <- as.numeric(commandArgs(trailingOnly = TRUE)[[9]])
+infillsearch <- as.numeric(commandArgs(trailingOnly = TRUE)[[10]])
+
+checkmate::assertInt(as.integer(curseed))
+checkmate::assertChoice(algo, c("intermbo", "random_search", "design_points"))
+checkmate::assertChoice(searchspace, c("discrete", "numeric"))
+checkmate::assertChoice(runlen, c("longrun", "shortrun"))
+short <- runlen == "shortrun"
+checkmate::assertChoice(objective, c("lcbench", "rbv2_super", "all"))
+checkmate::assertChoice(fixedmu, c("mufix", "muvary"))
+fixedmu <- fixedmu == "mufix"
+checkmate::assertChoice(siman, c("siman", "nosiman"))
+siman <- siman == "siman"
+checkmate::assertChoice(batchmethod, c("smashy", "hb", "any"))
+checkmate::assertCount(cores, tol = 1e-100)
+checkmate::assertChoice(infillsearch, c("infill_rs", "infill_vario", "infill_all"))
+
+
+### arguments:
+# <curseed> <algo> <searchspace> <runlen | short> <objective> <fixedmu> <siman> <batchmethod> <cores> <infillsearch>
+
+# evaluation modality:
+# - curseed
+# - algo
+# - runlen
+# - objective
+# - cores
+
+# searchspace config:
+# - searchspace (only relevant for algo == "intermbo"
+# - fixedmu
+# - siman
+# - batchmethod
+# - infillsearch
+
+if (fixedmu && batchmethod != "smashy") stop("fixed mu only with smashy")
+
+problem_count <- switch(objective, lcbench = 8, rbv2_super = 30, all = 38, stop())
+
+if (problem_count >= cores) {
+  parallelity <- cores
+  multiplier <- 1
+} else {
+  multiplier <- floor(cores / problem_count)
+  parallelity <- multiplier * problem_count
+}
+
+budgetfactor <- (if (short) 3 else 30) * (if (fixedmu) 32 else 1)
 
 parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
 
 parallelSource("load_objectives.R")
 
-curseed <- as.numeric(commandArgs(trailingOnly = TRUE)[[1]])
-
-algo <- commandArgs(trailingOnly = TRUE)[[2]]
-checkmate::assertChoice(algo, c("intermbo", "random_search", "design_points"))
-searchspace <- commandArgs(trailingOnly = TRUE)[[3]]
-
-short <- FALSE
-if (identical(commandArgs(trailingOnly = TRUE)[4], "shortrun")) {
-  cat("SHORT RUN\n")
-  short <- TRUE
-}
-
-checkmate::assertChoice(searchspace, c("discrete", "numeric"))
-
-filename <- sprintf("run_%s_%s_%s_seed_%s.rds", algo, searchspace, gsub(":", "-", gsub(" ", "_", Sys.time())), curseed)
+filename <- sprintf("run_%s_%s_%s_%s%s%s_%s_seed_%s.rds", algo, searchspace, objective,
+  if (fixedmu) "mufix_" else "muvary_", if (!siman) "nosiman_" else "siman_", batchmethod, gsub(":", "-", gsub(" ", "_", Sys.time())), curseed)
 tmpname <- paste0(filename, ".tmp")
 saveRDS(Sys.time(), tmpname)
 
@@ -37,14 +79,18 @@ evaluate_metaconf <- function(metaconf) {
   file.rename(tmpname, filename)
 
   curseed <<- curseed + 1
-  evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = if (short) 3 else 30)),
+
+  more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = budgetfactor)
+
+  evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = more.args),
     error = function(e) {
+      # retry once when parallelMap crashes for some reason
     parallelStop()
     parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
     parallelSource("load_objectives.R")
     lgr::get_logger("mlr3")$set_threshold("info")
     lgr::get_logger("bbotk")$set_threshold("info")
-    parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = if (short) 3 else 30))
+    parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = more.args)
   })
 
   c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[, sprintf("%s.%s", cfg, level)]))
@@ -55,10 +101,14 @@ objective <- bbotk::ObjectiveRFun$new(
     evaluate_metaconf(xs)
   },
   domain = suggested_meta_domain,
-  codomain = ps(yval = p_dbl(tags = "maximize"))
+  codomain = ps(yval = p_dbl(tags = "minimize"))
 )
 
-space <- switch(searchspace, discrete = suggested_meta_searchspace,  numeric = suggested_meta_searchspace_numeric, stop())
+space <- get_searchspace(
+  include.mu = !fixedmu, include.batchmethod = batchmethod == "any",
+  infill = substr(infillsearch, 8, 100), include.siman = siman,
+  include.mo = FALSE, numeric.only = searchspace == "numeric"
+)
 
 oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 10 else 60 * 60 * 70))
 
@@ -76,26 +126,3 @@ opter$optimize(oi)
 
 saveRDS(oi, tmpname)
 file.rename(tmpname, filename)
-
-# proposed config:
-## proposition <- list(budget_log_step = log(16), mu = 20, survival_fraction = 1/3, filter_algorithm = "progressive", surrogate_learner = learnerlist$knn,
-##   filter_with_max_budget = TRUE, filter_factor_first = 1000, filter_factor_last = 20, random_interleave_fraction = 2/3, random_interleave_random = FALSE,
-##   filter_select_per_tournament = 1)
-## --> rs-factor 6  ("64x better than RS") / 5.5 (45x) / 5 (32x) --> probably around 5.5
-## --> lcbench 126026, lcbench 7593 --> both around 7.3 / 6 / 8.2 --> probably around 7.3 ("160x better than RS")
-# Possible amendment: filter_factor_last.end = 300
-## --> 5.3 +- 1, lcbench 8.2 +- 1.3
-
-## library("ggplot2")
-## pl <- melt(oi$archive$data[, .SD, .SDcols = grepl("\\.", colnames(oi$archive$data))])
-
-## ggplot(pl, aes(x = variable, y = value)) + geom_boxplot()
-## colnames(oi$archive$data)
-## ggplot(oi$archive$data, aes(x = , y = yval)) + geom_point()
-## ggplot(oi$archive$data, aes(x = random_interleave_random, y = yval)) + geom_boxplot()
-
-# dse <- generate_design_random(suggested_meta_searchspace, 10)
-#
-# pres <- profvis::profvis(evaluate_miesmuschel(10, seed = 10, metaconf = dse$transpose()[[1]], budgetfactor = 10), simplify = FALSE)
-# htmlwidgets::saveWidget(pres, "profiled.html", selfcontained = FALSE)
-

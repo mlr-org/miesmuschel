@@ -43,90 +43,118 @@ generate_design_bohb = ContextPV(function(inst) function(param_set, n) {
   sampler$sample(n)
 })
 
+# --- search space components
 
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
-  mu = p_int(2, 200, logscale = TRUE),
-  sample = p_fct(c("random", "bohb")),
-  batch_method = p_fct(c("smashy", "hb")),
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
-  filter_algorithm = p_fct(c("tournament", "progressive")),
   surrogate_learner = p_fct(learnerlist),
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
-  filter_factor_last = p_dbl(1, 1000, logscale = TRUE),
-  filter_select_per_tournament = p_int(1, 10, logscale = TRUE),
   random_interleave_fraction = p_dbl(0, 1),
-
-  filter_factor_first.end = p_dbl(1, 1000, logscale = TRUE),
-  filter_factor_last.end = p_dbl(1, 1000, logscale = TRUE),
-  filter_select_per_tournament.end = p_int(1, 10, logscale = TRUE),
-  random_interleave_fraction.end = p_dbl(0, 1),
-
   random_interleave_random = p_lgl()
 )
 
-suggested_meta_searchspace_mo = miesmuschel:::ps_union(list(suggested_meta_searchspace,
-  ps(mo_selection_method = p_fct(c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon")))
-))
+searchspace_component_sample = ps(sample = p_fct(c("random", "bohb")))
+searchspace_component_sample_numeric = ps(sample = p_int(1, 2, trafo = function(x) c("random", "bohb")[x]))
 
-suggested_meta_searchspace_numeric = ps(
-  budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
-  mu = p_int(2, 200, logscale = TRUE),
-  sample = p_int(1, 2, trafo = function(x) c("random", "bohb")[x]),
-  batch_method = p_int(1, 2, trafo = function(x) c("smashy", "hb")[x]),
-  survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
+searchspace_component_mu = ps(mu = p_int(2, 200, logscale = TRUE))
+
+searchspace_component_batchmethod = ps(batch_method = p_fct(c("smashy", "hb")))
+searchspace_component_batchmethod_numeric = ps(batch_method = p_int(1, 2, trafo = function(x) c("smashy", "hb")[x]))
+
+searchspace_component_vario = ps(
+  filter_factor_last = p_dbl(1, 1000, logscale = TRUE)
+)
+
+searchspace_component_infill = ps(
+  filter_algorithm = p_fct(c("tournament", "progressive")),
+  filter_select_per_tournament = p_int(1, 10, logscale = TRUE)
+)
+
+searchspace_component_infill_numeric = ps(
   filter_algorithm = p_int(1, 2, trafo = function(x) c("tournament", "progressive")[x]),
-  surrogate_learner = p_int(1, 2, trafo = function(x) learnerlist[[x]]),
-  filter_with_max_budget = p_lgl(),
-  filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
-  filter_factor_last = p_dbl(1, 1000, logscale = TRUE),
-  filter_select_per_tournament = p_int(1, 10, logscale = TRUE),
-  random_interleave_fraction = p_dbl(0, 1),
-
-  filter_factor_first.end = p_dbl(1, 1000, logscale = TRUE),
-  filter_factor_last.end = p_dbl(1, 1000, logscale = TRUE),
-  filter_select_per_tournament.end = p_int(1, 10, logscale = TRUE),
-  random_interleave_fraction.end = p_dbl(0, 1),
-
-  random_interleave_random = p_lgl()
+  filter_select_per_tournament = p_int(1, 10, logscale = TRUE)
 )
+
+searchspace_component_siman = ps(
+  filter_factor_first.end = p_dbl(1, 1000, logscale = TRUE),
+  random_interleave_fraction.end = p_dbl(0, 1)
+)
+
+searchspace_component_siman_vario = ps(
+  filter_factor_last.end = p_dbl(1, 1000, logscale = TRUE)
+)
+
+searchspace_component_siman_infill = ps(
+  filter_select_per_tournament.end = p_int(1, 10, logscale = TRUE)
+)
+
+searchspace_component_mo = ps(mo_selection_method = p_fct(c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon")))
 
 # This is probably relatively useless, it would be better to have a surrogate model that does one hot encoding preprocessing
-suggested_meta_searchspace_mo_numeric = miesmuschel:::ps_union(list(suggested_meta_searchspace_numeric,
-  ps(
-    mo_selection_method.nondom.crowding = p_dbl(0, 1),
-    mo_selection_method.nondom.hvcontrib = p_dbl(0, 1),
-    mo_selection_method.nondom.hvimprovement = p_dbl(0, 1),
-    mo_selection_method.nondom.amazon = p_dbl(0, 1),
-    .extra_trafo = function(x, param_set) {
-      list(mo_selection_method = c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon")[which.max(unlist(x))])
+searchspace_component_mo_numeric = ps(
+  mo_selection_method.nondom.crowding = p_dbl(0, 1),
+  mo_selection_method.nondom.hvcontrib = p_dbl(0, 1),
+  mo_selection_method.nondom.hvimprovement = p_dbl(0, 1),
+  mo_selection_method.nondom.amazon = p_dbl(0, 1),
+  .extra_trafo = function(x, param_set) {
+    list(mo_selection_method = c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon")[which.max(unlist(x))])
+  }
+)
+
+get_searchspace <- function(include.mu, include.batchmethod, infill, include.siman, include.mo, numeric.only = FALSE) {
+  assertFlag(include.mu)
+  assertFlag(include.siman)
+  assertFlag(include.batchmethod)
+  assertChoice(infill, c("rs", "vario", "all"))
+  assertFlag(numeric.only)
+
+  pss = list(
+    suggested_meta_searchspace,
+    if (numeric.only) searchspace_component_sample_numeric else searchspace_component_sample,
+    if (include.mu) searchspace_component_mu,
+    if (include.batchmethod) {
+      if (numeric.only) searchspace_component_batchmethod_numeric else searchspace_component_batchmethod
+    },
+    if (infill %in% c("vario", "all")) searchspace_component_vario,
+    if (infill == "all") {
+      if (numeric.only) searchspace_component_infill_numeric else searchspace_component_infill
+    },
+    if (include.siman) searchspace_component_siman,
+    if (include.siman && infill %in% c("vario", "all")) searchspace_component_siman_vario,
+    if (include.siman && infill == "all") searchspace_component_siman_infill,
+    if (include.mo) {
+      if (numeric.only) searchspace_component_mo_numeric else searchspace_component_mo
     }
   )
-))
+  miesmuschel:::ps_union(pss)
+}
 
+# --- domain
 
 suggested_meta_domain = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4),
-  mu = p_int(2, 200),
-  sample = p_fct(c("random", "bohb")),
-  batch_method = p_fct(c("smashy", "hb")),
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
-  filter_algorithm = p_fct(c("tournament", "progressive")),
   surrogate_learner = p_uty(),
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000),
-  filter_factor_last = p_dbl(1, 1000),
-  filter_select_per_tournament = p_int(1, 10),
   random_interleave_fraction = p_dbl(0, 1),
+  random_interleave_random = p_lgl(),
+  sample = p_fct(c("random", "bohb")),
+  mu = p_int(2, 200),
+  batch_method = p_fct(c("smashy", "hb")),
+  filter_factor_last = p_dbl(1, 1000),
+  filter_algorithm = p_fct(c("tournament", "progressive")),
+  filter_select_per_tournament = p_int(1, 10),
   filter_factor_first.end = p_dbl(1, 1000),
+  random_interleave_fraction.end = p_dbl(0, 1),
   filter_factor_last.end = p_dbl(1, 1000),
   filter_select_per_tournament.end = p_int(1, 10),
-  random_interleave_fraction.end = p_dbl(0, 1),
-  random_interleave_random = p_lgl(),
   mo_selection_method = p_fct(c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon"))
 )
 
+# --- ContextPV helpers
 
 # for simulated annealing
 get_progress <- function(inst) {
@@ -149,27 +177,28 @@ interpolate_cpv <- function(beginning, end, logscale = FALSE, round = FALSE) {
   }, beginning, end, get_progress, logscale, round)
 }
 
-opt_objective <- function(objective, search_space, budget_limit, budget_log_step,
+# --- objective construction
+
+setup_smashy <- function(search_space, budget_log_step,
     survival_fraction, mu, sample, batch_method,
-    filter_algorithm, surrogate_learner, filter_with_max_budget,
-    filter_factor_first, filter_factor_last, filter_select_per_tournament, random_interleave_fraction,
+    filter_algorithm = "tournament", surrogate_learner, filter_with_max_budget,
+    filter_factor_first, filter_factor_last = filter_factor_first, filter_select_per_tournament = 1, random_interleave_fraction,
     filter_factor_first.end = filter_factor_first, filter_factor_last.end = filter_factor_last,
     filter_select_per_tournament.end = filter_select_per_tournament, random_interleave_fraction.end = random_interleave_fraction,
-    random_interleave_random, mo_selection_method = NULL, highest_budget_only = TRUE, mo_nadir = 0) {
+    random_interleave_random,
+    multiobjective = FALSE, mo_selection_method = NULL, highest_budget_only = TRUE, mo_nadir = 0) {
   library("checkmate")
   library("miesmuschel")
   library("mlr3learners")
 
 
   # Objective Parameters
-  assert_r6(objective, "Objective")  # to optimize, single- or multi-objective
   assert_r6(search_space, "ParamSet")  # search space, has one parameter tagged 'budget', with *** 'logscale = TRUE' ***
-  assert_number(budget_limit, lower = 0)  # Total 'budget' to optimize. Not log-transformed.
 
   # HB Parameters
   assert_number(budget_log_step, lower = 0)  # log() of budget fidelity steps to make. E.g. log(2) for doubling
   assert_int(mu, lower = 2)  # population size
-#  assert_number(survival_fraction, lower = 0, upper = 1 - 0.5 / mu)  # fraction of individuals that survive. round(mu * survival_fraction) must be < survival_fraction
+  assert_number(survival_fraction, lower = 0, upper = 1)  # fraction of individuals that survive. round(mu * survival_fraction) must be < survival_fraction, but we just clip because we don't want to crash out of nowhere.
   assert_choice(sample, c("random", "bohb"))  # sample points randomly or using BOHB's mechanism.
   assert_choice(batch_method, c("smashy", "hb"))  # whether to use synchronized batches, or generalized hyperband
   # (for true hyperband (up to rounding), set `budget_log_step` to `-log(survival_fraction)` and `mu` to `survival_fraction ^ -fidelity_steps` (note fidelity_steps is 0-based))
@@ -192,8 +221,10 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   assert_number(random_interleave_fraction.end, lower = 0, upper = 1)  # fraction of individuals sampled with random interleaving
   assert_flag(random_interleave_random)  # whether the number of random interleaved individuals is drawn from a binomial distribution, or the same each generation
 
+  assert_flag(multiobjective)
   assert_choice(mo_selection_method, c("nondom.crowding", "nondom.hvcontrib", "hvimprovement", "amazon"), null.ok = TRUE)
-  assert_flag(highest_budget_only)
+  assert_flag(highest_budget_only)  # relevant for MO-evaluation
+  assert_numeric(mo_nadir, any.missing = FALSE, finite = TRUE)
 
 
   # We change the lower limit of the budget parameter:
@@ -211,14 +242,9 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
     survival_fraction <- 1 - 1 / mu
   }
 
-  oiclass = if (objective$codomain$length == 1) bbotk::OptimInstanceSingleCrit else bbotk::OptimInstanceMultiCrit
-  oi <- oiclass$new(objective, search_space,
-    terminator = bbotk::trm("budget", budget = budget_limit, aggregate = function(x) sum(exp(as.numeric(x))))  # budget in archive is in log-scale!
-  )
-
   additional_component_sampler = NULL
 
-  if (objective$codomain$length == 1) {
+  if (is.null(mo_selection_method)) {
     # scalor: scalarizes multi-objective results. "one": take the single objective.
     scalor = scl("one")
   } else {
@@ -236,7 +262,7 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
         }
       }, highest_budget_only)),
       amazon = {
-        additional_component_sampler = SamplerRandomWeights(nobjectives = objective$codomain$length, nweights = 100)
+        additional_component_sampler = ContextPV(function(inst) SamplerRandomWeights(nobjectives = inst$objective$codomain$length, nweights = 100))
         scl("fixedprojection", scalarization = scalarizer_linear())
       }
     )
@@ -274,52 +300,112 @@ opt_objective <- function(objective, search_space, budget_limit, budget_log_step
   optimizer = bbotk::opt("smashy", filtor = interleaving_filtor, selector = selector,
     mu = mu, survival_fraction = survival_fraction,
     fidelity_steps = fidelity_steps + 1, synchronize_batches = batch_method == "smashy",
-    filter_with_max_budget = filter_with_max_budget,
-    additional_component_sampler = additional_component_sampler
+    filter_with_max_budget = filter_with_max_budget
   )
   optimizer$param_set$context_available = "inst"
   optimizer$param_set$values$sampling = sampling_fun
+  optimizer$param_set$values$additional_component_sampler = additional_component_sampler
 
-  optimizer$optimize(oi)
-  oi
+  optimizer
 }
 
-opt_objective_optimizable <- function(objective, test_objective, search_space, ..., highest_budget_only, nadir = 0) {
+setup_oi <- function(objective, budget_limit) {
+  assert_r6(objective, "Objective")  # to optimize, single- or multi-objective
+  assert_number(budget_limit, lower = 0)  # Total 'budget' to optimize. Not log-transformed.
+  oiclass = if (objective$codomain$length == 1) bbotk::OptimInstanceSingleCrit else bbotk::OptimInstanceMultiCrit
+  oiclass$new(objective, search_space,
+    terminator = bbotk::trm("budget", budget = budget_limit, aggregate = function(x) sum(exp(as.numeric(x))))  # budget in archive is in log-scale!
+  )
+}
 
-  assert_flag(highest_budget_only)
+get_meta_objective <- function(objective, test_objective, search_space, budget_limit, highest_budget_only = TRUE, nadir = 0) {
 
   multiobjective <- objective$codomain$length > 1
 
-  oi <- opt_objective(objective, search_space, ..., highest_budget_only = highest_budget_only, mo_nadir = nadir)
+  function(...) {
 
-  om <- oi$objective_multiplicator
+    oi <- setup_oi(objective, budget_limit)
 
-  archdata <- oi$archive$data
-  budgetparam <- oi$search_space$ids(tags = "budget")
-  if (highest_budget_only) {
-    archdata <- archdata[get(budgetparam) == max(get(budgetparam))]
-  }
+    optimizer <- setup_smashy(search_space, ..., multiobjective = multiobjective, highest_budget_only = highest_budget_only, mo_nadir = nadir)
 
-  objvalues <- archdata[, names(om), with = FALSE]
-  objmat <- as.matrix(sweep(objvalues, 2, om, `*`)) * -1
+    optimizer$optimize(oi)
 
-  ndo <- miesmuschel::order_nondominated(objmat)$fronts
-  selarch <- ndo == 1
+    om <- oi$objective_multiplicator
 
-  if (!multiobjective) {
-    selarch <- which(selarch)[[1]]
-  }
+    archdata <- oi$archive$data
+    budgetparam <- oi$search_space$ids(tags = "budget")
+    if (highest_budget_only) {
+      archdata <- archdata[get(budgetparam) == max(get(budgetparam))]
+    }
 
-  design <- archdata[selarch, x_domain]
+    objvalues <- archdata[, names(om), with = FALSE]
+    objmat <- as.matrix(sweep(objvalues, 2, om, `*`)) * -1
 
-  fitnesses <- as.matrix(sweep(test_objective$eval_many(design)[, test_objective$codomain$ids(), with = FALSE], 2, om, `*`)) * -1
+    ndo <- miesmuschel::order_nondominated(objmat)$fronts
+    selarch <- ndo == 1
 
-  if (multiobjective) {
-    miesmuschel:::domhv(fitnesses, nadir = nadir)
-  } else {
-    fitnesses
+    if (!multiobjective) {
+      selarch <- which(selarch)[[1]]
+    }
+
+    design <- archdata[selarch, x_domain]
+
+    fitnesses <- as.matrix(sweep(test_objective$eval_many(design)[, test_objective$codomain$ids(), with = FALSE], 2, om, `*`)) * -1
+
+    if (multiobjective) {
+      miesmuschel:::domhv(fitnesses, nadir = nadir)
+    } else {
+      fitnesses
+    }
   }
 }
 
+get_meta_objective_from_surrogate <- function(surrogate, budgetfactor) {
 
+  budget_id <- surrogate$domain$ids(tags = "budget")
+  fulleval_equivalents <- budgetfactor * surrogate$domain$length
+  budget_limit <- fulleval_equivalents * surrogate$domain$upper[[budget_id]]
+
+
+  prevtrafo <- surrogate$domain$trafo
+
+  search_space <- surrogate$domain$clone(deep = TRUE)
+  id_order <- search_space$ids()
+
+  proto_dt <- generate_design_random(search_space, 1)$data  # a bit hacky; make sure missings have the right type TODO: maybe not necessary any more
+
+  if (surrogate$codomain$ids() == "val_cross_entropy") {
+    # lcbench special code: fix missings and round budget
+
+    budgetupper <- search_space$params[[budget_id]]$upper
+
+    search_space$.__enclos_env__$private$.params[[budget_id]] <- ParamDbl$new(budget_id,
+      lower = log(search_space$params[[budget_id]]$lower),
+      upper = log(search_space$params[[budget_id]]$upper + 1),
+      tags = "budget"
+    )
+
+    search_space$trafo <- mlr3misc::crate(function(x, param_set) {
+      x <- prevtrafo(x)
+      x[[budget_id]] <- min(floor(exp(x[[budget_id]])), budgetupper)
+      rbind(proto_dt, x, fill = TRUE)[2]
+    }, prevtrafo, budget_id, proto_dt, budgetupper)
+
+  } else {
+    # randombot special code: fix missings only
+    search_space$params[["trainsize"]]$lower <- 3^-3
+
+    search_space$params[[budget_id]]$lower <- log(search_space$params[[budget_id]]$lower)
+    search_space$params[[budget_id]]$upper <- log(search_space$params[[budget_id]]$upper)
+
+    surrogate$trafo_dict$logloss$retrafo <- function(x) { ret <- -log(x) ; ret[ret > 1e20] <- 1e20 ; ret }  # way faster than pmin
+    search_space$trafo <- mlr3misc::crate(function(x, param_set) {
+      x <- prevtrafo(x)
+      x[[budget_id]] <- exp(x[[budget_id]])
+      rbind(proto_dt, x, fill = TRUE)[2]
+    }, prevtrafo, budget_id, proto_dt)
+  }
+
+  get_meta_objective(surrogate, surrogate, search_space, budget_limit = budget_limit, highest_budget_only = highest_budget_only)
+}
 

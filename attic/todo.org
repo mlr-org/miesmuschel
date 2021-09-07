@@ -18,9 +18,9 @@
 - replicates
 * continuing
 - [X] build sampler
-- [ ] check sampler works
-- [ ] finish bohb learner
-- [ ] check bohb learner works
+- [X] check sampler works
+- [X] finish bohb learner
+- [X] check bohb learner works
 - [ ] reconstruct hb, bohb
 - [ ] check these work and look as they should
 - [ ] write mbo for abs regret
