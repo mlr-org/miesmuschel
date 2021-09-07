@@ -60,10 +60,6 @@ search_space.mo = objective.mo$domain$search_space(list(
 ))
 
 
-
-
-
-
 # Example call:
 # res <- opt_objective(objective.mo, search_space.mo, budget_limit = 2^13, budget_log_step = log(2), survival_fraction = .5, mu = 20, sample = "random", filter_algorithm = "tournament", surrogate_learner = lrn("regr.ranger"), filter_with_max_budget = FALSE, filter_factor_first = 1, filter_factor_last = 100, filter_select_per_tournament = 1, random_interleave_fraction = 0.1, random_interleave_random = TRUE)
 
