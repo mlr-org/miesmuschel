@@ -63,6 +63,14 @@ parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
 
 parallelSource("load_objectives.R")
 
+if (objective == "all") {
+  problem_ids = seq_len(nrow(tinst))
+} else {
+  problem_ids = tinst[, which(cfg == objective)]
+}
+
+assertTRUE(length(problem_ids) == problem_count)
+
 filename <- sprintf("run_%s_%s_%s_%s%s%s_%s_seed_%s.rds", algo, searchspace, objective,
   if (fixedmu) "mufix_" else "muvary_", if (!siman) "nosiman_" else "siman_", batchmethod, gsub(":", "-", gsub(" ", "_", Sys.time())), curseed)
 tmpname <- paste0(filename, ".tmp")
@@ -78,11 +86,14 @@ evaluate_metaconf <- function(metaconf) {
   saveRDS(oi, tmpname)
   file.rename(tmpname, filename)
 
-  curseed <<- curseed + 1
+  curseed <<- curseed + problem_count
+  if (fixedmu) metaconf$mu <- 32
+  if (batchmethod != "any") metaconf$batch_method <- batchmethod
 
-  more.args = list(seed = curseed, metaconf = metaconf, budgetfactor = budgetfactor)
+  callseed = seq(curseed, length.out = problem_count)
+  more.args = list(metaconf = metaconf, budgetfactor = budgetfactor)
 
-  evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = more.args),
+  evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args),
     error = function(e) {
       # retry once when parallelMap crashes for some reason
     parallelStop()

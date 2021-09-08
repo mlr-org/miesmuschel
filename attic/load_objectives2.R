@@ -26,7 +26,7 @@ tinst <- instances[test == FALSE]
 
 surrogates <- lapply(seq_len(nrow(tinst)), function(i) {
   tinstnao <- tinst[i]
-  problem <- cfgs(tinstnao$cfg, workdir = WORKDIR)$get_objective(tinstnao$level, target_variables = tinstnao$target)
+  cfgs(tinstnao$cfg, workdir = WORKDIR)$get_objective(tinstnao$level, target_variables = tinstnao$target)
 })
 
 

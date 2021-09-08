@@ -1,6 +1,7 @@
 library("mlr3learners")
 library("paradox")
 library("mlr3pipelines")
+loadNamespace("miesmuschel")
 
 
 # --- possible surrogate learners
@@ -10,26 +11,26 @@ learnerlist <- list(
   ranger = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn1 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 1, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn7 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 7, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
-  bohb = GraphLearner$new(po("imputesample") %>>%
+  bohblrn = GraphLearner$new(po("imputesample") %>>%
                           po("stratify") %>>%
                           list(
                             po("densitysplit") %>>%
                             # would love to use a multiplicity here, but nested mults have problems when the outer one is empty, which can actually happen here.
-                            list(lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
-                              lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)) %>>%
+                            list(mlr3::lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
+                              mlr3::lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)) %>>%
                             po("densityratio") %>>%
                             po("predictionunion", collect_multiplicity = TRUE),
-                            lrn("regr.featureless")
+                            mlr3::lrn("regr.featureless")
                           ) %>>% po("predictionunion", id = "fallback_union"))
 )
 
 learnerlist$knn7$graph$pipeops$regr.kknn$param_set$context_available = "task"
 learnerlist$knn7$param_set$values$regr.kknn.k = ContextPV(function(task) if (task$nrow < 8) stop("need 8 samples") else 7)
-learnerlist$bohb$graph$pipeops$stratify$param_set$context_available = "inputs"
-learnerlist$bohb$graph$pipeops$densitysplit$param_set$context_available = "inputs"
-learnerlist$bohb$graph$pipeops$stratify$param_set$values$min_size = ContextPV(function(task) inputs[[1]]$ncol + 2)
-learnerlist$bohb$graph$pipeops$densitysplit$param_set$values$min_size = ContextPV(function(task) inputs[[1]]$ncol + 1)
-learnerlist$bohb$graph$pipeops$stratify$param_set$values$stratify_feature = ContextPV(function() stop("needs to be set to the budget param"))
+learnerlist$bohblrn$graph$pipeops$stratify$param_set$context_available = "inputs"
+learnerlist$bohblrn$graph$pipeops$densitysplit$param_set$context_available = "inputs"
+learnerlist$bohblrn$graph$pipeops$stratify$param_set$values$min_size = ContextPV(function(inputs) inputs[[1]]$ncol + 2)
+learnerlist$bohblrn$graph$pipeops$densitysplit$param_set$values$min_size = ContextPV(function(inputs) inputs[[1]]$ncol + 1)
+learnerlist$bohblrn$graph$pipeops$stratify$param_set$values$stratify_feature = ContextPV(function(inputs) stop("needs to be set to the budget param"))
 
 learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", class(x)) ; x })
 
@@ -48,7 +49,7 @@ generate_design_bohb = ContextPV(function(inst) function(param_set, n) {
 suggested_meta_searchspace = ps(
   budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
   survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
-  surrogate_learner = p_fct(learnerlist),
+  surrogate_learner = p_fct(names(learnerlist)),  # TODO: not numeric yet
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
   random_interleave_fraction = p_dbl(0, 1),
@@ -128,7 +129,7 @@ get_searchspace <- function(include.mu, include.batchmethod, infill, include.sim
       if (numeric.only) searchspace_component_mo_numeric else searchspace_component_mo
     }
   )
-  miesmuschel:::ps_union(pss)
+  miesmuschel:::ps_union(discard(pss, is.null))
 }
 
 # --- domain
@@ -205,7 +206,10 @@ setup_smashy <- function(search_space, budget_log_step,
 
   # Surrogate Options
   assert_choice(filter_algorithm, c("tournament", "progressive"))  # The two implemented filter algorithms
-  assert_r6(surrogate_learner, "Learner")
+  assert_choice(surrogate_learner, names(learnerlist))
+
+
+  #  assert_r6(surrogate_learner, "Learner")
   # Whether to use surrogate predictions at the largest budget so far evaluated, or at the budget of the last evaluated budget.
   # (This only makes a difference after HB "restarts", i.e. when max-budget configs were already evaluated and HB samples new low-budget individuals.)
   assert_flag(filter_with_max_budget)
@@ -234,6 +238,9 @@ setup_smashy <- function(search_space, budget_log_step,
   budget_param = search_space$ids(tags = "budget")
   fidelity_steps = floor((search_space$upper[budget_param] - search_space$lower[budget_param]) / budget_log_step)
   search_space$params[[budget_param]]$lower = search_space$upper[budget_param] - fidelity_steps * budget_log_step
+
+  learnerlist$bohblrn$graph$pipeops$stratify$param_set$values$stratify_feature = budget_param
+  surrogate_learner = learnerlist[[surrogate_learner]]
 
   survivors = max(round(survival_fraction * mu), 1)
   lambda = mu - survivors
@@ -291,7 +298,7 @@ setup_smashy <- function(search_space, budget_log_step,
     )
   )
 
-  random_interleave_fraction_cpv  = interpolate_cpv(random_interleave_fraction, random_interleave_fraction.end)  # linear scale
+  random_interleave_fraction_cpv  = interpolate_cpv(1 - random_interleave_fraction, 1 - random_interleave_fraction.end)  # linear scale
 
   interleaving_filtor = ftr("maybe", filtor, p = random_interleave_fraction_cpv, random_choice = random_interleave_random)
 
