@@ -1,6 +1,7 @@
 library("mlr3learners")
 library("paradox")
 library("mlr3pipelines")
+library("mlr3misc")
 loadNamespace("miesmuschel")
 
 
@@ -317,7 +318,7 @@ setup_smashy <- function(search_space, budget_log_step,
   optimizer
 }
 
-setup_oi <- function(objective, budget_limit) {
+setup_oi <- function(objective, budget_limit, search_space) {
   assert_r6(objective, "Objective")  # to optimize, single- or multi-objective
   assert_number(budget_limit, lower = 0)  # Total 'budget' to optimize. Not log-transformed.
   oiclass = if (objective$codomain$length == 1) bbotk::OptimInstanceSingleCrit else bbotk::OptimInstanceMultiCrit
@@ -332,7 +333,7 @@ get_meta_objective <- function(objective, test_objective, search_space, budget_l
 
   function(...) {
 
-    oi <- setup_oi(objective, budget_limit)
+    oi <- setup_oi(objective, budget_limit, search_space)
 
     optimizer <- setup_smashy(search_space, ..., multiobjective = multiobjective, highest_budget_only = highest_budget_only, mo_nadir = nadir)
 

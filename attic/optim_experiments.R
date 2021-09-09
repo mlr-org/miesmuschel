@@ -77,7 +77,7 @@ search_space = objective$domain$search_space(list(
 
 os <- imitate_bohb(search_space, eta = 2)
 
-oi <- setup_oi(objective, 2^17)
+oi <- setup_oi(objective, 2^17, search_space)
 
 
 
