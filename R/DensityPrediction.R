@@ -51,12 +51,12 @@ as.data.table.PredictionDensity = function(x, ...) {
   as.data.table(x$data[c("row_ids", "prob", "logprob")])
 }
 
-#' @exportS3Method mlr3::as_prediction
+#' @exportS3Method mlr3::as_prediction PredictionDataDensity
 as_prediction.PredictionDataDensity = function(x, check = TRUE, ...) {
   invoke(PredictionDensity$new, check = check, .args = x)
 }
 
-#' @exportS3Method mlr3::check_prediction_data
+#' @exportS3Method mlr3::check_prediction_data PredictionDataDensity
 check_prediction_data.PredictionDataDensity = function(pdata) {
   pdata$row_ids = assert_row_ids(pdata$row_ids)
 
@@ -74,7 +74,7 @@ check_prediction_data.PredictionDataDensity = function(pdata) {
   pdata
 }
 
-#' @exportS3Method mlr3::is_missing_prediction_data
+#' @exportS3Method mlr3::is_missing_prediction_data PredictionDataDensity
 is_missing_prediction_data.PredictionDataDensity = function(pdata) {
   pdata$row_ids[is.na(pdata$prob) | is.na(pdata$logprob)]
 }

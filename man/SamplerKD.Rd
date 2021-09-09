@@ -7,6 +7,8 @@
 Sample similar to BOHB
 
 \verb{# TODO}
+
+This currently hardcodes lots of things.
 }
 \section{Super class}{
 \code{\link[paradox:Sampler]{paradox::Sampler}} -> \code{SamplerKD}
@@ -33,7 +35,15 @@ Sample similar to BOHB
 \subsection{Method \code{new()}}{
 Initialize the \code{SamplerKD} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{SamplerKD$new(param_set, task, minimize)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{SamplerKD$new(
+  param_set,
+  task,
+  minimize,
+  alpha = 0.15,
+  min_points_in_model = 0,
+  bandwidth_factor = 3,
+  min_bandwidth = 0.001
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

@@ -11,7 +11,9 @@ Perform kernel density estimation using the \code{np} package.
 
 \itemize{
 \item \code{bwmethod} :: \code{character(1)}\cr
-Bandwidth selection method. One of \code{"cv.ml"}, \code{"cv.ls"}, \code{"normal-reference"}. Default \code{"cv.ml"}.
+Bandwidth selection method. One of \code{"cv.ml"}, \code{"cv.ls"}, \code{"normal-reference"}, \code{"normal-reference-numeric"}. Default \code{"cv.ml"}.
+\code{"normal-reference-numeric"} emulates (buggy, see \verb{https://github.com/statsmodels/statsmodels/issues/3790}) behaviour of python statsmodels:
+non-numeric columns are treated as numeric for bandwidth estimation.
 \item \code{bwtype} :: \code{character(1)}\cr
 Continuous variable bandwidth type, one of \code{"fixed"} (default), \code{"generalized_nn"}, \code{"adaptive_nn"}.
 \item \code{ckertype} :: \code{character(1)}\cr

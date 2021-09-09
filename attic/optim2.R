@@ -391,19 +391,20 @@ prepare_surrogate <- function(surrogate, budgetfactor) {
   if (surrogate$codomain$ids() == "val_cross_entropy") {
     # lcbench special code: fix missings and round budget
 
+    budgetlower <- search_space$params[[budget_id]]$lower
     budgetupper <- search_space$params[[budget_id]]$upper
 
     search_space$.__enclos_env__$private$.params[[budget_id]] <- ParamDbl$new(budget_id,
       lower = log(search_space$params[[budget_id]]$lower),
-      upper = log(search_space$params[[budget_id]]$upper + 1),
+      upper = log(search_space$params[[budget_id]]$upper),
       tags = "budget"
     )
 
     search_space$trafo <- mlr3misc::crate(function(x, param_set) {
       x <- prevtrafo(x)
-      x[[budget_id]] <- min(floor(exp(x[[budget_id]])), budgetupper)
+      x[[budget_id]] <- max(min(round(exp(x[[budget_id]])), budgetupper), budgetlower)
       rbind(proto_dt, x, fill = TRUE)[2]
-    }, prevtrafo, budget_id, proto_dt, budgetupper)
+    }, prevtrafo, budget_id, proto_dt, budgetupper, budgetlower)
 
   } else {
     # randombot special code: fix missings only

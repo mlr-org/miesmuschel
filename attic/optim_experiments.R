@@ -165,3 +165,116 @@ cursur <- surrogates[[1]]
 
 config <- imitate_hyperband(cursur$domain)
 optimizer <- optimize_from_surrogate(cursur, 30)
+
+results <- replicate(30, do.call(optimizer, config), simplify = FALSE)
+
+dats <- lapply(results, function(x) x$archive$data)
+
+configbohb <- imitate_bohb(cursur$domain)
+
+resultsbohb <- replicate(30, do.call(optimizer, configbohb), simplify = FALSE)
+
+datsbohb <- lapply(resultsbohb, function(x) x$archive$data)
+
+##
+
+lcbench_3945 <- readRDS("data/lcbench_3945.rds")
+
+lcbench_3945[, budget.expended := cumsum(budget), by = "job.id"]
+lcbench_3945[, bestperf := cummin(performance), by = "job.id"]
+
+library("ggplot2")
+ggplot(lcbench_3945, aes(x = budget.expended, y = bestperf, color = algorithm,
+  group = as.factor(job.id))) + geom_line()
+
+ggplot(lcbench_3945[, .(meanperf = mean(bestperf), job.id = job.id[[1]]),
+  by = c( "budget.expended", "algorithm")],
+  aes(x = budget.expended, y = meanperf, color = algorithm,
+    group = as.factor(job.id))) + geom_line()
+
+
+hbe <- readRDS("data/hyperbandemulation2.rds")
+
+lapply(seq_along(hbe), function(x) hbe[[x]][, id := x])
+
+
+hbel <- rbindlist(hbe)
+nn <- cbind(hbel, x = rbindlist(hbel$x_domain))
+
+nn
+
+nn[, budget.expended := cumsum(x.epoch), by = "id"]
+nn[, bestperf := cummin(val_cross_entropy), by = "id"]
+
+
+ggplot(nn, aes(x = budget.expended, y = bestperf,
+  group = as.factor(id))) + geom_line()
+
+ggplot(nn[, .(meanperf = mean(bestperf), job.id = id[[1]]),
+  by = c( "budget.expended")],
+  aes(x = budget.expended, y = meanperf,
+    group = as.factor(job.id))) + geom_line()
+
+
+
+
+ggplot() +
+  geom_line(data = lcbench_3945[, .(meanperf = mean(bestperf),
+    job.id = job.id[[1]]),
+  by = c( "budget.expended", "algorithm")],
+  aes(x = budget.expended, y = meanperf, color = algorithm,
+    group = as.factor(job.id))) +
+  geom_line(data = nn, aes(x = budget.expended, y = bestperf,
+    group = as.factor(id)))
+
+
+
+dat <- lcbench_3945[, .(meanperf = mean(bestperf), sdperf = sd(bestperf),
+  job.id = job.id[[1]]),
+  by = c( "budget.expended", "algorithm")]
+nndat <- nn[, .(meanperf = mean(bestperf), sdperf = sd(bestperf), job.id = id[[1]]),
+    by = c( "budget.expended")]
+
+
+log10 <- function(x) log(x, 10)
+log10 <- function(x) x
+
+
+ggplot() +
+  geom_line(data = dat,
+    aes(x = log10(budget.expended), y = meanperf, color = algorithm,
+      group = algorithm)) +
+  geom_ribbon(data = dat,
+    aes(x = log10(budget.expended), fill = algorithm,
+    ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30),
+    group = algorithm), alpha = 0.3) +
+  geom_line(data = nndat,
+    aes(x = log10(budget.expended), y = meanperf,
+      group = as.factor(job.id))) +
+  geom_ribbon(data = nndat,
+    aes(x = log10(budget.expended),
+    ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30)), alpha = 0.3) +
+  geom_vline(xintercept = log10(27)) +
+  geom_vline(xintercept = log10(27 + 18)) +
+  geom_vline(xintercept = log10(27 * 2))
+
+
+ggplot(data = dat, aes(x = log10(budget.expended), color = algorithm, group = algorithm, y = meanperf)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30)),
+    alpha = 0.3)
+
+
+
+hist(lcbench_3945[
+    algorithm == "hpbster_hb" & budget == 2 & budget.expended <= 11610
+  ]$performance, breaks = 1000)
+
+hist(nn[x.epoch == 1]$val_cross_entropy, breaks = 1000)
+
+nrow(nn)
+
+nrow(nn[x.epoch == 1])
+
+
+nrow(lcbench_3945[algorithm == "hpbster_hb" & budget == 2 & budget.expended <= 11610])

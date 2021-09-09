@@ -8,7 +8,7 @@ smashy_evaluation_schedule(
   mu,
   survival_fraction,
   fidelity_lower,
-  fidelity_uppwer,
+  fidelity_upper,
   fidelity_steps
 )
 }
@@ -22,11 +22,11 @@ Fraction of generation that gets killed.}
 \item{fidelity_lower}{(\code{numeric(1)})\cr
 Lower bound of fidelity parameter}
 
-\item{fidelity_steps}{(\code{integer(1)})\cr
-Max number of fidelity steps, at least 1.}
-
 \item{fidelity_upper}{(\code{numeric(1)})\cr
 Upper bound of fidelity parameter}
+
+\item{fidelity_steps}{(\code{integer(1)})\cr
+Max number of fidelity steps, at least 1.}
 }
 \value{
 \code{data.table} with columns \code{fidelity} (\code{numeric}): fidelity component value to evaluateat,
