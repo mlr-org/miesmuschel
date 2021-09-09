@@ -59,7 +59,10 @@ as_prediction.PredictionDataDensity = function(x, check = TRUE, ...) {
 #' @exportS3Method mlr3::check_prediction_data
 check_prediction_data.PredictionDataDensity = function(pdata) {
   pdata$row_ids = assert_row_ids(pdata$row_ids)
+
   if (is.null(pdata$prob)) {
+    # the following is necessary to handle empty predictions
+    if (!length(pdata$row_ids) && is.null(pdata$logprob)) pdata$logprob = numeric(0)
     pdata$prob = exp(assert_numeric(pdata$logprob))
   } else if (is.null(pdata$logprob)) {
     pdata$logprob = log(assert_numeric(pdata$prob, lower = 0))

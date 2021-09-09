@@ -131,9 +131,9 @@ hb_evaluation_schedule = function(mu, survival_fraction, fidelity_lower, fidelit
 #' @return `data.table` with columns `fidelity` (`numeric`): fidelity component value to evaluateat,
 #'`sample_new` (`integer`) number of individuals to sample anew, and
 #' `survivors` (`integer`): number of individuals kept alive from previous stage.
-smashy_evaluation_schedule = function(mu, survival_fraction, fidelity_lower, fidelity_uppwer, fidelity_steps) {
+smashy_evaluation_schedule = function(mu, survival_fraction, fidelity_lower, fidelity_upper, fidelity_steps) {
   # use rev(seq(upper, lower)), so that with sequence length 1, we get the upper bound only.
-  fidelities = rev(seq(fidelity_upper, fidelity_lower, length.out = generations))
+  fidelities = rev(seq(fidelity_upper, fidelity_lower, length.out = fidelity_steps))
 
   survivors = max(round(survival_fraction * mu), 1)
   if (survivors == mu) {
@@ -142,5 +142,5 @@ smashy_evaluation_schedule = function(mu, survival_fraction, fidelity_lower, fid
   lambda = mu - survivors
 
   data.table(fidelity = fidelities, sample_new = lambda, survivors = survivors)[1,
-    sample_new = mu, survivors = 0]
+    `:=`(sample_new = mu, survivors = 0)]
 }

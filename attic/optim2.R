@@ -12,7 +12,7 @@ learnerlist <- list(
   knn1 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 1, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn7 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 7, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   bohblrn = GraphLearner$new(po("imputesample") %>>%
-                          po("stratify") %>>%
+                          po("stratify", predict_choice = "exact_or_less") %>>%
                           list(
                             po("densitysplit") %>>%
                             # would love to use a multiplicity here, but nested mults have problems when the outer one is empty, which can actually happen here.
@@ -38,7 +38,7 @@ learnerlist <- lapply(learnerlist, function(x) { class(x) <- c("LearnerRegr", cl
 
 generate_design_bohb = ContextPV(function(inst) function(param_set, n) {
   target = inst$archive$codomain$ids()
-
+  if (!nrow(inst$archive$data)) return(generate_design_random(param_set, n))
   task = TaskRegr$new("archive", inst$archive$data[, c(inst$archive$search_space$ids(), target), with = FALSE], target = target)
   sampler = SamplerKD$new(param_set, task, inst$archive$codomain$tags[[1]] == "minimize", alpha = .15, min_points_in_model = 0, bandwidth_factor = 3, min_bandwidth = 1e-3)
   sampler$sample(n)
@@ -309,7 +309,8 @@ setup_smashy <- function(search_space, budget_log_step,
     fidelity_steps = fidelity_steps + 1, synchronize_batches = batch_method == "smashy",
     filter_with_max_budget = filter_with_max_budget
   )
-  optimizer$param_set$context_available = "inst"
+
+  optimizer$.__enclos_env__$private$.own_param_set$context_available = "inst"
   optimizer$param_set$values$sampling = sampling_fun
   optimizer$param_set$values$additional_component_sampler = additional_component_sampler
 
@@ -348,7 +349,7 @@ get_meta_objective <- function(objective, test_objective, search_space, budget_l
     objvalues <- archdata[, names(om), with = FALSE]
     objmat <- as.matrix(sweep(objvalues, 2, om, `*`)) * -1
 
-    ndo <- miesmuschel::order_nondominated(objmat)$fronts
+    ndo <- miesmuschel::rank_nondominated(objmat)$fronts
     selarch <- ndo == 1
 
     if (!multiobjective) {

@@ -21,11 +21,11 @@
 - [X] check sampler works
 - [X] finish bohb learner
 - [X] check bohb learner works
-- [ ] reconstruct hb, bohb
+- [X] reconstruct hb, bohb
 - [ ] check these work and look as they should
-- [ ] write mbo for abs regret
-- [ ] write mbo for different & conditioned search spaces
-- [ ] write mbo script for different eval subsets
+- [X] write mbo for abs regret
+- [X] write mbo for different & conditioned search spaces
+- [X] write mbo script for different eval subsets
 - [ ] re-setup surrogates
 - [ ] expand mbo run script for large scale
 - [ ] run optimization

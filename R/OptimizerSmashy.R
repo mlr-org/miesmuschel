@@ -271,7 +271,7 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
         evaluation_schedule = hb_evaluation_schedule(params$mu, params$survival_fraction, inst$search_space$lower[[budget_id]], inst$search_space$upper[[budget_id]], stages)
       }
 
-      fidelity_schedule_base = evaluation_schedule[, .(generation = seq_len(nrow(schedule_info)), budget_new = fidelity, budget_survivors = fidelity)]
+      fidelity_schedule_base = evaluation_schedule[, .(generation = seq_len(nrow(evaluation_schedule)), budget_new = fidelity, budget_survivors = fidelity)]
       generations = nrow(fidelity_schedule_base)
 
 
@@ -312,7 +312,7 @@ OptimizerSmashy = R6Class("OptimizerSmashy", inherit = Optimizer,
 
         mies_survival_plus(inst, mu = keep_alive, survival_selector = private$.selector)
 
-        offspring = mies_filter_offspring(inst, offspring, filter_down_to, private$.filtor,
+        offspring = mies_filter_offspring(inst, offspring, sample_new, private$.filtor,
           fidelity_schedule = if (!params$filter_with_max_budget) fidelity_schedule, budget_id = budget_id)
 
         mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = fidelity_schedule, budget_id = budget_id, step_fidelity = TRUE)

@@ -81,18 +81,22 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
       top = TaskDensity$new(paste0(task$id, ".top"), task$backend)
       top$filter(rows = rows_top)
       top$col_roles = new_col_roles
+      top$row_roles = task$row_roles
 
       bottom = TaskDensity$new(paste0(task$id, ".bottom"), task$backend)
       bottom$filter(rows = rows_bottom)
       bottom$col_roles = new_col_roles
+      bottom$row_roles = task$row_roles
 
       list(top, bottom)
     },
     .predict = function(inputs) {
       task = inputs[[1]]
       new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr3::mlr_reflections$task_col_roles$density)]
+      new_row_roles = task$row_roles
       task = TaskDensity$new(paste0(task$id, ".density"), task$backend)
       task$col_roles = new_col_roles
+      task$row_roles = new_row_roles
 
       list(task, task)
     },
