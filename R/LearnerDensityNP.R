@@ -112,7 +112,7 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
     },
     .predict = function(task) {
       prob = stats::fitted(np::npudens(bws = self$model$bw, tdat = self$model$dat, edat = task$data()))
-      prob[prob < 0] <- 0
+      prob[prob < .Machine$double.xmin] <- .Machine$double.xmin
       list(prob = prob)
     },
     .sample = function(n, lower, upper) {
