@@ -11,7 +11,7 @@ source("load_objectives2.R")
 imitate_hyperband <- function(search_space, eta = 3, budget_is_logscale = FALSE) {
   budget_param = search_space$ids(tags = "budget")
   trafo = if (budget_is_logscale) identity else log
-  fidelity_steps = floor(trafo(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
+  fidelity_steps = floor((trafo(search_space$upper[budget_param]) - trafo(search_space$lower[budget_param])) / log(eta))
 
   list(
     budget_log_step = log(eta),
@@ -33,7 +33,7 @@ imitate_bohb <- function(search_space, eta = 3, rho = 1 / 3, ns = 64, budget_is_
 
   budget_param = search_space$ids(tags = "budget")
   trafo = if (budget_is_logscale) identity else log
-  fidelity_steps = floor(trafo(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
+  fidelity_steps = floor((trafo(search_space$upper[budget_param]) - trafo(search_space$lower[budget_param])) / log(eta))
 
   list(
     budget_log_step = log(eta),
@@ -172,7 +172,8 @@ mm <- do.call(metaoc, imitate_bohb(search_space_complex, budget_is_logscale = TR
 profiled
 # -----
 
-cursur <- surrogates[[1]]
+cursur <- surrogates[[1]]  # lcbench 3945
+cursur <- surrogates[[37]]  # rbv2_super 46
 
 config <- imitate_hyperband(cursur$domain)
 optimizer <- optimize_from_surrogate(cursur, 30)
@@ -214,7 +215,7 @@ ggplot(lcbench_3945[, .(meanperf = mean(bestperf), job.id = job.id[[1]]),
     group = as.factor(job.id))) + geom_line()
 
 
-hbe <- c(list(hb1 = readRDS("data/hyperbandemulation2.rds")), readRDS("data/tryouts.rds"))
+hbe <- c(list(hb1 = readRDS("data/hyperbandemulation2.rds")), readRDS("data/tryouts_repaired.rds"))
 
 hbe <- sapply(names(hbe), function(y) lapply(hbe[[y]], function(x) x[, algorithm := y]), simplify = FALSE)
 
@@ -257,11 +258,36 @@ ggplot() +
     group = as.factor(id)))
 
 
-
-dat <- lcbench_3945[, .(meanperf = mean(bestperf), sdperf = sd(bestperf),
+# mean +- sd
+dat <- lcbench_3945[, .(meanperf = mean(bestperf),
+  ub = mean(bestperf) + sd(bestperf) / sqrt(.N),
+  lb = mean(bestperf) - sd(bestperf) / sqrt(.N),
   job.id = job.id[[1]]),
   by = c( "budget.expended", "algorithm")]
-nndat <- nn[, .(meanperf = mean(bestperf), sdperf = sd(bestperf), job.id = id[[1]]),
+nndat <- nn[, .(meanperf = mean(bestperf),
+  ub = mean(bestperf) - sd(bestperf) / sqrt(.N),
+  lb = mean(bestperf) + sd(bestperf) / sqrt(.N),
+  job.id = id[[1]]),
+    by = c( "budget.expended", "algorithm")]
+
+
+
+qbinom(.975, 30, .5)
+qbinom(.025, 30, .5)
+qbinom(.5, 30, .5)
+
+
+
+
+dat <- lcbench_3945[, .(meanperf = median(bestperf),
+  lb = sort(bestperf)[[10]],
+  ub = sort(bestperf)[[20]],
+  job.id = job.id[[1]]),
+  by = c( "budget.expended", "algorithm")]
+nndat <- nn[, .(meanperf = median(bestperf),
+  lb = sort(bestperf)[[10]],
+  ub = sort(bestperf)[[20]],
+  job.id = id[[1]]),
     by = c( "budget.expended", "algorithm")]
 
 
@@ -269,23 +295,28 @@ log10 <- function(x) log(x, 10)
 log10 <- function(x) x
 
 
-ggplot() +
+ggplot() +# xlim(0, 13000) +
   geom_line(data = dat,
     aes(x = log10(budget.expended), y = meanperf, color = algorithm,
       group = algorithm)) +
   geom_ribbon(data = dat,
     aes(x = log10(budget.expended), fill = algorithm,
-    ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30),
+    ymin = lb, ymax = ub,
     group = algorithm), alpha = 0.3) +
   geom_line(data = nndat,
     aes(x = log10(budget.expended), y = meanperf,
       color = algorithm)) +
   geom_ribbon(data = nndat,
     aes(x = log10(budget.expended),
-      ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30),
+      ymin = lb, ymax = ub,
       fill = algorithm), alpha = 0.3) +
-  geom_vline(xintercept = log10(40)) +
-  geom_vline(xintercept = log10(27 * 2))
+  geom_vline(xintercept = log10(27 * 2)) +
+  geom_vline(xintercept = log10(27 * 2 + 6 * 9)) +
+  geom_vline(xintercept = log10(27 * 2 + 6 * 9 + 17 * 3)) +
+  geom_vline(xintercept = log10(27 * 2 + 6 * 9 + 17 * 3 + 52)) +
+  geom_vline(xintercept = log10(824)) +
+  geom_vline(xintercept = log10(824 + 27 * 2 + 6 * 9 + 17 * 3 + 52)) +
+  geom_vline(xintercept = log10(824 * 2))
 
 
 ggplot(data = dat, aes(x = log10(budget.expended), color = algorithm, group = algorithm, y = meanperf)) +
