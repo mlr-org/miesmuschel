@@ -129,8 +129,8 @@ results <- list()
 for (ss in asx) {
   calls <- generate_design_random(ss, 100)$transpose()
   results[[length(results) + 1]] <- lapply(calls, function(conf) {
-    conf$mu <- 32
-    conf$batch_method = "smashy"
+    conf$mu <- conf$mu %??% 32
+    conf$batch_method = conf$batch_method %??% "smashy"
     do.call(metao, conf)
   })
 }
