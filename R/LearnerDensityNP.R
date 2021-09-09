@@ -82,18 +82,22 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       pv = self$param_set$get_values(tags = "train")
       pv$min_bandwidth <- pv$min_bandwidth %??% 0
       dat = task$data()
-      # TODO: hack: do something with constant values, npudensbw can't handle them otherwise.
-      for (col in seq_along(dat)) {
-        if (is.numeric(dat[[col]]) && diff(range(dat[[col]])) == 0) dat[[col]][[1]] = dat[[col]][[1]] * (1 - 2 * .Machine$double.eps) + .Machine$double.eps
+
+      jitter <- function(d) {
+        # TODO: hack: do something with constant values, npudensbw can't handle them otherwise.
+        for (col in seq_along(d)) {
+          if (is.numeric(d[[col]]) && diff(range(d[[col]])) == 0) d[[col]][[1]] = d[[col]][[1]] * (1 - 2 * .Machine$double.eps) + .Machine$double.eps
+        }
+        d
       }
       np::npseed(as.integer(runif(1, -2^31 + 1, 2^31 - 1)))
       args = self$param_set$get_values(tags = "npudensbw")
       numericize = identical(args$bwmethod, "normal-reference-numeric")
       if (numericize) {
         args$bwmethod = "normal-reference"
-        bw_numeric = invoke(np::npudensbw, dat = dat[, lapply(.SD, as.numeric)], .args = args)
+        bw_numeric = invoke(np::npudensbw, dat = jitter(dat[, lapply(.SD, as.numeric)]), .args = args)
       }
-      bw = invoke(np::npudensbw, dat = dat, .args = args)
+      bw = invoke(np::npudensbw, dat = jitter(dat), .args = args)
       if (numericize) {
         bw$bw = bw_numeric$bw
         bw$bandwidth$x = bw_numeric$bandwidth$x

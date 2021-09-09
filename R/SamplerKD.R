@@ -27,7 +27,7 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       if (length(budget_id) > 1) stopf("Need at most one budget parameter for multifidelity method, but found %s: %s",
         length(budget_id), str_collapse(budget_id))
 
-      param_set$assert_dt(task$data(cols = setdiff(task$feature_names, budget_id))[, lapply(.SD, function(x) if (is.factor(x)) as.character(x) else x)])
+      if (getOption("miesmuschel.testing")) param_set$assert_dt(task$data(cols = setdiff(task$feature_names, budget_id))[, lapply(.SD, function(x) if (is.factor(x)) as.character(x) else x)])
 
 
 
@@ -107,7 +107,7 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       intparams <- self$param_set$class[fnames] == "ParamInt"
       result <- private$.model$sample(n, self$param_set$lower[fnames] - intparams / 2, self$param_set$upper[fnames] + intparams / 2)
       for (i in which(intparams)) {
-        col = result[, i, with = FALSE]
+        col = result[[i]]
         col = round(col)
         col[col < self$param_set$lower[fnames][[i]]] <- self$param_set$lower[fnames][[i]]
         col[col < self$param_set$upper[fnames][[i]]] <- self$param_set$upper[fnames][[i]]

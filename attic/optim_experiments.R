@@ -6,11 +6,12 @@ source("optim2.R")
 library("bbotk")
 library("mlr3")
 
-source("load_objectives.R")
+source("load_objectives2.R")
 
-imitate_hyperband <- function(search_space, eta = 3) {
+imitate_hyperband <- function(search_space, eta = 3, budget_is_logscale = FALSE) {
   budget_param = search_space$ids(tags = "budget")
-  fidelity_steps = floor(log(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
+  trafo = if (budget_is_logscale) identity else log
+  fidelity_steps = floor(trafo(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
 
   list(
     budget_log_step = log(eta),
@@ -28,10 +29,11 @@ imitate_hyperband <- function(search_space, eta = 3) {
   )
 }
 
-imitate_bohb <- function(search_space, eta = 3, rho = 1 / 3, ns = 64) {
+imitate_bohb <- function(search_space, eta = 3, rho = 1 / 3, ns = 64, budget_is_logscale = FALSE) {
 
   budget_param = search_space$ids(tags = "budget")
-  fidelity_steps = floor(log(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
+  trafo = if (budget_is_logscale) identity else log
+  fidelity_steps = floor(trafo(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
 
   list(
     budget_log_step = log(eta),
@@ -156,9 +158,18 @@ for (ss in asx) {
   })
 }
 
+})
+
+
+metaoc <- get_meta_objective(objective_complex, objective_complex, search_space_complex, budget_limit = 2^15)
+
+profiled <- profvis::profvis({
+
+mm <- do.call(metaoc, imitate_bohb(search_space_complex, budget_is_logscale = TRUE))
 
 })
 
+profiled
 # -----
 
 cursur <- surrogates[[1]]
@@ -176,7 +187,17 @@ resultsbohb <- replicate(30, do.call(optimizer, configbohb), simplify = FALSE)
 
 datsbohb <- lapply(resultsbohb, function(x) x$archive$data)
 
+
+
+
 ##
+
+
+
+
+
+
+
 
 lcbench_3945 <- readRDS("data/lcbench_3945.rds")
 
@@ -193,26 +214,34 @@ ggplot(lcbench_3945[, .(meanperf = mean(bestperf), job.id = job.id[[1]]),
     group = as.factor(job.id))) + geom_line()
 
 
-hbe <- readRDS("data/hyperbandemulation2.rds")
+hbe <- c(list(hb1 = readRDS("data/hyperbandemulation2.rds")), readRDS("data/tryouts.rds"))
 
-lapply(seq_along(hbe), function(x) hbe[[x]][, id := x])
+hbe <- sapply(names(hbe), function(y) lapply(hbe[[y]], function(x) x[, algorithm := y]), simplify = FALSE)
 
+hbe <- unlist(hbe, recursive = FALSE)
+
+invisible(lapply(seq_along(hbe), function(x) hbe[[x]][, id := x]))
 
 hbel <- rbindlist(hbe)
 nn <- cbind(hbel, x = rbindlist(hbel$x_domain))
 
 nn
 
-nn[, budget.expended := cumsum(x.epoch), by = "id"]
-nn[, bestperf := cummin(val_cross_entropy), by = "id"]
+nn[, budget.expended := cumsum(x.epoch), by = c("id", "algorithm")]
+nn[, bestperf := cummin(val_cross_entropy), by = c("id", "algorithm")]
 
 
 ggplot(nn, aes(x = budget.expended, y = bestperf,
-  group = as.factor(id))) + geom_line()
+  group = paste(id, algorithm))) + geom_line()
 
 ggplot(nn[, .(meanperf = mean(bestperf), job.id = id[[1]]),
-  by = c( "budget.expended")],
+  by = c("budget.expended", "algorithm")],
   aes(x = budget.expended, y = meanperf,
+    group = as.factor(job.id))) + geom_line()
+
+ggplot(nn[, .(meanperf = mean(bestperf), job.id = id[[1]]),
+  by = c("budget.expended", "algorithm")],
+  aes(x = log10(budget.expended), y = meanperf,
     group = as.factor(job.id))) + geom_line()
 
 
@@ -233,7 +262,7 @@ dat <- lcbench_3945[, .(meanperf = mean(bestperf), sdperf = sd(bestperf),
   job.id = job.id[[1]]),
   by = c( "budget.expended", "algorithm")]
 nndat <- nn[, .(meanperf = mean(bestperf), sdperf = sd(bestperf), job.id = id[[1]]),
-    by = c( "budget.expended")]
+    by = c( "budget.expended", "algorithm")]
 
 
 log10 <- function(x) log(x, 10)
@@ -250,12 +279,12 @@ ggplot() +
     group = algorithm), alpha = 0.3) +
   geom_line(data = nndat,
     aes(x = log10(budget.expended), y = meanperf,
-      group = as.factor(job.id))) +
+      color = algorithm)) +
   geom_ribbon(data = nndat,
     aes(x = log10(budget.expended),
-    ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30)), alpha = 0.3) +
-  geom_vline(xintercept = log10(27)) +
-  geom_vline(xintercept = log10(27 + 18)) +
+      ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30),
+      fill = algorithm), alpha = 0.3) +
+  geom_vline(xintercept = log10(40)) +
   geom_vline(xintercept = log10(27 * 2))
 
 
@@ -263,6 +292,42 @@ ggplot(data = dat, aes(x = log10(budget.expended), color = algorithm, group = al
   geom_line() +
   geom_ribbon(aes(ymin = meanperf - sdperf / sqrt(30), ymax = meanperf + sdperf / sqrt(30)),
     alpha = 0.3)
+
+
+
+ggplot() +
+  geom_point(dat = lcbench_3945[, .SD[40], by = "job.id"],
+    aes(x = algorithm, y = bestperf))
+
+started <- lcbench_3945[, .SD[40], by = "job.id"]
+ended <- lcbench_3945[, .SD[1062], by = "job.id"]
+
+ggplot() +
+  geom_point(dat = rbind(
+      nn[, .SD[40], by = "id"][, .(algorithm, performance = bestperf)],
+      started[, .(algorithm, performance = bestperf)]
+    ), aes(x = algorithm, y = performance)
+  )
+
+t.test(
+  started[algorithm == "hpbster_hb", performance],
+  started[algorithm == "hpbster_bohb", performance]
+)
+
+data.table(we = head(nn$x.epoch, 1090), they = head(lcbench_3945$budget, 1090))
+
+plot(head(nn$x.epoch, 1090), type = "l")
+
+plot(head(lcbench_3945$budget, 1090), type = "l")
+
+plot(head(nn$budget.expended, 1090), type = "l")
+lines(head(lcbench_3945$budget.expended, 1090))
+
+max(nn$budget.expended)
+
+max(which(head(lcbench_3945$budget.expended, 1090) < 12556))
+
+lcbench_3945[1062]
 
 
 
@@ -277,4 +342,137 @@ nrow(nn)
 nrow(nn[x.epoch == 1])
 
 
+
 nrow(lcbench_3945[algorithm == "hpbster_hb" & budget == 2 & budget.expended <= 11610])
+
+ggplot() +
+  geom_point(dat = rbind(
+      nn[, .SD[1090], by = "id"][, .(algorithm, performance = bestperf)],
+      ended[, .(algorithm, performance = bestperf)]
+    ), aes(x = algorithm, y = performance)
+  )
+
+
+wassampled <- function(budget) {
+  Reduce(function(x,y) {
+    if (y == -1) {
+      1
+    } else if (y == 1) {
+      0
+    } else {
+      x
+    }
+  }, sign(diff(budget)), init = 1, accumulate = TRUE)
+}
+
+head(cbind(nn, nn[, wassampled(x.epoch)]), 100)[, .(x.epoch, V2)]
+
+nn[, wassampled := wassampled(x.epoch), by = c("id", "algorithm")]
+
+lcbench_3945[, wassampled := wassampled(budget), by = c("job.id", "algorithm")]
+
+
+ggplot() +
+  geom_point(data = lcbench_3945[wassampled == 1][,
+    x := seq_along(algorithm), by = "job.id"][x <= 1062],
+    aes(x = x, y = performance, color = algorithm), alpha = 0.3)
+
+
+ggplot() +
+  geom_point(data = nn[wassampled == 1][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")],
+    aes(x = x, y = val_cross_entropy, color = algorithm), alpha = 0.3)
+
+ggplot() +
+  geom_point(data = lcbench_3945[wassampled == 1 & algorithm == "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x <= 717],
+    aes(x = x, y = performance, color = algorithm), alpha = 0.3) +
+  geom_point(data = nn[wassampled == 1 & algorithm %in% c("hb", "hb1")][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")],
+    aes(x = x, y = val_cross_entropy, color = algorithm), alpha = 0.3)
+
+
+ggplot() +
+  geom_histogram(data = lcbench_3945[wassampled == 1 & algorithm == "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x <= 717],
+    aes(x = log(performance), color = algorithm), alpha = 0.3, position = "dodge") +
+  geom_histogram(data = nn[wassampled == 1 & algorithm %in% c("hb", "hb1")][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")],
+    aes(x = log(val_cross_entropy), color = algorithm), alpha = 0.3, position = "dodge")
+
+
+ggplot() +
+  geom_histogram(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x <= 717],
+    aes(x = log(performance), color = algorithm), alpha = 0.3, position = "dodge") +
+  geom_histogram(data = nn[wassampled == 1 & !algorithm %in% c("hb", "hb1")][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")],
+    aes(x = log(val_cross_entropy), color = algorithm), alpha = 0.3, position = "dodge")
+
+
+
+ggplot() +
+  geom_histogram(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x <= 717],
+    aes(x = log(performance), color = algorithm), alpha = 0.3, position = "dodge") +
+  geom_histogram(data = nn[wassampled == 1][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")],
+    aes(x = log(val_cross_entropy), color = algorithm), alpha = 0.3, position = "dodge")
+
+
+ggplot() +
+  geom_histogram(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x <= 717][budget.expended < 100],
+    aes(x = log(performance), color = algorithm), alpha = 0.3, position = "dodge") +
+  geom_histogram(data = nn[wassampled == 1][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")][budget.expended < 100],
+    aes(x = log(val_cross_entropy), color = algorithm), alpha = 0.3, position = "dodge")
+
+
+ggplot() +
+  geom_violin(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x <= 717][budget.expended < 100],
+    aes(x = as.factor(x), y = log(performance), color = algorithm), alpha = 0.3) +
+  geom_violin(data = nn[wassampled == 1][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")][budget.expended < 100],
+    aes(x = as.factor(x), y = log(val_cross_entropy), color = algorithm), alpha = 0.3)
+
+ggplot() +
+  geom_point(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x >= 717][budget.expended > 12500],
+    aes(x = (x), y = log(performance), color = algorithm), alpha = 0.3) +
+  geom_point(data = nn[wassampled == 1][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")][budget.expended > 12000],
+    aes(x = (x), y = log(val_cross_entropy), color = algorithm), alpha = 0.3)
+
+
+
+ggplot() +
+  geom_point(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x >= 2000][budget.expended > 12500],
+    aes(x = (x), y = log(performance), color = as.factor(budget)), alpha = 0.3)
+
+
+ggplot() +
+  geom_histogram(data = lcbench_3945[wassampled == 1 & algorithm != "hpbster_hb"][,
+    x := seq_along(algorithm), by = "job.id"][x >= 2000][budget.expended > 12500],
+    aes(x = log(performance), color = as.factor(budget)), alpha = 0.3,
+    position = "dodge")
+
+
+ggplot() +
+  geom_point(data = nn[wassampled == 1][,
+    x := seq_along(x.epoch), by = c("id", "algorithm")][budget.expended > 10000][
+                algorithm == "bohb"],
+    aes(x = x, y = log(val_cross_entropy), color = as.factor(x.epoch)), alpha = 0.3)
+
+
+
+
+nn
+
+lcbench_3945
+
+
+wassampled(c(1, 1, 1, 2, 2, 3, 3, 2, 2, 3, 2, 3))
+

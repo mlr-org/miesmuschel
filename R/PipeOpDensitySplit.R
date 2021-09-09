@@ -81,12 +81,10 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
       top = TaskDensity$new(paste0(task$id, ".top"), task$backend)
       top$filter(rows = rows_top)
       top$col_roles = new_col_roles
-      top$row_roles = task$row_roles
 
       bottom = TaskDensity$new(paste0(task$id, ".bottom"), task$backend)
       bottom$filter(rows = rows_bottom)
       bottom$col_roles = new_col_roles
-      bottom$row_roles = task$row_roles
 
       list(top, bottom)
     },
