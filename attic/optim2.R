@@ -13,6 +13,7 @@ learnerlist <- list(
   knn1 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 1, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn7 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 7, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   bohblrn = GraphLearner$new(po("imputesample") %>>%
+                          po("colapply", applicator = as.numeric, affect_columns = selector_type("integer")) %>>%
                           po("stratify", predict_choice = "exact_or_less") %>>%
                           list(
                             po("densitysplit") %>>%
@@ -369,7 +370,7 @@ get_meta_objective <- function(objective, test_objective, search_space, budget_l
   }
 }
 
-get_meta_objective_from_surrogate <- function(surrogate, budgetfactor) {
+get_meta_objective_from_surrogate <- function(surrogate, budgetfactor, highest_budget_only = TRUE) {
 
   budget_id <- surrogate$domain$ids(tags = "budget")
   fulleval_equivalents <- budgetfactor * surrogate$domain$length

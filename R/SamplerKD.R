@@ -34,6 +34,8 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       # not using %>>% since we are not importing mlr3pipelines
       graph = mlr3pipelines::Graph$new()$
         add_pipeop(mlr3pipelines::po("imputesample"))$
+        add_pipeop(mlr3pipelines::po("colapply", applicator = as.numeric,
+          affect_columns = mlr3pipelines::selector_type("integer")))$
         add_pipeop(mlr3pipelines::po("densitysplit", alpha = if (minimize) 1 - alpha else alpha))$
         add_pipeop(mlr3::lrn("density.np", bwmethod = "normal-reference-numeric",
           sampling_bw_factor = bandwidth_factor, min_bandwidth = min_bandwidth))
@@ -44,12 +46,14 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         graph$pipeops$stratify$param_set$context_available = "inputs"
         graph$pipeops$stratify$param_set$values$min_size = ContextPV(function(inputs) max(min_points_in_model, inputs[[1]]$ncol + 1) + 1, min_points_in_model)
         graph$
-          add_edge("imputesample", "stratify")$
+          add_edge("colapply", "stratify")$
           add_edge("stratify", "densitysplit", src_channel = "output")
       } else {
-        graph$add_edge("imputesample", "densitysplit")
+        graph$add_edge("colapply", "densitysplit")
       }
-      graph$add_edge("densitysplit", "density.np", src_channel = if (minimize) "bottom" else "top")
+      graph$
+        add_edge("densitysplit", "density.np", src_channel = if (minimize) "bottom" else "top")$
+        add_edge("imputesample", "colapply")
 
       # workaround since context does not work properly yet
       graph$pipeops$densitysplit$param_set$context_available = "inputs"
