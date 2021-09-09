@@ -12,18 +12,22 @@ learnerlist <- list(
   ranger = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.ranger", fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn1 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 1, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
   knn7 = GraphLearner$new(imputepl %>>% mlr3::lrn("regr.kknn", k = 7, fallback = mlr3::lrn("regr.featureless"), encapsulate = c(train = "evaluate", predict = "evaluate"))),
-  bohblrn = GraphLearner$new(po("imputesample") %>>%
-                          po("colapply", applicator = as.numeric, affect_columns = selector_type("integer")) %>>%
-                          po("stratify", predict_choice = "exact_or_less") %>>%
-                          list(
-                            po("densitysplit") %>>%
-                            # would love to use a multiplicity here, but nested mults have problems when the outer one is empty, which can actually happen here.
-                            list(mlr3::lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
-                              mlr3::lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)) %>>%
-                            po("densityratio") %>>%
-                            po("predictionunion", collect_multiplicity = TRUE),
-                            mlr3::lrn("regr.featureless")
-                          ) %>>% po("predictionunion", id = "fallback_union"))
+  bohblrn = GraphLearner$new(
+    po("colapply", id = "colapply0", applicator = as.factor, affect_columns = selector_type("character")) %>>%
+    po("fixfactors") %>>%
+    po("imputesample") %>>%
+    po("colapply", applicator = as.numeric, affect_columns = selector_type("integer")) %>>%
+    po("stratify", predict_choice = "exact_or_less") %>>%
+    list(
+      po("densitysplit") %>>%
+      # would love to use a multiplicity here, but nested mults have problems when the outer one is empty, which can actually happen here.
+      list(mlr3::lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
+        mlr3::lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)) %>>%
+      po("densityratio") %>>%
+      po("predictionunion", collect_multiplicity = TRUE),
+      mlr3::lrn("regr.featureless")
+    ) %>>% po("predictionunion", id = "fallback_union")
+  )
 )
 
 learnerlist$knn7$graph$pipeops$regr.kknn$param_set$context_available = "task"

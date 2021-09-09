@@ -58,7 +58,7 @@ search_space = objective$domain$search_space(list(
 
 os <- imitate_hyperband(search_space, eta = 2)
 
-oi <- setup_oi(objective, 2^13)
+oi <- setup_oi(objective, 2^13, search_space)
 
 
 
@@ -125,13 +125,33 @@ allss <- allss[include.mu | !include.batchmethod][, include.mo := FALSE]
 asx <- lapply(seq_len(nrow(allss)), function(i) do.call(get_searchspace, allss[i]))
 
 results <- list()
-
 for (ss in asx) {
-  calls <- generate_design_random(ss, 100)$transpose()
+  calls <- generate_design_random(ss, 10)$transpose()
   results[[length(results) + 1]] <- lapply(calls, function(conf) {
     conf$mu <- conf$mu %??% 32
     conf$batch_method = conf$batch_method %??% "smashy"
     do.call(metao, conf)
   })
 }
+
+metaoc <- get_meta_objective(objective_complex, objective_complex, search_space_complex, budget_limit = 2^13)
+allss <- CJ(
+  include.mu = c(FALSE, TRUE),
+  include.batchmethod = c(FALSE, TRUE),
+  infill = c("rs", "vario", "all"),
+  include.siman = c(FALSE, TRUE)
+)
+allss <- allss[include.mu | !include.batchmethod][, include.mo := FALSE]
+asx <- lapply(seq_len(nrow(allss)), function(i) do.call(get_searchspace, allss[i]))
+
+results <- list()
+for (ss in asx) {
+  calls <- generate_design_random(ss, 10)$transpose()
+  results[[length(results) + 1]] <- lapply(calls, function(conf) {
+    conf$mu <- conf$mu %??% 32
+    conf$batch_method = conf$batch_method %??% "smashy"
+    do.call(metaoc, conf)
+  })
+}
+
 

@@ -30,6 +30,50 @@ search_space = objective$domain$search_space(list(
   b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
 ))
 
+
+# single objective, complex search space
+objective_complex <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    if (xs$n == "a") {
+      z <- z + xs$x^2 / 8
+    }
+    if (xs$n == "b") {
+      z <- z + xs$a^2 / 8
+    }
+    z <- z + rnorm(1, sd = 1 / sqrt(xs$b))
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_int(-2, 4), a = p_dbl(-2, 2, depends = n == "b"), n = p_fct(c("a", "b", "c")), b = p_int(1)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# single objective, complex search space
+objective_complex_no_noise  <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    if (xs$n == "a") {
+      z <- z + xs$x^2 / 8
+    }
+    if (xs$n == "b") {
+      z <- z + xs$a^2 / 8
+    }
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_int(-2, 4), a = p_dbl(-2, 2, depends = n == "b"), n = p_fct(c("a", "b", "c")), b = p_int(1)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+search_space_complex = objective_complex$domain$search_space(list(
+  x = to_tune(),
+  y = to_tune(),
+  a = to_tune(),
+  n = to_tune(),
+  b = to_tune(p_int(1, 2^10, logscale = TRUE, tags = "budget"))
+))
+
+
+
 # multi-objective
 objective.mo <- ObjectiveRFun$new(
   fun = function(xs) {

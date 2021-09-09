@@ -26,6 +26,6 @@
 - [X] write mbo for abs regret
 - [X] write mbo for different & conditioned search spaces
 - [X] write mbo script for different eval subsets
-- [ ] re-setup surrogates
+- [X] re-setup surrogates
 - [ ] expand mbo run script for large scale
 - [ ] run optimization

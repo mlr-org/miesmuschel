@@ -120,7 +120,8 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       if (!identical(bw$ckerorder, 2)) stop("Can only sample with kernel order 2.")
       # gaussian kernel: rnorm
       # epanechnikov kernel: repanechnikov
-      prototypes = self$model$dat[sample.int(nrow(self$model$dat), n, replace = TRUE)]
+      indices = sample.int(nrow(self$model$dat), n, replace = TRUE)
+      prototypes = self$model$dat[indices]
       pfun = switch(bw$ckertype, epanechnikov = pepanechnikov, gaussian = pnorm)
       qfun = switch(bw$ckertype, epanechnikov = qepanechnikov, gaussian = qnorm)
       dt = as.data.table(Map(function(dim, dimname, bandwidth, type, lx, ux) {
@@ -143,7 +144,8 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
             exdat[[dimname]] = samplefrom
             sweights = np::npksum(bw, txdat = origin, exdat = exdat)$ksum
             sweights[sweights < 0] = 0  # happens when the bandwidth is set too high, e.g. through bw_factor or normal-reference-numeric
-            result[xlevel] = samplefrom[sample.int(length(sweights), length(xlevel), replace = TRUE, prob = sweights)]
+            indices = sample.int(length(sweights), length(xlevel), replace = TRUE, prob = sweights)
+            result[xlevel] = samplefrom[indices]
           }
         }
         result

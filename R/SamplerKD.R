@@ -27,12 +27,15 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       if (length(budget_id) > 1) stopf("Need at most one budget parameter for multifidelity method, but found %s: %s",
         length(budget_id), str_collapse(budget_id))
 
-      param_set$assert_dt(task$data(cols = setdiff(task$feature_names, budget_id))[, lapply(.SD, function(x) if (is.character(x)) as.factor(x))])
+      param_set$assert_dt(task$data(cols = setdiff(task$feature_names, budget_id))[, lapply(.SD, function(x) if (is.factor(x)) as.character(x) else x)])
 
 
 
       # not using %>>% since we are not importing mlr3pipelines
       graph = mlr3pipelines::Graph$new()$
+        add_pipeop(mlr3pipelines::po("colapply", id = "colapply0", applicator = as.factor,
+          affect_columns = mlr3pipelines::selector_type("character")))$
+        add_pipeop(mlr3pipelines::po("fixfactors"))$
         add_pipeop(mlr3pipelines::po("imputesample"))$
         add_pipeop(mlr3pipelines::po("colapply", applicator = as.numeric,
           affect_columns = mlr3pipelines::selector_type("integer")))$
@@ -53,6 +56,8 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       }
       graph$
         add_edge("densitysplit", "density.np", src_channel = if (minimize) "bottom" else "top")$
+        add_edge("colapply0", "fixfactors")$
+        add_edge("fixfactors", "imputesample")$
         add_edge("imputesample", "colapply")
 
       # workaround since context does not work properly yet
@@ -99,8 +104,20 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         return(private$.model$sample(n)$data)
       }
       fnames = private$.model$state$train_task$feature_names  # TODO this obviously sucks
-      private$.model$sample(n, self$param_set$lower[fnames], self$param_set$upper[fnames])
-      # TODO maybe need to make sure int-params are int?
+      intparams <- self$param_set$class[fnames] == "ParamInt"
+      result <- private$.model$sample(n, self$param_set$lower[fnames] - intparams / 2, self$param_set$upper[fnames] + intparams / 2)
+      for (i in which(intparams)) {
+        col = result[, i, with = FALSE]
+        col = round(col)
+        col[col < self$param_set$lower[fnames][[i]]] <- self$param_set$lower[fnames][[i]]
+        col[col < self$param_set$upper[fnames][[i]]] <- self$param_set$upper[fnames][[i]]
+        result[, (i) := col]
+      }
+      chrparam <- self$param_set$class[fnames] == "ParamFct"
+      for (i in which(chrparam)) {
+        result[, (i) := as.character(.SD[[i]])]
+      }
+      result
     }
   )
 )
