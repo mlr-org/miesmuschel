@@ -374,7 +374,7 @@ get_meta_objective <- function(objective, test_objective, search_space, budget_l
   }
 }
 
-get_meta_objective_from_surrogate <- function(surrogate, budgetfactor, highest_budget_only = TRUE) {
+prepare_surrogate <- function(surrogate, budgetfactor) {
 
   budget_id <- surrogate$domain$ids(tags = "budget")
   fulleval_equivalents <- budgetfactor * surrogate$domain$length
@@ -419,7 +419,21 @@ get_meta_objective_from_surrogate <- function(surrogate, budgetfactor, highest_b
       rbind(proto_dt, x, fill = TRUE)[2]
     }, prevtrafo, budget_id, proto_dt)
   }
-
-  get_meta_objective(surrogate, surrogate, search_space, budget_limit = budget_limit, highest_budget_only = highest_budget_only)
+  list(surrogate = surrogate, search_space = search_space, budget_limit = budget_limit)
 }
 
+get_meta_objective_from_surrogate <- function(surrogate, budgetfactor, highest_budget_only = TRUE) {
+  x <- prepare_surrogate(surrogate, budgetfactor)
+  get_meta_objective(x$surrogate, x$surrogate, x$search_space, budget_limit = x$budget_limit, highest_budget_only = highest_budget_only)
+}
+
+optimize_from_surrogate <- function(surrogate, budgetfactor, nadir = 0) {
+  x <- prepare_surrogate(surrogate, budgetfactor)
+  multiobjective <- x$surrogate$codomain$length > 1
+  function(...) {
+    oi <- setup_oi(x$surrogate, x$budget_limit, x$search_space)
+    optimizer <- setup_smashy(x$search_space, ..., multiobjective = multiobjective, mo_nadir = nadir)
+    optimizer$optimize(oi)
+    oi
+  }
+}

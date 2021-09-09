@@ -10,9 +10,9 @@ source("load_objectives.R")
 
 imitate_hyperband <- function(search_space, eta = 3) {
   budget_param = search_space$ids(tags = "budget")
-  fidelity_steps = floor((search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
+  fidelity_steps = floor(log(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
 
-  setup_smashy(search_space,
+  list(
     budget_log_step = log(eta),
     survival_fraction = 1 / eta,
     mu = eta ^ fidelity_steps,
@@ -31,9 +31,9 @@ imitate_hyperband <- function(search_space, eta = 3) {
 imitate_bohb <- function(search_space, eta = 3, rho = 1 / 3, ns = 64) {
 
   budget_param = search_space$ids(tags = "budget")
-  fidelity_steps = floor((search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
+  fidelity_steps = floor(log(search_space$upper[budget_param] - search_space$lower[budget_param]) / log(eta))
 
-  setup_smashy(search_space,
+  list(
     budget_log_step = log(eta),
     survival_fraction = 1 / eta,
     mu = eta ^ fidelity_steps,
@@ -134,6 +134,8 @@ for (ss in asx) {
   })
 }
 
+profiled <- profvis::profvis({
+
 metaoc <- get_meta_objective(objective_complex, objective_complex, search_space_complex, budget_limit = 2^13)
 allss <- CJ(
   include.mu = c(FALSE, TRUE),
@@ -155,3 +157,11 @@ for (ss in asx) {
 }
 
 
+})
+
+# -----
+
+cursur <- surrogates[[1]]
+
+config <- imitate_hyperband(cursur$domain)
+optimizer <- optimize_from_surrogate(cursur, 30)
