@@ -125,8 +125,16 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       pv = self$param_set$get_values(tags = "predict")
       bw_factor <- pv$sampling_bw_factor %??% 1
 
-      bw$bw <- bw$bw * bw_factor
-      bw$bandwidth$x <- bw$bandwidth$x * bw_factor
+      bwenlarge <- function(bw, factor) {
+        rebandwidth = !sapply(self$model$dat, is.numeric)
+        bw[rebandwidth] = 0.5 / qnorm(1 - bw[rebandwidth] / 2)
+        bw = bw * factor
+        bw[rebandwidth] = 2 - 2 * pnorm(0.5, sd = bw[rebandwidth])
+        bw
+      }
+
+      bw$bw <- bwenlarge(bw$bw, bw_factor)
+      bw$bandwidth$x <- bwenlarge(bw$bandwidth$x, bw_factor)
 
       if (!identical(bw$ckerorder, 2)) stop("Can only sample with kernel order 2.")
       # gaussian kernel: rnorm
