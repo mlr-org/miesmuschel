@@ -93,19 +93,23 @@ evaluate_metaconf <- function(metaconf) {
   callseed = seq(curseed, length.out = problem_count)
   more.args = list(metaconf = metaconf, budgetfactor = budgetfactor)
 
-  evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args),
-    error = function(e) {
+  while (!tryCatch({
+    evalresults <- parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args)
+    TRUE
+  }, error = function(e) {
       # retry once when parallelMap crashes for some reason
     cat("error in parallelMap\n")
     cat(e$message)
     cat("\n")
+    FALSE
+  }) {
     parallelStop()
     parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
     parallelSource("load_objectives2.R")
     lgr::get_logger("mlr3")$set_threshold("info")
     lgr::get_logger("bbotk")$set_threshold("info")
     parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args)
-  })
+  }
 
   c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[problem_ids, sprintf("%s.%s", cfg, level)]))
 }
