@@ -104,7 +104,7 @@ evaluate_metaconf <- function(metaconf) {
     parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = more.args)
   })
 
-  c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[, sprintf("%s.%s", cfg, level)]))
+  c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[problem_ids, sprintf("%s.%s", cfg, level)]))
 }
 
 objective <- bbotk::ObjectiveRFun$new(
