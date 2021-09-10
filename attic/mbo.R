@@ -96,6 +96,9 @@ evaluate_metaconf <- function(metaconf) {
   evalresults <- tryCatch(parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args),
     error = function(e) {
       # retry once when parallelMap crashes for some reason
+    cat("error in parallelMap\n")
+    cat(e$message)
+    cat("\n")
     parallelStop()
     parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
     parallelSource("load_objectives2.R")
