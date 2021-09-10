@@ -1,7 +1,7 @@
 
 options(warn = 1)
 
-library("mfsurrogates2")
+library("mfsurrogates")
 library("data.table")
 library("miesmuschel")
 library("checkmate")
