@@ -8,47 +8,6 @@ library("mlr3")
 
 source("load_objectives2.R")
 
-imitate_hyperband <- function(search_space, eta = 3, budget_is_logscale = FALSE) {
-  budget_param = search_space$ids(tags = "budget")
-  trafo = if (budget_is_logscale) identity else log
-  fidelity_steps = floor((trafo(search_space$upper[budget_param]) - trafo(search_space$lower[budget_param])) / log(eta))
-
-  list(
-    budget_log_step = log(eta),
-    survival_fraction = 1 / eta,
-    mu = eta ^ fidelity_steps,
-    sample = "random",
-    batch_method = "hb",
-    random_interleave_fraction = 1,
-   ## - mandatory arguments that don't have an effect with interleave fraction == 1
-    filter_algorithm = "tournament",  # doesn't matter
-    surrogate_learner = "ranger",  # doesn't matter
-    filter_with_max_budget = FALSE,  # doesn't matter
-    filter_factor_first = 1,  # doesn't matter
-    random_interleave_random = FALSE  # doesn't matter
-  )
-}
-
-imitate_bohb <- function(search_space, eta = 3, rho = 1 / 3, ns = 64, budget_is_logscale = FALSE) {
-
-  budget_param = search_space$ids(tags = "budget")
-  trafo = if (budget_is_logscale) identity else log
-  fidelity_steps = floor((trafo(search_space$upper[budget_param]) - trafo(search_space$lower[budget_param])) / log(eta))
-
-  list(
-    budget_log_step = log(eta),
-    survival_fraction = 1 / eta,
-    mu = eta ^ fidelity_steps,
-    sample = "bohb",
-    batch_method = "hb",
-    random_interleave_fraction = rho,
-    filter_algorithm = "tournament",
-    surrogate_learner = "bohblrn",
-    filter_with_max_budget = TRUE,
-    filter_factor_first = ns,
-    random_interleave_random = TRUE
-  )
-}
 
 
 search_space = objective$domain$search_space(list(
@@ -221,7 +180,10 @@ ggplot(lcbench_3945[, .(meanperf = mean(bestperf), job.id = job.id[[1]]),
 
 hbe <- c(list(hb1 = readRDS("data/hyperbandemulation2.rds")), readRDS("data/tryouts_repaired.rds"))
 
-hbe <- sapply(names(hbe), function(y) lapply(hbe[[y]], function(x) x[, algorithm := y]), simplify = FALSE)
+hbe <- list(hb = readRDS("data/hbrbv2.rds"), bohb = readRDS("data/bohbrbv2.rds"))
+
+
+hbe <- sapply(names(hbe), function(y) lapply(Filter(Negate(is.null), hbe[[y]]), function(x) x[, algorithm := y]), simplify = FALSE)
 
 hbe <- unlist(hbe, recursive = FALSE)
 
@@ -231,6 +193,11 @@ hbel <- rbindlist(hbe)
 nn <- cbind(hbel, x = rbindlist(hbel$x_domain))
 
 nn
+
+if ("x.trainsize" %in% names(nn)) {
+  nn$x.epoch <- nn$x.trainsize
+  nn$val_cross_entropy <- nn$logloss
+}
 
 nn[, budget.expended := cumsum(x.epoch), by = c("id", "algorithm")]
 nn[, bestperf := cummin(val_cross_entropy), by = c("id", "algorithm")]
@@ -297,6 +264,30 @@ nndat <- nn[, .(meanperf = median(bestperf),
 
 log10 <- function(x) log(x, 10)
 log10 <- function(x) x
+
+
+ggplot() +# xlim(0, 13000) +
+  geom_line(data = dat,
+    aes(x = log10(budget.expended), y = meanperf, color = algorithm,
+      group = algorithm)) +
+  geom_ribbon(data = dat,
+    aes(x = log10(budget.expended), fill = algorithm,
+    ymin = lb, ymax = ub,
+    group = algorithm), alpha = 0.3) +
+  geom_line(data = nndat,
+    aes(x = log10(budget.expended), y = meanperf,
+      color = algorithm)) +
+  geom_ribbon(data = nndat,
+    aes(x = log10(budget.expended),
+      ymin = lb, ymax = ub,
+      fill = algorithm), alpha = 0.3) +
+  geom_vline(xintercept = log10(1)) +
+  geom_vline(xintercept = log10(2)) +
+  geom_vline(xintercept = log10(3)) +
+  geom_vline(xintercept = log10(4)) +
+  geom_vline(xintercept = log10(824)) +
+  geom_vline(xintercept = log10(824 + 27 * 2 + 6 * 9 + 17 * 3 + 52)) +
+  geom_vline(xintercept = log10(824 * 2))
 
 
 ggplot() +# xlim(0, 13000) +
