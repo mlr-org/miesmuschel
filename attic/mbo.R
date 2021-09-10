@@ -98,7 +98,7 @@ evaluate_metaconf <- function(metaconf) {
       # retry once when parallelMap crashes for some reason
     parallelStop()
     parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
-    parallelSource("load_objectives.R")
+    parallelSource("load_objectives2.R")
     lgr::get_logger("mlr3")$set_threshold("info")
     lgr::get_logger("bbotk")$set_threshold("info")
     parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = more.args)
