@@ -81,6 +81,10 @@ reg_mlr3pipelines = function(...) {  # nocov start
     mlr3pipelines::mlr_pipeops$add("densitysplit", PipeOpDensitySplit)
     mlr3pipelines::mlr_pipeops$add("stratify", PipeOpStratify)
     mlr3pipelines::mlr_pipeops$add("predictionunion", PipeOpPredictionUnion)
+    mlr3pipelines::add_class_hierarchy_cache(c("TaskDensity", "Task"))
+    mlr3pipelines::add_class_hierarchy_cache(c("PredictionDensity", "Prediction"))
+    mlr3pipelines::add_class_hierarchy_cache(c("LearnerDensity", "Learner"))
+    mlr3pipelines::add_class_hierarchy_cache(c("MeasureDensity", "Measure"))
   }
 }  # nocov end
 
