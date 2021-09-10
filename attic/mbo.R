@@ -104,7 +104,7 @@ evaluate_metaconf <- function(metaconf) {
     parallelSource("load_objectives2.R")
     lgr::get_logger("mlr3")$set_threshold("info")
     lgr::get_logger("bbotk")$set_threshold("info")
-    parallelMap(evaluate_miesmuschel, seq_len(problem_count), more.args = more.args)
+    parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args)
   })
 
   c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[problem_ids, sprintf("%s.%s", cfg, level)]))
