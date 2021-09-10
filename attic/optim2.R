@@ -15,14 +15,19 @@ learnerlist <- list(
   bohblrn = GraphLearner$new(
     po("colapply", id = "colapply0", applicator = as.factor, affect_columns = selector_type("character")) %>>%
     po("fixfactors") %>>%
-    po("imputesample") %>>%
     po("colapply", applicator = as.numeric, affect_columns = selector_type("integer")) %>>%
     po("stratify", predict_choice = "exact_or_less") %>>%
     list(
       po("densitysplit") %>>%
       # would love to use a multiplicity here, but nested mults have problems when the outer one is empty, which can actually happen here.
-      list(mlr3::lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
-        mlr3::lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)) %>>%
+      list(
+          po("removeconstants", id = "goodremoveconstants") %>>%
+          po("imputesample", id = "goodimputesample") %>>%
+          mlr3::lrn("density.np", id = "gooddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3),
+          po("removeconstants", id = "badremoveconstants") %>>%
+          po("imputesample", id = "badimputesample") %>>%
+          mlr3::lrn("density.np", id = "baddensity", bwmethod = "normal-reference-numeric", min_bandwidth = 1e-3)
+      ) %>>%
       po("densityratio") %>>%
       po("predictionunion", collect_multiplicity = TRUE),
       mlr3::lrn("regr.featureless")

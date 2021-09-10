@@ -36,10 +36,11 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         add_pipeop(mlr3pipelines::po("colapply", id = "colapply0", applicator = as.factor,
           affect_columns = mlr3pipelines::selector_type("character")))$
         add_pipeop(mlr3pipelines::po("fixfactors"))$
-        add_pipeop(mlr3pipelines::po("imputesample"))$
         add_pipeop(mlr3pipelines::po("colapply", applicator = as.numeric,
           affect_columns = mlr3pipelines::selector_type("integer")))$
         add_pipeop(mlr3pipelines::po("densitysplit", alpha = if (minimize) 1 - alpha else alpha))$
+        add_pipeop(mlr3pipelines::po("removeconstants"))$
+        add_pipeop(mlr3pipelines::po("imputesample"))$
         add_pipeop(mlr3::lrn("density.np", bwmethod = "normal-reference-numeric",
           sampling_bw_factor = bandwidth_factor, min_bandwidth = min_bandwidth))
 
@@ -55,10 +56,11 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         graph$add_edge("colapply", "densitysplit")
       }
       graph$
-        add_edge("densitysplit", "density.np", src_channel = if (minimize) "bottom" else "top")$
         add_edge("colapply0", "fixfactors")$
-        add_edge("fixfactors", "imputesample")$
-        add_edge("imputesample", "colapply")
+        add_edge("fixfactors", "colapply")$
+        add_edge("densitysplit", "removeconstants", src_channel = if (minimize) "bottom" else "top")$
+        add_edge("removeconstants", "imputesample")$
+        add_edge("imputesample", "density.np")
 
       # workaround since context does not work properly yet
       graph$pipeops$densitysplit$param_set$context_available = "inputs"
@@ -68,20 +70,29 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         graph$train(task)
         max_stratum_index = which.max(graph$state$stratify$stratify_values)
         if (!length(max_stratum_index)) {
-          private$.model = SamplerUnif$new(param_set)
+          private$.sampler = SamplerUnif$new(param_set)
+          return(NULL)
         } else {
           private$.model = graph$pipeops$density.np$learner_model[[max_stratum_index]]
+          # do this instead? : private$.features = graph$pipeops$removeconstants$state[[max_stratum_index]]
         }
       } else {
         # need to manually catch the < min_points_in_model case here, since model crashes otherwise.
         if (task$nrow < max(min_points_in_model, task$ncol + 1)) {
-          private$.model = SamplerUnif$new(param_set)
+          private$.sampler = SamplerUnif$new(param_set)
+          return(NULL)
         } else {
           graph$train(task)
           private$.model = graph$pipeops$density.np$learner_model
+          # ...... private$.features = graph$pipeops$removeconstants$state
         }
       }
-
+      fnames = private$.model$state$train_task$feature_names
+      missingfnames <- setdiff(self$param_set$ids(), fnames)
+      if (length(missingfnames)) {
+        missingps = do.call(ps, self$param_set$params[missingfnames])
+        private$.sampler = SamplerUnif$new(missingps)
+      }
     }
   ),
   active = list(
@@ -98,10 +109,11 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
     .task = NULL,
     .minimize = NULL,
     .model = NULL,
+    .sampler = NULL,
     .sample = function(n) {
-      if (inherits(private$.model, "Sampler")) {
+      if (is.null(private$.model)) {
         # no mlr3::Learner model, but a paradox::Sampler, because task was too small.
-        return(private$.model$sample(n)$data)
+        return(private$.sampler$sample(n)$data)
       }
       fnames = private$.model$state$train_task$feature_names  # TODO this obviously sucks
       intparams <- self$param_set$class[fnames] == "ParamInt"
@@ -111,11 +123,15 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         col = round(col)
         col[col < self$param_set$lower[fnames][[i]]] <- self$param_set$lower[fnames][[i]]
         col[col < self$param_set$upper[fnames][[i]]] <- self$param_set$upper[fnames][[i]]
-        result[, (i) := col]
+        result[, (i) := as.integer(col)]
       }
       chrparam <- self$param_set$class[fnames] == "ParamFct"
       for (i in which(chrparam)) {
         result[, (i) := as.character(.SD[[i]])]
+      }
+      if (!is.null(private$.sampler)) {
+        # features that were not modelled are sampled uniformly
+        result = cbind(result, private$.sampler$sample(n)$data)[, self$param_set$ids(), with = FALSE]
       }
       result
     }

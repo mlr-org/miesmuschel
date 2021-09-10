@@ -53,6 +53,12 @@ resample(ts, lrn("density.np", bwmethod = "normal-reference"), rsmp("cv", folds 
 
 
 
+SamplerKD$new(ps(eruptions = p_dbl(1.5, 5.5), waiting = p_int(40, 100)), po("mutate", mutation = list(perf = ~1))$train(list(ts))[[1]]
+
+
+
+
+
 po("densityratio")
 
 po("densitysplit")
@@ -118,11 +124,15 @@ ss = SamplerKD$new(irisspace, iristask, TRUE, bandwidth_factor = 3, alpha = .4)
 ss = SamplerKD$new(irisspace, iristask, TRUE, bandwidth_factor = 5, alpha = .4)
 ss = SamplerKD$new(irisspace, iristask, FALSE, bandwidth_factor = .1, alpha = .4)
 
+irisspacebudget <- ps(Sepal.Width = p_dbl(2, 5), Petal.Length = p_dbl(1, 7), Species = p_fct(c("setosa", "versicolor", "virginica")))
+iristaskbudget <- po("mutate", mutation = list(Sepal.Length = ~ round(Sepal.Length)))$train(list(iristask))[[1]]
+ss = SamplerKD$new(irisspacebudget, iristaskbudget, FALSE, bandwidth_factor = .1, alpha = .4)
+
 sampled = ss$sample(10000)$data
 
 plot(iris$Petal.Length, iris$Petal.Width, xlim = c(1, 7), ylim = c(0, 6), col = as.numeric(iris$Species))
 # plot(iris$Petal.Length, as.numeric(iris$Species) + iris$Petal.Width / 1, xlim = c(1, 7), ylim = c(1, 6))
-points(sampled$Petal.Length, 4 + rnorm(nrow(sampled)) / 10, pch = ".", col = as.numeric(sampled$Species))
+points(sampled$Petal.Length, 4 + rnorm(nrow(sampled)) / 10, pch = ".", col = as.numeric(as.factor(sampled$Species)))
 
 
 ss$.__enclos_env__$private$.model$state$model$dat
