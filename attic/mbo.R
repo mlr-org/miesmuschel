@@ -102,7 +102,7 @@ evaluate_metaconf <- function(metaconf) {
     cat(e$message)
     cat("\n")
     FALSE
-  }) {
+  })) {
     parallelStop()
     parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
     parallelSource("load_objectives2.R")
