@@ -61,7 +61,7 @@ budgetfactor <- (if (short) 3 else 30) * (if (fixedmu) 32 else 1)
 
 parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
 
-parallelSource("load_objectives.R")
+parallelSource("load_objectives2.R")
 
 if (objective == "all") {
   problem_ids = seq_len(nrow(tinst))
