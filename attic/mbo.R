@@ -124,7 +124,7 @@ space <- get_searchspace(
   include.mo = FALSE, numeric.only = searchspace == "numeric"
 )
 
-oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 10 else 60 * 60 * 70))
+oi <- bbotk::OptimInstanceSingleCrit$new(objective, search_space = space, terminator = bbotk::trm("run_time", secs = if (short) 60 * 10 else 60 * 60 * 24 * 7))
 
 if (algo == "intermbo") {
   opter <- bbotk::opt(algo, infill.opt = "focussearch", infill.opt.focussearch.maxit = 20)
