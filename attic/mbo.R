@@ -11,7 +11,7 @@ fixedmu <- commandArgs(trailingOnly = TRUE)[[6]]
 siman <- commandArgs(trailingOnly = TRUE)[[7]]
 batchmethod <- commandArgs(trailingOnly = TRUE)[[8]]
 cores <- as.numeric(commandArgs(trailingOnly = TRUE)[[9]])
-infillsearch <- as.numeric(commandArgs(trailingOnly = TRUE)[[10]])
+infillsearch <- commandArgs(trailingOnly = TRUE)[[10]]
 
 checkmate::assertInt(as.integer(curseed))
 checkmate::assertChoice(algo, c("intermbo", "random_search", "design_points"))

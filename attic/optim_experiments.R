@@ -202,6 +202,10 @@ datsbohb <- lapply(resultsbohb, function(x) x$archive$data)
 
 lcbench_3945 <- readRDS("data/lcbench_3945.rds")
 
+lcbench_3945 <- readRDS("data/rbv2_super_46.rds")
+
+
+
 lcbench_3945[, budget.expended := cumsum(budget), by = "job.id"]
 lcbench_3945[, bestperf := cummin(performance), by = "job.id"]
 
