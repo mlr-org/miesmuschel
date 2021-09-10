@@ -101,6 +101,11 @@ LearnerDensityNP = R6Class("LearnerDensityNP", inherit = LearnerDensity,
       if (numericize) {
         bw$bw = bw_numeric$bw
         bw$bandwidth$x = bw_numeric$bandwidth$x
+        # using the numeric kernels breaks everything when bandwidths are larger than 1 (and don't make much sense, besides).
+        # instead, we get the probability that a normal rv with given bandwidth is not in the interval -0.5...0.5.
+        rebandwidth = !sapply(dat, is.numeric)
+        bw$bw[rebandwidth] = 2 - 2 * pnorm(0.5, sd = bw$bw[rebandwidth])
+        bw$bandwidth$x[rebandwidth] = 2 - 2 * pnorm(0.5, sd = bw$bandwidth$x[rebandwidth])
       }
 
       bw$call = NULL
