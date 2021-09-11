@@ -147,6 +147,13 @@
       "Repository": "CRAN",
       "Hash": "72557d88b5f42f01221dfa436de99301"
     },
+    "callr": {
+      "Package": "callr",
+      "Version": "3.7.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "461aa75a11ce2400245190ef5d3995df"
+    },
     "checkmate": {
       "Package": "checkmate",
       "Version": "2.0.0",
@@ -509,12 +516,26 @@
       "Repository": "CRAN",
       "Hash": "6b1493aa4e078147e3fc1faf3d8e7efa"
     },
+    "mlr3tuning": {
+      "Package": "mlr3tuning",
+      "Version": "0.8.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2f411e02fc56d35a59bf1004cf82180f"
+    },
     "mlrMBO": {
       "Package": "mlrMBO",
       "Version": "1.1.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "59b8f36c8c0ecc59925a2ae93ac7bdac"
+    },
+    "mlrintermbo": {
+      "Package": "mlrintermbo",
+      "Version": "0.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b467531d2634e3e3f0775c702e55150e"
     },
     "munsell": {
       "Package": "munsell",
