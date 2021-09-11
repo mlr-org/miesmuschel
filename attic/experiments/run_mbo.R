@@ -1,11 +1,15 @@
 source("argparse.R")
 options(warn = 1)
 options(width=170)
-options(error=function()traceback(2))
+options(error = function() {
+  traceback(3)
+  if(!interactive())quit("no",status=1,runLast=FALSE)
+})
+
 
 args <- list(
   arg("Cores to use at most", "cores", "c", "integer", name = "cores", checkmate.args = list(lower = 1)),
-  arg("File to load", "file", "f", "string", name = "filename"),
+  arg("File to load", "file", "f", "character", name = "filename"),
   arg("Print help and exit", "help", "h")
 )
 
@@ -17,14 +21,14 @@ blob <- readRDS(filename)
 
 fun <- blob$fun
 
-if (is.null(fun) || is.null()) stop(sprintf("%s was not a valid file.", filename))
+if (is.null(fun)) stop(sprintf("%s was not a valid file.", filename))
 
 
 library("parallelMap")
 library("mlrintermbo")
 
 if (opts$cores > 1) {
-  parallelStartSocket(cpus = problem_count, load.balancing = TRUE)
+  parallelStartSocket(cpus = opts$cores, load.balancing = TRUE)
 }
 
 parallelSource("load_objectives2.R")

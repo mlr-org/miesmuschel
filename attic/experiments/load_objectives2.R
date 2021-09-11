@@ -26,7 +26,11 @@ tinst <- instances[test == FALSE]
 
 surrogates <- lapply(seq_len(nrow(tinst)), function(i) {
   tinstnao <- tinst[i]
-  cfgs(tinstnao$cfg, workdir = WORKDIR)$get_objective(tinstnao$level, target_variables = tinstnao$target)
+  sur <- cfgs(tinstnao$cfg, workdir = WORKDIR)$get_objective(tinstnao$level, target_variables = tinstnao$target)
+  if (tinstnao$cfg == "rbv2_super") {
+    sur$domain$params[["trainsize"]]$lower <- 3^-3
+  }
+  sur
 })
 
 
