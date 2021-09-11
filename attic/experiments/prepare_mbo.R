@@ -1,7 +1,10 @@
 source("argparse.R")
 options(warn = 1)
 options(width=170)
-options(error=function()traceback(2))
+options(error = {
+  function()traceback(2)
+  invokeRestart("abort")
+})
 
 args <- list(
   arg("Seed for evaluation", "seed", "s", "integer", name = "curseed"),
