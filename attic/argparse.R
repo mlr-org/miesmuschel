@@ -1,11 +1,12 @@
 library("checkmate")
 
-arg <- function(info, long, short = NULL, type = "logical", default = if (identical(type, "logical")) FALSE else NULL, choices = NULL, name = long) {
+arg <- function(info, long, short = NULL, type = "logical", default = if (identical(type, "logical")) FALSE else NULL, choices = NULL, name = long, checkmate.args = list()) {
   assertString(info)
   assertString(name, pattern = "^[.[:alpha:]][.[:alnum:]]*$")
   assertString(short, pattern = "^.$", null.ok = TRUE)
   assertString(long, pattern = "^[-.[:alnum:]]+$")
   assertChoice(type, c("logical", "integer", "numeric", "character", "choice"))
+  assertList(checkmate.args, names = "unique")
   switch(type,
     logical = assertFALSE(default),
     integer = assertInt(default, tol = 1e-100, null.ok = TRUE),
@@ -22,7 +23,7 @@ arg <- function(info, long, short = NULL, type = "logical", default = if (identi
 
 
 
-argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingOnly = TRUE)) {
+argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingOnly = TRUE), helparg = NULL) {
   assertList(argdefs, types = "arg")
 
   if (print.help) {
@@ -43,6 +44,9 @@ argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingO
   }
 
   result <- structure(lapply(argdefs, `[[`, "default"), names = sapply(argdefs, `[[`, "name"))
+
+  assertChoice(helparg, names(result), null.ok = TRUE)
+  if (!is.null(helparg) && argdefs[[match(helparg, names(result))]]$type != "logical") stop(sprintf("help argument %s must be a 'logical'", helparg))
 
   longdescs <- sapply(argdefs, `[[`, "long")
   shortdescs <- sapply(argdefs, `[[`, "short")
@@ -90,13 +94,34 @@ argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingO
 
     result[[curarg$name]] <- switch(curarg$type,
       logical = TRUE,
-      numeric = assertNumber(suppressWarnings(as.numeric(parameter)), .var.name = token),
-      integer = assertInt(suppressWarnings(as.numeric(parameter)), tol = 1e-100, .var.name = token),
+      numeric = suppressWarnings(as.numeric(parameter),
+      integer = suppressWarnings(as.numeric(parameter),
       character = parameter,
-      choice = assertChoice(parameter, curarg$choices, .var.name = token)
+      choice = parameter,
+      stop()
     )
+    asserter <- switch(curarg$type,
+      logical = function(x, ...) x,
+      numeric = assertNumber,
+      integer = assertInt,
+      character = assertString,
+      choice = assertChoice
+      stop()
+    )
+    addargs <- switch(curarg$type,
+      integer = list(tol = 1e-100),
+      choice = list(choices = curarg$choices)
+      list()
+    )
+    do.call(asserter, c(list(x = result[[curarg$name]], .var.name = token), addargs, curarg$checkmate.args))
 
     if (can.gobble) i <- i + 1
+  }
+
+  if (!is.null(helparg) && result[[helparg]]) {
+    Recall(argdefs, print.help = TRUE)
+    invokeRestart("abort")
+    print("eeh")
   }
 
   missings <- longdescs[which(sapply(result, is.null))]
