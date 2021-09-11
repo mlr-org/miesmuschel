@@ -94,8 +94,8 @@ argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingO
 
     result[[curarg$name]] <- switch(curarg$type,
       logical = TRUE,
-      numeric = suppressWarnings(as.numeric(parameter),
-      integer = suppressWarnings(as.numeric(parameter),
+      numeric = suppressWarnings(as.numeric(parameter)),
+      integer = suppressWarnings(as.numeric(parameter)),
       character = parameter,
       choice = parameter,
       stop()
@@ -131,6 +131,6 @@ argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingO
   }
 
   result
-}
 
+}
 

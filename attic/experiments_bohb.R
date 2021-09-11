@@ -79,6 +79,8 @@ gr <- po("densitysplit", min_size = 11) %>>%
 
 gr$train(tsk("mtcars"))
 
+gr$train(tsk("mtcars"))
+
 gr$predict(tsk("mtcars"))
 
 
@@ -87,6 +89,10 @@ gr2 <- po("densitysplit", min_size = 11) %>>% po("multiplicityimply", 2) %>>%
   po("densityratio")
 
 gr2$train(tsk("mtcars"))
+
+gr2$predict(tsk("mtcars"))
+
+gr2$train(iristask)
 
 gr2$predict(tsk("mtcars"))
 
@@ -119,6 +125,8 @@ summary(iris)
 irisspace <- ps(Sepal.Length = p_dbl(4, 8), Sepal.Width = p_dbl(2, 5), Petal.Length = p_dbl(1, 7), Species = p_fct(c("setosa", "versicolor", "virginica")))
 
 iristask = mlr3::TaskRegr$new("archive", iris, target = "Petal.Width")
+
+
 
 ss = SamplerKD$new(irisspace, iristask, TRUE, bandwidth_factor = 3, alpha = .4)
 ss = SamplerKD$new(irisspace, iristask, TRUE, bandwidth_factor = 5, alpha = .4)
