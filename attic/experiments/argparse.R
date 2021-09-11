@@ -105,12 +105,12 @@ argparse <- function(argdefs, print.help = FALSE, inputs = commandArgs(trailingO
       numeric = assertNumber,
       integer = assertInt,
       character = assertString,
-      choice = assertChoice
+      choice = assertChoice,
       stop()
     )
     addargs <- switch(curarg$type,
       integer = list(tol = 1e-100),
-      choice = list(choices = curarg$choices)
+      choice = list(choices = curarg$choices),
       list()
     )
     do.call(asserter, c(list(x = result[[curarg$name]], .var.name = token), addargs, curarg$checkmate.args))
