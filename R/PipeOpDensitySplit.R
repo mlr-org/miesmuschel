@@ -78,11 +78,11 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
 
       new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr3::mlr_reflections$task_col_roles$density)]
 
-      top = TaskDensity$new(paste0(task$id, ".top"), task$backend)
+      top = todensity(task, ".top")
       top$filter(rows = rows_top)
       top$col_roles = new_col_roles
 
-      bottom = TaskDensity$new(paste0(task$id, ".bottom"), task$backend)
+      bottom = todensity(task, ".bottom")
       bottom$filter(rows = rows_bottom)
       bottom$col_roles = new_col_roles
 
@@ -92,7 +92,7 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
       task = inputs[[1]]
       new_col_roles = task$col_roles[intersect(names(task$col_roles), mlr3::mlr_reflections$task_col_roles$density)]
       new_row_roles = task$row_roles
-      task = TaskDensity$new(paste0(task$id, ".density"), task$backend)
+      task = todensity(task, ".density")
       task$col_roles = new_col_roles
       task$row_roles = new_row_roles
 
@@ -104,3 +104,12 @@ PipeOpDensitySplit = R6Class("PipeOpDensitySplit",
 )
 
 # mlr_pipeops$add("densitysplit", PipeOpDensitySplit)
+
+
+## ugh, this is broken :-/
+# This is necessary, because it is not possible to create a task with empty levels. otherwise we could just create TaskDensity$new(id, task$backend)
+todensity = function(task, postfix) {
+  keepcols = c(unname(unlist(task$col_roles)), task$backend$primary_key)
+  backend = mlr3::as_data_backend(task$backend$data(cols = keepcols, rows = task$row_ids), primary_key = task$backend$primary_key)
+  TaskDensity$new(paste0(task$id, postfix), backend)
+}

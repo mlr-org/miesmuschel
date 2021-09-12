@@ -24,8 +24,15 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       private$.minimize = assert_flag(minimize)
       budget_id = setdiff(task$feature_names, param_set$ids())
 
+
+
       if (length(budget_id) > 1) stopf("Need at most one budget parameter for multifidelity method, but found %s: %s",
         length(budget_id), str_collapse(budget_id))
+
+      # TODO: make sure removeconstants won't remove the budget column. Right now this is just a crutch:
+      if (length(budget_id) && uniqueN(task$data(cols = budget_id)[[1]], na.rm = TRUE) <= 1) {
+        budget_id = character(0)
+      }
 
       if (getOption("miesmuschel.testing")) param_set$assert_dt(task$data(cols = setdiff(task$feature_names, budget_id))[, lapply(.SD, function(x) if (is.factor(x)) as.character(x) else x)])
 
@@ -36,6 +43,7 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         add_pipeop(mlr3pipelines::po("colapply", id = "colapply0", applicator = as.factor,
           affect_columns = mlr3pipelines::selector_type("character")))$
         add_pipeop(mlr3pipelines::po("fixfactors"))$
+        add_pipeop(mlr3pipelines::po("removeconstants", id = "removeconstants0"))$
         add_pipeop(mlr3pipelines::po("colapply", applicator = as.numeric,
           affect_columns = mlr3pipelines::selector_type("integer")))$
         add_pipeop(mlr3pipelines::po("densitysplit", alpha = if (minimize) 1 - alpha else alpha))$
@@ -57,7 +65,8 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
       }
       graph$
         add_edge("colapply0", "fixfactors")$
-        add_edge("fixfactors", "colapply")$
+        add_edge("fixfactors", "removeconstants0")$
+        add_edge("removeconstants0", "colapply")$
         add_edge("densitysplit", "removeconstants", src_channel = if (minimize) "bottom" else "top")$
         add_edge("removeconstants", "imputesample")$
         add_edge("imputesample", "density.np")
