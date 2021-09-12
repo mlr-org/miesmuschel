@@ -84,9 +84,9 @@ PipeOpStratify = R6Class("PipeOpStratify",
       if (pv$stratify_feature %nin% task$feature_names) {
 
 
-#        stopf("stratify_feature '%s' not in Task's features.", pv$stratify_feature)   # TODO this makes trouble when removeconstants removes the feature first...
-        self$state = list(stratify_values = numeric(0))
-        return(list(output = as.Multiplicity(list()), fallback = task))
+        stopf("stratify_feature '%s' not in Task's features.", pv$stratify_feature)   # TODO this makes trouble when removeconstants removes the feature first...
+#        self$state = list(stratify_values = numeric(0))
+#        return(list(output = as.Multiplicity(list()), fallback = task))
       }
       stratcol = task$data(cols = pv$stratify_feature)
       sample_numbers = stratcol[, .N, by = c(pv$stratify_feature)]
@@ -100,10 +100,10 @@ PipeOpStratify = R6Class("PipeOpStratify",
     },
     .predict = function(inputs) {
       task = inputs[[1]]
-      if (length(self$state$stratify_values) == 0) {
-        # TODO handling special case described above
-        return(list(output = as.Multiplicity(list()), fallback = task))
-      }
+      ## if (length(self$state$stratify_values) == 0) {
+      ##   # TODO handling special case described above
+      ##   return(list(output = as.Multiplicity(list()), fallback = task))
+      ## }
       pv = self$param_set$get_values(tags = "predict")
       stratcol = task$data(cols = pv$stratify_feature)[[1]]
       if (pv$predict_choice != "exact" && !is.numeric(stratcol)) stopf("predict_choice can only be 'exact' for non-numeric features, but is '%s'.", pv$predict_choice)

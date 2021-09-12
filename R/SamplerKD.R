@@ -43,7 +43,7 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         add_pipeop(mlr3pipelines::po("colapply", id = "colapply0", applicator = as.factor,
           affect_columns = mlr3pipelines::selector_type("character")))$
         add_pipeop(mlr3pipelines::po("fixfactors"))$
-        add_pipeop(mlr3pipelines::po("removeconstants", id = "removeconstants0"))$
+        add_pipeop(mlr3pipelines::po("removeconstants", id = "removeconstants0", affect_columns = selector_type("factor")))$  # prevent 0-level-columns
         add_pipeop(mlr3pipelines::po("colapply", applicator = as.numeric,
           affect_columns = mlr3pipelines::selector_type("integer")))$
         add_pipeop(mlr3pipelines::po("densitysplit", alpha = if (minimize) 1 - alpha else alpha))$
