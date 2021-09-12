@@ -15,6 +15,7 @@ learnerlist <- list(
   bohblrn = GraphLearner$new(
     po("colapply", id = "colapply0", applicator = as.factor, affect_columns = selector_type("character")) %>>%
     po("fixfactors") %>>%
+    po("removeconstants", id = "priorremoveconstants") %>>%
     po("colapply", applicator = as.numeric, affect_columns = selector_type("integer")) %>>%
     po("stratify", predict_choice = "exact_or_less") %>>%
     list(
