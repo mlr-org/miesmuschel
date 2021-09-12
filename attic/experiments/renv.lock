@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.0.2",
+    "Version": "4.1.1",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -463,9 +463,9 @@
       "RemoteUsername": "mlr-org",
       "RemoteRepo": "miesmuschel",
       "RemoteRef": "smashy_ex",
-      "RemoteSha": "b5fe20dba5c4b2a5b74700f66bc3b854a243d6af",
+      "RemoteSha": "78572f61acfe467afdc78ad102027b17b4070edc",
       "Remotes": "mlr-org/bbotk",
-      "Hash": "c1f48cbb2a2e60e91d13f4d712f85012"
+      "Hash": "3467581f6ef6ff5666f6a346a21316d1"
     },
     "mlbench": {
       "Package": "mlbench",
