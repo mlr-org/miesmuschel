@@ -100,7 +100,7 @@ PipeOpStratify = R6Class("PipeOpStratify",
     },
     .predict = function(inputs) {
       task = inputs[[1]]
-      if (length(self$state$stratify_values) == 0)) {
+      if (length(self$state$stratify_values) == 0) {
         # TODO handling special case described above
         return(list(output = as.Multiplicity(list()), fallback = task))
       }
