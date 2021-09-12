@@ -75,6 +75,11 @@ makeEvaluator <- function(config) {
 
     evalresults <- parallelMap(evaluate_miesmuschel, problem_ids, seed = callseed, more.args = more.args)
 
+    # parallelMap with batchtools seems to reset this (?)
+    lgr::get_logger("mlr3")$set_threshold("info")
+    lgr::get_logger("bbotk")$set_threshold("info")
+
+
     c(list(yval = mean(unlist(evalresults)), curseed = curseed), structure(evalresults, names = tinst[problem_ids, sprintf("%s.%s", cfg, level)]))
   }
 
@@ -97,7 +102,7 @@ makeEvaluator <- function(config) {
   # need 'fun' as a variable in this environment.
   fun <- switch(config$algo,
     intermbo = function() {
-      designlength <- oi$search_space$length * 4
+      designlength <- oi$search_space$length  # design would be 4x param length
       assertTRUE(designlength > 0)
       while ((evald <- nrow(oi$archive$data)) < designlength) {
         .Random.seed <<- seedstate
@@ -107,11 +112,20 @@ makeEvaluator <- function(config) {
         }
         bbotk::opt("design_points", design = design)$optimize(oi)
       }
-      opter <- bbotk::opt("intermbo", infill.opt = "focussearch", infill.opt.focussearch.maxit = 20, initial.design.size = 0)
+      mboopter <- bbotk::opt("intermbo", infill.opt = "focussearch", infill.opt.focussearch.maxit = 20, initial.design.size = 0)
       repeat {
         .Random.seed <<- seedstate
-        oi$terminator <- bbotk::trm("evals", n_evals = nrow(oi$archive$data) + 1)
-        opter$optimize(oi)
+        evald <- nrow(oi$archive$data)
+
+        oi$terminator <- bbotk::trm("evals", n_evals = evald + 1)
+
+        if (evald %% 3 == 0) {
+          design <- generate_design_random(space, 1)$data
+          bbotk::opt("design_points", design = design)$optimize(oi)
+        } else {
+          mboopter$optimize(oi)
+        }
+
         seedstate <<- .Random.seed
       }
     },

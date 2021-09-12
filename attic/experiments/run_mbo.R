@@ -9,6 +9,7 @@ options(error = function() {
 
 args <- list(
   arg("Cores to use at most", "cores", "c", "integer", name = "cores", checkmate.args = list(lower = 1)),
+  arg("Use batchtools", "batchtools", "b", "logical"),
   arg("File to load", "file", "f", "character", name = "filename"),
   arg("Print help and exit", "help", "h")
 )
@@ -28,7 +29,12 @@ library("parallelMap")
 library("mlrintermbo")
 
 if (opts$cores > 1) {
-  parallelStartSocket(cpus = opts$cores, load.balancing = TRUE)
+  if (opts$batchtools) {
+    NCPUS = opts$cores
+    parallelStartBatchtools()
+  } else {
+    parallelStartSocket(cpus = opts$cores, load.balancing = TRUE)
+  }
 }
 
 parallelSource("load_objectives2.R")
