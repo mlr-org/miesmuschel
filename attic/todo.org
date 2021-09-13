@@ -206,3 +206,9 @@ Rscript prepare_mbo.R -s 0000000 -o all        -b 960 -M 32 -B smashy -I rs  -S 
 
 
 
+
+
+## jobs to calculate
+
+120000 jobs
+

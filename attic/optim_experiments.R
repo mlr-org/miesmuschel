@@ -556,3 +556,19 @@ lcbench_3945
 
 wassampled(c(1, 1, 1, 2, 2, 3, 3, 2, 2, 3, 2, 3))
 
+
+
+
+##
+
+
+dat <- readRDS("experiments/data/run_0000000_hb______m0__hb_____rsinfill_______.rds")$oi$archive$data
+
+plot(dat$yval)
+plot(dat$mu)
+
+plot(dat$mu, dat$yval)
+
+
+
+
