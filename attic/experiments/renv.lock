@@ -498,9 +498,9 @@
       "RemoteUsername": "mlr-org",
       "RemoteRepo": "miesmuschel",
       "RemoteRef": "smashy_ex",
-      "RemoteSha": "9e5bfe3c2ccf4fba5ccca329b5315c78cb8b6b73",
+      "RemoteSha": "d64dac4701f3fbb0176167bd10f22f67f979c847",
       "Remotes": "mlr-org/bbotk",
-      "Hash": "afe2e5b971940697fa28b663240d51bc"
+      "Hash": "9c7472ead07ed6d4e38309be056e5e63"
     },
     "mlbench": {
       "Package": "mlbench",
@@ -575,9 +575,14 @@
     "mlrintermbo": {
       "Package": "mlrintermbo",
       "Version": "0.5.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b467531d2634e3e3f0775c702e55150e"
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "mb706",
+      "RemoteRepo": "mlrintermbo",
+      "RemoteRef": "master",
+      "RemoteSha": "920e4e56ef6a9e785c6d03268158e0db3896ac4e",
+      "Hash": "36b873aa914a0ba1102ba368307e183e"
     },
     "munsell": {
       "Package": "munsell",
