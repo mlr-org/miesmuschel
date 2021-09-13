@@ -87,7 +87,7 @@ SamplerKD = R6Class("SamplerKD", inherit = Sampler,
         }
       } else {
         # need to manually catch the < min_points_in_model case here, since model crashes otherwise.
-        if (task$nrow < max(min_points_in_model, task$ncol + 1)) {
+        if (task$nrow <= max(min_points_in_model, task$ncol + 1)) {
           private$.sampler = SamplerUnif$new(param_set)
           return(NULL)
         } else {
