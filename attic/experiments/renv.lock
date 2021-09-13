@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.0.2",
+    "Version": "4.0.5",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -99,6 +99,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "ddfa72a87fdf4c80466a20818be91d00"
+    },
+    "RhpcBLASctl": {
+      "Package": "RhpcBLASctl",
+      "Version": "0.21-247",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d6379398b203d672a0f79d4782a51ceb"
     },
     "SparseM": {
       "Package": "SparseM",
@@ -749,6 +756,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "30ab0ea8c8d3dd16a3fa06903449bbfb"
+    },
+    "rgenoud": {
+      "Package": "rgenoud",
+      "Version": "5.8-3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "485f0c669f0cb6e354714ed74fe490c8"
     },
     "rlang": {
       "Package": "rlang",
