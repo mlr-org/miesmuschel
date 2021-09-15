@@ -57,6 +57,9 @@ getOptimalLambda <- function(ca, space, seed = 1) {
 
   lr$train(ts)
 
+
+  if (FALSE) {
+
   surrogateObjective <- ObjectiveRFunDt$new(fun = function(xdt) {
     data.table(yval = lr$predict_newdata(xdt)$response)
   }, domain = space_no_trafo, codomain = ps(yval = p_dbl(tags = "maximize")))
@@ -103,6 +106,13 @@ getOptimalLambda <- function(ca, space, seed = 1) {
   predicted <- lr$predict_newdata(result)
 
   list(lambda = space$trafo(result$x_domain[[1]]), performance = predicted$response, se = predicted$se)
+  }
+  predicted <- lr$predict(ts)
+
+  best <- which.max(predicted$response)
+
+  list(lambda = space$trafo(ca[best, space$ids(), with = FALSE]), performance = predicted$response[[best]], se = predicted$se[[best]])
+
 }
 
 
