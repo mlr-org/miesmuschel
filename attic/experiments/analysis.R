@@ -127,7 +127,8 @@ allconfs <- rbind(metaconfs, combined)
 
 library("parallelMap")
 
-parallelStartSocket(cpus = 30, load.balancing = TRUE)
+NCPUS=16
+parallelStartBatchtools()
 
 lambdas <- do.call(parallelMap, c(list(getOptimalLambda), as.list(allconfs[, .(ca = archive, space = search_space)])))
 

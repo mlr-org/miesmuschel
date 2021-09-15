@@ -6,7 +6,7 @@ if [ -z "$4" ] ; then
 fi
 
 
-for objective in lcbench rbv2_super ; do
+for objective in  rbv2_super ; do
   name="mbo_${objective}_"
   if [[ $2 == "rs" ]] ; then
     name=${name}rs_
@@ -43,7 +43,7 @@ for objective in lcbench rbv2_super ; do
     cores=30
   fi
   export FILE
-  call="sbatch -A mallet -c $cores $MPC -J $name" 
+  call="sbatch -A mallet --exclude=tknl[01-12] -c $cores $MPC -J $name" 
   jobno=$( ${call}-1 runsingle.sbatch | grep -o '[0-9]\+')
   if [ $? -eq 0 ] ; then
     jobno=$( ${call}-2 --dependency=afterany:$jobno runsingle.sbatch | grep -o '[0-9]\+')
