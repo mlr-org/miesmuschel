@@ -111,7 +111,7 @@ getOptimalLambda <- function(ca, space, seed = 1) {
 
   best <- which.max(predicted$response)
 
-  list(lambda = space$trafo(ca[best, space$ids(), with = FALSE]), performance = predicted$response[[best]], se = predicted$se[[best]])
+  list(lambda = space$trafo(as.list(ca[best, space$ids(), with = FALSE])), performance = predicted$response[[best]], se = predicted$se[[best]], performance.measured = ca[best, yval])
 
 }
 
@@ -131,7 +131,7 @@ parallelStartSocket(cpus = 30, load.balancing = TRUE)
 
 lambdas <- do.call(parallelMap, c(list(getOptimalLambda), as.list(allconfs[, .(ca = archive, space = search_space)])))
 
-collected <- cbind(allconfs, rbindlist(lapply(lambdas, function(x) list(lambda = list(x$lambda), lperf = x$performance, lse = x$se))))
+collected <- cbind(allconfs, rbindlist(lapply(lambdas, function(x) list(lambda = list(x$lambda), lperf = x$performance, lse = x$se, lpm = x$performance.measured))))
 
 
 saveRDS(collected, "collected.rds")
