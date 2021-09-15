@@ -50,7 +50,7 @@ rq.6.tbl <- rbind(surgrid, rigrid, use.names = TRUE)
 # RQ 7
 # special:
 # budgetfactor: 8 * 30 == 240
-rq.7.tbl.BUDGETFACTOR <- rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "hb"]$lambda)[, mu := 32]
+rq.7.tbl.BUDGETFACTOR <- rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "smashy"]$lambda)[, mu := 32]
 
 
 
