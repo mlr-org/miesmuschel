@@ -32,16 +32,16 @@ rq.5b.tbl.cond <- copy(rq.5a.tbl.cond)[,
   filter_algorithm := "tournament"][]
 
 # RQ 6
-t1 <- rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "hb"]$lambda)[,
+t1 <- rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "smashy"]$lambda)[,
   original_surrogate_learner := surrogate_learner][,
   surrogate_learner := NULL][, id := 1:2]
 t2 <- CJ(id = 1:2, surrogate_learner = c("knn1", "knn7", "bohblrn", "ranger"))
 
 surgrid <- t1[t2, on = "id"][, id := NULL][surrogate_learner != original_surrogate_learner][, original_surrogate_learner := NULL][]
 rigrid <- rbind(
-  rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "hb"]$lambda)[,
+  rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "smashy"]$lambda)[,
     c("random_interleave_fraction", "random_interleave_fraction.end") := 1],
-  rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "hb"]$lambda)[,
+  rbindlist(canonical[siman & infillsearch == "all" & batchmethod == "smashy"]$lambda)[,
     c("random_interleave_fraction", "random_interleave_fraction.end") := 0]
 )
 
