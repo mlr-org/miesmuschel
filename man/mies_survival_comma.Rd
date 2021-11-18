@@ -11,7 +11,7 @@ mies_survival_comma(inst, mu, survival_selector, n_elite, elite_selector, ...)
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr
-Population target size.}
+Population target size, non-negative integer.}
 
 \item{survival_selector}{(\code{\link{Selector}})\cr
 \code{\link{Selector}} operator that selects surviving individuals depending on configuration values

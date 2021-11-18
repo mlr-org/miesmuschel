@@ -146,3 +146,14 @@ assert_optim_instance = function(inst) {
   assert_names(search_space_ids, disjunct.from = codomain_ids, .var.name = "inst$search_space$ids()")
   invisible(inst)
 }
+
+check_fidelity_schedule = function(x) {
+  if (test_data_frame(x, ncols = 3, min.rows = 1) &&
+      test_names(colnames(x), identical.to = c("generation", "budget_new", "budget_survivors")) &&
+      test_integerish(x$generation, tol = 1e-100, any.missing = FALSE, unique = TRUE) &&
+      1 %in% x$generation) {
+    TRUE
+  } else {
+    "must be a data.frame with integer column 'generation' (with unique non-missing values and at least one row with value 1) and columns 'budget_new', 'budget_survivors'."
+  }
+}

@@ -50,9 +50,9 @@ rn_half$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorProxy}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
+\code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_xounif}}
 }

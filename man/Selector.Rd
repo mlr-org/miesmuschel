@@ -41,6 +41,7 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
+\code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
@@ -49,8 +50,8 @@ Other base classes:
 \code{\link{Recombinator}}
 
 Other selectors: 
-\code{\link{SelectorProxy}},
 \code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}}
 }
 \concept{base classes}
@@ -85,7 +86,7 @@ Optimization supported by this \code{Selector}, can be \code{"single-crit"}, \co
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
-Initialize base class components of the \code{Mutator}.
+Initialize base class components of the \code{Selector}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Selector$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),

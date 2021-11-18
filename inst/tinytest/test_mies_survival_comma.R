@@ -70,6 +70,13 @@ expect_equal(mies_survival_comma(oibigmax, 3, sb, n_elite = 2), oibigmax$archive
 expect_equal(oibigmax$archive$data, archive_before)
 
 
+# kill all individuals
+
+expect_equal(mies_survival_comma(oibigmax, 0, n_elite = 0, elite_selector = sb), oibigmax$archive$data)
+expect_equal(oibigmax$archive$data, archive_before[c(8:9), eol := 3])
+
+expect_error(mies_survival_comma(oibigmax, 0, n_elite = 0, elite_selector = sb), "No alive individuals")
+
 
 oibigmax$clear()
 oibigmax$eval_batch(design)
@@ -78,6 +85,7 @@ archive_before = copy(oibigmax$archive$data)
 # kill non-elites; doesn't need non-elite selector
 expect_equal(mies_survival_comma(oibigmax, 2, n_elite = 2, elite_selector = sb), oibigmax$archive$data)
 expect_equal(oibigmax$archive$data, archive_before[c(2:3, 8:9), eol := 3])
+
 
 
 

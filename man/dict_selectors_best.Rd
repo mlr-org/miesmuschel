@@ -48,8 +48,8 @@ sb$operate(data, fitnesses, 4)
 }
 \seealso{
 Other selectors: 
-\code{\link{SelectorProxy}},
 \code{\link{Selector}},
+\code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}}
 }
 \concept{selectors}

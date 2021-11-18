@@ -62,10 +62,10 @@ Deb, Kalyanmoy, Agrawal, Bhushan R, others (1995).
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorProxy}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
+\code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{recombinators}

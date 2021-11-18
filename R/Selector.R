@@ -42,7 +42,7 @@ Selector = R6Class("Selector",
   inherit = MiesOperator,
   public = list(
     #' @description
-    #' Initialize base class components of the `Mutator`.
+    #' Initialize base class components of the `Selector`.
     #' @template param_param_classes
     #' @template param_param_set
     #' @param supported (`character`)\cr
@@ -68,7 +68,8 @@ Selector = R6Class("Selector",
     .supported = NULL,
     .operate = function(values, fitnesses, n_select) {
       assert_data_table(values, min.rows = 1)
-      if ("single-crit" %in% self$supported && test_numeric(fitnesses, any.missing = FALSE, len = nrow(values))) {
+      if ("single-crit" %in% self$supported && test_numeric(fitnesses) && !test_matrix(fitnesses)) {
+        assert_numeric(fitnesses, any.missing = FALSE, len = nrow(values))
         fitnesses = matrix(fitnesses, ncol = 1)
       }
       assert_matrix(fitnesses, nrows = nrow(values),

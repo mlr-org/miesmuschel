@@ -2,12 +2,11 @@
 #'
 #' @include Recombinator.R
 #'
+#' @name dict_recombinators_proxy
+#'
 #' @description
 #' Recombinator that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s recombination operation fully parametrizable.
-#'
-#' Changes in the `operation` configuration parameter are only realized whenever `$prime()` is called, so `$prime()`
-#' must be called every time when `operation` is changed, *even if* the new configuration parameter value is already primed.
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Recombinator`]\cr
@@ -34,7 +33,6 @@
 #' rp$operate(data)  # default operation: null
 #'
 #' rp$param_set$values$operation = rec("xounif", p = 0.5)
-#' rp$prime(p)
 #' rp$operate(data)
 #' @export
 RecombinatorProxy = R6Class("RecombinatorProxy",

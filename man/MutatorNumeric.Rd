@@ -23,6 +23,7 @@ of integer components by 0.5, applying their operation, and rounding resulting v
 
 \seealso{
 Other base classes: 
+\code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{Mutator}},
@@ -32,13 +33,14 @@ Other base classes:
 
 Other mutators: 
 \code{\link{MutatorDiscrete}},
-\code{\link{MutatorProxy}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
+\code{\link{dict_mutators_erase}},
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
+\code{\link{dict_mutators_proxy}},
 \code{\link{dict_mutators_unif}}
 }
 \concept{base classes}

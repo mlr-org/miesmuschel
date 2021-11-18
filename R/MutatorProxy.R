@@ -2,12 +2,11 @@
 #'
 #' @include Mutator.R
 #'
+#' @name dict_mutators_proxy
+#'
 #' @description
 #' Mutator that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s mutation operation fully parametrizable.
-#'
-#' Changes in the `operation` configuration parameter are only realized whenever `$prime()` is called, so `$prime()`
-#' must be called every time when `operation` is changed, *even if* the new configuration parameter value is already primed.
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Mutator`]\cr
@@ -34,7 +33,6 @@
 #' mp$operate(data)  # default operation: null
 #'
 #' mp$param_set$values$operation = mut("gauss", sdev = 5)
-#' mp$prime(p)
 #' mp$operate(data)
 #' @export
 MutatorProxy = R6Class("MutatorProxy",

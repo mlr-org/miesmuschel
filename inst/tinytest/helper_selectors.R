@@ -19,17 +19,18 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
   pvals_allowed = generate_design_random(p_allowed, 3)$data
 
   if (!is_primed) {
-    expect_error(sel$operate(pvals_allowed), "must be primed first", info = selector_name)
+    expect_error(sel$operate(pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "must be primed first", info = selector_name)
   }
 
   pbig_allowed = pbig$clone(deep = TRUE)$subset(ids = c(paste0(sel$param_classes, "."), paste0(sel$param_classes, ".1")))
   pbigvals_allowed = generate_design_random(pbig_allowed, 3)$data
 
   sel$prime(pbig_allowed)
-  expect_error(sel$operate(pvals_allowed), "Must be a permutation of set")
+  expect_equal(sel$primed_ps, pbig_allowed)
+  expect_error(sel$operate(pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "Must be a permutation of set")
 
   sel$prime(p_allowed)
-  expect_error(sel$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")
+  expect_error(sel$operate(pbigvals_allowed, seq_len(nrow(pbigvals_allowed)), 1), "Parameter .*\\.1.*not available")
 
   test_alloweds = function(data, pp) {
     sel$prime(pp)
@@ -65,7 +66,7 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
   }))
   pvals_allowed_multicol = generate_design_random(p_allowed_multicol, 3)$data
 
-  expect_error(sel$operate(pvals_allowed_multicol), "Parameter 'a' not available", info = selector_name)
+  expect_error(sel$operate(pvals_allowed_multicol, seq_len(nrow(pvals_allowed_multicol)), 1), "Parameter 'a' not available", info = selector_name)
 
   test_alloweds(pvals_allowed_multicol, p_allowed_multicol)
   test_alloweds(pvals_allowed_multicol[1], p_allowed_multicol)
