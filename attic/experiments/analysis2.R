@@ -18,6 +18,7 @@ allarchives <- lapply(seq_len(nrow(collected[curseed != -1])), function(i) {
 
 
 
+
 aa2 <- rbindlist(allarchives, fill = TRUE)[
     is.na(filter_factor_last), filter_factor_last := filter_factor_first][
     is.na(x.filter_factor_last), x.filter_factor_last := x.filter_factor_first][
