@@ -37,6 +37,7 @@ Other recombinators:
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{base classes}
