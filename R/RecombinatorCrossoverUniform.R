@@ -56,6 +56,16 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     .recombine = function(values, context) {
       params = self$param_set$get_values(context = context)
       index = lapply(sample(1:2, length(values), TRUE, c(1 - params$p, params$p)), function(x) c(x, 3 - x))
+      # for hiearchical spaces we posthoc fix dependent parameters so that recombination essentially happens over blocks of parameters
+      if (context$inst$search_space$has_deps) {
+        deps = context$inst$search_space$deps
+        deps[, nr := match(deps$id, context$inst$search_space$ids())]
+        for (parent in unique(deps$on)) {
+          parent_nr = match(parent, context$inst$search_space$ids())
+          combination = index[[parent_nr]]
+          index[deps[on == parent][["nr"]]] = list(combination)
+        }
+      }
       setnames(values[, pmap(list(.SD, index), `[`)][seq_len(self$n_indivs_out)], names(values))
     }
   )
