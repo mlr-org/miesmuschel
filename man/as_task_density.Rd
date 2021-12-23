@@ -16,10 +16,10 @@ as_task_density(x, ...)
 \method{as_task_density}{DataBackend}(x, id = deparse1(substitute(x)), ...)
 }
 \arguments{
-\item{x}{(\code{any})\cr
+\item{x}{(any)\cr
 Object to convert.}
 
-\item{...}{(\code{any})\cr
+\item{...}{(any)\cr
 Additional arguments.}
 
 \item{clone}{(\code{logical(1)})'cr

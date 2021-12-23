@@ -53,7 +53,8 @@ Other selectors:
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}},
-\code{\link{dict_selectors_sequential}}
+\code{\link{dict_selectors_sequential}},
+\code{\link{dict_selectors_tournament}}
 }
 \concept{selectors}
 \section{Super classes}{

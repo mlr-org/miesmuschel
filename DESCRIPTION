@@ -31,7 +31,7 @@ Suggests:
   rpart
 Remotes:
   mlr-org/bbotk
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Collate: 
     'DensityLearner.R'
     'DensityMeasure.R'
@@ -87,6 +87,7 @@ Collate:
     'SelectorProxy.R'
     'SelectorRandom.R'
     'SelectorSequential.R'
+    'SelectorTournament.R'
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
     'TunerMies.R'
