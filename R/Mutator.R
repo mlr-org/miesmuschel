@@ -95,7 +95,6 @@ MutatorNumeric = R6Class("MutatorNumeric",
   ),
   private = list(
     .mutate = function(values, context) {
-      # FIXME: this also needs the following fix: for hiearchical spaces we do not mutate parents because this clashes with dependencies
 
       # Is non-native integer
       is_nn_int = !private$.integer_native & private$.primed_ps$class == "ParamInt"
@@ -164,30 +163,17 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
   ),
   private = list(
     .mutate = function(values, context) {
-      # for hiearchical spaces we do not mutate parents because this clashes with dependencies
-      if (context$inst$search_space$has_deps) {
-        deps = context$inst$search_space$deps
-        parents = unique(deps$on)
-        not_mutate = values[, parents, with = FALSE]
-        values = values[, - parents, with = FALSE]
-      }
-      if (ncol(values) > 1L) {
-        vals = as.matrix(values)
-        mode(vals) <- "character"
-        vals = apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character), context)
-        if (is.matrix(vals)) {
-          vals = t(vals)
-        } else {
-          vals = as.matrix(vals)
-        }
-        vals = as.data.table(vals)
-
-        vals = vals[, pmap(list(.SD, private$.primed_ps$class), function(val, class) if (class == "ParamLgl") as.logical(val) else val)]  # TODO maybe this can be done more elegantly
+      vals = as.matrix(values)
+      mode(vals) <- "character"
+      vals = apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character), context)
+      if (is.matrix(vals)) {
+        vals = t(vals)
       } else {
-        vals = values
+        vals = as.matrix(vals)
       }
+      vals = as.data.table(vals)
 
-      vals = cbind(vals, not_mutate)
+      vals = vals[, pmap(list(.SD, private$.primed_ps$class), function(val, class) if (class == "ParamLgl") as.logical(val) else val)]  # TODO maybe this can be done more elegantly
 
       setnames(vals, private$.primed_ps$ids())
     },

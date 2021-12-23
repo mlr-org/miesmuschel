@@ -66,7 +66,7 @@ SelectorTournament = R6Class("SelectorTournament",
     .select = function(values, fitnesses, n_select, context) {
       map_int(seq_len(n_select), function(i) {
         ids = sample(nrow(values), size = 2L, replace = FALSE)
-        order(private$.scalor$operate(values[ids, ], fitnesses[ids, , drop = FALSE], context = context), decreasing = TRUE)[1L]
+        ids[order(private$.scalor$operate(values[ids, ], fitnesses[ids, , drop = FALSE], context = context), decreasing = TRUE)[1L]]
       })
     },
     .scalor = NULL

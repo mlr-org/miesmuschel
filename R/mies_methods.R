@@ -131,6 +131,7 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
   assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)  # TODO: must not include survivor_budget, but can include other things
 
   reeval = integer(0)  # individuals to be killed; only becomes relevant when `step_fidelity` is `TRUE`
+  offspring = Design$new(inst$search_space, data = offspring, remove_dupl = FALSE)$data  # NOTE: make sure that hierarchies are met
 
   if (!is.null(budget_id)) {
     assert(check_fidelity_schedule(fidelity_schedule))
