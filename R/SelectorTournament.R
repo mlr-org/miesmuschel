@@ -6,7 +6,7 @@
 #'
 #' @description
 #' [`Selector`] that selects two individuals randomly for a tournament and then selects the better one based on the fitness value.
-#'andl
+#'
 #' @section Configuration Parameters:
 #' This operator has no configuration parameters.
 #'
