@@ -1154,10 +1154,10 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   if (shuffle_after_select) {
     parents = parents[sample.int(nrow(parents))]
   }
-  recombined = recombinator$operate(parents, context = list(inst = inst))
+  recombined = recombinator$operate(parents)
   recombined = first(recombined, lambda)  # throw away things if we have too many (happens when n_indivs_out is not a divider of lambda)
 
-  mutator$operate(recombined, context = list(inst = inst))
+  mutator$operate(recombined)
 }
 
 #' @title Filter Offspring
