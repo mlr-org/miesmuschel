@@ -15,7 +15,6 @@ Although `miesmuschel` is currently still evolving, it can already be used for o
 Install the github version, using `remotes`:
 
 ```r
-remotes::install_github("mlr-org/bbotk")
 remotes::install_github("mlr-org/miesmuschel")
 ```
 
