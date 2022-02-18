@@ -213,10 +213,6 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \dQuote{Mixed integer evolution strategies for parameter optimization.}
 \emph{Evolutionary computation}, \bold{21}(1), 29--64.
 }
-\seealso{
-Other optimizers: 
-\code{\link{OptimizerSmashy}}
-}
 \concept{optimizers}
 \section{Super class}{
 \code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerMies}
