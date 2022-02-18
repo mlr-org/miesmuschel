@@ -163,7 +163,7 @@ the \code{param_set} argument is not a list of expressions.}
 \if{latex}{\out{\hypertarget{method-needed_input}{}}}
 \subsection{Method \code{needed_input()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Filtor$needed_input(output_size, context = list(inst = NULL))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Filtor$needed_input(output_size)}\if{html}{\out{</div>}}
 }
 
 }
