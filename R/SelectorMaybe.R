@@ -154,8 +154,8 @@ SelectorMaybe = R6Class("SelectorMaybe",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select, context) {
-      params = private$.maybe_param_set$get_values(context = context)
+    .select = function(values, fitnesses, n_select) {
+      params = private$.maybe_param_set$get_values()
       params$p_out = params$p_out %??% params$p_in
 
       if (params$p_in %in% c(0, 1) && params$p_out != params$p_in) {
@@ -216,14 +216,14 @@ SelectorMaybe = R6Class("SelectorMaybe",
       }
 
       if (selector_out == n_select) {
-        selector_in[private$.wrapped$operate(values[selector_in], fitnesses[selector_in, , drop = FALSE], n_select, context = context)]
+        selector_in[private$.wrapped$operate(values[selector_in], fitnesses[selector_in, , drop = FALSE], n_select)]
       } else if (selector_out == 0) {
-        selector_not_in[private$.wrapped_not$operate(values[selector_not_in], fitnesses[selector_not_in, , drop = FALSE], n_select, context = context)]
+        selector_not_in[private$.wrapped_not$operate(values[selector_not_in], fitnesses[selector_not_in, , drop = FALSE], n_select)]
       } else {
         # if we get here, then both operators need to work.
         c(
-          selector_in[private$.wrapped$operate(values[selector_in], fitnesses[selector_in, , drop = FALSE], n_select, context = context)],
-          selector_not_in[private$.wrapped_not$operate(values[selector_not_in], fitnesses[selector_not_in, , drop = FALSE], n_select, context = context)]
+          selector_in[private$.wrapped$operate(values[selector_in], fitnesses[selector_in, , drop = FALSE], n_select)],
+          selector_not_in[private$.wrapped_not$operate(values[selector_not_in], fitnesses[selector_not_in, , drop = FALSE], n_select)]
         )
       }
     },

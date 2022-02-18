@@ -129,8 +129,8 @@ FiltorMaybe = R6Class("FiltorMaybe",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_filter, context) {
-      params = private$.maybe_param_set$get_values(context = context)
+    .filter = function(values, known_values, fitnesses, n_filter) {
+      params = private$.maybe_param_set$get_values()
 
       if (params$random_choice) {
         filter_min = stats::qbinom(-20, n_filter, params$p, log.p = TRUE, lower.tail = TRUE)
@@ -142,20 +142,20 @@ FiltorMaybe = R6Class("FiltorMaybe",
         filtering = round(n_filter * params$p)
       }
       if (filtering == 0) {
-        private$.wrapped_not$operate(values, known_values, fitnesses, n_filter, context = context)
+        private$.wrapped_not$operate(values, known_values, fitnesses, n_filter)
       } else if (filtering == n_filter) {
-        private$.wrapped$operate(values, known_values, fitnesses, n_filter, context = context)
+        private$.wrapped$operate(values, known_values, fitnesses, n_filter)
       } else {
-        for_wrapped = seq_len(private$.wrapped$needed_input(filtering, context))
-        for_wrapped_not = seq.int(length(for_wrapped) + 1, length.out = private$.wrapped_not$needed_input(n_filter - filtering, context))
+        for_wrapped = seq_len(private$.wrapped$needed_input(filtering))
+        for_wrapped_not = seq.int(length(for_wrapped) + 1, length.out = private$.wrapped_not$needed_input(n_filter - filtering))
         c(
-            private$.wrapped$operate(values[for_wrapped], known_values, fitnesses, filtering, context = context),
-            length(for_wrapped) + private$.wrapped_not$operate(values[for_wrapped_not], known_values, fitnesses, n_filter - filtering, context = context)
+            private$.wrapped$operate(values[for_wrapped], known_values, fitnesses, filtering),
+            length(for_wrapped) + private$.wrapped_not$operate(values[for_wrapped_not], known_values, fitnesses, n_filter - filtering)
         )
       }
     },
-    .needed_input = function(output_size, context) {
-      params = private$.maybe_param_set$get_values(context = context)
+    .needed_input = function(output_size) {
+      params = private$.maybe_param_set$get_values()
       if (params$random_choice) {
         filter_min = stats::qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = TRUE)
         filter_max = stats::qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = FALSE)
@@ -165,11 +165,11 @@ FiltorMaybe = R6Class("FiltorMaybe",
         # do not sum to output_size. In theory we could iterate through filter_min:filter_max and calculate the
         # max of '.wrapped$needed_input(i) + .wrapped_not$needed_input(output_size - i)', but that is probably
         # more wasteful so we don't do that here.
-        private$.wrapped$needed_input(filter_max, context) + private$.wrapped_not$needed_input(output_size - filter_min, context)
+        private$.wrapped$needed_input(filter_max) + private$.wrapped_not$needed_input(output_size - filter_min)
       } else {
         filtering = round(output_size * params$p)
         # we know exactly how many elements each filter needs.
-        private$.wrapped$needed_input(filtering, context) + private$.wrapped_not$needed_input(output_size - filtering, context)
+        private$.wrapped$needed_input(filtering) + private$.wrapped_not$needed_input(output_size - filtering)
       }
     },
     .wrapped = NULL,

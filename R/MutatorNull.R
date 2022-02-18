@@ -35,7 +35,7 @@ MutatorNull = R6Class("MutatorNull",
     }
   ),
   private = list(
-    .mutate = function(values, context) values
+    .mutate = function(values) values
   )
 )
 dict_mutators$add("null", MutatorNull)

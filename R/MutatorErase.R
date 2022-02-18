@@ -48,8 +48,8 @@ MutatorErase = R6Class("MutatorErase",
     }
   ),
   private = list(
-    .mutate = function(values, context) {
-      params = self$param_set$get_values(context = context)
+    .mutate = function(values) {
+      params = self$param_set$get_values()
       assert_data_frame(params$initializer(private$.primed_ps, nrow(values))$data, nrows = nrow(values))
     }
   )

@@ -109,8 +109,8 @@ SelectorSequential = R6Class("SelectorSequential",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select, context) {
-      params = private$.own_param_set$get_values(context = context)
+    .select = function(values, fitnesses, n_select) {
+      params = private$.own_param_set$get_values()
       pnames = sprintf("reduction_%s", seq_along(private$.wrapped))
 
       reductions = unlist(params[pnames], use.names = FALSE, recursive = FALSE)
@@ -135,7 +135,7 @@ SelectorSequential = R6Class("SelectorSequential",
       for (i in seq_along(private$.wrapped)) {
         op = private$.wrapped[[i]]
         on = outputs[[i]]
-        selected = op$operate(values, fitnesses, on, context = context)
+        selected = op$operate(values, fitnesses, on)
         values = values[selected]
         fitnesses = fitnesses[selected, , drop = FALSE]
         outputmap = outputmap[selected]

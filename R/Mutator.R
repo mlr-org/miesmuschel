@@ -39,14 +39,14 @@ Mutator = R6Class("Mutator",
     }
   ),
   private = list(
-    .operate = function(values, context) {
+    .operate = function(values) {
       inrows = nrow(values)
-      values = private$.mutate(values, context)
+      values = private$.mutate(values)
       outrows = nrow(values)
       if (inrows != outrows) stopf("Mutation of %s input rows resulted in %s output rows.", inrows, outrows)
       values
     },
-    .mutate = function(values, context) stop(".mutate needs to be implemented by inheriting class.")
+    .mutate = function(values) stop(".mutate needs to be implemented by inheriting class.")
   )
 )
 
@@ -94,7 +94,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
     }
   ),
   private = list(
-    .mutate = function(values, context) {
+    .mutate = function(values) {
 
       # Is non-native integer
       is_nn_int = !private$.integer_native & private$.primed_ps$class == "ParamInt"
@@ -102,8 +102,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
       uppers = private$.primed_ps$upper
       mutated = apply(values, 1, private$.mutate_numeric,
         lowers - 0.5 * is_nn_int,
-        uppers + 0.5 * is_nn_int,
-        context
+        uppers + 0.5 * is_nn_int
       )
 
       if (is.matrix(mutated)) {
@@ -123,7 +122,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
       colnames(mutated) <- colnames(values)
       as.data.table(mutated)
     },
-    .mutate_numeric = function(values, lowers, uppers, context) stop(".mutate_numeric needs to be implemented by inheriting class."),
+    .mutate_numeric = function(values, lowers, uppers) stop(".mutate_numeric needs to be implemented by inheriting class."),
     .integer_native = NULL  # whether the operation handles integers natively, or we have to round results.
   )
 )
@@ -162,10 +161,10 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     }
   ),
   private = list(
-    .mutate = function(values, context) {
+    .mutate = function(values) {
       vals = as.matrix(values)
       mode(vals) <- "character"
-      vals = apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character), context)
+      vals = apply(vals, 1, private$.mutate_discrete, map(private$.primed_ps$levels, as.character))
       if (is.matrix(vals)) {
         vals = t(vals)
       } else {
@@ -177,6 +176,6 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
 
       setnames(vals, private$.primed_ps$ids())
     },
-    .mutate_discrete = function(values, levels, context) stop(".mutate_discrete needs to be implemented by inheriting class.")
+    .mutate_discrete = function(values, levels) stop(".mutate_discrete needs to be implemented by inheriting class.")
   )
 )

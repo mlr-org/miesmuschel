@@ -42,10 +42,10 @@ FiltorNull = R6Class("FiltorNull",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_filter, context) {
+    .filter = function(values, known_values, fitnesses, n_filter) {
       seq_len(n_filter)
     },
-    .needed_input = function(output_size, context) output_size
+    .needed_input = function(output_size) output_size
   )
 )
 dict_filtors$add("null", FiltorNull)

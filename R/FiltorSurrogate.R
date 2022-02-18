@@ -91,10 +91,10 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_filter, context) {
-      params = private$.own_param_set$get_values(context = context)
+    .filter = function(values, known_values, fitnesses, n_filter) {
+      params = private$.own_param_set$get_values()
       primed = self$primed_ps
-      values = first(values, self$needed_input(n_filter, context))
+      values = first(values, self$needed_input(n_filter))
       if (nrow(values) == n_filter) return(seq_len(n_filter))
       fcolname = "fitnesses"
       while (fcolname %in% colnames(known_values)) {
@@ -108,9 +108,9 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
       })
       # when things are one-dimensional they cease to be a matrix, so we force it here.
       surrogate_prediction = matrix(surrogate_prediction, nrow = nrow(values), ncol = ncol(fitnesses))
-      private$.filter_surrogate(values, surrogate_prediction, known_values, fitnesses, n_filter, context)
+      private$.filter_surrogate(values, surrogate_prediction, known_values, fitnesses, n_filter)
     },
-    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter, context) stop("abstract."),
+    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) stop("abstract."),
     .surrogate_learner = NULL,
     .surrogate_selector = NULL,
     .own_param_set = NULL

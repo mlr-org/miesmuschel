@@ -53,8 +53,8 @@ RecombinatorCrossoverUniform = R6Class("RecombinatorCrossoverUniform",
     }
   ),
   private = list(
-    .recombine = function(values, context) {
-      params = self$param_set$get_values(context = context)
+    .recombine = function(values) {
+      params = self$param_set$get_values()
       index = lapply(sample(1:2, length(values), TRUE, c(1 - params$p, params$p)), function(x) c(x, 3 - x))
       setnames(values[, pmap(list(.SD, index), `[`)][seq_len(self$n_indivs_out)], names(values))
     }

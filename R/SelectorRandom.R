@@ -49,8 +49,8 @@ SelectorRandom = R6Class("SelectorRandom",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select, context) {
-      params = self$param_set$get_values(context = context)
+    .select = function(values, fitnesses, n_select) {
+      params = self$param_set$get_values()
       sample(nrow(values), n_select, replace = params$replace)
     }
   )

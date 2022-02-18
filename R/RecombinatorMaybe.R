@@ -122,11 +122,11 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     }
   ),
   private = list(
-    .recombine = function(values, context) {
-      if (stats::runif(1) < private$.maybe_param_set$get_values(context = context)$p) {
-        private$.wrapped$operate(values, context = context)
+    .recombine = function(values) {
+      if (stats::runif(1) < private$.maybe_param_set$get_values()$p) {
+        private$.wrapped$operate(values)
       } else {
-        private$.wrapped_not$operate(values, context = context)
+        private$.wrapped_not$operate(values)
       }
     },
     .wrapped = NULL,

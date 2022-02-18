@@ -73,15 +73,15 @@ MutatorProxy = R6Class("MutatorProxy",
     }
   ),
   private = list(
-    .mutate = function(values, context) {
-      operation = self$param_set$get_values(context = context)$operation
+    .mutate = function(values) {
+      operation = self$param_set$get_values()$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
         # In that case we try to stay safe by priming again.
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$operate(values, context = context)
+      operation$operate(values)
     },
     .primed_with = NULL,
     deep_clone = function(name, value) {

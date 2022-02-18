@@ -169,11 +169,9 @@ MiesOperator = R6Class("MiesOperator",
     #'   and may not have any missing components.
     #' @param ... (any)\cr
     #'   Depending on the concrete class, passed on to `$.operate()`.
-    #' @param context (named `list`)\cr
-    #'   Context information. Should have one named entry, `"inst"`: The [`OptimInstance`][bbotk::OptimInstance] being optimized.
     #' @return `data.frame`: the result of the operation. If the input was a [`data.table`][data.table::data.table] instead of
     #'   a `data.frame`, the output is also [`data.table`][data.table::data.table].
-    operate = function(values, ..., context = list(inst = NULL)) {
+    operate = function(values, ...) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       ids = private$.primed_ps$ids()
       if (getOption("miesmuschel.testing")) private$.primed_ps$assert_dt(values)
@@ -186,7 +184,7 @@ MiesOperator = R6Class("MiesOperator",
       # load packages
       require_namespaces(self$packages, msg = sprintf("The following packages are required for %s operator: %%s", class(self)[[1]]))
       # make sure input / output cols are in the order as inndicated by paramset --> use `match` on input (and output if endomorphic)
-      values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ..., context = context)
+      values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ...)
       if (self$endomorphism) {
         if (getOption("miesmuschel.testing")) values = private$.primed_ps$assert_dt(values)[, match(ids, colnames(values), 0), with = FALSE]
         if (convert) {
@@ -289,7 +287,7 @@ MiesOperator = R6Class("MiesOperator",
     .primed_ps = NULL,
     .param_classes = NULL,
     .param_set_source = NULL,
-    .operate = function(values, ..., context) stop(".operate needs to be implemented by inheriting class."),
+    .operate = function(values, ...) stop(".operate needs to be implemented by inheriting class."),
     .packages = NULL,
     .dict_entry = NULL,
     .dict_shortaccess = NULL,

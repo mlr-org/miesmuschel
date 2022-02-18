@@ -76,24 +76,24 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
     }
   ),
   private = list(
-    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter, context) {
-      params = private$.own_param_set$get_values(context = context)
-      tournament_size = private$.tournament_size(n_filter, context)
+    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) {
+      params = private$.own_param_set$get_values()
+      tournament_size = private$.tournament_size(n_filter)
       tournament_windows = split(seq_len(sum(tournament_size)), rep(seq_along(tournament_size), tournament_size))
       selected = vector("list", length(tournament_size))
 
       for (i in seq_along(tournament_windows)) {
         tw = tournament_windows[[i]]
-        selected_from_window = private$.surrogate_selector$operate(values[tw], surrogate_prediction[tw, , drop = FALSE], params$per_tournament, context = context)
+        selected_from_window = private$.surrogate_selector$operate(values[tw], surrogate_prediction[tw, , drop = FALSE], params$per_tournament)
         selected[[i]] = tw[selected_from_window][sample.int(length(selected_from_window))]
       }
       first(unlist(selected, recursive = FALSE, use.names = FALSE), n_filter)
     },
-    .needed_input = function(output_size, context) {
-      sum(private$.tournament_size(output_size, context))
+    .needed_input = function(output_size) {
+      sum(private$.tournament_size(output_size))
     },
-    .tournament_size = function(output_size, context) {
-      params = private$.own_param_set$get_values(context = context)
+    .tournament_size = function(output_size) {
+      params = private$.own_param_set$get_values()
       number_of_tournaments = ceiling(output_size / params$per_tournament)
       tournament_size = round(exp(seq(
         log(params$tournament_size),

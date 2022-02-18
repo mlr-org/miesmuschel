@@ -976,7 +976,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 
   fitnesses = mies_get_fitnesses(inst, rows)
 
-  selected = selector$operate(indivs, fitnesses, n_select, context = list(inst = inst))
+  selected = selector$operate(indivs, fitnesses, n_select)
   if (get_indivs) {
     indivs[selected]
   } else {

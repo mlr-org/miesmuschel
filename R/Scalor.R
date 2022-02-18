@@ -67,7 +67,7 @@ Scalor = R6Class("Scalor",
   ),
   private = list(
     .supported = NULL,
-    .operate = function(values, fitnesses, context) {
+    .operate = function(values, fitnesses) {
       assert_data_table(values, min.rows = 1)
       if ("single-crit" %in% self$supported && test_numeric(fitnesses, any.missing = FALSE, len = nrow(values))) {
         fitnesses = matrix(fitnesses, ncol = 1)
@@ -76,9 +76,9 @@ Scalor = R6Class("Scalor",
         min.cols = 1, max.cols = if ("multi-crit" %nin% self$supported) 1,
         mode = "numeric", any.missing = FALSE
       )
-      scaled = private$.scale(values, fitnesses, context)
+      scaled = private$.scale(values, fitnesses)
       assert_numeric(scaled, finite = TRUE, any.missing = FALSE, len = nrow(values))
     },
-    .scale = function(values, fitnesses, context) stop(".scale needs to be implemented by inheriting class.")
+    .scale = function(values, fitnesses) stop(".scale needs to be implemented by inheriting class.")
   )
 )

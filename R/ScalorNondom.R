@@ -49,8 +49,8 @@ ScalorNondom = R6Class("ScalorNondom",
     }
   ),
   private = list(
-    .scale = function(values, fitnesses, context) {
-      params = self$param_set$get_values(context = context)
+    .scale = function(values, fitnesses) {
+      params = self$param_set$get_values()
       if (params$jitter) {
         fitnesses = fitnesses *
           (1 + runif(length(fitnesses)) * sqrt(.Machine$double.eps))

@@ -39,7 +39,7 @@ SelectorNull = R6Class("SelectorNull",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select, context) {
+    .select = function(values, fitnesses, n_select) {
       (seq_len(n_select) - 1) %% nrow(values) + 1  # mod-operation to wrap around when n_select > nrow(values)
     }
   )
