@@ -228,7 +228,7 @@ p1 = ggplot(pdata, aes(x = (params), y = vals, color = as.factor(scenario))) +
     "random_interleave_fraction.end" = parse(text = TeX("$\\rho(1)$")),
     "sample" = parse(text = TeX("$P_{\\lambda}(A)$"))
     )) +
-  geom_quasirandom(data = pdata, dodge.width = .8) +
+  geom_quasirandom(data = pdata, dodge.width = .8, alpha = .5) +
   scale_shape_manual(values = c(21, 24), name = "γ* batch_method", breaks = c(TRUE, FALSE), labels = c("HB", "equal")) +
 #  scale_size_manual(values = c(4, 4)) +
   scale_colour_Publication(name = "Scenario", labels = c("LCbench", "rbv2_super      ")) +
