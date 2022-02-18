@@ -45,7 +45,9 @@ MiesOperator = R6Class("MiesOperator",
       assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
         private$.param_set = assert_param_set(param_set)
-        private$.param_set$context_available = "inst"
+        if (paradox_context_available) {
+          private$.param_set$context_available = "inst"
+        }
         private$.param_set_source = NULL
       } else {
         lapply(param_set, function(x) assert_param_set(eval(x)))
@@ -56,7 +58,7 @@ MiesOperator = R6Class("MiesOperator",
       private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
       private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
       assert_true(is.language(own_param_set))
-      if (!inherits(param_set, "ParamSet")) {
+      if (paradox_context_available && !inherits(param_set, "ParamSet")) {
         # Doing the following in a less convoluted way gives `Error in ps()$context_available = "inst"` because of the default value of own_param_set.
         eval(substitute({x = own_param_set ; x$context_available = "inst"}, list(own_param_set = own_param_set)))  # TODO: there has to be a better way
       }
