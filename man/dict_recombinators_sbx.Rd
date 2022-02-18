@@ -73,6 +73,14 @@ Other recombinators:
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorSimulatedBinaryCrossover}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{keep_complement}}{(\code{logical(1)})\cr
+Whether the operation keeps both individuals that were crossed over or discards the crossover complement.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -99,6 +107,16 @@ Initialize the \code{RecombinatorSimulatedBinaryCrossover} object.
 \if{html}{\out{<div class="r">}}\preformatted{RecombinatorSimulatedBinaryCrossover$new(keep_complement = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{keep_complement}}{(\code{logical(1)})\cr
+Whether the operation should keep both individuals that were crossed over (\code{TRUE}), or only the first and discard
+the crossover complement (\code{FALSE}). Default \code{TRUE}.
+The \verb{$keep_complement} field will reflect this value.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
