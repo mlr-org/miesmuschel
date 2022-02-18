@@ -15,7 +15,7 @@
 #'  Non-negative distribution index of the polynomial distribution for each component.
 #'  Generally spoken, the higher `n`, the higher the probability of creating near parent values.
 #'  This may either be a scalar in which case it is applied to all input components, or a vector,
-#'  in which case it must have the length of the input components and applies to components in 
+#'  in which case it must have the length of the input components and applies to components in
 #'  order in which they appear in the priming [`ParamSet`][paradox::ParamSet]. Initialized to 1.
 #'
 #' @templateVar id sbx
@@ -46,13 +46,25 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
   public = list(
     #' @description
     #' Initialize the `RecombinatorSimulatedBinaryCrossover` object.
+    #' @param keep_complement (`logical(1)`)\cr
+    #'   Whether the operation should keep both individuals that were crossed over (`TRUE`), or only the first and discard
+    #'   the crossover complement (`FALSE`). Default `TRUE`.
+    #'   The `$keep_complement` field will reflect this value.
     initialize = function(keep_complement = TRUE) {
-      param_set = ps(p = p_dbl(lower = 0, upper = 1, tags = "required"),
-        n = p_uty(custom_check = crate(function(x) {
-          check_double(x, lower = 0L, any.missing = FALSE, min.len = 1L)
-        }, .parent = topenv()), tags = "required"))
+      param_set = ps(
+        p = p_dbl(lower = 0, upper = 1, tags = "required"),
+        n = p_vct(lower = 0, tags = "required")
+      )
       param_set$values = list(p = 0.5, n = 1)
-      super$initialize("ParamDbl", param_set = param_set, n_indivs_in = 2L, n_indivs_out = 2L)
+      super$initialize("ParamDbl", param_set = param_set, n_indivs_in = 2, n_indivs_out = if (keep_complement) 2 else 1, dict_entry = "sbx")
+    }
+  ),
+  active = list(
+    #' @field keep_complement (`logical(1)`)\cr
+    #' Whether the operation keeps both individuals that were crossed over or discards the crossover complement.
+    keep_complement = function(val) {
+      if (!missing(val)) stop("keep_complement is read-only.")
+      private$.n_indivs_out == 2
     }
   ),
   private = list(
