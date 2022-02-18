@@ -1231,7 +1231,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
 
   known_values = inst$archive$data[, f_ids, with = FALSE]
   fitnesses = mies_get_fitnesses(inst)
-  selected = filtor$operate(individuals_dt, known_values, fitnesses, lambda, context = list(inst = inst))
+  selected = filtor$operate(individuals_dt, known_values, fitnesses, lambda)
   if (get_indivs) {
     individuals[selected, ]
   } else {
