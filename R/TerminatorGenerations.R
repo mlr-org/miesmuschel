@@ -43,8 +43,7 @@ TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,
     initialize = function() {
       param_set = ps(generations = p_int(0, special_vals = list(Inf), tags = "required"))
       param_set$values$generations = Inf
-      super$initialize(param_set = param_set, properties = c("single-crit", "multi-crit"))
-      self$unit = "generations"
+      super$initialize(id = "gens", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "generations")
     },
 
     #' @description
