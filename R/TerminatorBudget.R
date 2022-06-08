@@ -45,8 +45,7 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
         "must be a function with one argument, which when called with NULL must return a finite numeric value."
       }))
       param_set$values = list(budget = Inf, aggregate = sum)
-      super$initialize(param_set = param_set, properties = c("single-crit", "multi-crit"))
-      self$unit = "percent"
+      super$initialize(id = "budget", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "percent")
     },
 
     #' @description
