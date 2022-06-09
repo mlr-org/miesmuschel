@@ -214,9 +214,9 @@ library("ggbeeswarm")
 
 
 
-p1 = ggplot(pdata, aes(x = (params), y = vals, color = as.factor(scenario))) +
+p1 = ggplot(pdata[params != "batch_method"], aes(x = (params), y = vals, color = as.factor(scenario))) +
   scale_x_discrete(labels = c(
-    batch_method = "batch_method",
+#    batch_method = "batch_method",
     "mu" = parse(text = TeX("$\\mu(1)$")),
     "budget_log_step" = parse(text = TeX("$\\eta_{fid}$")),
     "eta_surv" = parse(text = TeX("$\\eta_{surv}$")),
@@ -228,7 +228,7 @@ p1 = ggplot(pdata, aes(x = (params), y = vals, color = as.factor(scenario))) +
     "random_interleave_fraction.end" = parse(text = TeX("$\\rho(1)$")),
     "sample" = parse(text = TeX("$P_{\\lambda}(A)$"))
     )) +
-  geom_quasirandom(data = pdata, dodge.width = .8) +
+  geom_quasirandom(data = pdata[params != "batch_method"], dodge.width = .8) +
   scale_shape_manual(values = c(21, 24), name = "γ* batch_method", breaks = c(TRUE, FALSE), labels = c("HB", "equal")) +
 #  scale_size_manual(values = c(4, 4)) +
   scale_colour_Publication(name = "Scenario", labels = c("LCbench", "rbv2_super      ")) +
@@ -236,18 +236,18 @@ p1 = ggplot(pdata, aes(x = (params), y = vals, color = as.factor(scenario))) +
     sec.axis = sec_axis(identity, breaks = c(0, 1/3, 2/3, 1), labels = c(0, "1/3", "2/3", 1))) +
 #  theme_bw() +
   theme(axis.text.x = element_text(angle = 0)) +
-  geom_label(data = annot, aes(x = as.factor(nm), y = yi + ifelse(yi == 0, -.05, .07), label = label, colour = NULL, alpha = NULL), key_glyph = "point") +
+  geom_label(data = annot[nm != "batch_method"], aes(x = as.factor(nm), y = yi + ifelse(yi == 0, -.05, .07), label = label, colour = NULL, alpha = NULL), key_glyph = "point") +
   guides(alpha = 'none') +
-  geom_point(data = bests.t[grepl("*", name, fixed = TRUE)], aes(x = (params), y = vals, group = as.factor(scenario),
+  geom_point(data = bests.t[grepl("*", name, fixed = TRUE)][params != "batch_method"], aes(x = (params), y = vals, group = as.factor(scenario),
     shape = grepl("hb", name), fill = as.factor(scenario)), # fill = substr(name, 1, 6), size = grepl("*", name, fixed = TRUE)),
     color = "black", position = position_jitterdodge(dodge.width = .8, jitter.width = .3), size = 4) +
   scale_fill_manual(values = c("#386cb0","#fdb462","#7fc97f","#ef3b2c","#662506","#a6cee3","#fb9a99","#984ea3","#ffff33"), guide = "none") +
   ggtitle("Best Configuration Parameters") +
   xlab("Parameter") +
   ylab("Value")
-p1
+# p1
 
-ggsave("coordinateplot.pdf", plot = p1, device = cairo_pdf)
+ggsave("coordinateplot.pdf", plot = p1, device = cairo_pdf, width = 8.58, height = 5.04)
 
 
 # ---------
