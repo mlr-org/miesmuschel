@@ -178,7 +178,7 @@ normie_scale = function(values) {
 
 # replace mlr3misc's default 'parent' with topenv()
 # TODO: submit this as PR to mlr3misc
-crate <- function(.fn, ..., .parent = topenv()) {
+crate <- function(.fn, ..., .parent = topenv(parent.frame())) {
     nn = map_chr(substitute(list(...)), as.character)[-1L]
     environment(.fn) = list2env(setNames(list(...), nn), parent = .parent)
     .fn

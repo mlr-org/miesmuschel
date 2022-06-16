@@ -169,7 +169,7 @@ for (opinfo in dicts) {
 
     pv_obj = do.call(shortforms[[opinfo$base]], c(list(dictname), constargs))
     expand(pv_obj)
-    expect_false(isTRUE(all.equal(test_obj, pv_obj)))
+    expect_false(isTRUE(all.equal(test_obj, pv_obj)), info = opinfo$operator)
     test_obj$param_set$values[[testingparam$id]] = val
     expect_true(isTRUE(all.equal(test_obj, pv_obj)))
 
