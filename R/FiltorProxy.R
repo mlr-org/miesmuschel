@@ -45,7 +45,7 @@ FiltorProxy = R6Class("FiltorProxy",
     #' @description
     #' Initialize the `FiltorProxy` object.
     initialize = function() {
-      param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Filtor"), tags = "required"))
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Filtor")), tags = "required"))
       param_set$values = list(operation = FiltorNull$new())
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, dict_entry = "proxy")

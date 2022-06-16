@@ -40,10 +40,10 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
     #' @description
     #' Initialize the `TerminatorBudget` object.
     initialize = function() {
-      param_set = ps(budget = p_dbl(tags = "required"), aggregate = p_uty(tags = "required", custom_check = function(x) {
+      param_set = ps(budget = p_dbl(tags = "required"), aggregate = p_uty(tags = "required", custom_check = crate(function(x) {
         if (test_function(x) && test_number(x(NULL), finite = TRUE)) return(TRUE)
         "must be a function with one argument, which when called with NULL must return a finite numeric value."
-      }))
+      })))
       param_set$values = list(budget = Inf, aggregate = sum)
       super$initialize(id = "budget", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "percent")
     },

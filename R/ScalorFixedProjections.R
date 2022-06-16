@@ -35,7 +35,7 @@ ScalorFixedProjection = R6Class("ScalorFixedProjection",
     #' Initialize the `ScalorFixedProjection` object.
     initialize = function(weights_component_id = "scalarization_weights") {
       private$.weight_id = assert_string(weights_component_id)
-      param_set = ps(scalarization = p_uty(custom_check = function(x) check_function(x, args = c("fitnesses", "weights"))))
+      param_set = ps(scalarization = p_uty(custom_check = crate(function(x) check_function(x, args = c("fitnesses", "weights")))))
       param_set$values = list(scalarization = scalarizer_linear())
       super$initialize(param_set = param_set, dict_entry = "fixedprojection")
     },

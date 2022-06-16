@@ -40,7 +40,7 @@ ScalorProxy = R6Class("ScalorProxy",
     #' @description
     #' Initialize the `ScalorProxy` object.
     initialize = function() {
-      param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Scalor")))
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Scalor"))))
       param_set$values = list(operation = ScalorOne$new())
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, dict_entry = "proxy")
