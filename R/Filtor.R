@@ -23,7 +23,7 @@
 #'   Individuals to use for filtering. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components. Note that `known_values` may be empty.
 #' * `fitnesses` :: `numeric` | `matrix`\cr
-#'   Fitnesses for each individual given in `old_values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
+#'   Fitnesses for each individual given in `known_values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
 #'   this is a `matrix`, if number of rows must be equal to the number of rows in `values`, and it must have one column when doing single-crit optimization
 #'   and one column each for each  "criterion" when doing multi-crit optimization.
 #' * `n_filter` :: `integer(1)`\cr

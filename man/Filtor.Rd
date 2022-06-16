@@ -24,7 +24,7 @@ and may not have any missing components.
 Individuals to use for filtering. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
 and may not have any missing components. Note that \code{known_values} may be empty.
 \item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
-Fitnesses for each individual given in \code{old_values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
+Fitnesses for each individual given in \code{known_values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
 this is a \code{matrix}, if number of rows must be equal to the number of rows in \code{values}, and it must have one column when doing single-crit optimization
 and one column each for each  "criterion" when doing multi-crit optimization.
 \item \code{n_filter} :: \code{integer(1)}\cr
