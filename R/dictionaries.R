@@ -68,7 +68,7 @@ mut = function(.key, ...) {
 #' @rdname mut
 #' @export
 muts = function(.keys, ...) {
-  dictionary_sugar_mget(dict_mutators, .keys, ...)
+  miesmuschel_dictionary_mget(dict_mutators, .keys, ...)
 }
 
 #' @rdname mut
@@ -80,7 +80,7 @@ rec = function(.key, ...) {
 #' @rdname mut
 #' @export
 recs = function(.key, ...) {
-  dictionary_sugar_mget(dict_recombinators, .key, ...)
+  miesmuschel_dictionary_mget(dict_recombinators, .key, ...)
 }
 
 #' @rdname mut
@@ -92,7 +92,7 @@ sel = function(.key, ...) {
 #' @rdname mut
 #' @export
 sels = function(.key, ...) {
-  dictionary_sugar_mget(dict_selectors, .key, ...)
+  miesmuschel_dictionary_mget(dict_selectors, .key, ...)
 }
 
 #' @rdname mut
@@ -104,7 +104,7 @@ scl = function(.key, ...) {
 #' @rdname mut
 #' @export
 scls = function(.key, ...) {
-  dictionary_sugar_mget(dict_scalors, .key, ...)
+  miesmuschel_dictionary_mget(dict_scalors, .key, ...)
 }
 
 #' @rdname mut
@@ -116,5 +116,17 @@ ftr = function(.key, ...) {
 #' @rdname mut
 #' @export
 ftrs = function(.key, ...) {
-  dictionary_sugar_mget(dict_filtors, .key, ...)
+  miesmuschel_dictionary_mget(dict_filtors, .key, ...)
+}
+
+
+miesmuschel_dictionary_mget = function(dict, .keys, ...) {
+  if (missing(.keys)) {
+    return(dict)
+  }
+  values = lapply(X = .keys, FUN = dictionary_sugar_get, dict = dict, ...)
+  if (is.null(names(.keys))) {
+    names(values) = .keys
+  }
+  values
 }
