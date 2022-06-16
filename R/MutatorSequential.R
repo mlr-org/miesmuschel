@@ -36,7 +36,7 @@ MutatorSequential = R6Class("MutatorSequential",
     #'   The constructed object gets a *clone* of this argument. The `$mutators` field will reflect this value.
     initialize = function(mutators) {
       private$.wrapped = imap(unname(assert_list(mutators, types = "Mutator", min.len = 1)), function(x, i) {
-        x$clone(deep = TRUE)
+        x = x$clone(deep = TRUE)
         x$param_set$set_id = sprintf("mutator_%s", i)
         x
       })
@@ -45,7 +45,7 @@ MutatorSequential = R6Class("MutatorSequential",
 
       super$initialize(Reduce(intersect, map(private$.wrapped, "param_classes")), ps_alist,
         packages = unique(unlist(map(private$.wrapped, "packages"), use.names = FALSE, recursive = FALSE)),
-        dict_entry = "sequential")
+        dict_entry = "sequential", own_param_set = quote(ps()))
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators

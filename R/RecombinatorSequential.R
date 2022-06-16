@@ -55,7 +55,7 @@ RecombinatorSequential = R6Class("RecombinatorSequential",
     #'   The `$allow_lcm_packing` field will reflect this value.
     initialize = function(recombinators, allow_lcm_packing = FALSE) {
       private$.wrapped = imap(unname(assert_list(recombinators, types = "Recombinator", min.len = 1)), function(x, i) {
-        x$clone(deep = TRUE)
+        x = x$clone(deep = TRUE)
         x$param_set$set_id = sprintf("recombinator_%s", i)
         x
       })

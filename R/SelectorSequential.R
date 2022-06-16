@@ -65,7 +65,7 @@ SelectorSequential = R6Class("SelectorSequential",
     #'   The constructed object gets a *clone* of this argument. The `$selectors` field will reflect this value.
     initialize = function(selectors) {
       private$.wrapped = imap(unname(assert_list(selectors, types = "Selector", min.len = 1)), function(x, i) {
-        x$clone(deep = TRUE)
+        x = x$clone(deep = TRUE)
         x$param_set$set_id = sprintf("selector_%s", i)
         x
       })
