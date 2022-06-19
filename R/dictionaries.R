@@ -125,8 +125,5 @@ miesmuschel_dictionary_mget = function(dict, .keys, ...) {
     return(dict)
   }
   values = lapply(X = .keys, FUN = dictionary_sugar_get, dict = dict, ...)
-  if (is.null(names(.keys))) {
-    names(values) = .keys
-  }
   values
 }
