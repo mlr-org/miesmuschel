@@ -183,9 +183,9 @@ expect_error(MutatorCombination$new(list(g1 = mut_dbl), groups = list(g1 = "x_re
 
 expect_error(MutatorCombination$new(list(g1 = mut_dbl, g1 = mut_dbl), groups = list(g1 = c("x_rep_1", "x_rep_2"))), "unique names")
 expect_error(MutatorCombination$new(list(ParamDbl = mut_dbl), groups = list(ParamDbl = c("x_rep_1", "x_rep_2"))), "Special group names")
-expect_error(MutatorCombination$new(list(g1 = mut_lf), groups = list(g1 = c("x_rep_1", "x_rep_2", "x_rep_3", "x_rep_4")))$prime(psnum), "Must be .*ParamFct.* but is .*ParamDbl")
+expect_error(MutatorCombination$new(list(g1 = mut_lf), groups = list(g1 = c("x_rep_1", "x_rep_2", "x_rep_3", "x_rep_4")))$prime(psnum), "Must be .*ParamFct.* but (is|has) .*ParamDbl")
 expect_error(MutatorCombination$new(list(g1 = mut_dbl, g2 = mut_lf),
-  groups = list(g1 = c("x_rep_1", "x_rep_2"), g2 = c("x_rep_3", "x_rep_4")))$prime(psnum), "Must be .*ParamFct.* but is .*ParamDbl")
+  groups = list(g1 = c("x_rep_1", "x_rep_2"), g2 = c("x_rep_3", "x_rep_4")))$prime(psnum), "Must be .*ParamFct.* but (is|has) .*ParamDbl")
 
 expect_error(MutatorCombination$new(list(g1 = mut_dbl), groups = list(g1 = c("x_rep_1", "x_rep_2", "x_rep_3")))$prime(psnum), "No operators for.* x_rep_4 .* ParamDbl")
 
@@ -253,7 +253,7 @@ expect_silent(MutatorCombination$new(list(g1 = mut_fct), groups = list(g1 = c("x
 # It could be argued that the following should work, but let's live without that for now
 expect_error(MutatorCombination$new(list(ParamLgl = mut_fct), binary_fct_as_logical = TRUE, on_type_not_present = "quiet"), "ParamLgl does not support the type")
 
-expect_error(MutatorCombination$new(list(ParamLgl = mut_lgl, ParamFct = mut_fct), binary_fct_as_logical = TRUE, on_type_not_present = "quiet")$prime(ps(x = p_fct(c("a", "b")))), "Must be a subset of .*ParamLgl.* but is .*ParamFct")
+expect_error(MutatorCombination$new(list(ParamLgl = mut_lgl, ParamFct = mut_fct), binary_fct_as_logical = TRUE, on_type_not_present = "quiet")$prime(ps(x = p_fct(c("a", "b")))), "Must be a subset of .*ParamLgl.* but (is|has) .*ParamFct")
 
 expect_warning(MutatorCombination$new(list(ParamLgl = mut_lgl, ParamFct = mut_fct), binary_fct_as_logical = FALSE)$prime(ps(x = p_fct(c("a", "b")))), "ParamLgl have no corresponding dimension")
 

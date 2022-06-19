@@ -31,7 +31,7 @@ expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
 
   mut$prime(pbig_allowed)
   expect_equal(mut$primed_ps, pbig_allowed)
-  expect_error(mut$operate(pvals_allowed), "Must be a permutation of set")
+  expect_error(mut$operate(pvals_allowed), "[mM]ust be a (permutation of set|set equal to)")
 
   mut$prime(p_allowed)
   expect_error(mut$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")

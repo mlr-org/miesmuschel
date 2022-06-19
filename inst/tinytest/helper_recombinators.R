@@ -28,7 +28,7 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
 
   rec$prime(pbig_allowed)
   expect_equal(rec$primed_ps, pbig_allowed)
-  expect_error(rec$operate(pvals_allowed), "Must be a permutation of set")
+  expect_error(rec$operate(pvals_allowed), "[mM]ust be a (permutation of set|set equal to)")
 
   rec$prime(p_allowed)
 

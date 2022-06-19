@@ -27,7 +27,7 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
 
   sel$prime(pbig_allowed)
   expect_equal(sel$primed_ps, pbig_allowed)
-  expect_error(sel$operate(pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "Must be a permutation of set")
+  expect_error(sel$operate(pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "[mM]ust be a (permutation of set|set equal to)")
 
   sel$prime(p_allowed)
   expect_error(sel$operate(pbigvals_allowed, seq_len(nrow(pbigvals_allowed)), 1), "Parameter .*\\.1.*not available")

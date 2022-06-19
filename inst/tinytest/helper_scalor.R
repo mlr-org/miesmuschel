@@ -27,7 +27,7 @@ expect_scalor = function(scl, scalor_name, can_oversample = TRUE, is_primed = FA
 
   scl$prime(pbig_allowed)
   expect_equal(scl$primed_ps, pbig_allowed)
-  expect_error(scl$operate(pvals_allowed, seq_len(nrow(pvals_allowed))), "Must be a permutation of set")
+  expect_error(scl$operate(pvals_allowed, seq_len(nrow(pvals_allowed))), "[mM]ust be a (permutation of set|set equal to)")
 
   scl$prime(p_allowed)
   expect_error(scl$operate(pbigvals_allowed, seq_len(nrow(pbigvals_allowed))), "Parameter .*\\.1.*not available")

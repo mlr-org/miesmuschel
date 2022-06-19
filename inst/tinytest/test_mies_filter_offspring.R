@@ -38,7 +38,7 @@ fn$prime(p)
 expect_equal(mies_filter_offspring(oibig, individuals, 3, fn), individuals[1:3])
 expect_equal(mies_filter_offspring(oibig, individuals, 3, fn, get_indivs = FALSE), 1:3)
 # error when not primed correctly
-expect_error(mies_filter_offspring(oibigmin, individuals_min, 1, fn), "Must be equal to set .* but is")
+expect_error(mies_filter_offspring(oibigmin, individuals_min, 1, fn), "Must be (equal to set .* but is|a permutation of set .* but has extra)")
 
 # TODO
 ## # FiltorSurrogateProgressive
