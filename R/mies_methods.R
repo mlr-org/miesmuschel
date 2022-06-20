@@ -8,28 +8,23 @@
 #' This function can be used directly, but it is easier to use it within the [`OptimizerMies`]
 #' [`Optimizer`][bbotk::Optimizer] if standard GA operation is desired.
 #'
-#' "Rolling-tide" multifidelity is supported as described in [`OptimizerMies`] or more thoroughly
-#' in `vignette("mies-multifid")`. For this,
+#' Multifidelity evaluation is supported as described in `vignette("mies-multifid")`. For this,
 #' an extra component named after `budget_id` is appended to each individual, chosen from
-#' the `fidelity_schedule` depending on the value of `survivor_budget`. Both `fidelity_schedule`
-#' and `budget_id` should be the same values as given to the other `mies_*` functions.
+#' the `fidelity` argument and depending on the value of `survivor_budget`. `budget_id` should
+#' have the same values as given to the other `mies_*` functions.
 #'
 #' @template param_inst
 #' @param offspring (`data.frame`)\cr
 #'   Proposed configurations to be evaluated, must have columns named after the `inst`'s search space, minus `budget_id` if not `NULL`.
-#' @template param_fidelity_schedule_maybenull
 #' @template param_budget_id_maybenull
-#' @param survivor_budget (`logical(1)`)\cr
-#'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' @param step_fidelity (`logical(1)`)\cr
-#'   Whether to *also* evaluate alive individuals from previous generations that have a budget value below the current `budget_survivors`.
-#'   Default `FALSE`. Ignored when `budget_id` and `fidelity_schedule` are `NULL`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#' @template param_fidelity_maybenull
+#' @param reevaluate_fidelity (`atomic(1)`)\cr
+#'   Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if `monotonic` is `TRUE`) or
+#'   different from the current `fidelity` value. Default `NULL`: Do not re-evaluate. Must be `NULL` when `budget_id` and `fidelity` are `NULL`.
+#'   See also [`mies_step_fidelity`].
 #' @param monotonic (`logical(1)`)\cr
-#'   When `step_fidelity` is `TRUE`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
-#'   Ignored when `step_fidelity` is `FALSE` or when `budget_id` and `fidelity_schedule` are `NULL`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#'   When `step_fidelity` is non-`NULL`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
+#'   Default `TRUE`. Ignored when `step_fidelity` is `NULL`
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
@@ -69,133 +64,101 @@
 #' # function.
 #'
 #' ###
-#' # Advanced demo, making use of additional components and fidelity_schedule
-#' # Note that the multifidelity functionality is experimental and the UI may
-#' # change in the future.
+#' # Advanced demo, making use of additional components and doing multi-fidelity
 #' ##
 #'
-#' # declare 'y' the budget parameter. It does not occur in 'offspring' any more.
+#' # declare 'y' the budget parameter. It will not be in the 'offspring'
+#' # table any more.
 #' budget_id = "y"
-#' # but: offspring may contain any other value that is appended to 'oi'. They
+#' # but: offspring may contain any other value that is appended to 'oi'. These
 #' # are ignored by the objective.
 #' offspring = data.frame(x = 0:1, z = 3)
 #'
-#' fidelity_schedule = data.frame(
-#'   generation = c(1, 5),
-#'   budget_new = c(1, 2),
-#'   budget_survivors = c(3, 4)
-#' )
-#' # The fidelity schedule:
-#' fidelity_schedule
-#'
-#' # When given a fidelity_schedule and budget_id, the 'budget_new' budget
-#' # is used. Here it is '1', because the geeneration number 3 is being evaluated.
-#' mies_evaluate_offspring(oi, offspring = offspring,
-#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 1)
 #'
 #' # This now has the additional column 'z'. Values of y for the new evaluations
 #' # are 1.
 #' oi$archive
 #'
-#' # setting 'survivor_budget = TRUE' uses the 'budget_survivors' schedule column.
-#' mies_evaluate_offspring(oi, offspring = offspring,
-#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id,
-#'   survivor_budget = TRUE)
-#'
-#' # the new row has y set to 2.
+#' offspring = data.frame(x = 2, z = 3)
+#' # Increasing the fidelity will not cause re-evaluation of existing individuals
+#' # when `reevaluate_fidelity` is not given.
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 2)
 #' oi$archive
 #'
-#' # When calling 'mies_evaluate_offspring()' with the same 'fidelity_schedule'
-#' # now, then the generation 5 is evaluated. Therefore the next row of
-#' # the schedule is used, and 'y' is therefore set to 2 (or 4, ir survivor budget
-#' # is used).
+#' offspring = data.frame(x = 3, z = 3)
+#' # Depending on the effect of fidelity, this may however have a biasing effect,
+#' # so it may be desirable to re-evaluate surviving individuals from previous
+#' # generations. The 'reevaluate_fidelity' may even be different from 'fidelity'
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 3, reevaluate_fidelity = 2)
 #'
-#' mies_evaluate_offspring(oi, offspring = offspring,
-#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
-#'
+#' # In this example, only individuals with 'y = 1' were re-evaluated, since
+#' # 'monotonic' is TRUE.
 #' oi$archive
-#' # TODO example with step_fidelity = TRUE
+#'
 #' @export
-mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE, step_fidelity = FALSE, monotonic = TRUE) {
+mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity = NULL, reevaluate_fidelity = NULL, monotonic = TRUE) {
   assert_optim_instance(inst)
 
   offspring = as.data.table(assert_data_frame(offspring))
   ss_ids = inst$search_space$ids()
-  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
-  assert_flag(survivor_budget)
-  assert_flag(step_fidelity)
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
+  if (!is.null(reevaluate_fidelity) && is.null(budget_id)) stop("reevaluate_fidelity must be NULL when budget_id is not given.")
   assert_flag(monotonic)
   data = inst$archive$data
-  current_gen = max(data$dob, 0, na.rm = TRUE) + 1
   ocols = colnames(offspring)
-  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)  # TODO: must not include survivor_budget, but can include other things
+  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)
 
-  reeval = integer(0)  # individuals to be killed; only becomes relevant when `step_fidelity` is `TRUE`
+  reeval = integer(0)  # individuals to be killed; only becomes relevant when `reevaluate_fidelity` is given
 
   if (!is.null(budget_id)) {
-    assert(check_fidelity_schedule(fidelity_schedule))
-    fidelity_schedule = as.data.table(fidelity_schedule)
-    fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
-    fidelity_column = if (survivor_budget) "budget_survivors" else "budget_new"
-    fidelity = fidelity_schedule[data.table(generation = current_gen), fidelity_column, on = "generation", roll = TRUE, with = FALSE]
-    setnames(fidelity, budget_id)
+    assert_scalar(fidelity)
 
-    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])  # the conditional is to avoid edge-cases for empty tables here.
+    fidelity = setnames(data.table(fidelity), budget_id)
 
-    if (step_fidelity && any(is.na(data$eol))) {
+    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])  # the conditional is to handle the edge-case for empty offspring tables
+
+    if (!is.null(reevaluate_fidelity) && any(is.na(data$eol))) {
       assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
       assert_integerish(data$eol, lower = 0, tol = 1e-100)
-      budget_survivors = NULL
-      survivor_fidelity = fidelity_schedule[data.table(generation = current_gen), budget_survivors, on = "generation", roll = TRUE]
+
       comparator = if (monotonic) `<` else `!=`
-      reeval = which(is.na(data$eol) & comparator(data[[budget_id]], survivor_fidelity))
+      reeval = which(is.na(data$eol) & comparator(data[[budget_id]], reevaluate_fidelity))
       indivs = data[reeval, ocols, with = FALSE]
-      offspring = rbind(offspring, set(indivs, , budget_id, survivor_fidelity))
+      offspring = rbind(offspring, set(indivs, , budget_id, reevaluate_fidelity))
     }
   }
 
+  current_gen = max(data$dob, 0, na.rm = TRUE) + 1
   ret = eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))
 
-  set(inst$archive$data, reeval, "eol", current_gen)
+  set(inst$archive$data, reeval, "eol", current_gen)  # kill old individuals that were fidelity-reevaluated
 
   invisible(ret)
 }
 
-#' @title Re-Evaluate Configurations with Higher Fidelity
+#' @title Re-Evaluate Existing Configurations with Higher Fidelity
 #'
 #' @description
 #' As part of the "rolling-tide" multifidelity-setup, do reevaluation of configurations with
-#' higher fidelity that have survived lower-fidelity selection.
-#'
-#' The `fidelity_schedule` specifies what the fidelity (i.e. value of the "budget" component) of evaluations
-#' done or compared at generation `i` should be. The `generation_lookahead` parameter has a subtle influence.
-#' If it is `TRUE`, then, at the end of generation `i`, reevaluation is done with the `"budget_survivors"`
-#' fidelity of generation `i + 1`, otherwise the entry of generation `i` is used. This gives the `"budget_survivors"`
-#' column a slightly different meaning in the two cases: either it is the budget, with which survivors "entering"
-#' generation `i` have been evaluated, or it is the budget with which survivors "coming out of" that generation
-#' were evaluated. The evaluations are done as part of the *current* generation in any case (see examples).
+#' higher fidelity that have survived lower-fidelity selection. The evaluations are done as part of the
+#' *current* generation, so the `dob` value is not increased.
 #'
 #' This function should only be called when doing rolling-tide multifidelity, and should not be part of the
 #' MIES cycle otherwise.
 #'
-#' Note that the multifidelity functionality is experimental and the UI may change in the future.
-#'
 #' @template param_inst
-#' @param fidelity_schedule (`data.frame`)\cr
-#'   `data.frame` with three columns `"generation"`, `"budget_new"`, `"budget_survivors"`, in that order. `"budget_new"` and `"budget_survivors"`
-#'   are atomic columns. The value of `"budget_survivors"` of the appropriate row is assigned to the `budget_id` component of `offspring`.
-#'   `"generation"` is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-#'   `generation == 1` must be present.
 #' @param budget_id (`character(1)`)\cr
-#'   Budget component that is set to the value found in `fidelity_schedule`.
-#' @param generation_lookahead (`logical(1)`)\cr
-#'   Whether to re-evaluate alive individuals with the `"budget_survivors"` entry of the current generation (`FALSE`), or
-#'   of the next generation (`TRUE`).
+#'   Budget component that is set to the `fidelity` value.
+#' @param fidelity (`atomic(1)`)\cr
+#'   Atomic scalar indicating the value to be assigned to the `budget_id` component of offspring.
 #' @param current_gen_only (`logical(1)`)\cr
 #'   Whether to only re-evaluate survivors individuals generated in the latest generation (`TRUE`), or re-evaluate all currently alive
 #'   individuals (`FALSE`). In any case, only individuals that were not already evaluated with the chosen fidelity are evaluated,
-#'   so this will usually only affect individuals from before the latest generation if the `"budget_survivors"` changed between
-#'   generations (i.e. when a different row from `fidelity_schedule` is used).
+#'   so this will usually only have an effect when the fidelity of surviving individuals changed between generations.
 #' @param monotonic (`logical(1)`)\cr
 #'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
 #' @template param_additional_components
@@ -223,51 +186,45 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'
 #' budget_id = "y"
 #'
-#' fidelity_schedule = data.frame(
-#'   generation = c(1, 2),
-#'   budget_new = c(1, 3),
-#'   budget_survivors = c(2, 4)
-#' )
-#'
-#' # The initial population gets evaluated with 'budget_survivors', so y = 2.
-#' mies_init_population(oi, mu = 2, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id)
+#' # Create an initial population with fidelity ("y") value 1
+#' mies_init_population(oi, mu = 2, budget_id = budget_id, fidelity = 1)
 #'
 #' oi$archive
 #'
-#' # By default, mies_step_fidelity() will re-evaluate all survivors with
-#' # budget_survivors of the *next* generation. This is the reason why it
-#' # usually does not make sense to have 'budget_survivors' change between
-#' # generations 1 and 2!
-#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id)
-#'
-#' # The first two evaluations have 'eol = 1' (died in generation 1) and were
-#' # re-evaluated with y = 4.
-#' oi$archive
-#'
-#' # Using 'generation_lookahead = FALSE' will use the 'budget_survivors' of the
-#' # current genereation, where the current generation is always the max() of the
-#' # 'dob' column in the archive.
-#' # Calling 'mies_step_fidelity()' multiple times within one generation barely
-#' # ever makes sense and is done here for demonstration.
-#' # The following call will have *no* effect: The 'budget_survivors' of the
-#' # current generation (generation 1) is 2, but the alive individuals were
-#' # evaluated with budget 4.
-#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id, generation_lookahead = FALSE)
+#' # Re-evaluate these individuals with higher fidelity
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 2)
 #'
 #' oi$archive
 #'
-#' # To also re-evaluate individuals with *lower* budget, use 'monotonic = FALSE':
-#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id, generation_lookahead = FALSE, monotonic = FALSE)
+#' # The following creates a new generation without killing the initial
+#' # generation
+#' offspring = data.frame(x = 0:1)
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 3)
+#'
+#' oi$archive
+#'
+#' # Re-evaluate only individuals from last generation by setting current_gen_only
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 4,
+#'   current_gen_only = TRUE)
+#'
+#' oi$archive
+#'
+#' # Default: Re-evaluate all that *increase* fidelity: Only the initial
+#' # population is re-evaluated here.
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3)
+#'
+#' oi$archive
+#'
+#' # To also re-evaluate individuals with *higher* fidelity, use
+#' # 'monotonic = FALSE'. This does not re-evaluate the points that already have
+#' # the requested fidelity, however.
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, monotonic = FALSE)
 #'
 #' oi$archive
 #' @export
-mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL) {
+mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL) {
   assert_optim_instance(inst)
-  assert_flag(generation_lookahead)
   assert_flag(current_gen_only)
   assert_flag(monotonic)
   assert_r6(additional_components, "ParamSet", null.ok = TRUE)
@@ -281,31 +238,28 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   data = inst$archive$data
   current_gen = max(data$dob, 0)
   assert_choice(budget_id, ss_ids)
-  assert(check_fidelity_schedule(fidelity_schedule))
-  fidelity_schedule = as.data.table(fidelity_schedule)
+  assert_scalar(fidelity)
 
   if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
 
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
-  next_fidelity = fidelity_schedule[data.table(generation = current_gen + generation_lookahead), "budget_survivors", on = "generation", roll = TRUE, with = FALSE][[1]]
-
   comparator = if (monotonic) `<` else `!=`
-  reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], next_fidelity))
+  reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], fidelity))
 
   indivs = data[reeval, c(ss_ids, ac_ids), with = FALSE]
-  set(indivs, , budget_id, next_fidelity)
+  set(indivs, , budget_id, fidelity)
 
   # I hate this... but there seems to be no way to avoid the TerminatorGenerations from terminating here :-(
-  # What happens here is that we decrease dob by 1 everywhere, evaluate with current-generation-minus-one,
-  # and then increase dob by 1 again. This avoids TerminatorGenerations from firing because if it *did*
-  # mind about dob minus 1, then it would have fired already.
+  # What happens here is that we decrease dob by 1 for the entries of the current generation, evaluate with
+  # current-generation-minus-one, and then increase dob by 1 again. This avoids TerminatorGenerations from
+  # firing because if it *did* mind about dob minus 1, then it would have fired already.
   # Weird edge-case: A TerminatorGenerations with `generations` set to 0 will not prevent reevals of initial
   # pop if the initial pop is entirely made up of preexisting values.
-  inst$archive$data[, dob := dob - 1]
-  # stupid race condition. Hope we don't get trapped here...
-  on.exit(inst$archive$data[, dob := dob + 1])
+  current_gen_rows = which(inst$archive$data$dob == current_gen)
+  on.exit(set(inst$archive$data, current_gen_rows, "dob", current_gen))  # first sset the on.exit to prevent leaving data in a bad state.
+  set(inst$archive$data, current_gen_rows, "dob", current_gen - 1)
 
   ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
 
@@ -626,8 +580,17 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'   or [`paradox::generate_design_lhs`]. Note that [`paradox::generate_design_grid`] can not be used and must be wrapped with
 #'   a custom function that ensures that only `n` individuals are produced. The generated design must correspond to the `inst`'s `$search_space`; for
 #'   components that are not in the objective's search space, the `additional_component_sampler` is used.
-#' @template param_fidelity_schedule_maybenull
+#' @param survival_selector ([`Selector`] | `NULL`)\cr
+#'   Used when the given [`OptimInstance`][bbotk::OptimInstance] already contains more individuals than `mu`.\cr
+#'   [`Selector`] operator that selects surviving individuals depending on configuration values
+#'   and objective results,  When `survival_selector$operate()` is called, then objectives that
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.\cr
+#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization.\cr
+#'   The given [`Selector`] may *not* return duplicates.\cr
+#'   This may be `NULL` (the default), in which case [`SelectorBest`] is used.
 #' @template param_budget_id_maybenull
+#' @template param_fidelity_maybenull
 #' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
 #'   [`Sampler`][paradox::Sampler] for components of individuals that are not part of `inst`'s `$search_space`. These components
 #'   are never used for performance evaluation, but they may be useful for self-adaptive [`OperatorCombination`]s. See the description
@@ -666,9 +629,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #' oi$archive
 #'
 #' ###
-#' # Advanced demo, making use of additional components and fidelity_schedule
-#' # Note that the multifidelity functionality is experimental and the UI may
-#' # change in the future.
+#' # Advanced demo, making use of additional components and fidelity
 #' ##
 #'
 #' # Get a new OptimInstance
@@ -676,12 +637,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'   terminator = trm("evals", n_evals = 100)
 #' )
 #'
-#' mies_init_population(inst = oi, mu = 3,
-#'   fidelity_schedule = data.frame(
-#'     generation = c(1, 3),
-#'     budget_new = c(1, 2),
-#'     budget_survivors = c(2, 3)
-#'   ), budget_id = "y",
+#' mies_init_population(inst = oi, mu = 3, budget_id = "y", fidelity = 2,
 #'   additional_component_sampler = Sampler1DRfun$new(
 #'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
 #'   )
@@ -689,11 +645,11 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'
 #' # 3 evaluations. We also have 'additional', sampled from rfun (always -1),
 #' # which is ignored by the objective. Besides, we have "y", which is 2,
-#' # according to the fidelity_schedule: `budget_survivors` of `generation` 1.
+#' # according to 'fidelity'.
 #' oi$archive
 #'
 #' @export
-mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL, additional_component_sampler = NULL) {
+mies_init_population = function(inst, mu, initializer = generate_design_random, survival_selector = NULL, budget_id = NULL, fidelity = NULL, additional_component_sampler = NULL) {
   assert_optim_instance(inst)
 
   assert_int(mu, lower = 0, tol = 1e-100)
@@ -1176,24 +1132,17 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
 #' @param filtor ([`Filtor`] | `NULL`)\cr
 #'   [`Filtor`] operator that filters. When `NULL` is given, then the [`FiltorNull`] operation is performed and the first `lambda` individuals are
 #'   taken from `individuals`.
-#' @param fidelity_schedule (`data.frame` | `NULL`)\cr
-#'   `data.frame` with three columns `"generation"`, `"budget_new"`, `"budget_survivors"`, in that order. `"budget_new"` and `"budget_survivors"`
-#'   are atomic columns assigned to the `budget_id` component of `offspring`; which one is chosen depends on `survivor_budget`.
-#'   `"generation"` is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-#'   `generation == 1` must be present.\cr
-#'   This value may be `NULL` if no multi-fidelity optimization is performed, **or** when, instead of the current generation's budget, the
-#'   maximum budget found in `inst$archive` should be used (the default).\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' @param budget_id (`character(1)` | `NULL`)\cr
-#'   Budget compnent when doing multi-fidelity optimization. This component of the search space is added
-#'   to `individuals` according to `fidelity_schedule` and the current generation's `"budget_survivors"`. Should be `NULL`
-#'   when and only when `fidelity_schedule` is `NULL`.
+#' @template param_budget_id_maybenull
+#' @param fidelity (`atomic` | `NULL`)\cr
+#'   scalar indicating the value of the `budget_id` component with which to evaluate individuals to be filtered.\cr
+#'   This value must be `NULL` when no multi-fidelity optimization is performed, but it may **also** be `NULL` when the
+#'   maximum value of the `budget_id` found in `inst$archive` should be used (the default).
 #' @param get_indivs (`logical(1)`)\cr
 #'   Whether to return the `data.frame` or [`data.table`][data.table::data.table] of selected individuals, or an index into `individuals`.
 #' @return If `get_indivs` is `TRUE`: a `data.frame` or [`data.table`][data.table::data.table] (depending on the input type of `individuals`) of filtered configurations.
 #'   If `get_indivs` is `FALSE`: an `integer` vector indexing the filtered individuals.
 #' @export
-mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidelity_schedule = NULL, budget_id = NULL, get_indivs = TRUE) {
+mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budget_id = NULL, fidelity = NULL, get_indivs = TRUE) {
   assert_optim_instance(inst)
   assert_int(lambda, lower = 0, tol = 1e-100)
   individuals_dt = as.data.table(assert_data_frame(individuals, min.rows = lambda))
@@ -1201,7 +1150,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
   data = inst$archive$data
   if (!nrow(data)) stop("mies_filter_offspring does not work with empty OptimInstance.")
   ss_ids = inst$search_space$ids()
-  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
+  assert_choice(budget_id, ss_ids, null.ok = is.null(schedule))
 
   assert_names(colnames(individuals), must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id, subset.of = colnames(data))
 
@@ -1209,14 +1158,10 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
 
   if (lambda == 0) if (get_indivs) individuals_dt[0] else integer(0)
   if (!is.null(budget_id)) {
-    if (is.null(fidelity_schedule)) {
+    if (is.null(fidelity)) {
       fidelity = max(data[[budget_id]])
     } else {
-      assert(check_fidelity_schedule(fidelity_schedule))
-      fidelity_schedule = as.data.table(fidelity_schedule)
-      fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
-      budget_survivors = NULL
-      fidelity = fidelity_schedule[data.table(generation = current_gen), budget_survivors, on = "generation", roll = TRUE]
+      assert_scalar(fidelity)
     }
     individuals_dt[, (budget_id) := fidelity]
   }
