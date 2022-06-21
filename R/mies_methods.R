@@ -23,8 +23,8 @@
 #'   different from the current `fidelity` value. Default `NULL`: Do not re-evaluate. Must be `NULL` when `budget_id` and `fidelity` are `NULL`.
 #'   See also [`mies_step_fidelity`].
 #' @param monotonic (`logical(1)`)\cr
-#'   When `step_fidelity` is non-`NULL`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
-#'   Default `TRUE`. Ignored when `step_fidelity` is `NULL`
+#'   When `reevaluate_fidelity` is non-`NULL`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
+#'   Default `TRUE`. Ignored when `reevaluate_fidelity` is `NULL`
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
@@ -580,15 +580,14 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'   or [`paradox::generate_design_lhs`]. Note that [`paradox::generate_design_grid`] can not be used and must be wrapped with
 #'   a custom function that ensures that only `n` individuals are produced. The generated design must correspond to the `inst`'s `$search_space`; for
 #'   components that are not in the objective's search space, the `additional_component_sampler` is used.
-#' @param survival_selector ([`Selector`] | `NULL`)\cr
+#' @param survival_selector ([`Selector`])\cr
 #'   Used when the given [`OptimInstance`][bbotk::OptimInstance] already contains more individuals than `mu`.\cr
 #'   [`Selector`] operator that selects surviving individuals depending on configuration values
 #'   and objective results,  When `survival_selector$operate()` is called, then objectives that
 #'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.\cr
 #'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
-#'   when performing multi-fidelity optimization.\cr
+#'   when performing multi-fidelity optimization. Default is [`SelectorBest`].\cr
 #'   The given [`Selector`] may *not* return duplicates.\cr
-#'   This may be `NULL` (the default), in which case [`SelectorBest`] is used.
 #' @template param_budget_id_maybenull
 #' @template param_fidelity_maybenull
 #' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
@@ -649,11 +648,13 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #' oi$archive
 #'
 #' @export
-mies_init_population = function(inst, mu, initializer = generate_design_random, survival_selector = NULL, budget_id = NULL, fidelity = NULL, additional_component_sampler = NULL) {
+mies_init_population = function(inst, mu, initializer = generate_design_random, survival_selector = SelectorBest$new()$prime(inst$search_space), budget_id = NULL, fidelity = NULL, additional_component_sampler = NULL) {
   assert_optim_instance(inst)
 
   assert_int(mu, lower = 0, tol = 1e-100)
   assert_function(initializer, args = c("param_set", "n"))
+  assert_r6(survival_selector, "Selector")
+
   assert_r6(additional_component_sampler, "Sampler", null.ok = TRUE)
 
   ss_ids = inst$search_space$ids()
@@ -681,13 +682,13 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   dob = batch_nr = NULL
   if (nrow(inst$archive$data)) {
     if ("eol" %nin% present_cols) {
-      inst$archive$data[, eol := NA_real_]
+      set(inst$archive$data, , "eol", NA_real_)
     } else if ("dob" %nin% present_cols) {
       stop("'eol' but not 'dob' column found in archive; this is an undefined state that would probably lead to bad behaviour, so stopping.")
     }
 
     if ("dob" %nin% present_cols) {
-      inst$archive$data[, dob := 0]
+      set(inst$archive$data, , "dob", 0)
     }
     data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we need to be careful with copies of data!
     assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
@@ -695,14 +696,30 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   }
   alive = which(is.na(inst$archive$data$eol))
   n_alive = length(alive)
+
+  # use survival_selector to kill superfluous individuals, if any
+  # if the survival selector does not depend on the additional components, then we can do this right away here.
+  # otherwise we sample the remaining additional components and *then* select
+  if (n_alive > mu && !any(survival_selector$primed_ps$ids() %in% ac_ids)) {
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    if (anyDuplicated(survival_selector)) stop("survival_selector may not generate duplicates.")
+    died = setdiff(alive, survivors)
+    set(data, died, "eol", max(data$dob))
+    alive = survivors
+    n_alive = mu
+  }
   mu_remaining = mu - n_alive
 
   # take care of additional components
   # we need to check if / how many additional components we need to sample. If there are no alive individuals,
   # then this is just mu. If there are alive individuals, it *may* also be mu (we will have to insert components
   # at those rows where there are alive individuals!)
-  additional_needed = mu  # how many more rows of additional components need to be sampled. by default: mu
-  row_insert = last(alive, mu)  # at what rows of `data` the components are inserted
+
+  # how many more rows of additional components need to be sampled.
+  # at least mu (if new indivs are sampled)
+  # but maybe more (if more than mu are alive *and* they need to be selected using a survival_selector that depends on additional components.
+  additional_needed = max(mu, n_alive)
+  row_insert = alive  # at what rows of `data` additional components are inserted (some alive indivs may have them already, check this next)
   if (n_alive && length(ac_ids) && all(ac_ids %in% present_cols)) {
     # additional components already present in the archive. Let's check if there are any rows with NAs.
     missing_info = is.na(data[row_insert, ac_ids, with = FALSE])
@@ -717,22 +734,30 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   additional_components = NULL
   if (!is.null(additional_component_sampler)) {
     additional_components = assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
-
+    assert_names(colnames(additional_components), identical.to = ac_ids)
     # assert here that:
     # we either have some individuals that need to be sampled (mu_remaining > 0)
     #   in which case the additional_components table's first `length(row_insert)` and last `mu_remaining` rows are complementary
     # or that we have no more individuals to sample, in which case `additional_components` are exactly equal to the number of rows where things get inserted.
     assert_true((mu_remaining > 0 && length(row_insert) + mu_remaining == additional_needed) || (mu_remaining <= 0 && length(row_insert) == additional_needed))
 
-    # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise
-    inst$archive$data[row_insert, ac_ids] <- first(additional_components, length(row_insert))
+
+    if (length(row_insert)) {
+      set(data, row_insert, ac_ids, first(additional_components, length(row_insert)))
+    } else {
+      # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise.
+      # ideally the set() above would do this, but it does not: https://github.com/Rdatatable/data.table/issues/5409
+      inst$archive$data[0, ac_ids] = additional_components[0]
+      data = inst$archive$data
+    }
   }
 
   if (mu_remaining < 0) {
-    # we are currently killing the earliest evals, maybe do something smarter (issue #35)
-    # also we are not doing anything about budget here, we just hope the user knows what he's doing.
-    # also also the additional component handling above depends on killing earliest now.
-    inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
+    # kill superfluous individuals, in the case that the survival selector needs additional components
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    if (anyDuplicated(survival_selector)) stop("survival_selector may not generate duplicates.")
+    died = setdiff(alive, survivors)
+    set(data, died, "eol", max(data$dob))
   } else if (mu_remaining > 0) {
     sample_space = inst$search_space
     if (!is.null(budget_id)) {
@@ -741,7 +766,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     mies_evaluate_offspring(inst,
       cbind(as.data.table(assert_data_frame(initializer(sample_space, mu_remaining)$data, nrows = mu_remaining)),
         last(additional_components, mu_remaining)),
-      fidelity_schedule, budget_id, survivor_budget = TRUE)
+      budget_id = budget_id, fidelity = fidelity)
   }
   invisible(inst)
 }
