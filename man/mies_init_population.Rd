@@ -8,8 +8,9 @@ mies_init_population(
   inst,
   mu,
   initializer = generate_design_random,
-  fidelity_schedule = NULL,
+  survival_selector = SelectorBest$new()$prime(inst$search_space),
   budget_id = NULL,
+  fidelity = NULL,
   additional_component_sampler = NULL
 )
 }
@@ -26,17 +27,22 @@ or \code{\link[paradox:generate_design_lhs]{paradox::generate_design_lhs}}. Note
 a custom function that ensures that only \code{n} individuals are produced. The generated design must correspond to the \code{inst}'s \verb{$search_space}; for
 components that are not in the objective's search space, the \code{additional_component_sampler} is used.}
 
-\item{fidelity_schedule}{(\code{data.frame} | \code{NULL})\cr
-\code{data.frame} with three columns \code{"generation"}, \code{"budget_new"}, \code{"budget_survivors"}, in that order. \code{"budget_new"} and \code{"budget_survivors"}
-are atomic columns assigned to the \code{budget_id} component of \code{offspring}; which one is chosen depends on \code{survivor_budget}.
-\code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-\code{generation == 1} must be present.\cr
-This value may be \code{NULL} if no multi-fidelity optimization is performed (the default).\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.}
+\item{survival_selector}{(\code{\link{Selector}})\cr
+Used when the given \code{\link[bbotk:OptimInstance]{OptimInstance}} already contains more individuals than \code{mu}.\cr
+\code{\link{Selector}} operator that selects surviving individuals depending on configuration values
+and objective results,  When \code{survival_selector$operate()} is called, then objectives that
+are being minimized are multiplied with -1 (through \code{\link{mies_get_fitnesses}}), since \code{\link{Selector}}s always try to maximize fitness.\cr
+The \code{\link{Selector}} must be primed on \code{inst$search_space}; this \emph{includes} the "budget" component
+when performing multi-fidelity optimization. Default is \code{\link{SelectorBest}}.\cr
+The given \code{\link{Selector}} may \emph{not} return duplicates.\cr}
 
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
-Budget component that is set to the value found in \code{fidelity_schedule} when doing multi-fidelity optimization. Should be \code{NULL}
-when and only when \code{fidelity_schedule} is \code{NULL}.}
+Budget component when doing multi-fidelity optimization. This component of the search space is added
+to \code{individuals} according to \code{fidelity}. Should be \code{NULL} when no multi-fidelity optimization is performed (default).}
+
+\item{fidelity}{(\code{atomic(1)} | \code{NULL})\cr
+Atomic scalar indicating the value to be assigned to the \code{budget_id} component of offspring.
+This value must be \code{NULL} if no multi-fidelity optimization is performed (the default).}
 
 \item{additional_component_sampler}{(\code{\link[paradox:Sampler]{Sampler}} | \code{NULL})\cr
 \code{\link[paradox:Sampler]{Sampler}} for components of individuals that are not part of \code{inst}'s \verb{$search_space}. These components
@@ -84,9 +90,7 @@ mies_init_population(inst = oi, mu = 3)
 oi$archive
 
 ###
-# Advanced demo, making use of additional components and fidelity_schedule
-# Note that the multifidelity functionality is experimental and the UI may
-# change in the future.
+# Advanced demo, making use of additional components and fidelity
 ##
 
 # Get a new OptimInstance
@@ -94,12 +98,7 @@ oi <- OptimInstanceSingleCrit$new(objective,
   terminator = trm("evals", n_evals = 100)
 )
 
-mies_init_population(inst = oi, mu = 3,
-  fidelity_schedule = data.frame(
-    generation = c(1, 3),
-    budget_new = c(1, 2),
-    budget_survivors = c(2, 3)
-  ), budget_id = "y",
+mies_init_population(inst = oi, mu = 3, budget_id = "y", fidelity = 2,
   additional_component_sampler = Sampler1DRfun$new(
     param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
   )
@@ -107,7 +106,7 @@ mies_init_population(inst = oi, mu = 3,
 
 # 3 evaluations. We also have 'additional', sampled from rfun (always -1),
 # which is ignored by the objective. Besides, we have "y", which is 2,
-# according to the fidelity_schedule: `budget_survivors` of `generation` 1.
+# according to 'fidelity'.
 oi$archive
 
 }

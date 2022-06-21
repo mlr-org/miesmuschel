@@ -661,10 +661,8 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   ac_ids = if (is.null(additional_component_sampler)) character(0) else additional_component_sampler$param_set$ids()
   present_cols = colnames(inst$archive$data)
 
-  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
-  if (!is.null(fidelity_schedule)) {
-    assert(check_fidelity_schedule(fidelity_schedule))
-  }
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
+  assert_scalar(fidelity, null.ok = TRUE)
 
   if (any(c("dob", "eol") %in% ac_ids)) {
     stop("'dob' and 'eol' may not be additional component dimensions.")
@@ -1207,4 +1205,144 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budge
   } else {
     selected
   }
+}
+
+
+#' @title Get Performance Values by Generation
+#'
+#' @description
+#' Get evaluated performance values from an [`OptimInstance`][bbotk::OptimInstance] for all individuals that were alive
+#' at a given generation. Depending on `survivors_only`, all individuals alive at the *end* of a generation are returned,
+#' or all individuals alive at any point during a generation.
+#'
+#' The resulting [`data.table`][data.table::data.table] object is formatted for easy manipulation to get relevant
+#' information about optimization progress. To get aggregated values per generation, use `by = "dob"`.
+#'
+#' @template param_inst
+#' @template param_as_fitnesses
+#' @template param_survivors_only
+#' @template param_condition_on_budget_id
+#' @return a [`data.table`][data.table::data.table] with the column `"dob"`, indicating the generation, as well as further
+#'   columns named by the [`OptimInstance`][bbotk::OptimInstance]'s objectives.
+#'
+#' @examples
+#' @export
+mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
+  assert_optim_instance(inst)
+  assert_flag(as_fitnesses)
+  assert_flag(survivors_only)
+  ss_ids = inst$search_space$ids()
+  assert_choice(condition_on_budget_id, ss_ids, null.ok = TRUE)
+  if (!is.null(condition_on_budget_id) && !inst$search_space$is_number[[condition_on_budget_id]]) {
+    stopf("condition_on_budget_id for non-numeric components is not supported. It is '%s', which is not numeric.", condition_on_budget_id)
+  }
+  data = copy(inst$archive$data)
+  present_cols = colnames(data)
+
+  if ("eol" %nin% present_cols) {
+    if (nrow(data)) set(data, , "eol", NA_real_)
+  } else if ("dob" %nin% present_cols) {
+    stop("'eol' but not 'dob' column found in archive; this is an undefined state.")
+  }
+
+  objectives = inst$archive$codomain$ids()
+
+  if (as_fitnesses) {
+    fitness_negate = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = TRUE, maximize = FALSE, NA))
+    objectives = objectives[!is.na(fitness_negate)]
+    fitness_negate = fitness_negate[!is.na(fitness_negate)]
+    for (col_negate in objectives[fitness_negate]) {
+      set(data, , col_negate, -data[[col_negate]])
+    }
+  }
+
+  if (!nrow(data)) {
+    return(data[, c("dob", objectives), with = FALSE])
+  }
+
+  if ("dob" %nin% present_cols) {
+    set(data, , "dob", 0)
+  }
+  assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, tol = 1e-100)
+
+  data$eol[is.na(data$eol)] = Inf  # don't set() here because 'eol' could be integer, in which case this doesn't work.
+
+  generations = seq.int(min(data$dob), max(data$dob))
+
+  gentbl = data.table(generations = generations)
+
+  if (survivors_only) {
+    conditions = c("dob <= generations", "eol > generations")
+  } else {
+    conditions = c("dob <= generations", "eol >= generations")
+  }
+  results = data[gentbl, c("dob", objectives, condition_on_budget_id), on = conditions, nomatch = NULL, with = FALSE]
+
+  if (!is.null(condition_on_budget_id)) {
+    results = results[, .SD[get(condition_on_budget_id) == max(get(condition_on_budget_id))], by = "dob"]
+    set(results, , condition_on_budget_id, NULL)
+  }
+
+  results
+}
+
+#' @title Get Aggregated Performance Values by Generation
+#'
+#' @description
+#' Get evaluated performance values from an [`OptimInstance`][bbotk::OptimInstance] aggregated for each generation.
+#' This may either concern all individuals that were alive at the end of a given generation (`survivors_only` `TRUE`)
+#' or at any point during a generation (`survivors_only` `FALSE`).
+#'
+#' The result is a single [`data.table`][data.table::data.table] object with a `dob` column indicating the
+#' generation, as well as one column for each `aggregations` entry crossed with each objective of `inst`.
+#'
+#' @template param_inst
+#' @param objectives (`character`)\cr
+#'   Objectives for which to calculate aggregates. Must be a subset of the codomain elements of `inst`, but when `as_fitnesses` is `TRUE`, elements
+#'   that are neither being minimized nor maximized are ignored.
+#' @param aggregations (named `list` of `function`)\cr
+#'   List containing aggregation functions to be evaluated on a vector of objective falues for each generation. These functions should take
+#'   a single argument and return a scalar value.
+#' @template param_as_fitnesses
+#' @template param_survivors_only
+#' @template param_condition_on_budget_id
+#' @return a [`data.table`][data.table::data.table] with the column `"dob"`, indicating the generation, as well as further
+#'   columns named by the items in `aggregations`. There is more on element in `objectives`
+#'   (or more than one element not being minimized/maximized when `as_fitnesses` is `TRUE`), then columns are named `<aggregations element name>.<objective name>`.
+#'   Otherwise, they are named by `<aggregations element name>` only. To get a guarantee that elements are only named after elements in `aggregations`, set `objectives`
+#'   to a length 1 `character`.
+#' @examples
+#' @export
+mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$ids(), aggregations = list(min = min, mean = mean, max = max, median = median, size = length),
+    as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
+  assert_optim_instance(inst)
+  assert_character(objectives, any.missing = FALSE, unique = TRUE)
+  assert_subset(objectives, inst$archive$codomain$ids())
+
+  generationed = mies_get_generation_results(inst, as_fitnesses = as_fitnesses, survivors_only = survivors_only, condition_on_budget_id = condition_on_budget_id)
+
+  generationed = generationed[, c("dob", intersect(colnames(generationed), objectives))]
+
+  if (ncol(generationed) == 1) return(generationed)  # 'objectives' did not contain any columns that are minimized/maximized; may in particular happen when as_fitnesses is TRUE
+
+  eol = aggregations  # 'generationed' is guaranteed not to contain the 'eol' column. This is necessary, unfortunately, for the case that an objective is named 'aggregations'.
+  generationed[, unlist(lapply(eol, function(agf) lapply(if (length(.SD) == 1) unname(.SD) else .SD, agf)), recursive = FALSE), by = "dob"]
+}
+
+#' @title Get the Last Generation that was Evaluated
+#'
+#' @description
+#' Gets the last generation that was evaluated as counted by the `"dob"` column in the [`OptimInstance`][bbotk::OptimInstance]'s [`Archive`][bbotk::Archive].
+#'
+#' This accepts [`OptimInstance`][bbotk::OptimInstance]s that were not evaluated with `miesmuschel` and are therefore missing the `"dob"` column, returning
+#' a value of 0. However, if the `"dob"` column is invalid (the inferred generation is not integer numeric or not non-negative), an error is thrown.
+#'
+#' @template param_inst
+#' @return a scalar integer value indicating the last generation that was evaluated in `inst`. It is 0 when `inst` is empty, and also typically 0 if all evaluations
+#'   in `inst` so far were performed outside of `miesmuschel`. Every call of [`mies_init_population`] that actually performs evaluations, as well as each call to
+#'   [`mies_evaluate_offspring`] with non-empty `offspring`, increases the generation by 1.
+mies_generation = function(inst) {
+  assert_optim_instance(inst)
+  (assert_int(max(inst$archive$data$dob, 0, na.rm = TRUE), lower = 0, any.missing = FALSE, tol = 1e-100))  # parentheses because we don't want to return invisibly
 }
