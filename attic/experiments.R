@@ -55,8 +55,13 @@ tinytest::test_all()
 tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
 
 
-tinytest::run_test_file("inst/tinytest/test_ParamSetShadow.R")
-
+tinytest::run_test_file("inst/tinytest/test_TunerMies.R")
+tinytest::run_test_file("inst/tinytest/test_TerminatorGenerations.R")
+tinytest::run_test_file("inst/tinytest/test_OptimizerMies.R")
+tinytest::run_test_file("inst/tinytest/test_mies_evaluate_offspring.R")
+tinytest::run_test_file("inst/tinytest/test_TerminatorBudget.R")
+tinytest::run_test_file("inst/tinytest/test_mies_init_population.R")
+tinytest::run_test_file("inst/tinytest/test_mies_step_fidelity.R")
 
 
 tinytest::run_test_file("inst/tinytest/test_mutator_proxy.R")       # ...

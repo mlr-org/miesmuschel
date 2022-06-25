@@ -17,10 +17,10 @@ as presented in Li (2013) can easily be implemented.
 \enumerate{
 \item Prime operators, using \code{mies_prime_operators()}
 \item Initialize and evaluate population, using \code{mies_init_population()}
-\item Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 \item Generate offspring by selecting parents, recombining and mutating them, using \code{mies_generate_offspring()}
 \item Evaluate performance, using \code{mies_evaluate_offspring()}
 \item Select survivors, using either \code{mies_survival_plus()} or \code{mies_survival_comma()}, depending on the \code{survival_strategy} configuration parameter
+\item Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 \item Jump to 3.
 }
 }
@@ -29,7 +29,7 @@ as presented in Li (2013) can easily be implemented.
 As with all optimizers, \code{\link[bbotk:Terminator]{Terminator}}s are used to end optimization after a specific number of evaluations were performed,
 time elapsed, or other conditions are satisfied. Of particular interest is \code{\link{TerminatorGenerations}}, which terminates after a number
 of generations were evaluated in \code{OptimizerMies}. The initial population counts as generation 1, its offspring as generation 2 etc.;
-fidelity refinements (step 3. in the algorithm description above) are always included in their generation, \code{\link{TerminatorGenerations}}
+fidelity refinements (step 6. in the algorithm description above) are always included in their generation, \code{\link{TerminatorGenerations}}
 avoids terminating right before they are evaluated. Other terminators may, however, end the optimization process at any time.
 }
 
@@ -39,11 +39,11 @@ avoids terminating right before they are evaluated. Other terminators may, howev
 as well as fidelity refinement within each generation. When \code{multi_fidelity} is \code{TRUE}, then one search space component of the
 \code{\link[bbotk:OptimInstance]{OptimInstance}} must have the \code{"budget"} tag, which is then optimized as the "budget" component. This means that the value of this component is
 determined by the \code{fidelity}/\code{fidelity_offspring} parameters, which are functions that get called whenever individuals get evaluated.
-The \code{fidelity} function is evaluated before step 3 in the algorithm, it returns the value of the budget search space component that all individuals
-that survive the current generation should be evaluated with. \code{fidelity_offspring} is called before step 5 and determines the fidelity that newly
+The \code{fidelity} function is evaluated before step 2 and before every occurrence of step 6 in the algorithm, it returns the value of the budget search space component that all individuals
+that survive the current generation should be evaluated with. \code{fidelity_offspring} is called before step 4 and determines the fidelity that newly
 sampled offspring individuals should be evaluated with; it may be desirable to set this to a lower value than \code{fidelity} to save budget when
 preliminarily evaluating newly sampled individuals that may or may not perform well compared to already sampled individuals.
-Individuals that survive the generation and are not removed in step 6 will be re-evaluated with the \code{fidelity}-value in step 3 in the next loop
+Individuals that survive the generation and are not removed in step 5 will be re-evaluated with the \code{fidelity}-value in step 6 before the next loop
 iteration.
 
 \code{fidelity} and \code{fidelity_offspring} must have arguments \code{inst}, \code{budget_id}, \code{last_fidelity} and \code{last_fidelity_offspring}. \code{inst} is the
@@ -54,9 +54,9 @@ by \code{fidelity_offspring} always be the same as the parent generation fidelit
 can be set to a function that just returns \code{last_fidelity}; this is actually the behaviour that \code{fidelity_offspring} is initialized with.
 
 \code{OptimizerMies} avoids re-evaluating individuals if the fidelity parameter does not change. This means that setting \code{fidelity} and \code{fidelity_offspring}
-to the same value avoids re-evaluating individuals in step 3. When \code{fidelity_monotonic} is \code{TRUE}, re-evaluation is also avoided should the
-desired fidelity parameter value decrease. When \code{fidelity_current_gen_only} is \code{TRUE}, then step 3 only re-evaluates individuals that were
-created in the current generation (in the previous step 5) and sets the fidelity for individuals that are created in step 2, but it does not
+to the same value avoids re-evaluating individuals in step 6. When \code{fidelity_monotonic} is \code{TRUE}, re-evaluation is also avoided should the
+desired fidelity parameter value decrease. When \code{fidelity_current_gen_only} is \code{TRUE}, then step 6 only re-evaluates individuals that were
+created in the current generation (in the previous step 4) and sets the fidelity for individuals that are created in step 6, but it does not
 re-evaluate individuals that survived from earlier generations or were already in the \code{\link[bbotk:OptimInstance]{OptimInstance}} when
 optimization started; it is recommended to leave this value at \code{TRUE} which it is initialized with.
 }

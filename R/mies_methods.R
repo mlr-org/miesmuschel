@@ -1184,7 +1184,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budge
   data = inst$archive$data
   if (!nrow(data)) stop("mies_filter_offspring does not work with empty OptimInstance.")
   ss_ids = inst$search_space$ids()
-  assert_choice(budget_id, ss_ids, null.ok = is.null(schedule))
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
 
   assert_names(colnames(individuals), must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id, subset.of = colnames(data))
 

@@ -17,17 +17,17 @@
 #' `OptimizerMies` implements a standard evolutionary strategies loop:
 #' 1. Prime operators, using `mies_prime_operators()`
 #' 2. Initialize and evaluate population, using `mies_init_population()`
-#' 3. Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
-#' 4. Generate offspring by selecting parents, recombining and mutating them, using `mies_generate_offspring()`
-#' 5. Evaluate performance, using `mies_evaluate_offspring()`
-#' 6. Select survivors, using either `mies_survival_plus()` or `mies_survival_comma()`, depending on the `survival_strategy` configuration parameter
+#' 3. Generate offspring by selecting parents, recombining and mutating them, using `mies_generate_offspring()`
+#' 4. Evaluate performance, using `mies_evaluate_offspring()`
+#' 5. Select survivors, using either `mies_survival_plus()` or `mies_survival_comma()`, depending on the `survival_strategy` configuration parameter
+#' 6. Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 #' 7. Jump to 3.
 #'
 #' @section Terminating:
 #' As with all optimizers, [`Terminator`][bbotk::Terminator]s are used to end optimization after a specific number of evaluations were performed,
 #' time elapsed, or other conditions are satisfied. Of particular interest is [`TerminatorGenerations`], which terminates after a number
 #' of generations were evaluated in `OptimizerMies`. The initial population counts as generation 1, its offspring as generation 2 etc.;
-#' fidelity refinements (step 3. in the algorithm description above) are always included in their generation, [`TerminatorGenerations`]
+#' fidelity refinements (step 6. in the algorithm description above) are always included in their generation, [`TerminatorGenerations`]
 #' avoids terminating right before they are evaluated. Other terminators may, however, end the optimization process at any time.
 #'
 #' @section Multi-Fidelity:
@@ -35,11 +35,11 @@
 #' as well as fidelity refinement within each generation. When `multi_fidelity` is `TRUE`, then one search space component of the
 #' [`OptimInstance`][bbotk::OptimInstance] must have the `"budget"` tag, which is then optimized as the "budget" component. This means that the value of this component is
 #' determined by the `fidelity`/`fidelity_offspring` parameters, which are functions that get called whenever individuals get evaluated.
-#' The `fidelity` function is evaluated before step 3 in the algorithm, it returns the value of the budget search space component that all individuals
-#' that survive the current generation should be evaluated with. `fidelity_offspring` is called before step 5 and determines the fidelity that newly
+#' The `fidelity` function is evaluated before step 2 and before every occurrence of step 6 in the algorithm, it returns the value of the budget search space component that all individuals
+#' that survive the current generation should be evaluated with. `fidelity_offspring` is called before step 4 and determines the fidelity that newly
 #' sampled offspring individuals should be evaluated with; it may be desirable to set this to a lower value than `fidelity` to save budget when
 #' preliminarily evaluating newly sampled individuals that may or may not perform well compared to already sampled individuals.
-#' Individuals that survive the generation and are not removed in step 6 will be re-evaluated with the `fidelity`-value in step 3 in the next loop
+#' Individuals that survive the generation and are not removed in step 5 will be re-evaluated with the `fidelity`-value in step 6 before the next loop
 #' iteration.
 #'
 #' `fidelity` and `fidelity_offspring` must have arguments `inst`, `budget_id`, `last_fidelity` and `last_fidelity_offspring`. `inst` is the
@@ -50,9 +50,9 @@
 #' can be set to a function that just returns `last_fidelity`; this is actually the behaviour that `fidelity_offspring` is initialized with.
 #'
 #' `OptimizerMies` avoids re-evaluating individuals if the fidelity parameter does not change. This means that setting `fidelity` and `fidelity_offspring`
-#' to the same value avoids re-evaluating individuals in step 3. When `fidelity_monotonic` is `TRUE`, re-evaluation is also avoided should the
-#' desired fidelity parameter value decrease. When `fidelity_current_gen_only` is `TRUE`, then step 3 only re-evaluates individuals that were
-#' created in the current generation (in the previous step 5) and sets the fidelity for individuals that are created in step 2, but it does not
+#' to the same value avoids re-evaluating individuals in step 6. When `fidelity_monotonic` is `TRUE`, re-evaluation is also avoided should the
+#' desired fidelity parameter value decrease. When `fidelity_current_gen_only` is `TRUE`, then step 6 only re-evaluates individuals that were
+#' created in the current generation (in the previous step 4) and sets the fidelity for individuals that are created in step 6, but it does not
 #' re-evaluate individuals that survived from earlier generations or were already in the [`OptimInstance`][bbotk::OptimInstance] when
 #' optimization started; it is recommended to leave this value at `TRUE` which it is initialized with.
 #'
