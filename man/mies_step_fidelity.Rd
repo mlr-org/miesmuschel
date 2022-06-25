@@ -9,7 +9,7 @@ mies_step_fidelity(
   budget_id,
   fidelity,
   current_gen_only = FALSE,
-  monotonic = TRUE,
+  fidelity_monotonic = TRUE,
   additional_components = NULL
 )
 }
@@ -28,7 +28,7 @@ Whether to only re-evaluate survivors individuals generated in the latest genera
 individuals (\code{FALSE}). In any case, only individuals that were not already evaluated with the chosen fidelity are evaluated,
 so this will usually only have an effect when the fidelity of surviving individuals changed between generations.}
 
-\item{monotonic}{(\code{logical(1)})\cr
+\item{fidelity_monotonic}{(\code{logical(1)})\cr
 Whether to only re-evaluate configurations for which the fidelity would increase. Default \code{TRUE}.}
 
 \item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
@@ -99,9 +99,9 @@ mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3)
 oi$archive
 
 # To also re-evaluate individuals with *higher* fidelity, use
-# 'monotonic = FALSE'. This does not re-evaluate the points that already have
+# 'fidelity_monotonic = FALSE'. This does not re-evaluate the points that already have
 # the requested fidelity, however.
-mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, monotonic = FALSE)
+mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, fidelity_monotonic = FALSE)
 
 oi$archive
 }

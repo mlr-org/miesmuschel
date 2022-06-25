@@ -30,13 +30,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("proxy")
 recs("proxy")  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("proxy")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -82,23 +84,23 @@ Packages needed for the operator. Retrieved from the \code{operation} configurat
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorProxy$new()}}
-\item \href{#method-prime}{\code{RecombinatorProxy$prime()}}
-\item \href{#method-clone}{\code{RecombinatorProxy$clone()}}
+\item \href{#method-RecombinatorProxy-new}{\code{RecombinatorProxy$new()}}
+\item \href{#method-RecombinatorProxy-prime}{\code{RecombinatorProxy$prime()}}
+\item \href{#method-RecombinatorProxy-clone}{\code{RecombinatorProxy$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorProxy-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorProxy-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{RecombinatorProxy} object.
 \subsection{Usage}{
@@ -125,8 +127,8 @@ The \verb{$n_indivs_out} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-RecombinatorProxy-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorProxy-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
 Note that this modifies the \verb{$param_set$values$operation} object.
@@ -147,8 +149,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorProxy-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorProxy-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

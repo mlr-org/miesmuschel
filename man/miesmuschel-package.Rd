@@ -12,7 +12,9 @@ is more flexible and can be used for research into novel evolutionary strategies
 
 The call-graph of the default algorithm in \code{\link{OptimizerMies}} / \code{\link{TunerMies}} is as follows, and is shown
 here as an overview over the \verb{mies_*} functions, and how they are usually connected. (Note that only the
-exported \verb{mies_*} functions are shown.) See the help information of these functions for more info.\preformatted{OptimizerMies$.optimize(inst)
+exported \verb{mies_*} functions are shown.) See the help information of these functions for more info.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{OptimizerMies$.optimize(inst)
 |- mies_prime_operators()  # prime operators on instance's search_space
 |- mies_init_population()  # sample and evaluate first generation
 |  `- mies_evaluate_offspring()  # evaluate sampled individuals
@@ -27,7 +29,7 @@ exported \verb{mies_*} functions are shown.) See the help information of these f
    |  `- inst$eval_batch()  # The OptimInst's evaluation method
    `- mies_survival_plus() / mies_survival_comma()  # survival
       `- mies_select_from_archive()  # Use 'Selector' on 'Archive'
-}
+}\if{html}{\out{</div>}}
 }
 \seealso{
 Useful links:

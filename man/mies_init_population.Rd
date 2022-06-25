@@ -11,6 +11,8 @@ mies_init_population(
   survival_selector = SelectorBest$new()$prime(inst$search_space),
   budget_id = NULL,
   fidelity = NULL,
+  fidelity_new_individuals_only = FALSE,
+  fidelity_monotonic = TRUE,
   additional_component_sampler = NULL
 )
 }
@@ -43,6 +45,14 @@ to \code{individuals} according to \code{fidelity}. Should be \code{NULL} when n
 \item{fidelity}{(\code{atomic(1)} | \code{NULL})\cr
 Atomic scalar indicating the value to be assigned to the \code{budget_id} component of offspring.
 This value must be \code{NULL} if no multi-fidelity optimization is performed (the default).}
+
+\item{fidelity_new_individuals_only}{(\code{logical(1)})\cr
+When \code{fidelity} is not \code{NULL}: Whether to re-evaluate individuals that are already present in \code{inst} should they have a smaller (if \code{fidelity_monotonic} is \code{TRUE}) or different
+(if \code{fidelity_monotonic} is \code{FALSE}) value from the one given to \code{fidelity}. Default \code{FALSE}. Ignored when \code{fidelity} is \code{NULL}.}
+
+\item{fidelity_monotonic}{(\code{logical(1)})\cr
+Whether to only re-evaluate configurations for which the fidelity would increase. Default \code{TRUE}.
+Ignored when \code{fidelity} is \code{NULL} or when \code{fidelity_new_individuals_only} is \code{TRUE}.}
 
 \item{additional_component_sampler}{(\code{\link[paradox:Sampler]{Sampler}} | \code{NULL})\cr
 \code{\link[paradox:Sampler]{Sampler}} for components of individuals that are not part of \code{inst}'s \verb{$search_space}. These components

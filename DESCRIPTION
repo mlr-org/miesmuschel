@@ -30,7 +30,7 @@ Suggests:
   ranger,
   xgboost,
   rpart
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Collate: 
     'dictionaries.R'
     'MiesOperator.R'
@@ -79,7 +79,6 @@ Collate:
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
     'TunerMies.R'
-    'aggregate_generations.R'
     'bibentries.R'
     'repr.R'
     'utils.R'

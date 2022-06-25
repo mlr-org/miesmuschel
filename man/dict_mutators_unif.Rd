@@ -29,13 +29,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Mutator}} can be created with the short access form \code{\link[=mut]{mut()}}
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_mutators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 mut("unif")
 muts("unif")  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("unif")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -72,23 +74,23 @@ Other mutators:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MutatorDiscreteUniform$new()}}
-\item \href{#method-clone}{\code{MutatorDiscreteUniform$clone()}}
+\item \href{#method-MutatorDiscreteUniform-new}{\code{MutatorDiscreteUniform$new()}}
+\item \href{#method-MutatorDiscreteUniform-clone}{\code{MutatorDiscreteUniform$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MutatorDiscreteUniform-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorDiscreteUniform-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{MutatorDiscreteUniform} object.
 \subsection{Usage}{
@@ -97,8 +99,8 @@ Initialize the \code{MutatorDiscreteUniform} object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MutatorDiscreteUniform-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorDiscreteUniform-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -41,13 +41,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("sequential", <recombinators>)
 recs("sequential", <recombinators>)  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("sequential", <recombinators>)
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -87,23 +89,23 @@ Whether to allow lowest common multiple packing.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorSequential$new()}}
-\item \href{#method-prime}{\code{RecombinatorSequential$prime()}}
-\item \href{#method-clone}{\code{RecombinatorSequential$clone()}}
+\item \href{#method-RecombinatorSequential-new}{\code{RecombinatorSequential$new()}}
+\item \href{#method-RecombinatorSequential-prime}{\code{RecombinatorSequential$prime()}}
+\item \href{#method-RecombinatorSequential-clone}{\code{RecombinatorSequential$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorSequential-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorSequential-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{RecombinatorSequential} object.
 \subsection{Usage}{
@@ -125,8 +127,8 @@ The \verb{$allow_lcm_packing} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-RecombinatorSequential-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorSequential-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operators
 given to \code{recombinator} and \code{recombinator_not} during construction.
@@ -147,8 +149,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorSequential-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorSequential-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

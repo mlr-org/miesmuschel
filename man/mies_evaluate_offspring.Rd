@@ -10,7 +10,7 @@ mies_evaluate_offspring(
   budget_id = NULL,
   fidelity = NULL,
   reevaluate_fidelity = NULL,
-  monotonic = TRUE
+  fidelity_monotonic = TRUE
 )
 }
 \arguments{
@@ -29,11 +29,11 @@ Atomic scalar indicating the value to be assigned to the \code{budget_id} compon
 This value must be \code{NULL} if no multi-fidelity optimization is performed (the default).}
 
 \item{reevaluate_fidelity}{(\code{atomic(1)})\cr
-Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if \code{monotonic} is \code{TRUE}) or
+Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if \code{fidelity_monotonic} is \code{TRUE}) or
 different from the current \code{fidelity} value. Default \code{NULL}: Do not re-evaluate. Must be \code{NULL} when \code{budget_id} and \code{fidelity} are \code{NULL}.
 See also \code{\link{mies_step_fidelity}}.}
 
-\item{monotonic}{(\code{logical(1)})\cr
+\item{fidelity_monotonic}{(\code{logical(1)})\cr
 When \code{reevaluate_fidelity} is non-\code{NULL}, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
 Default \code{TRUE}. Ignored when \code{reevaluate_fidelity} is \code{NULL}}
 }
@@ -122,7 +122,7 @@ mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
   fidelity = 3, reevaluate_fidelity = 2)
 
 # In this example, only individuals with 'y = 1' were re-evaluated, since
-# 'monotonic' is TRUE.
+# 'fidelity_monotonic' is TRUE.
 oi$archive
 
 }

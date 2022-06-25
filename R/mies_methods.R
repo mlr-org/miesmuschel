@@ -592,7 +592,8 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #' @param fidelity_new_individuals_only (`logical(1)`)\cr
 #'   When `fidelity` is not `NULL`: Whether to re-evaluate individuals that are already present in `inst` should they have a smaller (if `fidelity_monotonic` is `TRUE`) or different
 #'   (if `fidelity_monotonic` is `FALSE`) value from the one given to `fidelity`. Default `FALSE`. Ignored when `fidelity` is `NULL`.
-#' @template param_fidelity_monotonic
+#' @param fidelity_monotonic (`logical(1)`)\cr
+#'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
 #'   Ignored when `fidelity` is `NULL` or when `fidelity_new_individuals_only` is `TRUE`.
 #' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
 #'   [`Sampler`][paradox::Sampler] for components of individuals that are not part of `inst`'s `$search_space`. These components

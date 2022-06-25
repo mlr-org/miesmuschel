@@ -84,24 +84,24 @@ Optimization supported by this \code{Filtor}, can be \code{"single-crit"}, \code
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{Filtor$new()}}
-\item \href{#method-needed_input}{\code{Filtor$needed_input()}}
-\item \href{#method-clone}{\code{Filtor$clone()}}
+\item \href{#method-Filtor-new}{\code{Filtor$new()}}
+\item \href{#method-Filtor-needed_input}{\code{Filtor$needed_input()}}
+\item \href{#method-Filtor-clone}{\code{Filtor$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-Filtor-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Filtor-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{Filtor}.
 \subsection{Usage}{
@@ -159,8 +159,8 @@ the \code{param_set} argument is not a list of expressions.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-needed_input"></a>}}
-\if{latex}{\out{\hypertarget{method-needed_input}{}}}
+\if{html}{\out{<a id="method-Filtor-needed_input"></a>}}
+\if{latex}{\out{\hypertarget{method-Filtor-needed_input}{}}}
 \subsection{Method \code{needed_input()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Filtor$needed_input(output_size)}\if{html}{\out{</div>}}
@@ -168,8 +168,8 @@ the \code{param_set} argument is not a list of expressions.}
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-Filtor-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-Filtor-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

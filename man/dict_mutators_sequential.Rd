@@ -23,13 +23,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of
 
 This \code{\link{Mutator}} can be created with the short access form \code{\link[=mut]{mut()}}
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_mutators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 mut("sequential", <mutators>)
 muts("sequential", <mutators>)  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("sequential", <mutators>)
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -71,23 +73,23 @@ Other mutator wrappers:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MutatorSequential$new()}}
-\item \href{#method-prime}{\code{MutatorSequential$prime()}}
-\item \href{#method-clone}{\code{MutatorSequential$clone()}}
+\item \href{#method-MutatorSequential-new}{\code{MutatorSequential$new()}}
+\item \href{#method-MutatorSequential-prime}{\code{MutatorSequential$prime()}}
+\item \href{#method-MutatorSequential-clone}{\code{MutatorSequential$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MutatorSequential-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorSequential-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{MutatorSequential} object.
 \subsection{Usage}{
@@ -105,8 +107,8 @@ The constructed object gets a \emph{clone} of this argument. The \verb{$mutators
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-MutatorSequential-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorSequential-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operators
 given to \code{mutator} and \code{mutator_not} during construction.
@@ -127,8 +129,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MutatorSequential-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorSequential-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

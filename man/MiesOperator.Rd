@@ -77,17 +77,17 @@ Whether the \code{MiesOperator} was primed before. Is \code{FALSE} exactly when 
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MiesOperator$new()}}
-\item \href{#method-repr}{\code{MiesOperator$repr()}}
-\item \href{#method-print}{\code{MiesOperator$print()}}
-\item \href{#method-prime}{\code{MiesOperator$prime()}}
-\item \href{#method-operate}{\code{MiesOperator$operate()}}
-\item \href{#method-clone}{\code{MiesOperator$clone()}}
+\item \href{#method-MiesOperator-new}{\code{MiesOperator$new()}}
+\item \href{#method-MiesOperator-repr}{\code{MiesOperator$repr()}}
+\item \href{#method-MiesOperator-print}{\code{MiesOperator$print()}}
+\item \href{#method-MiesOperator-prime}{\code{MiesOperator$prime()}}
+\item \href{#method-MiesOperator-operate}{\code{MiesOperator$operate()}}
+\item \href{#method-MiesOperator-clone}{\code{MiesOperator$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MiesOperator-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{MiesOperator}.
 \subsection{Usage}{
@@ -153,8 +153,8 @@ The \verb{$endomorphsim} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-repr"></a>}}
-\if{latex}{\out{\hypertarget{method-repr}{}}}
+\if{html}{\out{<a id="method-MiesOperator-repr"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-repr}{}}}
 \subsection{Method \code{repr()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$repr(
@@ -167,8 +167,8 @@ The \verb{$endomorphsim} field will reflect this value.}
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-MiesOperator-print"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$print(verbose = FALSE, ...)}\if{html}{\out{</div>}}
@@ -176,8 +176,8 @@ The \verb{$endomorphsim} field will reflect this value.}
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-MiesOperator-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-prime}{}}}
 \subsection{Method \code{prime()}}{
 Prepare the \code{MiesOperator} to function on the given \code{\link[paradox:ParamSet]{ParamSet}}. This must be called before
 \verb{$operate()}. It may be called multiple times in the lifecycle of the \code{MiesOperator} object, and prior primings are
@@ -201,8 +201,8 @@ May only contiain \code{\link[paradox:ParamSet]{Param}} objects that conform to 
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-operate"></a>}}
-\if{latex}{\out{\hypertarget{method-operate}{}}}
+\if{html}{\out{<a id="method-MiesOperator-operate"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-operate}{}}}
 \subsection{Method \code{operate()}}{
 Operate on the given individuals. This calls private \verb{$.operate()}, which must be overloaded by an inheriting class,
 passing through all function arguments after performing some checks.
@@ -228,8 +228,8 @@ a \code{data.frame}, the output is also \code{\link[data.table:data.table]{data.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MiesOperator-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

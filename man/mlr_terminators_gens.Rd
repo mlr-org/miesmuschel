@@ -20,13 +20,15 @@ termination at this fidelity refinement step is avoided.
 \section{Dictionary}{
 
 This \code{\link[bbotk:Terminator]{Terminator}} can be created with the short access form \code{\link[bbotk:trm]{trm()}} (\code{\link[bbotk:trm]{trms()}} to get a list),
-or through the \link[mlr3misc:Dictionary]{dictionary} \code{\link[bbotk:mlr_terminators]{mlr_terminators}} in the following way:\preformatted{# preferred
+or through the \link[mlr3misc:Dictionary]{dictionary} \code{\link[bbotk:mlr_terminators]{mlr_terminators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred
 trm("gens")
 trms("gens")  # takes vector IDs, returns list of Terminators
 
 # long form
 mlr_terminators$get("gens")
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Configuration Parameters}{
@@ -47,24 +49,24 @@ trm("gens", generations = 10)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{TerminatorGenerations$new()}}
-\item \href{#method-is_terminated}{\code{TerminatorGenerations$is_terminated()}}
-\item \href{#method-clone}{\code{TerminatorGenerations$clone()}}
+\item \href{#method-TerminatorGenerations-new}{\code{TerminatorGenerations$new()}}
+\item \href{#method-TerminatorGenerations-is_terminated}{\code{TerminatorGenerations$is_terminated()}}
+\item \href{#method-TerminatorGenerations-clone}{\code{TerminatorGenerations$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="format">}\href{../../bbotk/html/Terminator.html#method-format}{\code{bbotk::Terminator$format()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="print">}\href{../../bbotk/html/Terminator.html#method-print}{\code{bbotk::Terminator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="remaining_time">}\href{../../bbotk/html/Terminator.html#method-remaining_time}{\code{bbotk::Terminator$remaining_time()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="status">}\href{../../bbotk/html/Terminator.html#method-status}{\code{bbotk::Terminator$status()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="format"><a href='../../bbotk/html/Terminator.html#method-Terminator-format'><code>bbotk::Terminator$format()</code></a></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="print"><a href='../../bbotk/html/Terminator.html#method-Terminator-print'><code>bbotk::Terminator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="remaining_time"><a href='../../bbotk/html/Terminator.html#method-Terminator-remaining_time'><code>bbotk::Terminator$remaining_time()</code></a></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="status"><a href='../../bbotk/html/Terminator.html#method-Terminator-status'><code>bbotk::Terminator$status()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-TerminatorGenerations-new"></a>}}
+\if{latex}{\out{\hypertarget{method-TerminatorGenerations-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{TerminatorGenerations} object.
 \subsection{Usage}{
@@ -73,8 +75,8 @@ Initialize the \code{TerminatorGenerations} object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-is_terminated"></a>}}
-\if{latex}{\out{\hypertarget{method-is_terminated}{}}}
+\if{html}{\out{<a id="method-TerminatorGenerations-is_terminated"></a>}}
+\if{latex}{\out{\hypertarget{method-TerminatorGenerations-is_terminated}{}}}
 \subsection{Method \code{is_terminated()}}{
 Is \code{TRUE} if when the termination criterion is matched, \code{FALSE} otherwise.
 \subsection{Usage}{
@@ -94,8 +96,8 @@ Archive to check.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-TerminatorGenerations-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-TerminatorGenerations-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -31,13 +31,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of
 
 This \code{\link{Mutator}} can be created with the short access form \code{\link[=mut]{mut()}}
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_mutators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 mut("maybe", <mutator> [, <mutator_not>])
 muts("maybe", <mutator> [, <mutator_not>])  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("maybe", <mutator> [, <mutator_not>])
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -100,23 +102,23 @@ Alternative \code{\link{Mutator}} being wrapped. This operator gets run with pro
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MutatorMaybe$new()}}
-\item \href{#method-prime}{\code{MutatorMaybe$prime()}}
-\item \href{#method-clone}{\code{MutatorMaybe$clone()}}
+\item \href{#method-MutatorMaybe-new}{\code{MutatorMaybe$new()}}
+\item \href{#method-MutatorMaybe-prime}{\code{MutatorMaybe$prime()}}
+\item \href{#method-MutatorMaybe-clone}{\code{MutatorMaybe$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MutatorMaybe-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorMaybe-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{MutatorMaybe} object.
 \subsection{Usage}{
@@ -143,8 +145,8 @@ The \verb{$mutator_not} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-MutatorMaybe-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorMaybe-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operators
 given to \code{mutator} and \code{mutator_not} during construction.
@@ -165,8 +167,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MutatorMaybe-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorMaybe-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

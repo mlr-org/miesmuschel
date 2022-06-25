@@ -56,33 +56,33 @@ Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value 
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{ParamSetShadow$new()}}
-\item \href{#method-add}{\code{ParamSetShadow$add()}}
-\item \href{#method-subset}{\code{ParamSetShadow$subset()}}
-\item \href{#method-add_dep}{\code{ParamSetShadow$add_dep()}}
-\item \href{#method-clone}{\code{ParamSetShadow$clone()}}
+\item \href{#method-ParamSetShadow-new}{\code{ParamSetShadow$new()}}
+\item \href{#method-ParamSetShadow-add}{\code{ParamSetShadow$add()}}
+\item \href{#method-ParamSetShadow-subset}{\code{ParamSetShadow$subset()}}
+\item \href{#method-ParamSetShadow-add_dep}{\code{ParamSetShadow$add_dep()}}
+\item \href{#method-ParamSetShadow-clone}{\code{ParamSetShadow$clone()}}
 }
 }
-\if{html}{
-\out{<details ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert">}\href{../../paradox/html/ParamSet.html#method-assert}{\code{paradox::ParamSet$assert()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert_dt">}\href{../../paradox/html/ParamSet.html#method-assert_dt}{\code{paradox::ParamSet$assert_dt()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check">}\href{../../paradox/html/ParamSet.html#method-check}{\code{paradox::ParamSet$check()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check_dt">}\href{../../paradox/html/ParamSet.html#method-check_dt}{\code{paradox::ParamSet$check_dt()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="format">}\href{../../paradox/html/ParamSet.html#method-format}{\code{paradox::ParamSet$format()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="get_values">}\href{../../paradox/html/ParamSet.html#method-get_values}{\code{paradox::ParamSet$get_values()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="ids">}\href{../../paradox/html/ParamSet.html#method-ids}{\code{paradox::ParamSet$ids()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="print">}\href{../../paradox/html/ParamSet.html#method-print}{\code{paradox::ParamSet$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="search_space">}\href{../../paradox/html/ParamSet.html#method-search_space}{\code{paradox::ParamSet$search_space()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test">}\href{../../paradox/html/ParamSet.html#method-test}{\code{paradox::ParamSet$test()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test_dt">}\href{../../paradox/html/ParamSet.html#method-test_dt}{\code{paradox::ParamSet$test_dt()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert"><a href='../../paradox/html/ParamSet.html#method-ParamSet-assert'><code>paradox::ParamSet$assert()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-assert_dt'><code>paradox::ParamSet$assert_dt()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check"><a href='../../paradox/html/ParamSet.html#method-ParamSet-check'><code>paradox::ParamSet$check()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-check_dt'><code>paradox::ParamSet$check_dt()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="format"><a href='../../paradox/html/ParamSet.html#method-ParamSet-format'><code>paradox::ParamSet$format()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="get_values"><a href='../../paradox/html/ParamSet.html#method-ParamSet-get_values'><code>paradox::ParamSet$get_values()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="ids"><a href='../../paradox/html/ParamSet.html#method-ParamSet-ids'><code>paradox::ParamSet$ids()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="print"><a href='../../paradox/html/ParamSet.html#method-ParamSet-print'><code>paradox::ParamSet$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="search_space"><a href='../../paradox/html/ParamSet.html#method-ParamSet-search_space'><code>paradox::ParamSet$search_space()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test"><a href='../../paradox/html/ParamSet.html#method-ParamSet-test'><code>paradox::ParamSet$test()</code></a></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-test_dt'><code>paradox::ParamSet$test_dt()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-ParamSetShadow-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ParamSetShadow-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{ParamSetShadow} object.
 \subsection{Usage}{
@@ -102,8 +102,8 @@ Ids of \code{\link[paradox:Param]{Param}}s to shadow from \code{sets}, must be a
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add"></a>}}
-\if{latex}{\out{\hypertarget{method-add}{}}}
+\if{html}{\out{<a id="method-ParamSetShadow-add"></a>}}
+\if{latex}{\out{\hypertarget{method-ParamSetShadow-add}{}}}
 \subsection{Method \code{add()}}{
 Adds a single param or another set to this set, all params are cloned.
 
@@ -127,8 +127,8 @@ but are shadowed can \emph{not} be added and instead will result in an error.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-subset"></a>}}
-\if{latex}{\out{\hypertarget{method-subset}{}}}
+\if{html}{\out{<a id="method-ParamSetShadow-subset"></a>}}
+\if{latex}{\out{\hypertarget{method-ParamSetShadow-subset}{}}}
 \subsection{Method \code{subset()}}{
 Reduces the parameters to the ones of passed ids.
 
@@ -149,8 +149,8 @@ This calls the underlying \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$subs
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add_dep"></a>}}
-\if{latex}{\out{\hypertarget{method-add_dep}{}}}
+\if{html}{\out{<a id="method-ParamSetShadow-add_dep"></a>}}
+\if{latex}{\out{\hypertarget{method-ParamSetShadow-add_dep}{}}}
 \subsection{Method \code{add_dep()}}{
 Adds a dependency to the unterlying \code{\link[paradox:ParamSet]{ParamSet}}.
 \subsection{Usage}{
@@ -173,8 +173,8 @@ Adds a dependency to the unterlying \code{\link[paradox:ParamSet]{ParamSet}}.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-ParamSetShadow-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-ParamSetShadow-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

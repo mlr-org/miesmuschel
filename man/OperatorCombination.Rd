@@ -56,24 +56,28 @@ Configuration parameter names are prefixed with the name of the \code{\link{Mies
 
 This \code{\link{Mutator}} can be created with the short access form \code{\link[=mut]{mut()}}
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_mutators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 mut("combine", <operators>, ...)
 muts("combine", <operators>, ...)  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("combine", <operators>, ...)
-}
+}\if{html}{\out{</div>}}
 
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("combine", <operators>, ...)
 recs("combine", <operators>, ...)  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("combine", <operators>, ...)
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -240,23 +244,23 @@ See the construction argument. Can be changed during the object's lifetime.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{OperatorCombination$new()}}
-\item \href{#method-prime}{\code{OperatorCombination$prime()}}
-\item \href{#method-clone}{\code{OperatorCombination$clone()}}
+\item \href{#method-OperatorCombination-new}{\code{OperatorCombination$new()}}
+\item \href{#method-OperatorCombination-prime}{\code{OperatorCombination$prime()}}
+\item \href{#method-OperatorCombination-clone}{\code{OperatorCombination$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-OperatorCombination-new"></a>}}
+\if{latex}{\out{\hypertarget{method-OperatorCombination-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{OperatorCombination} object.
 \subsection{Usage}{
@@ -340,8 +344,8 @@ The \verb{$dict_shortaccess} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-OperatorCombination-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-OperatorCombination-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operators
 given to \code{operators} during construction. Priming of wrapped operators happens according
@@ -363,8 +367,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-OperatorCombination-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-OperatorCombination-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
@@ -386,23 +390,23 @@ The objects of this class are cloneable with this method.
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MutatorCombination$new()}}
-\item \href{#method-clone}{\code{MutatorCombination$clone()}}
+\item \href{#method-MutatorCombination-new}{\code{MutatorCombination$new()}}
+\item \href{#method-MutatorCombination-clone}{\code{MutatorCombination$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../miesmuschel/html/OperatorCombination.html#method-prime}{\code{miesmuschel::OperatorCombination$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime"><a href='../../miesmuschel/html/OperatorCombination.html#method-OperatorCombination-prime'><code>miesmuschel::OperatorCombination$prime()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MutatorCombination-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorCombination-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{MutatorCombination} object.
 \subsection{Usage}{
@@ -435,8 +439,8 @@ Initialize the \code{MutatorCombination} object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MutatorCombination-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorCombination-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
@@ -469,23 +473,23 @@ Number of individuals produced for each group of \verb{$n_indivs_in} individuals
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorCombination$new()}}
-\item \href{#method-clone}{\code{RecombinatorCombination$clone()}}
+\item \href{#method-RecombinatorCombination-new}{\code{RecombinatorCombination$new()}}
+\item \href{#method-RecombinatorCombination-clone}{\code{RecombinatorCombination$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print">}\href{../../miesmuschel/html/MiesOperator.html#method-print}{\code{miesmuschel::MiesOperator$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr">}\href{../../miesmuschel/html/MiesOperator.html#method-repr}{\code{miesmuschel::MiesOperator$repr()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime">}\href{../../miesmuschel/html/OperatorCombination.html#method-prime}{\code{miesmuschel::OperatorCombination$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="OperatorCombination" data-id="prime"><a href='../../miesmuschel/html/OperatorCombination.html#method-OperatorCombination-prime'><code>miesmuschel::OperatorCombination$prime()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorCombination-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorCombination-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{RecombinatorCombination} object.
 \subsection{Usage}{
@@ -518,8 +522,8 @@ Initialize the \code{RecombinatorCombination} object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorCombination-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorCombination-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
