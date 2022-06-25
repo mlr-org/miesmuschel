@@ -19,10 +19,10 @@
 #' @template param_budget_id_maybenull
 #' @template param_fidelity_maybenull
 #' @param reevaluate_fidelity (`atomic(1)`)\cr
-#'   Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if `monotonic` is `TRUE`) or
+#'   Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if `fidelity_monotonic` is `TRUE`) or
 #'   different from the current `fidelity` value. Default `NULL`: Do not re-evaluate. Must be `NULL` when `budget_id` and `fidelity` are `NULL`.
 #'   See also [`mies_step_fidelity`].
-#' @param monotonic (`logical(1)`)\cr
+#' @param fidelity_monotonic (`logical(1)`)\cr
 #'   When `reevaluate_fidelity` is non-`NULL`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
 #'   Default `TRUE`. Ignored when `reevaluate_fidelity` is `NULL`
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
@@ -96,18 +96,18 @@
 #'   fidelity = 3, reevaluate_fidelity = 2)
 #'
 #' # In this example, only individuals with 'y = 1' were re-evaluated, since
-#' # 'monotonic' is TRUE.
+#' # 'fidelity_monotonic' is TRUE.
 #' oi$archive
 #'
 #' @export
-mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity = NULL, reevaluate_fidelity = NULL, monotonic = TRUE) {
+mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity = NULL, reevaluate_fidelity = NULL, fidelity_monotonic = TRUE) {
   assert_optim_instance(inst)
 
   offspring = as.data.table(assert_data_frame(offspring))
   ss_ids = inst$search_space$ids()
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
   if (!is.null(reevaluate_fidelity) && is.null(budget_id)) stop("reevaluate_fidelity must be NULL when budget_id is not given.")
-  assert_flag(monotonic)
+  assert_flag(fidelity_monotonic)
   data = inst$archive$data
   ocols = colnames(offspring)
   assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)
@@ -125,7 +125,7 @@ mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity =
       assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
       assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
-      comparator = if (monotonic) `<` else `!=`
+      comparator = if (fidelity_monotonic) `<` else `!=`
       reeval = which(is.na(data$eol) & comparator(data[[budget_id]], reevaluate_fidelity))
       indivs = data[reeval, ocols, with = FALSE]
       offspring = rbind(offspring, set(indivs, , budget_id, reevaluate_fidelity))
@@ -159,8 +159,7 @@ mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity =
 #'   Whether to only re-evaluate survivors individuals generated in the latest generation (`TRUE`), or re-evaluate all currently alive
 #'   individuals (`FALSE`). In any case, only individuals that were not already evaluated with the chosen fidelity are evaluated,
 #'   so this will usually only have an effect when the fidelity of surviving individuals changed between generations.
-#' @param monotonic (`logical(1)`)\cr
-#'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
+#' @template param_fidelity_monotonic
 #' @template param_additional_components
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
@@ -217,16 +216,16 @@ mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity =
 #' oi$archive
 #'
 #' # To also re-evaluate individuals with *higher* fidelity, use
-#' # 'monotonic = FALSE'. This does not re-evaluate the points that already have
+#' # 'fidelity_monotonic = FALSE'. This does not re-evaluate the points that already have
 #' # the requested fidelity, however.
-#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, monotonic = FALSE)
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, fidelity_monotonic = FALSE)
 #'
 #' oi$archive
 #' @export
-mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL) {
+mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALSE, fidelity_monotonic = TRUE, additional_components = NULL) {
   assert_optim_instance(inst)
   assert_flag(current_gen_only)
-  assert_flag(monotonic)
+  assert_flag(fidelity_monotonic)
   assert_r6(additional_components, "ParamSet", null.ok = TRUE)
   ss_ids = inst$search_space$ids()
   ac_ids = character(0)
@@ -245,7 +244,7 @@ mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALS
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
-  comparator = if (monotonic) `<` else `!=`
+  comparator = if (fidelity_monotonic) `<` else `!=`
   reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], fidelity))
 
   indivs = data[reeval, c(ss_ids, ac_ids), with = FALSE]
@@ -590,6 +589,11 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'   The given [`Selector`] may *not* return duplicates.\cr
 #' @template param_budget_id_maybenull
 #' @template param_fidelity_maybenull
+#' @param fidelity_new_individuals_only (`logical(1)`)\cr
+#'   When `fidelity` is not `NULL`: Whether to re-evaluate individuals that are already present in `inst` should they have a smaller (if `fidelity_monotonic` is `TRUE`) or different
+#'   (if `fidelity_monotonic` is `FALSE`) value from the one given to `fidelity`. Default `FALSE`. Ignored when `fidelity` is `NULL`.
+#' @template param_fidelity_monotonic
+#'   Ignored when `fidelity` is `NULL` or when `fidelity_new_individuals_only` is `TRUE`.
 #' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
 #'   [`Sampler`][paradox::Sampler] for components of individuals that are not part of `inst`'s `$search_space`. These components
 #'   are never used for performance evaluation, but they may be useful for self-adaptive [`OperatorCombination`]s. See the description
@@ -648,7 +652,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #' oi$archive
 #'
 #' @export
-mies_init_population = function(inst, mu, initializer = generate_design_random, survival_selector = SelectorBest$new()$prime(inst$search_space), budget_id = NULL, fidelity = NULL, additional_component_sampler = NULL) {
+mies_init_population = function(inst, mu, initializer = generate_design_random, survival_selector = SelectorBest$new()$prime(inst$search_space), budget_id = NULL, fidelity = NULL, fidelity_new_individuals_only = FALSE, fidelity_monotonic = TRUE, additional_component_sampler = NULL) {
   assert_optim_instance(inst)
 
   assert_int(mu, lower = 0, tol = 1e-100)
@@ -663,6 +667,10 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 
   assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
   assert_scalar(fidelity, null.ok = TRUE)
+  assert_flag(fidelity_monotonic)
+  assert_flag(fidelity_new_individuals_only)
+  if (is.null(fidelity)) fidelity_new_individuals_only = TRUE  # indicate that fidelity-reevals won't be necessary
+
 
   if (any(c("dob", "eol") %in% ac_ids)) {
     stop("'dob' and 'eol' may not be additional component dimensions.")
@@ -756,15 +764,17 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
     if (anyDuplicated(survival_selector)) stop("survival_selector may not generate duplicates.")
     died = setdiff(alive, survivors)
     set(data, died, "eol", max(data$dob))
-  } else if (mu_remaining > 0) {
+  }
+  if (mu_remaining > 0 || !fidelity_new_individuals_only) {
+    # mies_evaluate_offspring needs to be evaluated even if there are no new indivs if fidelity-reevals could be necessary.
     sample_space = inst$search_space
     if (!is.null(budget_id)) {
       sample_space = ParamSetShadow$new(sample_space, budget_id)
     }
-    mies_evaluate_offspring(inst,
-      cbind(as.data.table(assert_data_frame(initializer(sample_space, mu_remaining)$data, nrows = mu_remaining)),
-        last(additional_components, mu_remaining)),
-      budget_id = budget_id, fidelity = fidelity)
+    offspring = cbind(as.data.table(assert_data_frame(initializer(sample_space, mu_remaining)$data, nrows = mu_remaining)), last(additional_components, mu_remaining))
+
+    mies_evaluate_offspring(inst, offspring = offspring, budget_id = budget_id, fidelity = fidelity,
+      reevaluate_fidelity = if (!fidelity_new_individuals_only) fidelity, fidelity_monotonic = fidelity_monotonic)
   }
   invisible(inst)
 }
