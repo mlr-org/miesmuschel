@@ -20,7 +20,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `budget` :: `numeric(1)`\cr
-#'   Total budget available, after which to stop. Initialized to `Inf`.
+#'   Total budget available, after which to stop. Not initialized and should be set to the desired value during construction.
 #' * `aggregate` :: `function`\cr
 #'   Function taking a vector of values of the budget search space component, returning a scalar value to be compared
 #'   to the `budget` configuration parameter. If this function returns a value greater or equal to `budget` the termination

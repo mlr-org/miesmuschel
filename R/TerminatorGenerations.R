@@ -30,7 +30,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `generations` :: `integer(1)`\cr
-#'   Number of generations to evaluate, after which to stop. Initialized to `Inf`.
+#'   Number of generations to evaluate, after which to stop. Not initialized and should be set to the desired value during construction.
 #'
 #' @examples
 #' library("bbotk")

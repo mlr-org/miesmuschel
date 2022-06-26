@@ -25,7 +25,7 @@ mlr_terminators$get("budget")
 
 \itemize{
 \item \code{budget} :: \code{numeric(1)}\cr
-Total budget available, after which to stop. Initialized to \code{Inf}.
+Total budget available, after which to stop. Not initialized and should be set to the desired value during construction.
 \item \code{aggregate} :: \code{function}\cr
 Function taking a vector of values of the budget search space component, returning a scalar value to be compared
 to the \code{budget} configuration parameter. If this function returns a value greater or equal to \code{budget} the termination

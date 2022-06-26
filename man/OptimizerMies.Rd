@@ -381,6 +381,7 @@ Initialize the \code{TunerMies} object.
   parent_selector = SelectorProxy$new(),
   survival_selector = SelectorProxy$new(),
   elite_selector = NULL,
+  init_selector = survival_selector,
   multi_fidelity = FALSE
 )}\if{html}{\out{</div>}}
 }

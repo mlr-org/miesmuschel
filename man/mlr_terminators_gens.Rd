@@ -35,7 +35,7 @@ mlr_terminators$get("gens")
 
 \itemize{
 \item \code{generations} :: \code{integer(1)}\cr
-Number of generations to evaluate, after which to stop. Initialized to \code{Inf}.
+Number of generations to evaluate, after which to stop. Not initialized and should be set to the desired value during construction.
 }
 }
 
