@@ -260,7 +260,7 @@ mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALS
   on.exit(set(inst$archive$data, current_gen_rows, "dob", current_gen))  # first sset the on.exit to prevent leaving data in a bad state.
   set(inst$archive$data, current_gen_rows, "dob", current_gen - 1)
 
-  ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
+  ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen, NA_real_)))
 
   set(inst$archive$data, reeval, "eol", current_gen)  # do this once we are done evaluating replacements, e.g. in case the terminator triggers
 
@@ -1355,5 +1355,5 @@ mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$i
 #'   [`mies_evaluate_offspring`] with non-empty `offspring`, increases the generation by 1.
 mies_generation = function(inst) {
   assert_optim_instance(inst)
-  (assert_int(max(inst$archive$data$dob, 0, na.rm = TRUE), lower = 0, any.missing = FALSE, tol = 1e-100))  # parentheses because we don't want to return invisibly
+  (assert_int(max(inst$archive$data$dob, 0, na.rm = TRUE), lower = 0, tol = 1e-100))  # parentheses because we don't want to return invisibly
 }

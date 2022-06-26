@@ -414,9 +414,9 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         fidelity = params$fidelity(inst = inst, budget_id = budget_id, last_fidelity = fidelity, last_fidelity_offspring = fidelity_offspring)
       }
 
-      mies_init_population(inst, mu = params$mu, initializer = params$initializer, survival_selector = params$init_selector,
-        budget_id = budget_id, fidelity = fidelity, fidelity_new_individuals_only = params$current_gen_only,
-        fidelity_monotonic = params$fidelity_monotonic, additional_component_sampler = params$additional_component_sampler)
+      mies_init_population(inst, mu = params$mu, initializer = params$initializer, survival_selector = self$init_selector,
+        budget_id = budget_id, fidelity = fidelity, fidelity_new_individuals_only = params$current_gen_only %??% TRUE,
+        fidelity_monotonic = params$fidelity_monotonic %??% FALSE, additional_component_sampler = params$additional_component_sampler)
 
       repeat {
         offspring = mies_generate_offspring(inst, lambda = params$lambda,
@@ -429,7 +429,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         if (!is.null(params$fidelity)) {
           fidelity = params$fidelity(inst = inst, budget_id = budget_id, last_fidelity = fidelity, last_fidelity_offspring = fidelity_offspring)
           mies_step_fidelity(inst, budget_id = budget_id, fidelity = fidelity, current_gen_only = params$fidelity_current_gen_only,
-            monotonic = params$fidelity_monotonic, additional_components = additional_components)
+            fidelity_monotonic = params$fidelity_monotonic, additional_components = additional_components)
         }
       }
     },
