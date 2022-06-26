@@ -2,9 +2,18 @@
 source("setup.R", local = TRUE)
 
 tg = TerminatorGenerations$new()
-expect_equal(tg$param_set$values, list(generations = Inf))
+expect_error(tg$param_set$get_values(), "Missing required parameter.*generations")
 
 oibig = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
+
+expect_error(tg$is_terminated(oibig$archive), "Missing required parameter.*generations")
+
+
+tg$param_set$values$generations = Inf
+
+expect_equal(tg$param_set$values, list(generations = Inf))
+
+
 
 expect_error(tg$is_terminated(oibig), "Must inherit from class 'Archive'")
 
@@ -49,6 +58,7 @@ oib = as_oi(objective_budget)
 tg$param_set$values$generations = 3
 oib$terminator = tg
 
+
 fidelity_schedule = data.frame(
   generation = c(1, 3, 4),
   budget_new = c(1, 2, 3),
@@ -57,7 +67,8 @@ fidelity_schedule = data.frame(
 
 opt = OptimizerMies$new(mutator = MutatorGauss$new(), recombinator = RecombinatorCrossoverUniform$new(),
   parent_selector = SelectorBest$new(), survival_selector = SelectorBest$new(), multi_fidelity = TRUE)
-opt$param_set$values$fidelity_schedule = fidelity_schedule
+opt$param_set$values$fidelity = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 4, 6)[[max(1, min(mies_generation(inst), 5))]]
+opt$param_set$values$fidelity_offspring = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 2, 3)[[max(1, min(mies_generation(inst), 5))]]
 opt$param_set$values$mu = 2
 opt$param_set$values$lambda = 2
 

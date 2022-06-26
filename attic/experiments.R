@@ -55,7 +55,6 @@ tinytest::test_all()
 tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
 
 
-tinytest::run_test_file("inst/tinytest/test_TunerMies.R")
 tinytest::run_test_file("inst/tinytest/test_TerminatorGenerations.R")
 tinytest::run_test_file("inst/tinytest/test_OptimizerMies.R")
 tinytest::run_test_file("inst/tinytest/test_mies_evaluate_offspring.R")
