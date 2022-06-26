@@ -159,14 +159,19 @@ oib = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
 oib$search_space$params$bud$tags = "budget"
 oib$terminator = trm("evals", n_evals = 10)
 
-fidelity_schedule = data.frame(
-  generation = c(1, 3, 4),
-  budget_new = c(1, 2, 3),
-  budget_survivors = c(1, 4, 6)
-)
 opt = OptimizerMies$new(mutator = MutatorNull$new(), recombinator = RecombinatorCrossoverUniform$new(),
   parent_selector = SelectorBest$new(), survival_selector = SelectorBest$new(), multi_fidelity = TRUE)
-opt$param_set$values$fidelity_schedule = fidelity_schedule
+
+records = new.env()
+
+opt$param_set$values$fidelity = function(inst, budget_id, last_fidelity, last_fidelity_offspring) {
+  records$fidelity_gens = c(records$fidelity_gens, mies_generation(inst))
+  c(1, 4, 6)[[max(1, min(mies_generation(inst), 3))]]
+}
+opt$param_set$values$fidelity_offspring = function(inst, budget_id, last_fidelity, last_fidelity_offspring) {
+  records$fidelity_offspring_gens = c(records$fidelity_offspring_gens, mies_generation(inst))
+  c(1, 2, 3)[[max(1, min(mies_generation(inst), 3))]]
+}
 opt$param_set$values$mu = 2
 opt$param_set$values$lambda = 2
 
@@ -180,6 +185,9 @@ expect_equal(oib$archive$data$bud, rep(c(1, 1, 4, 2, 6), each = 2))
 # generations: initial, first offspring, re-eval, second offspring, re-eval
 expect_equal(oib$archive$data$dob, rep(c(1, 2, 2, 3, 3), each = 2))
 
+# at what generations the fidelity-functions are called
+expect_equal(records$fidelity_gens, c(0, 2, 3))
+expect_equal(records$fidelity_offspring_gens, c(1, 2, 3))
 
 # cloning, paramsets handled properly
 
