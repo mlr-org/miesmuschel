@@ -2,9 +2,18 @@
 source("setup.R", local = TRUE)
 
 tb = TerminatorBudget$new()
-expect_equal(tb$param_set$values, list(budget = Inf, aggregate = sum))
+
+expect_error(tb$param_set$get_values(), "Missing required parameter.*budget")
 
 oibig = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
+
+expect_error(tb$is_terminated(oibig$archive), "Missing required parameter.*budget")
+
+tb$param_set$values$budget = Inf
+
+expect_equal(tb$param_set$values, list(aggregate = sum, budget = Inf))
+
+
 
 expect_error(tb$is_terminated(oibig), "Must inherit from class 'Archive'")
 
