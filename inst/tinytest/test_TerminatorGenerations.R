@@ -59,16 +59,11 @@ tg$param_set$values$generations = 3
 oib$terminator = tg
 
 
-fidelity_schedule = data.frame(
-  generation = c(1, 3, 4),
-  budget_new = c(1, 2, 3),
-  budget_survivors = c(1, 4, 6)
-)
 
 opt = OptimizerMies$new(mutator = MutatorGauss$new(), recombinator = RecombinatorCrossoverUniform$new(),
   parent_selector = SelectorBest$new(), survival_selector = SelectorBest$new(), multi_fidelity = TRUE)
-opt$param_set$values$fidelity = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 4, 6)[[max(1, min(mies_generation(inst), 5))]]
-opt$param_set$values$fidelity_offspring = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 2, 3)[[max(1, min(mies_generation(inst), 5))]]
+opt$param_set$values$fidelity = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 4, 6)[[max(1, min(mies_generation(inst), 3))]]
+opt$param_set$values$fidelity_offspring = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 2, 3)[[max(1, min(mies_generation(inst), 3))]]
 opt$param_set$values$mu = 2
 opt$param_set$values$lambda = 2
 
