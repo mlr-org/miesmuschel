@@ -709,10 +709,10 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   # otherwise we sample the remaining additional components and *then* select
   if (n_alive > mu && !any(survival_selector$primed_ps$ids() %in% ac_ids)) {
     survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
-    if (anyDuplicated(survival_selector)) stop("survival_selector may not generate duplicates.")
+    if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
     died = setdiff(alive, survivors)
     set(data, died, "eol", max(data$dob))
-    alive = survivors
+    alive = sort(survivors)  # want deterministic assignment of additional_component_sampler results
     n_alive = mu
   }
   mu_remaining = mu - n_alive
@@ -762,9 +762,10 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   if (mu_remaining < 0) {
     # kill superfluous individuals, in the case that the survival selector needs additional components
     survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
-    if (anyDuplicated(survival_selector)) stop("survival_selector may not generate duplicates.")
+    if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
     died = setdiff(alive, survivors)
     set(data, died, "eol", max(data$dob))
+    mu_remaining = 0  # for further down where we call mies_evaluate_offspring to do budget re-evaluations
   }
   if (mu_remaining > 0 || !fidelity_new_individuals_only) {
     # mies_evaluate_offspring needs to be evaluated even if there are no new indivs if fidelity-reevals could be necessary.
