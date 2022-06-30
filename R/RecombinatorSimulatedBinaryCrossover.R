@@ -70,6 +70,7 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
   ),
   private = list(
     .recombine = function(values) {
+      browser()
       n_components = NCOL(values)
       params = self$param_set$get_values()
       p = params$p
@@ -85,6 +86,9 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
       lower = self$primed_ps$lower[nms]
       upper = self$primed_ps$upper[nms]
       is_nn_int = private$.primed_ps$class == "ParamInt"
+      
+      lower[is_nn_int] = lower[is_nn_int] - 0.5
+      upper[is_nn_int] = upper[is_nn_int] + 0.5
 
       values[, (nms) := imap(.SD, .f = function(x, name) {
         if (stats::runif(1L, min = 0, max = 1) <= p && abs(diff(x)) > sqrt(.Machine$double.eps)) {
@@ -104,14 +108,14 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
         }
       })]
       if (any(is_nn_int)) {
+        values <- as.matrix(values)
         ### This is slow:
-        # rounded = round(mutated[, is_nn_int])
+        # rounded = round(values[, is_nn_int])
         # rounded = sweep(rounded, 2, uppers[is_nn_int], pmin)
         # rounded = sweep(rounded, 2, lowers[is_nn_int], pmax)
         ### This is faster and does the same:
-        rounded =  as.integer(c(pmax(pmin(t(round(values[, ..is_nn_int])), 
-          upper[is_nn_int]), lower[is_nn_int])))
-        values[, which(is_nn_int) := rounded]
+        values[, is_nn_int] = t(pmax(pmin(t(round(values[, is_nn_int])), upper[is_nn_int]), lower[is_nn_int]))
+        values = as.data.table(values)
       }
       values
     }
