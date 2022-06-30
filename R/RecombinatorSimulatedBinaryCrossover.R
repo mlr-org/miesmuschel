@@ -109,8 +109,8 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
         # rounded = sweep(rounded, 2, uppers[is_nn_int], pmin)
         # rounded = sweep(rounded, 2, lowers[is_nn_int], pmax)
         ### This is faster and does the same:
-        rounded =  c(pmax(pmin(t(round(values[, ..is_nn_int])), 
-          upper[is_nn_int]), lower[is_nn_int]))
+        rounded =  as.integer(c(pmax(pmin(t(round(values[, ..is_nn_int])), 
+          upper[is_nn_int]), lower[is_nn_int])))
         values[, which(is_nn_int) := rounded]
       }
       values
