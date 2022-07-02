@@ -1,0 +1,162 @@
+
+
+
+* TODOs
+** Write Documentation
+*** vignette
+*** bookdown overview
+*** check missing docs of classes
+*** help families
+*** document functions
+*** all 'documentation' tags
+** tests
+*** test deep cloning
+*** all 'test' tags
+*** autotest: class names start with appropriate prefix (#51)
+** code refactoring
+*** own param set unification (#70)
+*** abbrevation of param types
+** operator things
+*** make 'p' orthogonal
+*** recombinator crossover uniform should have vector p
+*** check sbx, seems awfully long
+*** all 'new component' tags
+*** add simple recombinator, automate recombinator complement
+** internals adjustment
+*** p_vct "depends" (#63)
+    - probably needs a workaround for now
+*** proxy operator packages should not be dynamic active binding (#61)
+*** skip priming in mies_generate_offspring, mies_filter_offspring (#27)
+**** maybe skip null-operator priming 
+*** different defaults (#30)
+**** optimizermies lambda, mu
+**** "Changing MutatorGauss defaults: sdev_is_relative to TRUE, and truncated_normal to FALSE, because I am assuming this is the default people expect"
+** multifidelity
+*** id column for fidelity reevals (#58)
+*** continuation of eval (e.g. add reps): function that maps old to new results
+** Package Management
+*** Put Density Estimation in its own package, together with pipeops
+*** Put PipeOps in their respective package
+*** Rename TunerSmash -> TunerSmashy
+* big design questions
+** operators should announce their own additional components needed
+ - should be able to prefix them
+ - problem with vectorial things, there needs to be a trafo somewhere
+ - need to ask a primed operator what further components he demands?
+ - need to pre-prime an operator?
+ - maybe this happens at operatorcombination-level
+* Systematics
+** [==> SMASHY] Density Estimation
+ - LearnerDensity
+   - LearnerDensityNP
+ - MeasureDensity
+ - PredictionDensity
+ - TaskDensity
+ - PipeOpDensityRatio
+ - PipeOpDensitySplit
+ - SamplerKD
+** Operators
+ - MiesOperator
+ - OperatorCombination
+*** Selector
+ - Selector
+ - SelectorBest
+ - SelectorMaybe
+ - SelectorNull
+ - SelectorProxy
+ - SelectorRandom
+ - SelectorSequential
+**** Filtor
+ - Filtor
+ - FiltorMaybe
+ - FiltorNull
+ - FiltorProxy
+ - FiltorSurrogate
+   - FiltorSurrogateProgressive
+   - FiltorSurrogateTournament
+**** Scalor
+ - Scalor
+ - ScalorAggregate
+ - ScalorDomcount
+ - ScalorFixedProjections
+ - ScalorHypervolume
+ - ScalorNondom
+ - ScalorOne
+ - ScalorProxy
+*** Mutator
+ - Mutator
+ - MutatorCmpMaybe
+ - MutatorDiscreteUniform
+ - MutatorErase
+ - MutatorGauss
+ - MutatorMaybe
+ - MutatorNull
+ - MutatorProxy
+ - MutatorSequential
+*** Recombinator
+ - RecombinatorNull
+ - RecombinatorProxy
+ - RecombinatorSequential
+ - RecombinatorMaybe
+ - RecombinatorCrossoverUniform
+ - RecombinatorSimulatedBinaryCrossover
+*** Optimization
+ - OptimizerMies
+ - TunerMies
+ - [==> SMASHY] OptimizerSmashy
+ - [==> SMASHY] TunerSmashy
+**** Terminator
+ - TerminatorBudget
+ - TerminatorGenerations
+*** ParamSet
+ - ParamSetShadow
+*** [==> SMASHY] mlr3pipelines
+ - PipeOpStratify
+ - PipeOpPredictionUnion (==> POFU)
+*** Auxiliary
+ - zzz.R
+ - utils_mo.R
+ - utils_hb.R
+ - utils.R
+ - repr.R
+ - mies_methods.R
+ - dictionaries.R
+ - bibentries.R
+ - 
+
+* Tests to do
+-- test 
+** mies_methods
+ - mies_filter_offspring
+   - empty optiminstance
+   - fidelity schedule
+ - 'packages is read-only'
+   - recombinatorproxy
+   - filtorproxy
+   - selectorproxy
+   - mutatorproxy
+ - filtormaybe, mutatorcmpmaybe, recombinatormaybe
+   - x, x_not read-only
+ - recombinatorsbx
+   - keep_
+ - filtorsurrogate abstract
+ - filtor nrow equal
+ - selectorbest
+   - scalor is read-only
+ - paradox_context_available -- nocov
+ - miesoperator: representability
+ - miesoperator: printer
+ - dict_entry, dict_shortaccess: read-only
+ - scalor: supported read-only
+ - scalor: abstract .scale()
+ - scalorproxy
+   - packages read-only
+   - ! priming operation...
+ - scls()
+ - xxxs() mget
+ - all scalors
+ - all meta-selectors
+ - all sequentials
+ - filtor tournament
+ - repr
+ - utils_mo
