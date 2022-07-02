@@ -55,13 +55,6 @@ tinytest::test_all()
 tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
 
 
-tinytest::run_test_file("inst/tinytest/test_mies_init_population.R")
-
-
-tinytest::run_test_file("inst/tinytest/test_mies_evaluate_offspring.R")
-
-tinytest::run_test_file("inst/tinytest/test_mies_step_fidelity.R")
-
 
 tinytest::run_test_file("inst/tinytest/test_mutator_proxy.R")       # ...
 tinytest::run_test_file("inst/tinytest/test_OptimizerSumoHB.R")     # properties are wrong
