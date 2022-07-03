@@ -74,14 +74,6 @@ Other selector wrappers:
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{SelectorProxy}
 }
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{packages}}{(\code{character})\cr
-Packages needed for the operator. Retrieved from the \code{operation} configuration parameter. Read-only.}
-}
-\if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

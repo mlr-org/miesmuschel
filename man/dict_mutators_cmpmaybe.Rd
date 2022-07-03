@@ -130,13 +130,14 @@ Initialize the \code{MutatorCmpMaybe} object.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{mutator}}{(\code{\link{Mutator}})\cr
-\code{\link{Mutator}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
+\code{\link{Mutator}} to wrap. Component-wise results of this operator are used with probability \code{p} (Configuration parameter).\cr
 The constructed object gets a \emph{clone} of this argument.
 The \verb{$mutator} field will reflect this value.}
 
 \item{\code{mutator_not}}{(\code{\link{Mutator}})\cr
-Another \code{\link{Mutator}} to wrap. This operator runs when \code{mutator} is not chosen. By
-default, this is \code{\link{MutatorNull}}, i.e. no operation. With this default, the
+Another \code{\link{Mutator}} to wrap. Results from this operator are used when \code{mutator} is not chosen. By
+default, this is \code{\link{MutatorNull}}, i.e. no operation.\cr
+With this default, the
 \code{MutatorCmpMaybe} object applies the \code{mutator} operation with probability \code{p}, and
 no operation at all otherwise.\cr
 The constructed object gets a \emph{clone} of this argument.

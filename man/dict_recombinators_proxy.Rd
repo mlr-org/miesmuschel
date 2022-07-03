@@ -56,11 +56,13 @@ rp$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
@@ -72,14 +74,6 @@ Other recombinator wrappers:
 \concept{recombinators}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorProxy}
-}
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{packages}}{(\code{character})\cr
-Packages needed for the operator. Retrieved from the \code{operation} configuration parameter. Read-only.}
-}
-\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{

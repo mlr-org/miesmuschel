@@ -52,11 +52,13 @@ rn_half$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{recombinators}

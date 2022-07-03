@@ -48,6 +48,7 @@ Other base classes:
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
 \code{\link{Scalor}}
 

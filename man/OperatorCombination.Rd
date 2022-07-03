@@ -170,6 +170,7 @@ Other base classes:
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
 \code{\link{Scalor}},
 \code{\link{Selector}}
@@ -194,12 +195,14 @@ Other mutator wrappers:
 \code{\link{dict_mutators_sequential}}
 
 Other recombinators: 
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
