@@ -1,14 +1,7 @@
 source("setup.R", local = TRUE)
 
 fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.featureless"))
-# TODO
-## expect_filtor(fsp, "FiltorSurrogateProgressive")
-
-## fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.rpart"))
-## fsp$param_set$values$filter_pool_first = 10
-## fsp$param_set$values$filter_pool_per_sample = 4
-## expect_filtor(fsp, "FiltorSurrogateProgressive")
-## expect_read_only(fsp, "surrogate_learner")
+expect_filtor(fsp, "FiltorSurrogateProgressive")
 
 fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.rpart"))
 fsp$param_set$values$filter.pool_factor = 2
@@ -28,9 +21,6 @@ fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.lm"))
 p = ps(x = p_dbl(-10, 10))
 fsp$prime(p)
 
-## fsp$param_set$values$filter_pool_first = 4
-## fsp$param_set$values$filter_pool_per_sample = 2
-
 fsp$param_set$values$filter.pool_factor = 2
 fsp$param_set$values$filter.pool_factor_last = 6
 
@@ -38,11 +28,12 @@ fsp$param_set$values$filter.pool_factor_last = 6
 known_data = data.frame(x = c(1, -1))
 fitnesses = c(1, 2)
 
-## data = data.table(x = c(1, 2, -1, -2, 10, -10, 8, -8))
-## expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
-## expect_equal(fsp$operate(data, known_data, fitnesses, 1), 4)
-## expect_equal(fsp$operate(data, known_data, fitnesses, 2), c(4, 6))
-## expect_equal(fsp$operate(data, known_data, fitnesses, 3), c(4, 6, 8))
+data = data.table(x = c(1, 2, -1, -2, 10, -10, 8, -8))
+expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
+expect_equal(fsp$operate(data, known_data, fitnesses, 1), 1)
+expect_error(fsp$operate(data, known_data, fitnesses, 2), "Needs at least 12 individuals.*got 8")
+expect_equal(fsp$operate(rbind(data, data.table(x = rep(9, 4))), known_data, fitnesses, 2), c(4, 6))
+expect_equal(fsp$operate(rbind(data, data.table(x = rep(9, 10))), known_data, fitnesses, 3), c(6, 8, 4))
 
 data = data.table(x = c(1, 2, -1, -2, 10, -10, 8, -8, 0, 3, -3, 4, 5, 6, -6, -5, -4, -9))
 expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
@@ -60,10 +51,10 @@ expect_equal(fsp$operate(data, known_data, fitnesses, 3), c(6, 8, 18))  # select
 expect_equal(fsp$operate(data.table(x = seq(-10, 10)), known_data, fitnesses, 3), c(1, 2, 3))  # select from 1:6, 1:10, 1:18
 expect_equal(fsp$operate(data.table(x = seq(10, -10)), known_data, fitnesses, 3), c(6, 10, 18))  # select from 1:6, 1:10, 1:18
 
-## expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
-## expect_equal(fsp$operate(data, known_data, fitnesses, 1), 2)
-## expect_equal(fsp$operate(data, known_data, fitnesses, 2), c(2, 5))
-## expect_equal(fsp$operate(data, known_data, fitnesses, 3), c(2, 5, 7))
+expect_equal(fsp$operate(data, known_data, fitnesses, 0), integer(0))
+expect_equal(fsp$operate(data, known_data, fitnesses, 1), 1)
+expect_equal(fsp$operate(data, known_data, fitnesses, 2), c(4, 6))
+expect_equal(fsp$operate(data, known_data, fitnesses, 3), c(6, 8, 18))
 
 expect_equal(fsp$operate(data, known_data, -fitnesses, 0), integer(0))
 expect_equal(fsp$operate(data, known_data, -fitnesses, 1), 2)
