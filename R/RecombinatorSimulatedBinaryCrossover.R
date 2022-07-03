@@ -46,25 +46,14 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
   public = list(
     #' @description
     #' Initialize the `RecombinatorSimulatedBinaryCrossover` object.
-    #' @param keep_complement (`logical(1)`)\cr
-    #'   Whether the operation should keep both individuals that were crossed over (`TRUE`), or only the first and discard
-    #'   the crossover complement (`FALSE`). Default `TRUE`.
-    #'   The `$keep_complement` field will reflect this value.
+    #' @template param_keep_complement
     initialize = function(keep_complement = TRUE) {
       param_set = ps(
         p = p_dbl(lower = 0, upper = 1, tags = "required"),
         n = p_vct(lower = 0, tags = "required")
       )
       param_set$values = list(p = 0.5, n = 1)
-      super$initialize("ParamDbl", param_set = param_set, n_indivs_in = 2, n_indivs_out = if (keep_complement) 2 else 1, dict_entry = "sbx")
-    }
-  ),
-  active = list(
-    #' @field keep_complement (`logical(1)`)\cr
-    #' Whether the operation keeps both individuals that were crossed over or discards the crossover complement.
-    keep_complement = function(val) {
-      if (!missing(val)) stop("keep_complement is read-only.")
-      private$.n_indivs_out == 2
+      super$initialize(keep_complement, "ParamDbl", param_set = param_set, dict_entry = "sbx")
     }
   ),
   private = list(

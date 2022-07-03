@@ -26,7 +26,6 @@
 ** internals adjustment
 *** p_vct "depends" (#63)
     - probably needs a workaround for now
-*** proxy operator packages should not be dynamic active binding (#61)
 *** skip priming in mies_generate_offspring, mies_filter_offspring (#27)
 **** maybe skip null-operator priming 
 *** different defaults (#30)
@@ -126,8 +125,6 @@
  - 
 
 * Tests to do
--- test 
-** mies_methods
  - mies_filter_offspring
    - empty optiminstance
    - fidelity schedule

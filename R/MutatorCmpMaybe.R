@@ -56,12 +56,13 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
     #' @description
     #' Initialize the `MutatorCmpMaybe` object.
     #' @param mutator ([`Mutator`])\cr
-    #'   [`Mutator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
+    #'   [`Mutator`] to wrap. Component-wise results of this operator are used with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
     #'   The `$mutator` field will reflect this value.
     #' @param mutator_not ([`Mutator`])\cr
-    #'   Another [`Mutator`] to wrap. This operator runs when `mutator` is not chosen. By
-    #'   default, this is [`MutatorNull`], i.e. no operation. With this default, the
+    #'   Another [`Mutator`] to wrap. Results from this operator are used when `mutator` is not chosen. By
+    #'   default, this is [`MutatorNull`], i.e. no operation.\cr
+    #'   With this default, the
     #'   `MutatorCmpMaybe` object applies the `mutator` operation with probability `p`, and
     #'   no operation at all otherwise.\cr
     #'   The constructed object gets a *clone* of this argument.
