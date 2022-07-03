@@ -22,6 +22,7 @@
 *** check sbx, seems awfully long
 *** all 'new component' tags
 *** add simple recombinator, automate recombinator complement
+*** add simple selector that uses scalor by default
 ** internals adjustment
 *** p_vct "depends" (#63)
     - probably needs a workaround for now

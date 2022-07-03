@@ -1140,7 +1140,7 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   needed_parents = needed_recombinations * recombinator$n_indivs_in
 
   parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector)
-  if (!is.null(budget_id)) parents[, (budget_id) := NULL]
+  if (!is.null(budget_id)) set(parents, , budget_id, NULL)
 
   if (shuffle_after_select) {
     parents = parents[sample.int(nrow(parents))]
@@ -1198,7 +1198,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budge
     } else {
       assert_scalar(fidelity)
     }
-    individuals_dt[, (budget_id) := fidelity]
+    set(individuals_dt, , budget_id, fidelity)
   }
 
   if (is.null(filtor)) {
