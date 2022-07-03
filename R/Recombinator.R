@@ -30,10 +30,7 @@ Recombinator = R6Class("Recombinator",
     #' Initialize base class components of the `Recombinator`.
     #' @template param_param_classes
     #' @template param_param_set
-    #' @param n_indivs_in (`integer(1)`)\cr
-    #'   Number of individuals to consider at the same time. When operating, the number of input individuals must be divisible by this number.
-    #'   Default 2.\cr
-    #'   The `$n_indivs_in` field will reflect this value.
+    #' @template param_n_indivs_in
     #' @param n_indivs_out (`integer(1)`)\cr
     #'   Number of individuals that result for each `n_indivs_in` lines of input. The number of results from the recombinator will be
     #'   `nrow(values) / n_indivs_in * n_indivs_out`. Default equal to `n_indivs_in`.\cr
@@ -107,7 +104,7 @@ RecombinatorPair = R6Class("RecombinatorPair",
     #' @template param_packages
     #' @template param_dict_entry
     #' @template param_own_param_set
-    initialize = function(keep_complement = TRUE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), n_indivs_in = 2, n_indivs_out = n_indivs_in, packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
+    initialize = function(keep_complement = TRUE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
 
       super$initialize(param_classes = param_classes, param_set = param_set, n_indivs_in = 2, n_indivs_out = if (keep_complement) 2 else 1,
         packages = packages, dict_entry = dict_entry, own_param_set = own_param_set)

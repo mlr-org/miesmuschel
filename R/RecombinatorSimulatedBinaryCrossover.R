@@ -13,7 +13,7 @@
 #' be used; see examples.
 #'
 #' @section Configuration Parameters:
-#' *  `n` :: `double`\cr
+#' *  `n` :: `numeric`\cr
 #'  Non-negative distribution index of the polynomial distribution for each component.
 #'  Generally spoken, the higher `n`, the higher the probability of creating near parent values.
 #'  This may either be a scalar in which case it is applied to all input components, or a vector,
@@ -43,7 +43,7 @@
 #' rsbx$operate(data)
 #' @export
 RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCrossover",
-  inherit = Recombinator,
+  inherit = RecombinatorPair,
   public = list(
     #' @description
     #' Initialize the `RecombinatorSimulatedBinaryCrossover` object.

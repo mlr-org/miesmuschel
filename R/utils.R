@@ -149,9 +149,23 @@ assert_optim_instance = function(inst) {
 
 
 # vector-domain
-p_vct = function(lower = -Inf, upper = Inf, min.len = 1, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
+p_vct = function(lower = -Inf, upper = Inf, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
   if (!is.null(depends)) stop("depends support not in paradox yet")
-  p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper, min.len), tags = tags, trafo = trafo)
+  p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper), tags = tags, trafo = trafo)
+}
+
+# matrix-domain
+# is either a matrix with 'rows' rows, or a vector of length 'rows'
+p_mtx = function(rows, lower = -Inf, upper = Inf, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
+  if (!is.null(depends)) stop("depends support not in paradox yet")
+  p_uty(custom_check = crate(function(x) {
+    if (!test_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE) ||  # check numeric and bounds
+        (!test_matrix(x, nrows = rows, min.cols = 1) && !test_numeric(x, len = rows))) {
+      sprintf("must either be a matrix with %s rows, or a vector of length %s.", rows, rows)
+    } else {
+      TRUE
+    }
+  }, rows, lower, upper), tags = tags, trafo = trafo)
 }
 
 check_fidelity = function(x, null.ok = FALSE) {
