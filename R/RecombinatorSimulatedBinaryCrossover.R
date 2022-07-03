@@ -8,9 +8,11 @@
 #' Numeric Values between two individuals are recombined via component-wise independent simulated
 #' binary crossover. See `r cite_bib("deb1995simulated")` for more details.
 #'
+#' This operator is applied to all components; It is common to apply the operator to only some randomly
+#' chosen components, in which case the [`rec("cmpmaybe")`][RecombinatorCmpMaybe] operator should
+#' be used; see examples.
+#'
 #' @section Configuration Parameters:
-#' * `p` :: `numeric(1)`\cr
-#'  Component-wise probability with which to crossover values. Initialized to 0.5.
 #' *  `n` :: `double`\cr
 #'  Non-negative distribution index of the polynomial distribution for each component.
 #'  Generally spoken, the higher `n`, the higher the probability of creating near parent values.
@@ -30,15 +32,14 @@
 #'
 #' @examples
 #' set.seed(1)
-#' rsbx = rec("sbx")
+#' rsbx = rec("cmpmaybe", rec("sbx"), p = 0.5)
 #' p = ps(x = p_dbl(-5, 5), y = p_dbl(-5, 5), z = p_dbl(-5, 5))
 #' data = data.frame(x = 0:5, y = 0:5, z = 0:5)
 #'
 #' rsbx$prime(p)
 #' rsbx$operate(data)
 #'
-#' rsbx$param_set$values$n = c(0.5, 1, 10)
-#' rsbx$param_set$values$p = 1
+#' rsbx = rec("sbx", n = c(0.5, 1, 10))
 #' rsbx$operate(data)
 #' @export
 RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCrossover",
@@ -49,18 +50,16 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
     #' @template param_keep_complement
     initialize = function(keep_complement = TRUE) {
       param_set = ps(
-        p = p_dbl(lower = 0, upper = 1, tags = "required"),
         n = p_vct(lower = 0, tags = "required")
       )
-      param_set$values = list(p = 0.5, n = 1)
-      super$initialize(keep_complement, "ParamDbl", param_set = param_set, dict_entry = "sbx")
+      param_set$values = list(n = 1)
+      super$initialize(keep_complement, "ParamDbl", param_set = param_set, packages = "stats", dict_entry = "sbx")
     }
   ),
   private = list(
     .recombine = function(values) {
-      n_components = NCOL(values)
+      n_components = ncol(values)
       params = self$param_set$get_values()
-      p = params$p
       n = params$n
       if (length(n) == 1L) {
         n = rep(n, n_components)
@@ -68,29 +67,24 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
       if (length(n) != n_components) {
         stop("n must have either length 1, or length of input components.")
       }
-      nms = names(values)
+      nms = names(values)[abs(values[2] - values[1]) > sqrt(.Machine$double.eps)]
       names(n) = nms
       lower = self$primed_ps$lower[nms]
       upper = self$primed_ps$upper[nms]
 
-      values[, (nms) := imap(.SD, .f = function(x, name) {
-        if (stats::runif(1L, min = 0, max = 1) <= p && abs(diff(x)) > sqrt(.Machine$double.eps)) {
-          y1 = min(x)
-          y2 = max(x)
-          betaq1 = calculate_betaq(1 + (2 * (y1 - lower[name]) / (y2 - y1)), n[name])
-          c1 = pmin(pmax(0.5 * ((y1 + y2) - betaq1 * (y2 - y1)), lower[name]), upper[name])
-          betaq2 = calculate_betaq(1 + (2 * (upper[name] - y2) / (y2 - y1)), n[name])
-          c2 = pmin(pmax(0.5 * ((y1 + y2) + betaq2 * (y2 - y1)), lower[name]), upper[name])
-          if (stats::runif(1L, min = 0, max = 1) <= 0.5) {
-            c(c1, c2)
-          } else {
-            c(c2, c1)
-          }
+      set(values, , nms, imap(values, .f = function(x, name) {
+        y1 = min(x)
+        y2 = max(x)
+        betaq1 = calculate_betaq(1 + (2 * (y1 - lower[name]) / (y2 - y1)), n[name])
+        c1 = pmin(pmax(0.5 * ((y1 + y2) - betaq1 * (y2 - y1)), lower[name]), upper[name])
+        betaq2 = calculate_betaq(1 + (2 * (upper[name] - y2) / (y2 - y1)), n[name])
+        c2 = pmin(pmax(0.5 * ((y1 + y2) + betaq2 * (y2 - y1)), lower[name]), upper[name])
+        if (stats::runif(1L, min = 0, max = 1) <= 0.5) {  # TODO: check if this is the way it should be
+          c(c1, c2)
         } else {
-          x
+          c(c2, c1)
         }
-      })]
-      values
+      }))
     }
   )
 )
