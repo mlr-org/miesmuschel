@@ -15,8 +15,10 @@
 #'
 #' @section Configuration Parameters:
 #' *  `lambda` :: `numeric` | `matrix`\cr
-#'   Combination weights. Must either be a vector of length `n_indivs_in`, or a matrix with `n_indivs_in` rows and as many columns as there
-#'   are components in the values being operated on. Must be non-negative, at least one value per column must be greater than zero.\cr
+#'   Combination weights; these are normalized to sum to 1 internally.
+#'   Must either be a vector of length `n_indivs_in`, or a matrix with `n_indivs_in` rows and as many columns as there
+#'   are components in the values being operated on. Must be non-negative, at least one value per column must be greater than zero, but it is not
+#'   necessary that they sum to 1.\cr
 #'   Initialized to `rep(1, n_indivs_in)`, i.e. equal weights to all individuals being operated on.
 #'
 #' @templateVar id convex

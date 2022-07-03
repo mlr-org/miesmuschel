@@ -29,6 +29,7 @@
 *** skip priming in mies_generate_offspring, mies_filter_offspring (#27)
 **** maybe skip null-operator priming 
 *** different defaults (#30)
+*** remove 'shuffle_after_select'; instead the deterministic selectors should offer this as option.
 **** optimizermies lambda, mu
 **** "Changing MutatorGauss defaults: sdev_is_relative to TRUE, and truncated_normal to FALSE, because I am assuming this is the default people expect"
 ** multifidelity
