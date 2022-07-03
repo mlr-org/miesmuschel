@@ -2,6 +2,17 @@
 
 
 * TODOs
+** Direct TODOs, ordered:
+ 1. simple selector that uses scalor
+ 2. make 'p' orthogonal
+ 3. different defaults (#30)
+ 4. remove shuffle_after_select
+ 5. own param set unification
+ 6. id col for fidelity reevals
+ 7. autotest class names
+ 8. autotest deep cloning
+ 9. documentation
+ 10. all 'test' tags, test todos
 ** Write Documentation
 *** vignette
 *** bookdown overview
@@ -18,10 +29,8 @@
 *** abbrevation of param types
 ** operator things
 *** make 'p' orthogonal
-*** recombinator crossover uniform should have vector p
 *** check sbx, seems awfully long
 *** all 'new component' tags
-*** add simple recombinator, automate recombinator complement
 *** add simple selector that uses scalor by default
 ** internals adjustment
 *** p_vct "depends" (#63)
