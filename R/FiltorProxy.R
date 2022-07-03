@@ -73,14 +73,6 @@ FiltorProxy = R6Class("FiltorProxy",
       invisible(self)
     }
   ),
-  active = list(
-    #' @field packages (`character`)\cr
-    #' Packages needed for the operator. Retrieved from the `operation` configuration parameter. Read-only.
-    packages = function(val) {
-      if (!missing(val)) stop("packages is read-only.")
-      self$param_set$values$operation$packages
-    }
-  ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter) {
       operation = self$param_set$get_values()$operation

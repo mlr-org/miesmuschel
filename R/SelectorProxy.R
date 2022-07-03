@@ -67,14 +67,6 @@ SelectorProxy = R6Class("SelectorProxy",
       invisible(self)
     }
   ),
-  active = list(
-    #' @field packages (`character`)\cr
-    #' Packages needed for the operator. Retrieved from the `operation` configuration parameter. Read-only.
-    packages = function(val) {
-      if (!missing(val)) stop("packages is read-only.")
-      self$param_set$values$operation$packages
-    }
-  ),
   private = list(
     .select = function(values, fitnesses, n_select) {
       operation = self$param_set$get_values()$operation
