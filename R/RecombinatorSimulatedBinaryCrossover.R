@@ -56,7 +56,8 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
         n = p_vct(lower = 0, tags = "required")
       )
       param_set$values = list(p = 0.5, n = 1)
-      super$initialize("ParamDbl", param_set = param_set, n_indivs_in = 2, n_indivs_out = if (keep_complement) 2 else 1, dict_entry = "sbx")
+      super$initialize(c("ParamDbl", "ParamInt"), param_set = param_set, 
+        n_indivs_in = 2, n_indivs_out = if (keep_complement) 2 else 1, dict_entry = "sbx")
     }
   ),
   active = list(
@@ -83,6 +84,10 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
       names(n) = nms
       lower = self$primed_ps$lower[nms]
       upper = self$primed_ps$upper[nms]
+      is_nn_int = private$.primed_ps$class == "ParamInt"
+      
+      lower[is_nn_int] = lower[is_nn_int] - 0.5
+      upper[is_nn_int] = upper[is_nn_int] + 0.5
 
       values[, (nms) := imap(.SD, .f = function(x, name) {
         if (stats::runif(1L, min = 0, max = 1) <= p && abs(diff(x)) > sqrt(.Machine$double.eps)) {
@@ -101,6 +106,16 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
           x
         }
       })]
+      if (any(is_nn_int)) {
+        values <- as.matrix(values)
+        ### This is slow:
+        # rounded = round(values[, is_nn_int])
+        # rounded = sweep(rounded, 2, uppers[is_nn_int], pmin)
+        # rounded = sweep(rounded, 2, lowers[is_nn_int], pmax)
+        ### This is faster and does the same:
+        values[, is_nn_int] = t(pmax(pmin(t(round(values[, is_nn_int])), upper[is_nn_int]), lower[is_nn_int]))
+        values = as.data.table(values)
+      }
       values
     }
   )
