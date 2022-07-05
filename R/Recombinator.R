@@ -99,6 +99,7 @@ RecombinatorPair = R6Class("RecombinatorPair",
   public = list(
     #' @description
     #' Initialize base class components of the `RecombinatorPair`.
+    #' @template param_keep_complement
     #' @template param_param_classes
     #' @template param_param_set
     #' @template param_packages

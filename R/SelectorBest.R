@@ -32,43 +32,18 @@
 #' sb$operate(data, fitnesses, 4)
 #' @export
 SelectorBest = R6Class("SelectorBest",
-  inherit = Selector,
+  inherit = SelectorScalar,
   public = list(
     #' @description
     #' Initialize the `SelectorBest` object.
-    initialize = function(scalor = ScalorProxy$new()) {
-      private$.scalor = assert_r6(scalor, "Scalor")$clone(deep = TRUE)
-      super$initialize(supported = private$.scalor$supported,
-        param_set = alist(private$.scalor$param_set),
-        packages = scalor$packages, dict_entry = "best")
-    },
-    #' @description
-    #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operator
-    #' given to `scalor` during construction.
-    #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
-    #'   Passed to [`MiesOperator`]`$prime()`.
-    #' @return [invisible] `self`.
-    prime = function(param_set) {
-      private$.scalor$prime(param_set)
-      super$prime(param_set)
-      invisible(self)
-    }
-  ),
-  active = list(
-    #' @field scalor ([`Scalor`])\cr
-    #' [`Scalor`] used to scalarize fitnesses for selection.
-    scalor = function(rhs) {
-      if (!missing(rhs) && !identical(rhs, private$.scalor)) {
-        stop("scalor is read-only.")
-      }
-      private$.scalor
+    initialize = function(scalor = ScalorSingleObjective$new()) {
+      super$initialize(scalor = scalor, dict_entry = "best")
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
-      order(private$.scalor$operate(values, fitnesses), decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
-    },
-    .scalor = NULL
+    .select_scalar = function(values, fitnesses, n_select) {
+      order(fitnesses, decreasing = TRUE)[(seq_len(n_select) - 1) %% nrow(values) + 1]
+    }
   )
 )
 dict_selectors$add("best", SelectorBest)
