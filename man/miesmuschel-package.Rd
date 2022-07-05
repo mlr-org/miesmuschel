@@ -40,4 +40,9 @@ Useful links:
 \author{
 \strong{Maintainer}: Martin Binder \email{mlr.developer@mb706.com}
 
+Other contributors:
+\itemize{
+  \item Lennart Schneider \email{lennart.sch@web.de} (\href{https://orcid.org/0000-0003-4152-5308}{ORCID}) [contributor]
+}
+
 }

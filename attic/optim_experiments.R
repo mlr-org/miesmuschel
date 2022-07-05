@@ -572,3 +572,14 @@ plot(dat$mu, dat$yval)
 
 
 
+##
+
+ofaa <- readRDS("~/Downloads/results_baseline_nb301_lcbench.rds")
+ofaa <- readRDS("~/Downloads/results_baseline_nb301_rbv2_super.rds")
+
+ggplot(ofaa, aes(x = log(cumbudget), y = best, group = as.factor(repl))) + geom_line()
+
+ggplot(ofaa[, .(perf = mean(best), uperf = mean(best) + sd(best), lperf = mean(best) - sd(best)), by = "cumbudget"],
+  aes(x = log(cumbudget), y = perf)) + geom_line() + geom_ribbon(aes(ymin = lperf, ymax = uperf), alpha = .3)
+
+head(sort(unique(ofaa$cumbudget)), 100)
