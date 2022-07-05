@@ -38,6 +38,7 @@ Other base classes:
 \code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
 \code{\link{Scalor}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 
 Other filtors: 

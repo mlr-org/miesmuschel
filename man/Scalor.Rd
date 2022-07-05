@@ -48,6 +48,7 @@ Other base classes:
 \code{\link{OperatorCombination}},
 \code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 
 Other scalors: 
@@ -57,7 +58,8 @@ Other scalors:
 \code{\link{dict_scalors_domcount}},
 \code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_nondom}},
-\code{\link{dict_scalors_one}}
+\code{\link{dict_scalors_one}},
+\code{\link{dict_scalors_single}}
 }
 \concept{base classes}
 \concept{scalors}

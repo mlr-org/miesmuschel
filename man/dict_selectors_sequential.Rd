@@ -72,6 +72,7 @@ dict_selectors$get("sequential", <selectors>)
 }
 \seealso{
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{Selector}},
 \code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},

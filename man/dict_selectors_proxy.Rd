@@ -23,7 +23,7 @@ frequent re-priming.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
+Supported \code{\link[paradox:Param]{Param}} classes are:
 }
 
 \section{Dictionary}{
@@ -58,6 +58,7 @@ sp$operate(data, fitnesses, 2)
 }
 \seealso{
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{Selector}},
 \code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},

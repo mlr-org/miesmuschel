@@ -33,17 +33,21 @@ Other base classes:
 \code{\link{OperatorCombination}},
 \code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 
 Other recombinators: 
 \code{\link{OperatorCombination}},
 \code{\link{RecombinatorPair}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_sequential}},
 \code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{base classes}

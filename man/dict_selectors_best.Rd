@@ -17,7 +17,7 @@ This operator has no configuration parameters.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
+Supported \code{\link[paradox:Param]{Param}} classes are:
 }
 
 \section{Dictionary}{
@@ -50,6 +50,7 @@ sb$operate(data, fitnesses, 4)
 }
 \seealso{
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{Selector}},
 \code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_null}},
@@ -58,31 +59,20 @@ Other selectors:
 \code{\link{dict_selectors_sequential}}
 }
 \concept{selectors}
-\section{Super classes}{
-\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{SelectorBest}
-}
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{scalor}}{(\code{\link{Scalor}})\cr
-\code{\link{Scalor}} used to scalarize fitnesses for selection.}
-}
-\if{html}{\out{</div>}}
+\section{Super class}{
+\code{\link[miesmuschel:SelectorScalar]{miesmuschel::SelectorScalar}} -> \code{SelectorBest}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-SelectorBest-new}{\code{SelectorBest$new()}}
-\item \href{#method-SelectorBest-prime}{\code{SelectorBest$prime()}}
 \item \href{#method-SelectorBest-clone}{\code{SelectorBest$clone()}}
 }
 }
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="SelectorScalar" data-id="prime"><a href='../../miesmuschel/html/SelectorScalar.html#method-SelectorScalar-prime'><code>miesmuschel::SelectorScalar$prime()</code></a></li>
 </ul>
 </details>
 }}
@@ -92,31 +82,9 @@ Other selectors:
 \subsection{Method \code{new()}}{
 Initialize the \code{SelectorBest} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new(scalor = ScalorProxy$new())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new(scalor = ScalorSingleObjective$new())}\if{html}{\out{</div>}}
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-SelectorBest-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-SelectorBest-prime}{}}}
-\subsection{Method \code{prime()}}{
-See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operator
-given to \code{scalor} during construction.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$prime(param_set)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
-Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-\link{invisible} \code{self}.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-SelectorBest-clone"></a>}}

@@ -22,13 +22,14 @@ and may not have any missing components.
 \item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
 Fitnesses for each individual given in \code{values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
 this is a \code{matrix}, if number of rows must be equal to the number of rows in \code{values}, and it must have one column when doing single-crit optimization
-and one column each for each  "criterion" when doing multi-crit optimization.
+and one column each for each  "criterion" when doing multi-crit optimization.\cr
+The \code{fitnesses}-value passed on to \verb{$.select()} is always a \code{matrix}.
 \item \code{n_select} :: \code{integer(1)}\cr
 Number of individuals to select. Some \code{Selector}s select individuals with replacement, for which this value may be greater than the number of
 rows in \code{values}.
 }
 
-The return value for an operation will be a numeric vector of integer values of ength \code{n_select} indexing the individuals that were selected. Some \code{Selector}s
+The return value for an operation will be a numeric vector of integer values of length \code{n_select} indexing the individuals that were selected. Some \code{Selector}s
 select individuals with replacement, for which the return value may contain indices more than once.
 }
 \section{Inheriting}{
@@ -50,9 +51,11 @@ Other base classes:
 \code{\link{OperatorCombination}},
 \code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
-\code{\link{Scalor}}
+\code{\link{Scalor}},
+\code{\link{SelectorScalar}}
 
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},
 \code{\link{dict_selectors_null}},

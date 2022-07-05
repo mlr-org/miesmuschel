@@ -59,7 +59,8 @@ Other scalors:
 \code{\link{Scalor}},
 \code{\link{dict_scalors_domcount}},
 \code{\link{dict_scalors_hypervolume}},
-\code{\link{dict_scalors_one}}
+\code{\link{dict_scalors_one}},
+\code{\link{dict_scalors_single}}
 }
 \concept{scalors}
 \section{Super classes}{

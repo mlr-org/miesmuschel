@@ -29,17 +29,21 @@ Other base classes:
 \code{\link{OperatorCombination}},
 \code{\link{Recombinator}},
 \code{\link{Scalor}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 
 Other recombinators: 
 \code{\link{OperatorCombination}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
 \code{\link{dict_recombinators_sequential}},
 \code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{base classes}
@@ -82,8 +86,6 @@ Initialize base class components of the \code{RecombinatorPair}.
   keep_complement = TRUE,
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
-  n_indivs_in = 2,
-  n_indivs_out = n_indivs_in,
   packages = character(0),
   dict_entry = NULL,
   own_param_set = quote(self$param_set)
@@ -93,6 +95,11 @@ Initialize base class components of the \code{RecombinatorPair}.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{keep_complement}}{(\code{logical(1)})\cr
+Whether the operation should keep both resulting individuals (\code{TRUE}), or only the first and discard
+the complement (\code{FALSE}). Default \code{TRUE}.
+The \verb{$keep_complement} field will reflect this value.}
+
 \item{\code{param_classes}}{(\code{character})\cr
 Classes of parameters that the operator can handle. May contain any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}.
 Default is all of them.\cr

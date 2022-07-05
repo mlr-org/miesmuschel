@@ -105,6 +105,7 @@ dict_filtors$get("maybe", <selector> [, <selector_not>])
 }
 \seealso{
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{Selector}},
 \code{\link{dict_selectors_best}},
 \code{\link{dict_selectors_null}},
