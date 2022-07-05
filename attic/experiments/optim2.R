@@ -59,13 +59,16 @@ generate_design_bohb = ContextPV(function(inst) function(param_set, n) {
 # --- search space components
 
 suggested_meta_searchspace = ps(
-  budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
-  survival_fraction = p_dbl(0, 1),  # values close to 1 may fail depending on mu; somehow interpolate that.
   surrogate_learner = p_fct(names(learnerlist)),  # TODO: not numeric yet
   filter_with_max_budget = p_lgl(),
   filter_factor_first = p_dbl(1, 1000, logscale = TRUE),
   random_interleave_fraction = p_dbl(0, 1),
   random_interleave_random = p_lgl()
+)
+
+searchspace_component_multifid = ps(
+  budget_log_step = p_dbl(log(2) / 4, log(2) * 4, logscale = TRUE),
+  survival_fraction = p_dbl(0, 1)  # values close to 1 may fail depending on mu; somehow interpolate that.
 )
 
 searchspace_component_sample = ps(sample = p_fct(c("random", "bohb")))
@@ -116,14 +119,17 @@ searchspace_component_mo_numeric = ps(
   }
 )
 
-get_searchspace <- function(include.mu, include.batchmethod, infill, include.siman, include.mo, numeric.only = FALSE) {
+get_searchspace <- function(include.mu, include.batchmethod, infill, include.siman, include.mo, singlefid = FALSE, numeric.only = FALSE) {
   assertFlag(include.mu)
   assertFlag(include.siman)
   assertFlag(include.batchmethod)
   assertChoice(infill, c("rs", "vario", "all"))
   assertFlag(numeric.only)
+  assertFlag(singlefid)
+  if (singlefid && include.batchmethod) stop("batchmethod must be excluded in singlefid mode.")
 
   pss = list(
+    if (!singlefid) searchspace_component_multifid,
     suggested_meta_searchspace,
     if (numeric.only) searchspace_component_sample_numeric else searchspace_component_sample,
     if (include.mu) searchspace_component_mu,

@@ -19,6 +19,7 @@ args <- list(
   arg("Search with simulated annealing", "search-siman", "S", name = "siman"),
   arg("Batch-method to search over", "search-batch", "B", type = "choice", default = "smashy", choices = c("smashy", "hb", "any"), name = "batchmethod"),
   arg("What infill method to use", "infill", "I", "choice", default = "rs", choices = c("rs", "vario", "all"), name = "infillsearch"),
+  arg("Use single fidelity only", "singlefid", "F"),
   arg("Print help and exit", "help", "h")
 )
 
@@ -52,7 +53,9 @@ makeEvaluator <- function(config) {
   assertTRUE(problem_count >= 1)
 
 
-
+  if (opts$singlefid) {
+    opts$batchmethod <- "smashy"
+  }
 
   evaluate_metaconf <- function(metaconf) {
     tmpname <- paste0(filename, ".tmp")  # adapt this every call in case filename changed
@@ -69,6 +72,12 @@ makeEvaluator <- function(config) {
     if (config$mu != 0) metaconf$mu <- config$mu
 
     if (config$batchmethod != "any") metaconf$batch_method <- config$batchmethod
+
+    if (config$singlefid) {
+      metaconf$budget_log_step = 300
+      metaconf$survival_fraction = .9999
+    }
+    
 
     callseed = seq(curseed, length.out = problem_count * config$reps)
     more.args = list(metaconf = metaconf, budgetfactor = config$budgetfactor)
@@ -94,6 +103,7 @@ makeEvaluator <- function(config) {
   space <- get_searchspace(
     include.mu = config$mu == 0, include.batchmethod = config$batchmethod == "any",
     infill = config$infillsearch, include.siman = config$siman,
+    singlefid = opts$singlefid,
     include.mo = FALSE, numeric.only = config$searchspace.numeric
   )
 
