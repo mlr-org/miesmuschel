@@ -30,7 +30,7 @@ are prefixed with \code{"cmpmaybe."}, the configuration parameters of the operat
 Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
-Probability per component with which to use the result of applying the operator given to the \code{recombinator} construction argument.
+Probability per component with which to use the result of applying the operator given to the \code{recombinator} construction argument. Must be set by the user.
 }
 
 
@@ -40,7 +40,7 @@ are prefixed with \code{"maybe."}, the configuration parameters of the operator 
 Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
-Probability per group of \code{n_indivs_in} individuals with which to apply the operator given to the \code{recombinator} construction argument.
+Probability per group of \code{n_indivs_in} individuals with which to apply the operator given to the \code{recombinator} construction argument. Must be set by the user.
 }
 }
 

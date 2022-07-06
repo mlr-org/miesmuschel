@@ -11,13 +11,12 @@ times, with the top \code{nrow(values) \%\% n_select} individuals being selected
 }
 \section{Configuration Parameters}{
 
-This operator has no configuration parameters.
 }
 
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are:
+Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
 }
 
 \section{Dictionary}{
@@ -59,8 +58,8 @@ Other selectors:
 \code{\link{dict_selectors_sequential}}
 }
 \concept{selectors}
-\section{Super class}{
-\code{\link[miesmuschel:SelectorScalar]{miesmuschel::SelectorScalar}} -> \code{SelectorBest}
+\section{Super classes}{
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{\link[miesmuschel:SelectorScalar]{miesmuschel::SelectorScalar}} -> \code{SelectorBest}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -72,6 +71,9 @@ Other selectors:
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
 <li><span class="pkg-link" data-pkg="miesmuschel" data-topic="SelectorScalar" data-id="prime"><a href='../../miesmuschel/html/SelectorScalar.html#method-SelectorScalar-prime'><code>miesmuschel::SelectorScalar$prime()</code></a></li>
 </ul>
 </details>

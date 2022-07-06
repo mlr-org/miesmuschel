@@ -9,7 +9,6 @@ Selector that disregards fitness and individual values and selects individuals b
 }
 \section{Configuration Parameters}{
 
-This operator has no configuration parameters.
 }
 
 \section{Supported Operand Types}{

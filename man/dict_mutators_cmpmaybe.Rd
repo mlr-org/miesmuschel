@@ -18,7 +18,7 @@ are prefixed with \code{"cmpmaybe."}, the configuration parameters of the operat
 Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
-Probability per component with which to apply the operator given to the \code{mutator} construction argument.
+Probability per component with which to apply the operator given to the \code{mutator} construction argument. Must be set by the user.
 }
 }
 

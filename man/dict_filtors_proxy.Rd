@@ -12,7 +12,7 @@ filtor operation fully parametrizable.
 
 \itemize{
 \item \code{operation} :: \code{\link{Filtor}}\cr
-Operation to perform. Initialized to \code{\link{SelectorBest}}.
+Operation to perform. Must be set by the user.
 This is primed when \verb{$prime()} of \code{SelectorProxy} is called, and also when \verb{$operate()} is called, to make changing
 the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{SelectorProxy}
 objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid
@@ -23,7 +23,7 @@ frequent re-priming.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are:
+Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
 }
 
 \section{Dictionary}{
@@ -98,7 +98,7 @@ Other filtor wrappers:
 \subsection{Method \code{new()}}{
 Initialize the \code{FiltorProxy} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{FiltorProxy$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{FiltorProxy$new(init_empty = FALSE)}\if{html}{\out{</div>}}
 }
 
 }

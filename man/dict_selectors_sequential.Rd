@@ -29,6 +29,9 @@ In particular, this means that when all \code{reduction_#} values are the same a
 individuals in the pipeline by the same factor. When \code{reduction_by_factor} is \code{FALSE}, then each operation removes the same absolute number of individuals.
 
 While the illustrations are done with the assumption that \code{nrow(values) >= n_select}, they hold equivalently with \code{nrow(values) < n_select}.
+
+All except the last \code{\link{Selector}}s are called with \code{group_size} set to their \code{n_select} value; the last \code{\link{Selector}} is called with the \code{group_size} value
+given as input.
 }
 
 \section{Configuration Parameters}{

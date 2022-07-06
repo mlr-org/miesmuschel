@@ -15,7 +15,7 @@ Standard deviation of normal distribuion. This is absolute if \code{sdev_is_rela
 multiplied with each individual component's range (upper - lower) if \code{sdev_is_relative} is \code{TRUE}.
 This may either be a scalar, in which case it is applied to all input components, or a vector,
 in which case it must have the length of the input and applies to components in order in which
-they appear in the priming \code{\link[paradox:ParamSet]{ParamSet}}. Initialized to 1.
+they appear in the priming \code{\link[paradox:ParamSet]{ParamSet}}. Must be set by the user.
 \item \code{sdev_is_relative} :: \code{logical(1)}\cr
 Whether \code{sdev} is absolute (\code{FALSE}) or relative to component range (\code{TRUE}). Initialized to \code{FALSE}.
 \item \code{truncated_normal} :: \code{logical(1)}\cr

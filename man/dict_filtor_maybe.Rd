@@ -33,7 +33,7 @@ Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
 Probability per individual (when \code{random_choise} is \code{TRUE}), or fraction of individuals (when \code{random_choice} is \code{FALSE}),
-that are chosen from \verb{$filtor} instead of \verb{$filtor_not}.
+that are chosen from \verb{$filtor} instead of \verb{$filtor_not}. Must be set by the user.
 \item \code{random_choice} :: \code{logical(1)} \cr
 Whether to sample the number of individuals chosen by \verb{$filtor} according to \code{rbinom(1, n_filter, p)}, or to use a fixed fraction.
 Initialized to \code{FALSE}.

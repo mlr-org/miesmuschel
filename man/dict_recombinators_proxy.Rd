@@ -12,7 +12,7 @@ Recombinator that performs the operation in its \code{operation} configuration p
 
 \itemize{
 \item \code{operation} :: \code{\link{Recombinator}}\cr
-Operation to perform. Initialized to \code{\link{RecombinatorNull}} with appropriate \code{n_indivs_in} and \code{n_indivs_out} values.
+Operation to perform. Must be set by the user.
 This is primed when \verb{$prime()} of \code{RecombinatorProxy} is called, and also when \verb{$operate()} is called, to make changing
 the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{RecombinatorProxy}
 objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid

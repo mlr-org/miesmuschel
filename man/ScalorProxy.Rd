@@ -11,7 +11,7 @@
 
 \itemize{
 \item \code{operation} :: \code{\link{Scalor}}\cr
-Operation to perform. Initialized to \code{\link{ScalorOne}}.
+Operation to perform. Initialized to \code{\link{ScalorSingleObjective}}.
 This is primed when \verb{$prime()} of \code{ScalorProxy} is called, and also when \verb{$operate()} is called, to make changing
 the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{ScalorProxy}
 objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid

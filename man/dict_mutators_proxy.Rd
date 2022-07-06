@@ -12,7 +12,7 @@ Mutator that performs the operation in its \code{operation} configuration parame
 
 \itemize{
 \item \code{operation} :: \code{\link{Mutator}}\cr
-Operation to perform. Initialized to \code{\link{MutatorNull}}.
+Operation to perform. Must be set by the user.
 This is primed when \verb{$prime()} of \code{MutatorProxy} is called, and also when \verb{$operate()} is called, to make changing
 the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{MutatorProxy}
 objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid

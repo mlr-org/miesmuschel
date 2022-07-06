@@ -17,7 +17,7 @@ are prefixed with \code{"maybe."}, the configuration parameters of the operator 
 Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
-Probability per individual with which to apply the operator given to the \code{mutator} construction argument.
+Probability per individual with which to apply the operator given to the \code{mutator} construction argument. Must be set by the user.
 }
 }
 

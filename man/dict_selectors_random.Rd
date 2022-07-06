@@ -11,9 +11,10 @@ it samples with or without replacement.
 \section{Configuration Parameters}{
 
 \itemize{
-\item \code{replace} :: \code{logical(1)}\cr
-Whether to sample individuals with (\code{TRUE}) or without (\code{FALSE}) replacement. When sampling is done without replacement, then
-\code{n_select} must be less or equal the number of rows in \code{values} when calling \verb{$operate()}. Initialized to \code{FALSE}.
+\item \code{sample_unique} :: \code{character(1)}\cr
+Whether to sample individuals globally unique (\code{"global"}), unique within groups (\code{"groups"}), or not unique at all (\code{"no"}, sample with replacement).
+This is done with best effort; if \code{group_size} (when \code{sample_unique} is \code{"groups"}) or \code{nrow(values)} (when \code{sample_unique} is \code{"global"})
+is smaller than \code{n_select}, then individuals are selected with as few repeats as possible. Initialized to \code{"groups"}.
 }
 }
 

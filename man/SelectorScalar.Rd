@@ -41,6 +41,9 @@ Other selectors:
 }
 \concept{base classes}
 \concept{selectors}
+\section{Super classes}{
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{SelectorScalar}
+}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
@@ -57,6 +60,15 @@ Other selectors:
 \item \href{#method-SelectorScalar-clone}{\code{SelectorScalar$clone()}}
 }
 }
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-SelectorScalar-new"></a>}}
 \if{latex}{\out{\hypertarget{method-SelectorScalar-new}{}}}
@@ -65,6 +77,7 @@ Initialize base class components of the \code{SelectorScalar}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{SelectorScalar$new(
   scalor = ScalorSingleObjective$new(),
+  is_deterministic = FALSE,
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
   supported = scalor$supported,
@@ -80,6 +93,10 @@ Initialize base class components of the \code{SelectorScalar}.
 \code{\link{Scalor}} to use to generate scalar values from multiple objectives, if multi-objective optimization is performed.
 Initialized to \code{\link{ScalorSingleObjective}}: Doing single-objective optimization normally, throwing an error if used
 in multi-objective setting: In that case, a \code{\link{Scalor}} needs to be explicitly chosen.}
+
+\item{\code{is_deterministic}}{(\code{logical(1)})\cr
+Whether the \code{\link{Selector}} is deterministic. Setting this to \code{TRUE} adds a configuration parameter \code{shuffle_selection} (initialized to \code{TRUE})
+that causes the selection to be shuffled.}
 
 \item{\code{param_classes}}{(\code{character})\cr
 Classes of parameters that the operator can handle. May contain any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}.
