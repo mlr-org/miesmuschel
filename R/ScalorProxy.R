@@ -8,7 +8,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Scalor`]\cr
-#'   Operation to perform. Initialized to [`ScalorOne`].
+#'   Operation to perform. Initialized to [`ScalorSingleObjective`].
 #'   This is primed when `$prime()` of `ScalorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `ScalorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -41,7 +41,7 @@ ScalorProxy = R6Class("ScalorProxy",
     #' Initialize the `ScalorProxy` object.
     initialize = function() {
       param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Scalor"))))
-      param_set$values = list(operation = ScalorOne$new())
+      param_set$values = list(operation = ScalorSingleObjective$new())
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, dict_entry = "proxy")
     },

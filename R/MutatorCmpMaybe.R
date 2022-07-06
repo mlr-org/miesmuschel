@@ -16,7 +16,7 @@
 #'
 #' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
-#'   Probability per component with which to apply the operator given to the `mutator` construction argument.
+#'   Probability per component with which to apply the operator given to the `mutator` construction argument. Must be set by the user.
 #'
 #' @templateVar id cmpmaybe
 #' @templateVar additional , \<mutator\> \[, \<mutator_not\>\]
@@ -74,7 +74,6 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
       private$.wrapped$param_set$set_id = "cmpmaybe"
       private$.wrapped_not$param_set$set_id = "cmpmaybe_not"
       private$.maybe_param_set = ps(p = p_vct(lower = 0, upper = 1, tags = "required"))
-      private$.maybe_param_set$values = list(p = 1)
       super$initialize(intersect(mutator$param_classes, mutator_not$param_classes),
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         packages = c("stats", mutator$packages, mutator_not$packages), dict_entry = "cmpmaybe",

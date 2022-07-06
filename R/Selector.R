@@ -106,6 +106,7 @@ Selector = R6Class("Selector",
 #' @family selectors
 #' @export
 SelectorScalar = R6Class("SelectorScalar",
+  inherit = Selector,
   public = list(
     #' @description
     #' Initialize base class components of the `SelectorScalar`.
@@ -120,6 +121,8 @@ SelectorScalar = R6Class("SelectorScalar",
     #' @template param_dict_entry
     initialize = function(scalor = ScalorSingleObjective$new(), param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = scalor$supported, packages = character(0), dict_entry = NULL) {
       private$.scalor = assert_r6(scalor, "Scalor")$clone(deep = TRUE)
+      private$.own_param_set = param_set
+      private$.scalor$param_set$set_id = "scale"
       super$initialize(param_classes = param_classes, param_set = alist(private$.own_param_set, private$.scalor$param_set), supported = supported,
         packages = c(packages, scalor$packages), dict_entry = dict_entry,
         own_param_set = quote(private$.own_param_set))
@@ -151,6 +154,7 @@ SelectorScalar = R6Class("SelectorScalar",
       private$.select_scalar(values, private$.scalor$operate(values, fitnesses), n_select)
     },
     .scalor = NULL,
+    .own_param_set = NULL,
     .select_scalar = function(values, fitnesses_scalar, n_select) stop(".select_scalar needs to be implemented by inheriting class.")
   )
 )

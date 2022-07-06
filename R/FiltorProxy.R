@@ -10,7 +10,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Filtor`]\cr
-#'   Operation to perform. Initialized to [`SelectorBest`].
+#'   Operation to perform. Must be set by the user.
 #'   This is primed when `$prime()` of `SelectorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `SelectorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -44,9 +44,9 @@ FiltorProxy = R6Class("FiltorProxy",
   public = list(
     #' @description
     #' Initialize the `FiltorProxy` object.
-    initialize = function() {
+
+    initialize = function(init_empty = FALSE) {
       param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Filtor")), tags = "required"))
-      param_set$values = list(operation = FiltorNull$new())
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, dict_entry = "proxy")
     },

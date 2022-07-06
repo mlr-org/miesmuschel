@@ -10,7 +10,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Mutator`]\cr
-#'   Operation to perform. Initialized to [`MutatorNull`].
+#'   Operation to perform. Must be set by the user.
 #'   This is primed when `$prime()` of `MutatorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `MutatorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -42,7 +42,6 @@ MutatorProxy = R6Class("MutatorProxy",
     #' Initialize the `MutatorProxy` object.
     initialize = function() {
       param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Mutator")), tags = "required"))
-      param_set$values = list(operation = MutatorNull$new())
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, dict_entry = "proxy")
     },

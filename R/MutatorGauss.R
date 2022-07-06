@@ -13,7 +13,7 @@
 #'   multiplied with each individual component's range (upper - lower) if `sdev_is_relative` is `TRUE`.
 #'   This may either be a scalar, in which case it is applied to all input components, or a vector,
 #'   in which case it must have the length of the input and applies to components in order in which
-#'   they appear in the priming [`ParamSet`][paradox::ParamSet]. Initialized to 1.
+#'   they appear in the priming [`ParamSet`][paradox::ParamSet]. Must be set by the user.
 #' * `sdev_is_relative` :: `logical(1)`\cr
 #'   Whether `sdev` is absolute (`FALSE`) or relative to component range (`TRUE`). Initialized to `FALSE`.
 #' * `truncated_normal` :: `logical(1)`\cr
@@ -49,7 +49,7 @@ MutatorGauss = R6Class("MutatorGauss",
     initialize = function() {
       param_set = ps(sdev = p_vct(lower = 0, tags = "required"),
         sdev_is_relative = p_lgl(tags = "required"), truncated_normal = p_lgl(tags = "required"))
-      param_set$values = list(sdev = 1, sdev_is_relative = FALSE, truncated_normal = FALSE)
+      param_set$values = list(sdev_is_relative = TRUE, truncated_normal = FALSE)
       super$initialize("ParamDbl", param_set, packages = "stats", dict_entry = "gauss")
     }
   ),

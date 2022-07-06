@@ -3,10 +3,8 @@
 
 * TODOs
 ** Direct TODOs, ordered:
- 1. simple selector that uses scalor
- 2. make 'p' orthogonal
- 3. different defaults (#30)
- 4. remove shuffle_after_select
+ 3. remove shuffle_after_select
+ 4. help
  5. own param set unification
  6. id col for fidelity reevals
  7. autotest class names

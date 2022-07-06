@@ -31,7 +31,7 @@
 #' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
 #'   Probability per individual (when `random_choise` is `TRUE`), or fraction of individuals (when `random_choice` is `FALSE`),
-#'   that are chosen from `$filtor` instead of `$filtor_not`.
+#'   that are chosen from `$filtor` instead of `$filtor_not`. Must be set by the user.
 #' * `random_choice` :: `logical(1)` \cr
 #'   Whether to sample the number of individuals chosen by `$filtor` according to `rbinom(1, n_filter, p)`, or to use a fixed fraction.
 #'   Initialized to `FALSE`.
@@ -94,7 +94,7 @@ FiltorMaybe = R6Class("FiltorMaybe",
       private$.wrapped$param_set$set_id = "maybe"
       private$.wrapped_not$param_set$set_id = "maybe_not"
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"), random_choice = p_lgl(tags = "required"))
-      private$.maybe_param_set$values = list(p = 1, random_choice = FALSE)
+      private$.maybe_param_set$values = list(random_choice = FALSE)
       super$initialize(intersect(filtor$param_classes, filtor_not$param_classes),
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         supported = intersect(filtor$supported, filtor_not$supported),

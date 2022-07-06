@@ -10,7 +10,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Recombinator`]\cr
-#'   Operation to perform. Initialized to [`RecombinatorNull`] with appropriate `n_indivs_in` and `n_indivs_out` values.
+#'   Operation to perform. Must be set by the user.
 #'   This is primed when `$prime()` of `RecombinatorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `RecombinatorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -62,7 +62,6 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
         sprintf("Must be a 'Recombinator' where n_indivs_in is a divisor of %s, and where n_indivs_in / n_indivs_out must be %s / %s",
           n_indivs_in, n_indivs_in, n_indivs_out)
       }, n_indivs_in, n_indivs_out)))
-      param_set$values = list(operation = RecombinatorNull$new(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out))
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out, dict_entry = "proxy")
     },

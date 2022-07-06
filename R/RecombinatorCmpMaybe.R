@@ -20,7 +20,7 @@
 #'
 #' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
-#'   Probability per component with which to use the result of applying the operator given to the `recombinator` construction argument.
+#'   Probability per component with which to use the result of applying the operator given to the `recombinator` construction argument. Must be set by the user.
 #'
 #' @templateVar id cmpmaybe
 #' @templateVar additional , \<recombinator\> \[, \<recombinator_not\>\]
@@ -90,7 +90,6 @@ RecombinatorCmpMaybe = R6Class("RecombinatorCmpMaybe",
       private$.wrapped_not$param_set$set_id = "cmpmaybe_not"
 
       private$.maybe_param_set = ps(p = p_vct(lower = 0, upper = 1, tags = "required"))
-      private$.maybe_param_set$values = list(p = 1)
       super$initialize(recombinator$param_classes,
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         recombinator$n_indivs_in, recombinator$n_indivs_out,

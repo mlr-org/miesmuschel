@@ -18,7 +18,7 @@
 #'
 #' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
-#'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument.
+#'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument. Must be set by the user.
 #'
 #' @templateVar id maybe
 #' @templateVar additional , \<recombinator\> \[, \<recombinator_not\>\]
@@ -87,7 +87,6 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       private$.wrapped_not$param_set$set_id = "maybe_not"
 
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
-      private$.maybe_param_set$values = list(p = 1)
       super$initialize(recombinator$param_classes,
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         recombinator$n_indivs_in, recombinator$n_indivs_out,
