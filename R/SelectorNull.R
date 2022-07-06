@@ -8,7 +8,7 @@
 #' Selector that disregards fitness and individual values and selects individuals by order in which they are given.
 #'
 #' @section Configuration Parameters:
-#' This operator has no configuration parameters.
+#' @template confparam_shuffle_selection
 #'
 #' @templateVar id null
 #' @template autoinfo_prepare_sel
@@ -35,7 +35,7 @@ SelectorNull = R6Class("SelectorNull",
     #' @description
     #' Initialize the `SelectorNull` object.
     initialize = function() {
-      super$initialize(dict_entry = "null")
+      super$initialize(is_deterministic = TRUE, dict_entry = "null")
     }
   ),
   private = list(

@@ -44,6 +44,7 @@ Selector = R6Class("Selector",
   public = list(
     #' @description
     #' Initialize base class components of the `Selector`.
+    #' @template param_is_deterministic
     #' @template param_param_classes
     #' @template param_param_set
     #' @param supported (`character`)\cr
@@ -53,10 +54,16 @@ Selector = R6Class("Selector",
     #' @template param_packages
     #' @template param_dict_entry
     #' @template param_own_param_set
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
+    initialize = function(is_deterministic = FALSE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
+      if (is_deterministic) {
+        assert_r6(param_set, "ParamSet")
+        shuffle_ps = ps(shuffle_selection = p_lgl(tags = "required"))
+        shuffle_ps$values$shuffle_selection = TRUE
+        param_set = ps_union(list(param_set, shuffle_ps))
+      }
       super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "sel", own_param_set = own_param_set)
     }
   ),
@@ -82,8 +89,13 @@ Selector = R6Class("Selector",
       )
 
       assert_int(n_select, lower = 0, tol = 1e-100)
+      params = self$param_set$get_values()
       selected = private$.select(values, fitnesses, n_select)
       assert_integerish(selected, tol = 1e-100, lower = 1, upper = nrow(values), any.missing = FALSE, len = n_select)
+      if (isTRUE(params$shuffle_selection)) {
+        selected = selected[sample.int(length(selected))]
+      }
+      selected
     },
     .select = function(values, fitnesses, n_select) stop(".select needs to be implemented by inheriting class.")
   )
@@ -111,6 +123,7 @@ SelectorScalar = R6Class("SelectorScalar",
     #' @description
     #' Initialize base class components of the `SelectorScalar`.
     #' @template param_scalor
+    #' @template param_is_deterministic
     #' @template param_param_classes
     #' @template param_param_set
     #' @param supported (`character`)\cr
@@ -119,11 +132,18 @@ SelectorScalar = R6Class("SelectorScalar",
     #'   The `$supported` field will reflect this value.
     #' @template param_packages
     #' @template param_dict_entry
-    initialize = function(scalor = ScalorSingleObjective$new(), param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = scalor$supported, packages = character(0), dict_entry = NULL) {
+    initialize = function(scalor = ScalorSingleObjective$new(), is_deterministic = FALSE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = scalor$supported, packages = character(0), dict_entry = NULL) {
       private$.scalor = assert_r6(scalor, "Scalor")$clone(deep = TRUE)
-      private$.own_param_set = param_set
+      assert_r6(param_set, "ParamSet")
+      if (is_deterministic) {
+        shuffle_ps = ps(shuffle_selection = p_lgl(tags = "required"))
+        shuffle_ps$values$shuffle_selection = TRUE
+        private$.own_param_set = ps_union(list(param_set, shuffle_ps))
+      } else {
+        private$.own_param_set = param_set
+      }
       private$.scalor$param_set$set_id = "scale"
-      super$initialize(param_classes = param_classes, param_set = alist(private$.own_param_set, private$.scalor$param_set), supported = supported,
+      super$initialize(is_deterministic = FALSE, param_classes = param_classes, param_set = alist(private$.own_param_set, private$.scalor$param_set), supported = supported,
         packages = c(packages, scalor$packages), dict_entry = dict_entry,
         own_param_set = quote(private$.own_param_set))
     },

@@ -83,7 +83,7 @@ SelectorSequential = R6Class("SelectorSequential",
       )
 
       private$.own_param_set$values = list()
-      super$initialize(Reduce(intersect, map(private$.wrapped, "param_classes")), ps_alist,
+      super$initialize(param_classes = Reduce(intersect, map(private$.wrapped, "param_classes")), param_set = ps_alist,
         supported = Reduce(intersect, map(private$.wrapped, "supported")),
         packages = unique(unlist(map(private$.wrapped, "packages"), use.names = FALSE, recursive = FALSE)),
         dict_entry = "sequential", own_param_set = quote(private$.own_param_set))

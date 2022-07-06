@@ -10,7 +10,7 @@
 #' times, with the top `nrow(values) %% n_select` individuals being selected one more time.
 #'
 #' @section Configuration Parameters:
-#' This operator has no configuration parameters.
+#' @template confparam_shuffle_selection
 #'
 #' @templateVar id best
 #' @template autoinfo_prepare_sel
@@ -37,7 +37,7 @@ SelectorBest = R6Class("SelectorBest",
     #' @description
     #' Initialize the `SelectorBest` object.
     initialize = function(scalor = ScalorSingleObjective$new()) {
-      super$initialize(scalor = scalor, dict_entry = "best")
+      super$initialize(scalor = scalor, is_deterministic = TRUE, dict_entry = "best")
     }
   ),
   private = list(

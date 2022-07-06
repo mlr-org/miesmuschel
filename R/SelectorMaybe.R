@@ -118,8 +118,8 @@ SelectorMaybe = R6Class("SelectorMaybe",
       )
       private$.maybe_param_set$values = list(shuffle_input = TRUE,
         proportion_in = "exact", proportion_out = "oddsequal", try_unique = TRUE)
-      super$initialize(intersect(selector$param_classes, selector_not$param_classes),
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+      super$initialize(param_classes = intersect(selector$param_classes, selector_not$param_classes),
+        param_set = alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         supported = intersect(selector$supported, selector_not$supported),
         packages = c("stats", selector$packages, selector_not$packages), dict_entry = "maybe",
         own_param_set = quote(private$.maybe_param_set))
