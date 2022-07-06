@@ -1018,10 +1018,6 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #'   Budget compnent when doing multi-fidelity optimization. This component of the search space is removed from
 #'   individuals sampled from the archive in `inst` before giving it to `mutator` and `recombinator`.
 #'   Should be `NULL` when not doing multi-fidelity.
-#' @param shuffle_after_select (`logical(1)`)\cr
-#'   Whether to shuffle individuals selected by `parent_selector` before giving them to `recombinator`. May be set
-#'   to false, in which case one may consider using a [`SelectorSequential`] that performs some shuffling after selection.
-#'   Default `TRUE`.
 #' @return [`data.table`][data.table::data.table]: A table of configurations proposed as offspring to be evaluated
 #' using [`mies_evaluate_offspring()`].
 #' @family mies building blocks
@@ -1082,7 +1078,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' mies_generate_offspring(oi, lambda = 5, parent_selector = s, mutator = m, recombinator = r)
 #'
 #' @export
-mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator = NULL, recombinator = NULL, budget_id = NULL, shuffle_after_select = TRUE) {
+mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator = NULL, recombinator = NULL, budget_id = NULL) {
   assert_optim_instance(inst)
 
   assert_int(lambda, lower = 1, tol = 1e-100)
@@ -1142,9 +1138,6 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector)
   if (!is.null(budget_id)) set(parents, , budget_id, NULL)
 
-  if (shuffle_after_select) {
-    parents = parents[sample.int(nrow(parents))]
-  }
   recombined = recombinator$operate(parents)
   recombined = first(recombined, lambda)  # throw away things if we have too many (happens when n_indivs_out is not a divider of lambda)
 
