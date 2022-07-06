@@ -29,6 +29,9 @@
 #'
 #' While the illustrations are done with the assumption that `nrow(values) >= n_select`, they hold equivalently with `nrow(values) < n_select`.
 #'
+#' All except the last [`Selector`]s are called with `group_size` set to their `n_select` value; the last [`Selector`] is called with the `group_size` value
+#' given as input.
+#'
 #' @section Configuration Parameters:
 #' This operator has the configuration parameters of the [`Selector`]s that it wraps: The configuration parameters of the operator given to the `selectors` construction
 #' argument are prefixed with `"selector_1"`, `"selector_2"`, ... up to `"selector_#"`, where `#` is `length(selectors)`.
@@ -109,7 +112,7 @@ SelectorSequential = R6Class("SelectorSequential",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select, group_size) {
       params = private$.own_param_set$get_values()
       pnames = sprintf("reduction_%s", seq_along(private$.wrapped))
 
@@ -128,14 +131,19 @@ SelectorSequential = R6Class("SelectorSequential",
         outputs = outputs * (n_select - nrow(values)) + nrow(values)
       }
       outputs = round(outputs)
-
+      assert_true(last(outputs) == n_select)
       # accumulate selected individuals, since the result needs to be relative to the `values` input of this call.
       outputmap = seq_len(nrow(values))
 
       for (i in seq_along(private$.wrapped)) {
         op = private$.wrapped[[i]]
         on = outputs[[i]]
-        selected = op$operate(values, fitnesses, on)
+        if (i == length(private$.wrapped)) {
+          selected = op$operate(values, fitnesses, on, group_size)
+          outputmap = outputmap[selected]
+          break
+        }
+        selected = op$operate(values, fitnesses, on, on)
         values = values[selected]
         fitnesses = fitnesses[selected, , drop = FALSE]
         outputmap = outputmap[selected]

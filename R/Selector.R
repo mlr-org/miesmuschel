@@ -26,6 +26,13 @@
 #' * `n_select` :: `integer(1)`\cr
 #'   Number of individuals to select. Some `Selector`s select individuals with replacement, for which this value may be greater than the number of
 #'   rows in `values`.
+#' * `group_size` :: `integer`\cr
+#'   Sampling group size hint, indicating that the caller would prefer there to not be any duplicates within this group size, e.g. because the
+#'   [`Selector`] is called to select individuals to be given to a [`Recombinator`] with a certain `n_indivs_in`, or because it is called as a
+#'   `survival_selector` in [`mies_survival_comma()`] or [`mies_survival_plus()`]. The [`Selector`] may or may not ignore this value, however.
+#'   This may possibly happen because of certain configuration parameters, or because the input size is too small.\cr
+#'   Must either be a scalar value or sum up to `n_select`. Must be non-negative. A scalar value of 0 is interpreted the same as 1.\cr
+#'   If not given, this value defaults to 1.
 #'
 #' The return value for an operation will be a numeric vector of integer values of length `n_select` indexing the individuals that were selected. Some `Selector`s
 #' select individuals with replacement, for which the return value may contain indices more than once.
@@ -77,7 +84,7 @@ Selector = R6Class("Selector",
   ),
   private = list(
     .supported = NULL,
-    .operate = function(values, fitnesses, n_select) {
+    .operate = function(values, fitnesses, n_select, group_size = 1) {
       assert_data_table(values, min.rows = 1)
       if ("single-crit" %in% self$supported && test_numeric(fitnesses) && !test_matrix(fitnesses)) {
         assert_numeric(fitnesses, any.missing = FALSE, len = nrow(values))
@@ -89,15 +96,21 @@ Selector = R6Class("Selector",
       )
 
       assert_int(n_select, lower = 0, tol = 1e-100)
+      assert(check_int(group_size, lower = 0, tol = 1e-100), check_integerish(group_size, lower = 1, tol = 1e-100, any.missing = FALSE, min.len = 1))
+      if (length(group_size) > 1 && sum(group_size) != n_select) {
+        stop(sprintf("non-scalar group_size must sum up to n_select (%s) but is c(%s).", n_select, paste(group_size, collapse = ",")))
+      }
+      if (n_select == 0) return(numeric(0))
+      if (length(group_size) == 1 && group_size == 0) group_size = 1
       params = self$param_set$get_values()
-      selected = private$.select(values, fitnesses, n_select)
+      selected = private$.select(values, fitnesses, n_select, group_size)
       assert_integerish(selected, tol = 1e-100, lower = 1, upper = nrow(values), any.missing = FALSE, len = n_select)
       if (isTRUE(params$shuffle_selection)) {
         selected = selected[sample.int(length(selected))]
       }
       selected
     },
-    .select = function(values, fitnesses, n_select) stop(".select needs to be implemented by inheriting class.")
+    .select = function(values, fitnesses, n_select, group_size) stop(".select needs to be implemented by inheriting class.")
   )
 )
 
@@ -170,8 +183,8 @@ SelectorScalar = R6Class("SelectorScalar",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
-      private$.select_scalar(values, private$.scalor$operate(values, fitnesses), n_select)
+    .select = function(values, fitnesses, n_select, group_size) {
+      private$.select_scalar(values, private$.scalor$operate(values, fitnesses), n_select, group_size)
     },
     .scalor = NULL,
     .own_param_set = NULL,

@@ -68,7 +68,7 @@ SelectorProxy = R6Class("SelectorProxy",
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select, group_size) {
       operation = self$param_set$get_values()$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
@@ -76,7 +76,7 @@ SelectorProxy = R6Class("SelectorProxy",
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$operate(values, fitnesses, n_select)
+      operation$operate(values, fitnesses, n_select, group_size)
     },
     .primed_with = NULL,
     deep_clone = function(name, value) {

@@ -192,3 +192,13 @@ crate <- function(.fn, ..., .parent = topenv(parent.frame())) {
     environment(.fn) = list2env(setNames(list(...), nn), parent = .parent)
     .fn
 }
+
+
+vectorize_group_size = function(group_size, n_select) {
+  if (length(group_size) != 1) {
+    assert_true(sum(group_size) == n_select)
+    return(group_size)
+  }
+  gs_remainder = n_select %% group_size
+  c(rep(group_size, n_select / group_size), if (gs_remainder) gs_remainder)
+}
