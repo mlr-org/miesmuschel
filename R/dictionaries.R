@@ -108,7 +108,7 @@ dict_help = function(self, private, key, help_type) {
   )
   if (!length(h) || inherits(h, "error")) {
     tryCatch({
-      h = invoke(self$get, key = key, lapply(self$items[[key]]$aux_construction_args, eval))$help()
+      h = invoke(self$get, key = key, .args = lapply(self$items[[key]]$aux_construction_args, eval))$help()
     }, error = function(e) NULL)
   }
   if (inherits(h, "error")) stop(h)
