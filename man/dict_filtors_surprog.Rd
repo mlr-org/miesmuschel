@@ -128,6 +128,7 @@ Other filtors:
 \if{html}{\out{<a id="method-FiltorSurrogateProgressive-new"></a>}}
 \if{latex}{\out{\hypertarget{method-FiltorSurrogateProgressive-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the \code{FiltorSurrogateProgressive}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogateProgressive$new(
   surrogate_learner,
@@ -141,6 +142,14 @@ Other filtors:
 \item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}})\cr
 Regression learner for the surrogate model filtering algorithm.\cr
 The \verb{$surrogate_learner} field will reflect this value.}
+
+\item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}})\cr
+Regression learner for the surrogate model filtering algorithm.\cr
+The \verb{$surrogate_learner} field will reflect this value.}
+
+\item{\code{surrogate_selector}}{(\code{\link{Selector}})
+\code{\link{Selector}} for the surrogate model filtering algorithm.\cr
+The \verb{$surrogate_selector} field will reflect this value.}
 
 \item{\code{surrogate_selector}}{(\code{\link{Selector}})
 \code{\link{Selector}} for the surrogate model filtering algorithm.\cr

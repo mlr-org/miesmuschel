@@ -162,6 +162,7 @@ The \verb{$endomorphsim} field will reflect this value.}
 \if{html}{\out{<a id="method-MiesOperator-repr"></a>}}
 \if{latex}{\out{\hypertarget{method-MiesOperator-repr}{}}}
 \subsection{Method \code{repr()}}{
+Create a \code{\link[base:call]{call}} object representing this operator.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$repr(
   skip_defaults = TRUE,
@@ -171,15 +172,44 @@ The \verb{$endomorphsim} field will reflect this value.}
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{skip_defaults}}{(\code{logical(1)})\cr
+Whether to skip construction arguments that have their default value. Default \code{TRUE}.}
+
+\item{\code{show_params}}{(\code{logical(1)})\cr
+Whether to show \code{\link[paradox:ParamSet]{ParamSet}} values. Default \code{TRUE}.}
+
+\item{\code{show_constructor_args}}{(\code{logical(1)})\cr
+Whether to show construction args that are not \code{\link[paradox:ParamSet]{ParamSet}} values. Default \code{TRUE}.}
+
+\item{\code{...}}{(any)\cr
+Ignored.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MiesOperator-print"></a>}}
 \if{latex}{\out{\hypertarget{method-MiesOperator-print}{}}}
 \subsection{Method \code{print()}}{
+Print this operator.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$print(verbose = FALSE, ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{verbose}}{(\code{logical(1)})\cr
+Whether to show all construction arguments, even the ones at default values. Default \code{FALSE}.}
+
+\item{\code{...}}{(any)\cr
+Ignored.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-MiesOperator-prime"></a>}}

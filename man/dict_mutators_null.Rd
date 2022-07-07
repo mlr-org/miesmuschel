@@ -3,7 +3,7 @@
 \name{dict_mutators_null}
 \alias{dict_mutators_null}
 \alias{MutatorNull}
-\title{Null-Mutator}
+\title{Null Mutator}
 \description{
 Null-mutator that does not perform any operation on its input. Useful in particular with operator-wrappers such as \code{\link{MutatorMaybe}} or \code{\link{MutatorCombination}}.
 }

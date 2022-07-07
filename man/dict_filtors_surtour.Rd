@@ -108,6 +108,7 @@ Other filtors:
 \if{html}{\out{<a id="method-FiltorSurrogateTournament-new"></a>}}
 \if{latex}{\out{\hypertarget{method-FiltorSurrogateTournament-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the \code{FiltorSurrogateTournament}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogateTournament$new(
   surrogate_learner,
@@ -121,6 +122,14 @@ Other filtors:
 \item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}})\cr
 Regression learner for the surrogate model filtering algorithm.\cr
 The \verb{$surrogate_learner} field will reflect this value.}
+
+\item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}})\cr
+Regression learner for the surrogate model filtering algorithm.\cr
+The \verb{$surrogate_learner} field will reflect this value.}
+
+\item{\code{surrogate_selector}}{(\code{\link{Selector}})
+\code{\link{Selector}} for the surrogate model filtering algorithm.\cr
+The \verb{$surrogate_selector} field will reflect this value.}
 
 \item{\code{surrogate_selector}}{(\code{\link{Selector}})
 \code{\link{Selector}} for the surrogate model filtering algorithm.\cr

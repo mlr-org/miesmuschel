@@ -41,9 +41,8 @@ must always return unique integers, i.e. select every individual at most once.
 function. The user of the object calls \verb{$operate()}, and the arguments are passed on to private \verb{$.filter()} after checking that
 the operator is primed, that the \code{values} and \code{known_values} arguments conforms to the primed domain and that other values match.
 
-The \code{private$.needed_input()} function should also be overloaded. It is a function that gets a single input, \code{output_size}, a positive integer indicating
-the number of individuals that the caller desires. The function should calculate the number of \code{values} that are required to
-filter down to \code{output_size}, given the current configuraiton parameter settings. The needed input should always be at least \code{output_size}.
+The \code{private$.needed_input()} function should also be overloaded, it is called by the public \verb{$needed_input()} function after initial checks;
+see the documentation there.
 
 Typically, the \verb{$initialize()} function should also be overloaded, and optionally the \verb{$prime()} function; they should call their \code{super} equivalents.
 }
@@ -165,10 +164,23 @@ the \code{param_set} argument is not a list of expressions.}
 \if{html}{\out{<a id="method-Filtor-needed_input"></a>}}
 \if{latex}{\out{\hypertarget{method-Filtor-needed_input}{}}}
 \subsection{Method \code{needed_input()}}{
+Calculate the number of \code{values} that are required to
+filter down to \code{output_size}, given the current configuraiton parameter settings.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Filtor$needed_input(output_size)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{output_size}}{(\code{integer(1)})\cr
+A positive integer indicating the number of individuals for which the needed input size should be calculated.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{integer(1)}: The minimum number of rows required to filter down to \code{output_size}. At least \code{output_size}.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Filtor-clone"></a>}}

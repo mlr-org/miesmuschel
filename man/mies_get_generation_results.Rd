@@ -44,3 +44,41 @@ or all individuals alive at any point during a generation.
 The resulting \code{\link[data.table:data.table]{data.table}} object is formatted for easy manipulation to get relevant
 information about optimization progress. To get aggregated values per generation, use \code{by = "dob"}.
 }
+\examples{
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "minimize"))
+)
+
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 6)
+)
+
+op <- opt("mies",
+  lambda = 2, mu = 2,
+  mutator = mut("gauss", sdev = 0.1),
+  recombinator = rec("xounif"),
+  parent_selector = sel("best")
+)
+set.seed(1)
+op$optimize(oi)
+
+# negates objectives that are minimized:
+mies_get_generation_results(oi)
+
+# real objective values:
+mies_get_generation_results(oi, as_fitnesses = FALSE)
+
+# Individuals that died are included:
+mies_get_generation_results(oi, survivors_only = FALSE)
+
+# TODO: missing budget
+}

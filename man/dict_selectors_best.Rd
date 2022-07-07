@@ -88,6 +88,16 @@ Initialize the \code{SelectorBest} object.
 \if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new(scalor = ScalorSingleObjective$new())}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{scalor}}{(\code{\link{Scalor}})\cr
+\code{\link{Scalor}} to use to generate scalar values from multiple objectives, if multi-objective optimization is performed.
+Initialized to \code{\link{ScalorSingleObjective}}: Doing single-objective optimization normally, throwing an error if used
+in multi-objective setting: In that case, a \code{\link{Scalor}} needs to be explicitly chosen.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-SelectorBest-clone"></a>}}

@@ -112,6 +112,11 @@ Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usual
 be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
 is not entered in a dictionary.\cr
 The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
 }
 \if{html}{\out{</div>}}
 }

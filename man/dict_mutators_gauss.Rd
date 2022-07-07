@@ -50,7 +50,7 @@ dict_mutators$get("gauss")
 
 \examples{
 set.seed(1)
-mg = mut("gauss")
+mg = mut("gauss", sdev = 0.1)
 p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
 data = data.frame(x = rep(0, 5), y = rep(0, 5))
 

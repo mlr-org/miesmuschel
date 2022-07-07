@@ -2,9 +2,7 @@
 % Please edit documentation in R/repr.R
 \name{crate_env}
 \alias{crate_env}
-\title{Set a Function's Environment
-
-Useful to represent functions efficiently within \code{repr()}.}
+\title{Set a Function's Environment}
 \usage{
 crate_env(fun, namespace = "R_GlobalEnv", ..., selfref = NULL)
 }
@@ -33,8 +31,6 @@ present.}
 \code{function}: The given \code{fun} with changed environment.
 }
 \description{
-Set a Function's Environment
-
 Useful to represent functions efficiently within \code{repr()}.
 }
 \examples{

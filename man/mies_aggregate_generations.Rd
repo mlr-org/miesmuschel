@@ -58,3 +58,44 @@ or at any point during a generation (\code{survivors_only} \code{FALSE}).
 The result is a single \code{\link[data.table:data.table]{data.table}} object with a \code{dob} column indicating the
 generation, as well as one column for each \code{aggregations} entry crossed with each objective of \code{inst}.
 }
+\examples{
+library("bbotk")
+lgr::threshold("warn")
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "minimize"))
+)
+
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 6)
+)
+
+op <- opt("mies",
+  lambda = 2, mu = 2,
+  mutator = mut("gauss", sdev = 0.1),
+  recombinator = rec("xounif"),
+  parent_selector = sel("best")
+)
+set.seed(1)
+op$optimize(oi)
+
+# negates objectives that are minimized:
+mies_aggregate_generations(oi)
+
+# silly aggregation: first element
+mies_aggregate_generations(oi, aggregations = list(first = function(x) x[1]))
+
+# real objective values:
+mies_aggregate_generations(oi, as_fitnesses = FALSE)
+
+# Individuals that died are included:
+mies_aggregate_generations(oi, survivors_only = FALSE)
+
+# TODO: missing budget, multiobjective
+}

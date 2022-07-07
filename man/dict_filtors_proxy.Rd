@@ -99,7 +99,7 @@ Other filtor wrappers:
 \subsection{Method \code{new()}}{
 Initialize the \code{FiltorProxy} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{FiltorProxy$new(init_empty = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{FiltorProxy$new()}\if{html}{\out{</div>}}
 }
 
 }

@@ -141,7 +141,7 @@ on problems that have a categorical "budget" parameter, then this value should b
 \donttest{
 lgr::threshold("warn")
 
-op.m <- mut("gauss")
+op.m <- mut("gauss", sdev = 0.1)
 op.r <- rec("xounif", p = .3)
 op.parent <- sel("random")
 op.survival <- sel("best")
@@ -398,6 +398,8 @@ Initialize the \code{TunerMies} object.
 \item{\code{survival_selector}}{(\code{\link{Selector}})}
 
 \item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})}
+
+\item{\code{init_selector}}{(\code{\link{Selector}})}
 
 \item{\code{multi_fidelity}}{(\code{logical(1)})}
 }

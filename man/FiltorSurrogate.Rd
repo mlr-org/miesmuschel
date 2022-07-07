@@ -88,6 +88,7 @@ Regression learner for the surrogate model filtering algorithm.}
 \if{html}{\out{<a id="method-FiltorSurrogate-new"></a>}}
 \if{latex}{\out{\hypertarget{method-FiltorSurrogate-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the base class components of the \code{FiltorSurrogate}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogate$new(
   surrogate_learner,
@@ -105,6 +106,14 @@ Regression learner for the surrogate model filtering algorithm.}
 Regression learner for the surrogate model filtering algorithm.\cr
 The \verb{$surrogate_learner} field will reflect this value.}
 
+\item{\code{surrogate_learner}}{(\code{\link[mlr3:LearnerRegr]{mlr3::LearnerRegr}})\cr
+Regression learner for the surrogate model filtering algorithm.\cr
+The \verb{$surrogate_learner} field will reflect this value.}
+
+\item{\code{surrogate_selector}}{(\code{\link{Selector}})
+\code{\link{Selector}} for the surrogate model filtering algorithm.\cr
+The \verb{$surrogate_selector} field will reflect this value.}
+
 \item{\code{surrogate_selector}}{(\code{\link{Selector}})
 \code{\link{Selector}} for the surrogate model filtering algorithm.\cr
 The \verb{$surrogate_selector} field will reflect this value.}
@@ -113,11 +122,33 @@ The \verb{$surrogate_selector} field will reflect this value.}
 \code{\link[paradox:ParamSet]{ParamSet}} of the method implemented in the inheriting class with configuration parameters that go beyond the
 parameters of the \code{surrogate_learner} and \code{surrogate_selector}.}
 
+\item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{list} of \code{expression})\cr
+Strategy parameters of the operator. This should be created by the subclass and given to \code{super$initialize()}.
+If this is a \code{\link[paradox:ParamSet]{ParamSet}}, it is used as the \code{MiesOperator}'s \code{\link[paradox:ParamSet]{ParamSet}}
+directly. Otherwise it must be a \code{list} of expressions e.g. created by \code{alist()} that evaluate to \code{\link[paradox:ParamSet]{ParamSet}}s,
+possibly referencing \code{self} and \code{private}.
+These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\link[paradox:ParamSetCollection]{ParamSetCollection}}.
+Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
+The \verb{$param_set} field will reflect this value.}
+
 \item{\code{packages}}{(\code{character})
 Packages that need to be loaded for the operator to function. This should
 be declared so these packages can be loaded when operators run on parallel
 instances. Default is \code{character(0)}.\cr
 The \verb{$packages} field will reflect this values.}
+
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\cr
+The \verb{$dict_entry} field will reflect this value.}
 
 \item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
 Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of

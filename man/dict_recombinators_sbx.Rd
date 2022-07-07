@@ -55,6 +55,7 @@ rsbx$prime(p)
 rsbx$operate(data)
 
 rsbx = rec("sbx", n = c(0.5, 1, 10))
+rsbx$prime(p)
 rsbx$operate(data)
 }
 \references{

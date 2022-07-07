@@ -5,7 +5,7 @@
 \alias{SelectorNull}
 \title{Null Selector}
 \description{
-Selector that disregards fitness and individual values and selects individuals by order in which they are given.
+\code{\link{Selector}} that disregards fitness and individual values and selects individuals by order in which they are given.
 }
 \section{Configuration Parameters}{
 

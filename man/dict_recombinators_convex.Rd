@@ -58,7 +58,7 @@ rcvx$operate(data)  # mean of groups of 3
 rcvx = rec("convex", 3, lambda = c(0, 1, 2))$prime(p)
 rcvx$operate(data)  # for groups of 3, take 1/3 of 2nd and 2/3 of 3rd row
 
-lambda = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0, ncol = 3)
+lambda = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0), ncol = 3)
 lambda
 
 rcvx = rec("convex", 3, lambda = lambda)$prime(p)

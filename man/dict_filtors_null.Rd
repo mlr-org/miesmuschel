@@ -87,6 +87,7 @@ Other filtors:
 \if{html}{\out{<a id="method-FiltorNull-new"></a>}}
 \if{latex}{\out{\hypertarget{method-FiltorNull-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the \code{FiltorNull} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorNull$new()}\if{html}{\out{</div>}}
 }

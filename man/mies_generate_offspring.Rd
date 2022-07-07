@@ -85,7 +85,7 @@ oi <- OptimInstanceSingleCrit$new(objective,
 # Demo operators
 m = mut("gauss", sdev = 0.1)
 r = rec("xounif")
-s = sel("random", replace = TRUE)
+s = sel("random")
 # Operators must be primed
 mies_prime_operators(objective$domain, list(m), list(r), list(s))
 
