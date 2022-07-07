@@ -73,6 +73,9 @@ Writing to this acrive binding calls \verb{$prime()}.}
 
 \item{\code{is_primed}}{(\code{logical(1)})\cr
 Whether the \code{MiesOperator} was primed before. Is \code{FALSE} exactly when \verb{$primed_ps} is \code{NULL}. Read-only.}
+
+\item{\code{man}}{(\code{character(1)})\cr
+Name of this class, in the form \verb{<package>::<classname>}. Used by the \verb{$help()} method.}
 }
 \if{html}{\out{</div>}}
 }
@@ -84,6 +87,7 @@ Whether the \code{MiesOperator} was primed before. Is \code{FALSE} exactly when 
 \item \href{#method-MiesOperator-print}{\code{MiesOperator$print()}}
 \item \href{#method-MiesOperator-prime}{\code{MiesOperator$prime()}}
 \item \href{#method-MiesOperator-operate}{\code{MiesOperator$operate()}}
+\item \href{#method-MiesOperator-help}{\code{MiesOperator$help()}}
 \item \href{#method-MiesOperator-clone}{\code{MiesOperator$clone()}}
 }
 }
@@ -227,6 +231,27 @@ Depending on the concrete class, passed on to \verb{$.operate()}.}
 \subsection{Returns}{
 \code{data.frame}: the result of the operation. If the input was a \code{\link[data.table:data.table]{data.table}} instead of
 a \code{data.frame}, the output is also \code{\link[data.table:data.table]{data.table}}.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MiesOperator-help"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-help}{}}}
+\subsection{Method \code{help()}}{
+Run \code{\link[utils:help]{utils::help()}} for this object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$help(help_type = getOption("help_type"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{help_type}}{(\code{character(1)})\cr
+One of \code{"text"}, \code{"html"}, or \code{"pdf"}: The type of help page to open. Defaults to the \code{"help_type"} option.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{help_files_with_dopic} object, which opens the help page.
 }
 }
 \if{html}{\out{<hr>}}
