@@ -18,6 +18,13 @@ Install the github version, using `remotes`:
 remotes::install_github("mlr-org/miesmuschel")
 ```
 
+If you're feeling brave, install the `devel` branch version:
+
+```r
+remotes::install_github("mlr-org/miesmuschel@devel")
+```
+
+
 ## Some Code to Get Started
 
 ### Preparation
