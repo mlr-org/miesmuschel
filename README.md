@@ -57,7 +57,7 @@ oi <- OptimInstanceSingleCrit$new(objective,
 library("miesmuschel")
 
 # Get operators
-op.m <- mut("gauss")
+op.m <- mut("gauss", sdev = 0.1)
 op.r <- rec("xounif", p = .3)
 op.parent <- sel("random")
 op.survival <- sel("best")
@@ -86,14 +86,14 @@ oi <- OptimInstanceSingleCrit$new(objective,
 library("miesmuschel")
 
 # Get operators
-op.m <- mut("gauss")
+op.m <- mut("gauss", sdev = 0.1)
 op.r <- rec("xounif", p = .3)
 op.parent <- sel("random")
 op.survival <- sel("best")
 
 # Prime operators
 mies_prime_operators(list(op.m), list(op.r), list(op.parent, op.survival),
-  oi$search_space)
+  search_space = oi$search_space)
 
 # Sample first generation
 mies_init_population(oi, 3)
