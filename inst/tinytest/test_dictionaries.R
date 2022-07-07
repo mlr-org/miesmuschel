@@ -158,8 +158,8 @@ for (opinfo in dicts) {
       # we want to construct an object where the parameter value is different from the construction value
       # For this we take a few candidate values and filter for feasibility and inequality with original value
       candidates = c(as.list(testingparam$levels), list(testingparam$lower, testingparam$upper,
-        testingparam$lower + 1, 0, testingparam$upper - 1, if (is.atomic(origval)) origval + 1))
-      val = Filter(function(x) testingparam$test(x) && !is.na(x) && is.finite(x) && (!is.atomic(origval) || origval != x), candidates)[[1]]
+        testingparam$lower + 1, 0, testingparam$upper - 1, if (is.atomic(origval) && !is.null(origval)) origval + 1))
+      val = Filter(function(x) testingparam$test(x) && !is.na(x) && is.finite(x) && (!is.atomic(origval) || is.null(origval) || origval != x), candidates)[[1]]
     } else {
       val = setdiff(testingparam$levels, origval)[[1]]
     }
