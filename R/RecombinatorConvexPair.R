@@ -61,7 +61,7 @@ RecombinatorConvexPair = R6Class("RecombinatorConvexPair",
     .recombine = function(values) {
       lambda = self$param_set$get_values()$lambda
       if (!length(lambda) %in% c(1, ncol(values))) stop("lambda must have either length 1, or length of input.")
-      lambda * values[1] + (1 - lambda) * values[2]
+      lambda * values[1:2] + (1 - lambda) * values[2:1]
     }
   )
 )

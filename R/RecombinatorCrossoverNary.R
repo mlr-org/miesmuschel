@@ -41,10 +41,10 @@
 #' # for groups of 3, take with probability 1/3 from 2nd and with probability 2/3 from 3rd row
 #' rxon$operate(data)
 #'
-#' pmat = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0, ncol = 3)
+#' pmat = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0), ncol = 3)
 #' pmat
 #'
-#' rxon = rec("convex", 3, p = pmat)$prime(p)
+#' rxon = rec("xon", 3, p = pmat)$prime(p)
 #' rxon$operate(data)  # componentwise different operation
 #'
 #' @export
@@ -67,7 +67,7 @@ RecombinatorCrossoverNary = R6Class("RecombinatorCrossoverNary",
       p = self$param_set$get_values()$p
 
       if (is.matrix(lambda)) {
-        choices = apply(lambda, 2, sample.int, n = nrow(values), size = ncol(values), replace = TRUE)
+        choices = apply(lambda, 2, sample.int, n = nrow(values), size = 1, replace = TRUE)
       } else {
         choices = sample.int(nrow(values), ncol(values), replace = TRUE, prob = lambda)
       }

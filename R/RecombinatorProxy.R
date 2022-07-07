@@ -25,7 +25,7 @@
 #' @family recombinator wrappers
 #' @examples
 #' set.seed(1)
-#' rp = rec("proxy")
+#' rp = rec("proxy", operation = rec("xounif"))
 #' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
 #' data = data.frame(x = 1:4, y = 0:3, z = rep(TRUE, 4))
 #'
@@ -61,7 +61,7 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
         }
         sprintf("Must be a 'Recombinator' where n_indivs_in is a divisor of %s, and where n_indivs_in / n_indivs_out must be %s / %s",
           n_indivs_in, n_indivs_in, n_indivs_out)
-      }, n_indivs_in, n_indivs_out)))
+      }, n_indivs_in, n_indivs_out), tags = "required"))
       # call initialization with standard options: allow everything etc.
       super$initialize(param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out, dict_entry = "proxy")
     },
@@ -73,7 +73,7 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
     #' @return [invisible] `self`.
     prime = function(param_set) {
       operation = self$param_set$get_values()$operation
-      operation$prime(param_set)
+      if (!is.null(operation)) operation$prime(param_set)
       super$prime(param_set)
       private$.primed_with = operation$primed_ps  # keep uncloned copy of configuration parameter value for check in `.select()`
       ######### the following may be necessary for context dependent params

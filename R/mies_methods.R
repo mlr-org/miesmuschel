@@ -1051,7 +1051,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' # Demo operators
 #' m = mut("gauss", sdev = 0.1)
 #' r = rec("xounif")
-#' s = sel("random", replace = TRUE)
+#' s = sel("random")
 #' # Operators must be primed
 #' mies_prime_operators(objective$domain, list(m), list(r), list(s))
 #'
@@ -1237,6 +1237,42 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budge
 #'   columns named by the [`OptimInstance`][bbotk::OptimInstance]'s objectives.
 #'
 #' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 6)
+#' )
+#'
+#' op <- opt("mies",
+#'   lambda = 2, mu = 2,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("best")
+#' )
+#' set.seed(1)
+#' op$optimize(oi)
+#'
+#' # negates objectives that are minimized:
+#' mies_get_generation_results(oi)
+#'
+#' # real objective values:
+#' mies_get_generation_results(oi, as_fitnesses = FALSE)
+#'
+#' # Individuals that died are included:
+#' mies_get_generation_results(oi, survivors_only = FALSE)
+#'
+#' # TODO: missing budget
 #' @export
 mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
   assert_optim_instance(inst)
@@ -1259,7 +1295,7 @@ mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only
   objectives = inst$archive$codomain$ids()
 
   if (as_fitnesses) {
-    fitness_negate = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = TRUE, maximize = FALSE, NA))
+    fitness_negate = map_lgl(inst$archive$codomain$tags, function(x) switch(x, minimize = TRUE, maximize = FALSE, NA))
     objectives = objectives[!is.na(fitness_negate)]
     fitness_negate = fitness_negate[!is.na(fitness_negate)]
     for (col_negate in objectives[fitness_negate]) {
@@ -1324,6 +1360,45 @@ mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only
 #'   Otherwise, they are named by `<aggregations element name>` only. To get a guarantee that elements are only named after elements in `aggregations`, set `objectives`
 #'   to a length 1 `character`.
 #' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 6)
+#' )
+#'
+#' op <- opt("mies",
+#'   lambda = 2, mu = 2,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("best")
+#' )
+#' set.seed(1)
+#' op$optimize(oi)
+#'
+#' # negates objectives that are minimized:
+#' mies_aggregate_generations(oi)
+#'
+#' # silly aggregation: first element
+#' mies_aggregate_generations(oi, aggregations = list(first = function(x) x[1]))
+#'
+#' # real objective values:
+#' mies_aggregate_generations(oi, as_fitnesses = FALSE)
+#'
+#' # Individuals that died are included:
+#' mies_aggregate_generations(oi, survivors_only = FALSE)
+#'
+#' # TODO: missing budget, multiobjective
 #' @export
 mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$ids(), aggregations = list(min = min, mean = mean, max = max, median = median, size = length),
     as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
@@ -1333,7 +1408,7 @@ mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$i
 
   generationed = mies_get_generation_results(inst, as_fitnesses = as_fitnesses, survivors_only = survivors_only, condition_on_budget_id = condition_on_budget_id)
 
-  generationed = generationed[, c("dob", intersect(colnames(generationed), objectives))]
+  generationed = generationed[, c("dob", intersect(colnames(generationed), objectives)), with = FALSE]
 
   if (ncol(generationed) == 1) return(generationed)  # 'objectives' did not contain any columns that are minimized/maximized; may in particular happen when as_fitnesses is TRUE
 
@@ -1353,6 +1428,42 @@ mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$i
 #' @return a scalar integer value indicating the last generation that was evaluated in `inst`. It is 0 when `inst` is empty, and also typically 0 if all evaluations
 #'   in `inst` so far were performed outside of `miesmuschel`. Every call of [`mies_init_population`] that actually performs evaluations, as well as each call to
 #'   [`mies_evaluate_offspring`] with non-empty `offspring`, increases the generation by 1.
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 6)
+#' )
+#'
+#' op <- opt("mies",
+#'   lambda = 2, mu = 2,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("best")
+#' )
+#' set.seed(1)
+#'
+#' mies_generation(oi)
+#'
+#' op$optimize(oi)
+#' mies_generation(oi)
+#'
+#' oi$terminator = trm("evals", n_evals = 10)
+#'
+#' op$optimize(oi)
+#' mies_generation(oi)
+#' @export
 mies_generation = function(inst) {
   assert_optim_instance(inst)
   (assert_int(max(inst$archive$data$dob, 0, na.rm = TRUE), lower = 0, tol = 1e-100))  # parentheses because we don't want to return invisibly

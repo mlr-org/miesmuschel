@@ -155,6 +155,7 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     #' @template param_param_set
     #' @template param_packages
     #' @template param_dict_entry
+    #' @template param_own_param_set
     initialize = function(param_classes = c("ParamLgl", "ParamFct"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_subset(param_classes, c("ParamLgl", "ParamFct"))
       super$initialize(param_classes, param_set, packages = packages, dict_entry = dict_entry, own_param_set = own_param_set)

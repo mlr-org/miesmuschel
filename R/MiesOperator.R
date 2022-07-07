@@ -66,6 +66,16 @@ MiesOperator = R6Class("MiesOperator",
       private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
       private$.endomorphism = assert_flag(endomorphism)
     },
+    #' @description
+    #' Create a [`call`][base::call] object representing this operator.
+    #' @param skip_defaults (`logical(1)`)\cr
+    #'   Whether to skip construction arguments that have their default value. Default `TRUE`.
+    #' @param show_params (`logical(1)`)\cr
+    #'   Whether to show [`ParamSet`][paradox::ParamSet] values. Default `TRUE`.
+    #' @param show_constructor_args (`logical(1)`)\cr
+    #'   Whether to show construction args that are not [`ParamSet`][paradox::ParamSet] values. Default `TRUE`.
+    #' @param ... (any)\cr
+    #'   Ignored.
     repr = function(skip_defaults = TRUE, show_params = TRUE, show_constructor_args = TRUE, ...) {
       assert_flag(skip_defaults)
       assert_flag(show_params)
@@ -136,9 +146,15 @@ MiesOperator = R6Class("MiesOperator",
       }
       as.call(c(list(as.symbol(self$dict_shortaccess), self$dict_entry), deviantparams, deviantformals))
     },
+    #' @description
+    #' Print this operator.
+    #' @param verbose (`logical(1)`)\cr
+    #'   Whether to show all construction arguments, even the ones at default values. Default `FALSE`.
+    #' @param ... (any)\cr
+    #'   Ignored.
     print = function(verbose = FALSE, ...) {
       hasparams = length(self$param_set$ids())
-      txt = capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE))
+      txt = paste(capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE)), collapse = "\n")
       txt = paste0(gsub("stop\\(\"<([^>]*)>\"\\)", "<\\1>", txt), "\n$param_set:", if (hasparams) "\n" else " empty.\n")
       cat(txt)
       if (hasparams) {

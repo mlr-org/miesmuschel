@@ -40,7 +40,7 @@
 #' rcvx = rec("convex", 3, lambda = c(0, 1, 2))$prime(p)
 #' rcvx$operate(data)  # for groups of 3, take 1/3 of 2nd and 2/3 of 3rd row
 #'
-#' lambda = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0, ncol = 3)
+#' lambda = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0), ncol = 3)
 #' lambda
 #'
 #' rcvx = rec("convex", 3, lambda = lambda)$prime(p)
@@ -66,11 +66,10 @@ RecombinatorConvex = R6Class("RecombinatorConvex",
       lambda = self$param_set$get_values()$lambda
 
       if (is.matrix(lambda)) {
-        reslist = setnames(Map(weighted.mean, values, as.data.frame(lambda)), names(values))
+        setnames(setDT(Map(weighted.mean, values, as.data.frame(lambda))), names(values))
       } else {
-        reslist = lapply(values, weighted.mean, w = lambda)
+        setDT(lapply(values, weighted.mean, w = lambda))
       }
-      setDT(reslist)
     }
   )
 )

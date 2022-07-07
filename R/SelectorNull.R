@@ -5,7 +5,7 @@
 #' @name dict_selectors_null
 #'
 #' @description
-#' Selector that disregards fitness and individual values and selects individuals by order in which they are given.
+#' [`Selector`] that disregards fitness and individual values and selects individuals by order in which they are given.
 #'
 #' @section Configuration Parameters:
 #' @template confparam_shuffle_selection

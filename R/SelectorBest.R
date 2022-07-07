@@ -36,6 +36,7 @@ SelectorBest = R6Class("SelectorBest",
   public = list(
     #' @description
     #' Initialize the `SelectorBest` object.
+    #' @template param_scalor
     initialize = function(scalor = ScalorSingleObjective$new()) {
       super$initialize(scalor = scalor, is_deterministic = TRUE, dict_entry = "best")
     }

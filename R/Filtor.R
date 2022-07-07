@@ -38,9 +38,8 @@
 #' function. The user of the object calls `$operate()`, and the arguments are passed on to private `$.filter()` after checking that
 #' the operator is primed, that the `values` and `known_values` arguments conforms to the primed domain and that other values match.
 #'
-#' The `private$.needed_input()` function should also be overloaded. It is a function that gets a single input, `output_size`, a positive integer indicating
-#' the number of individuals that the caller desires. The function should calculate the number of `values` that are required to
-#' filter down to `output_size`, given the current configuraiton parameter settings. The needed input should always be at least `output_size`.
+#' The `private$.needed_input()` function should also be overloaded, it is called by the public `$needed_input()` function after initial checks;
+#' see the documentation there.
 #'
 #' Typically, the `$initialize()` function should also be overloaded, and optionally the `$prime()` function; they should call their `super` equivalents.
 #'
@@ -67,6 +66,12 @@ Filtor = R6Class("Filtor",
       private$.supported = supported
       super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "ftr", own_param_set = own_param_set)
     },
+    #' @description
+    #' Calculate the number of `values` that are required to
+    #' filter down to `output_size`, given the current configuraiton parameter settings.
+    #' @param output_size (`integer(1)`)\cr
+    #'   A positive integer indicating the number of individuals for which the needed input size should be calculated.
+    #' @return `integer(1)`: The minimum number of rows required to filter down to `output_size`. At least `output_size`.
     needed_input = function(output_size) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       assert_int(output_size, tol = 1e-100, lower = 0)

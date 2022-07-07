@@ -1,6 +1,7 @@
 
 #' @title Create a 'call' Object Representation
 #'
+#' @description
 #' `repr()` creates a [`call`][base::call] object representing `obj`, if possible.
 #' Evaluating the call should come close to recreating the original object.
 #'
@@ -237,6 +238,7 @@ repr.function = function(obj, ...) {
 
 #' @title Set a Function's Environment
 #'
+#' @description
 #' Useful to represent functions efficiently within `repr()`.
 #'
 #' @param fun (`function`)\cr

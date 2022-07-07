@@ -37,6 +37,8 @@
 FiltorNull = R6Class("FiltorNull",
   inherit = Filtor,
   public = list(
+    #' @description
+    #' Initialize the `FiltorNull` object.
     initialize = function() {
       super$initialize(dict_entry = "null")
     }

@@ -64,6 +64,10 @@
 FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
   inherit = FiltorSurrogate,
   public = list(
+    #' @description
+    #' Initialize the `FiltorSurrogateTournament`.
+    #' @template param_surrogate_learner
+    #' @template param_surrogate_selector
     initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new()) {
       own_param_set = ps(
         per_tournament = p_int(1, tags = "required"),

@@ -170,7 +170,7 @@
 #' \donttest{
 #' lgr::threshold("warn")
 #'
-#' op.m <- mut("gauss")
+#' op.m <- mut("gauss", sdev = 0.1)
 #' op.r <- rec("xounif", p = .3)
 #' op.parent <- sel("random")
 #' op.survival <- sel("best")

@@ -131,7 +131,7 @@ RecombinatorCmpMaybe = R6Class("RecombinatorCmpMaybe",
       p = pmin(pmax(p, 0), 1)
       if (!length(p) %in% c(1, ncol(values))) stop("p must have either length 1, or length of input.")
       recombining = stats::runif(ncol(values)) < p
-      setnames(setDT(ifelse(recombining, recombined, mutated_not)), names(values))
+      setnames(setDT(ifelse(recombining, recombined, recombined_not)), names(values))
     },
     .wrapped = NULL,
     .wrapped_not = NULL,

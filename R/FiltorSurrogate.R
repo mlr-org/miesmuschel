@@ -36,6 +36,13 @@
 FiltorSurrogate = R6Class("FiltorSurrogate",
   inherit = Filtor,
   public = list(
+    #' @description
+    #' Initialize the base class components of the `FiltorSurrogate`.
+    #' @template param_surrogate_learner
+    #' @template param_surrogate_selector
+    #' @template param_param_set
+    #' @template param_packages
+    #' @template param_dict_entry
     initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new(), param_set = ps(), packages = character(0), dict_entry = NULL) {
       private$.surrogate_learner = mlr3::as_learner(surrogate_learner, clone = TRUE)
       # can't assert LearnerRegr because GraphLearner doesn't announce that. Instead, we check $task_type

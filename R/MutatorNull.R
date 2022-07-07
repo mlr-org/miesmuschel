@@ -1,4 +1,4 @@
-#' @title Null-Mutator
+#' @title Null Mutator
 #'
 #' @include Mutator.R
 #'

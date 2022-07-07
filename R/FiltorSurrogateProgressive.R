@@ -82,6 +82,10 @@
 FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
   inherit = FiltorSurrogate,
   public = list(
+    #' @description
+    #' Initialize the `FiltorSurrogateProgressive`.
+    #' @template param_surrogate_learner
+    #' @template param_surrogate_selector
     initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new()) {
       own_param_set = ps(
         pool_factor = p_dbl(1, tags = "required"),
