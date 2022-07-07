@@ -127,4 +127,4 @@ MutatorMaybe = R6Class("MutatorMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_mutators$add("maybe", MutatorMaybe)
+dict_mutators$add("maybe", MutatorMaybe, aux_construction_args = alist(mutator = MutatorNull$new()))

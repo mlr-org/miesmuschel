@@ -333,7 +333,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
   if (length(alive) < mu) {
     survivors = alive
   } else {
-    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE, group_size = mu)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
   }
 
@@ -439,7 +439,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   } else if (n_elite == 0) {
     elites = integer(0)
   } else {
-    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
+    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE, group_size = n_elite)
     if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
   }
 
@@ -448,7 +448,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   } else if (mu - n_elite == 0) {  # don't use survival_selector when not needed.
     survivors = integer(0)
   } else {
-    survivors = mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE, group_size = mu - n_elite)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
   }
 
@@ -708,7 +708,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   # if the survival selector does not depend on the additional components, then we can do this right away here.
   # otherwise we sample the remaining additional components and *then* select
   if (n_alive > mu && !any(survival_selector$primed_ps$ids() %in% ac_ids)) {
-    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE, group_size = mu)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
     died = setdiff(alive, survivors)
     set(data, died, "eol", max(data$dob))
@@ -761,7 +761,7 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 
   if (mu_remaining < 0) {
     # kill superfluous individuals, in the case that the survival selector needs additional components
-    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE, group_size = mu)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
     died = setdiff(alive, survivors)
     set(data, died, "eol", max(data$dob))
@@ -879,6 +879,12 @@ mies_get_fitnesses = function(inst, rows) {
 #'   The [`Selector`] must be primed on a superset of `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization. All components on which `selector` is primed on must occur in the archive.\cr
 #'   The given [`Selector`] *may* return duplicates.
+#' @param group_size (`integer`)\cr
+#'   Sampling group size hint, indicating that the caller would prefer there to not be any duplicates within this group size.
+#'   The [`Selector`] may or may not ignore this value, however.
+#'   This may possibly happen because of certain configuration parameters, or because the input size is too small.\cr
+#'   Must either be a scalar value or sum up to `n_select`. Must be non-negative. A scalar value of 0 is interpreted the same as 1.\cr
+#'   Default is 1.
 #' @param get_indivs (`logical(1)`)\cr
 #'   Whether to return configuration values from within the archive (`TRUE`) or just the indices within
 #'   the archive (`FALSE`). Default is `TRUE`.
@@ -950,7 +956,7 @@ mies_get_fitnesses = function(inst, rows) {
 #'
 #' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
 #' @export
-mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
+mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), group_size = 1, get_indivs = TRUE) {
   assert_optim_instance(inst)
 
   assert_r6(selector, "Selector")
@@ -967,7 +973,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 
   fitnesses = mies_get_fitnesses(inst, rows)
 
-  selected = selector$operate(indivs, fitnesses, n_select)
+  selected = selector$operate(indivs, fitnesses, n_select, group_size)
   if (get_indivs) {
     indivs[selected]
   } else {
@@ -1135,7 +1141,7 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   needed_recombinations = ceiling(lambda / recombinator$n_indivs_out)
   needed_parents = needed_recombinations * recombinator$n_indivs_in
 
-  parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector)
+  parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector, group_size = recombinator$n_indivs_in)
   if (!is.null(budget_id)) set(parents, , budget_id, NULL)
 
   recombined = recombinator$operate(parents)

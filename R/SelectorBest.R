@@ -47,3 +47,4 @@ SelectorBest = R6Class("SelectorBest",
   )
 )
 dict_selectors$add("best", SelectorBest)
+

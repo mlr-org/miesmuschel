@@ -124,4 +124,4 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_mutators$add("cmpmaybe", MutatorCmpMaybe)
+dict_mutators$add("cmpmaybe", MutatorCmpMaybe, aux_construction_args = alist(mutator = MutatorNull$new()))

@@ -2,7 +2,7 @@
 #'
 #' @include Recombinator.R
 #'
-#' @name dict_recombinators_maybe
+#' @name dict_recombinators_cmpmaybe
 #'
 #' @description
 #' [`Recombinator`] that chooses which operation to perform probabilistically and independently for each component.
@@ -138,4 +138,4 @@ RecombinatorCmpMaybe = R6Class("RecombinatorCmpMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_recombinators$add("cmpmaybe", RecombinatorCmpMaybe)
+dict_recombinators$add("cmpmaybe", RecombinatorCmpMaybe, aux_construction_args = alist(recombinator = RecombinatorNull$new()))

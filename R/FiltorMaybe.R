@@ -2,7 +2,7 @@
 #'
 #' @include Filtor.R
 #'
-#' @name dict_filtor_maybe
+#' @name dict_filtors_maybe
 #'
 #' @description
 #' [`Filtor`] that wraps two other [`Filtor`]s given during construction and chooses which operation to perform.
@@ -177,4 +177,4 @@ FiltorMaybe = R6Class("FiltorMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_filtors$add("maybe", FiltorMaybe)
+dict_filtors$add("maybe", FiltorMaybe, aux_construction_args = alist(filtor = FiltorNull$new()))

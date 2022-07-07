@@ -2,6 +2,8 @@
 #'
 #' @include Scalor.R
 #'
+#' @name dict_scalors_proxy
+#'
 #' @description
 #' [`Scalor`] that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`SelectorBest`]'s operation fully parametrizable.

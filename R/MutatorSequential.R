@@ -84,4 +84,4 @@ MutatorSequential = R6Class("MutatorSequential",
     .wrapped = NULL
   )
 )
-dict_mutators$add("sequential", MutatorSequential)
+dict_mutators$add("sequential", MutatorSequential, aux_construction_args = alist(mutators = list(MutatorNull$new())))

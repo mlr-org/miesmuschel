@@ -2,6 +2,8 @@
 #'
 #' @include Scalor.R
 #'
+#' @name dict_scalors_aggregate
+#'
 #' @description
 #' [`Scalor`] that applies multiple other [`Scalor`]s and calculates their weighted sum.
 #'
@@ -134,4 +136,4 @@ ScalorAggregate = R6Class("ScalorAggregate",
     .own_param_set = NULL
   )
 )
-dict_scalors$add("aggregate", ScalorAggregate)
+dict_scalors$add("aggregate", ScalorAggregate, aux_construction_args = alist(scalors = ScalorOne$new()))

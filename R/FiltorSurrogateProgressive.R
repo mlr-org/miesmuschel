@@ -101,7 +101,7 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
       for (i in seq_len(n_filter)) {
         cpop = first(values, poolsizes[[i]])
         cfitness = first(surrogate_prediction, poolsizes[[i]])
-        selecting = private$.surrogate_selector$operate(cpop, cfitness, 1)
+        selecting = private$.surrogate_selector$operate(cpop, cfitness, 1, 1)
         # we may have removed things before, in which case we need to adjust the index.
         selected[[i]] = original_indices[selecting]
         # don't consider the selected value any more
@@ -118,5 +118,5 @@ FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
     }
   )
 )
-dict_filtors$add("surprog", FiltorSurrogateProgressive)
+dict_filtors$add("surprog", FiltorSurrogateProgressive, aux_construction_args = alist(surrogate_learner = mlr3::LearnerRegrDebug$new()))
 

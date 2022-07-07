@@ -145,7 +145,7 @@ Either match input and output sizes using a RecombinatorNull, or allow rescaling
     .allow_lcm_packing = NULL
   )
 )
-dict_recombinators$add("sequential", RecombinatorSequential)
+dict_recombinators$add("sequential", RecombinatorSequential, aux_construction_args = alist(recombinators = list(RecombinatorNull$new())))
 
 gcd = function(a, b) {
   if (a > b) {

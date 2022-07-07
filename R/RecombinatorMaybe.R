@@ -133,4 +133,4 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_recombinators$add("maybe", RecombinatorMaybe)
+dict_recombinators$add("maybe", RecombinatorMaybe, aux_construction_args = alist(recombinator = RecombinatorNull$new()))

@@ -84,7 +84,7 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
 
       for (i in seq_along(tournament_windows)) {
         tw = tournament_windows[[i]]
-        selected_from_window = private$.surrogate_selector$operate(values[tw], surrogate_prediction[tw, , drop = FALSE], params$per_tournament)
+        selected_from_window = private$.surrogate_selector$operate(values[tw], surrogate_prediction[tw, , drop = FALSE], params$per_tournament, params$per_tournament)
         selected[[i]] = tw[selected_from_window][sample.int(length(selected_from_window))]
       }
       first(unlist(selected, recursive = FALSE, use.names = FALSE), n_filter)
@@ -104,5 +104,5 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
     }
   )
 )
-dict_filtors$add("surtour", FiltorSurrogateTournament)
+dict_filtors$add("surtour", FiltorSurrogateTournament, aux_construction_args = alist(surrogate_learner = mlr3::LearnerRegrDebug$new()))
 

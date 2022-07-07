@@ -2,6 +2,8 @@
 #'
 #' @include Scalor.R
 #'
+#' @name dict_scalors_fixedprojections
+#'
 #' @description
 #' [`Scalor`] that returns the maximum of a set of projections.
 #'
