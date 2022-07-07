@@ -64,7 +64,7 @@ Other base classes:
 
 Other filtors: 
 \code{\link{FiltorSurrogate}},
-\code{\link{dict_filtor_maybe}},
+\code{\link{dict_filtors_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}},

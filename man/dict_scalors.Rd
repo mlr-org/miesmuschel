@@ -5,12 +5,19 @@
 \alias{dict_scalors}
 \title{Dictionary of Scalors}
 \format{
-An object of class \code{DictionaryScalor} (inherits from \code{Dictionary}, \code{R6}) of length 13.
+An object of class \code{DictionaryScalor} (inherits from \code{DictionaryEx}, \code{Dictionary}, \code{R6}) of length 15.
 }
 \usage{
 dict_scalors
 }
+\arguments{
+\item{key}{(\code{character(1)})\cr
+The dictionary entry for which to display the help record.}
+
+\item{help_type}{(\code{character(1)})\cr
+one of \code{"text"}, \code{"html"}, \code{"pdf"}, given as the \code{help_type} argument of R's \code{help()}.}
+}
 \description{
-Dictionary of Scalors
+Show help for a contained object, by its entry key.
 }
 \keyword{datasets}

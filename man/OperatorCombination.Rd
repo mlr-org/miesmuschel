@@ -198,6 +198,7 @@ Other mutator wrappers:
 Other recombinators: 
 \code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
 \code{\link{dict_recombinators_convex}},
 \code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
@@ -210,6 +211,7 @@ Other recombinators:
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
+\code{\link{dict_recombinators_cmpmaybe}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sequential}}

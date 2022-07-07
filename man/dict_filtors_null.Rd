@@ -55,7 +55,7 @@ fn$operate(new_data, known_data, fitnesses, 1)
 Other filtors: 
 \code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
-\code{\link{dict_filtor_maybe}},
+\code{\link{dict_filtors_maybe}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}},
 \code{\link{dict_filtors_surtour}}

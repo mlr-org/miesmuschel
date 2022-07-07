@@ -76,7 +76,7 @@ fp$operate(new_data, known_data, fitnesses, 1)
 Other filtors: 
 \code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
-\code{\link{dict_filtor_maybe}},
+\code{\link{dict_filtors_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}}
@@ -122,7 +122,7 @@ Regression learner for the surrogate model filtering algorithm.\cr
 The \verb{$surrogate_learner} field will reflect this value.}
 
 \item{\code{surrogate_selector}}{(\code{\link{Selector}})
-Regression learner for the surrogate model filtering algorithm.\cr
+\code{\link{Selector}} for the surrogate model filtering algorithm.\cr
 The \verb{$surrogate_selector} field will reflect this value.}
 }
 \if{html}{\out{</div>}}

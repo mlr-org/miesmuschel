@@ -5,12 +5,19 @@
 \alias{dict_recombinators}
 \title{Dictionary of Recombinators}
 \format{
-An object of class \code{DictionaryRecombinator} (inherits from \code{Dictionary}, \code{R6}) of length 13.
+An object of class \code{DictionaryRecombinator} (inherits from \code{DictionaryEx}, \code{Dictionary}, \code{R6}) of length 15.
 }
 \usage{
 dict_recombinators
 }
+\arguments{
+\item{key}{(\code{character(1)})\cr
+The dictionary entry for which to display the help record.}
+
+\item{help_type}{(\code{character(1)})\cr
+one of \code{"text"}, \code{"html"}, \code{"pdf"}, given as the \code{help_type} argument of R's \code{help()}.}
+}
 \description{
-Dictionary of Recombinators
+Show help for a contained object, by its entry key.
 }
 \keyword{datasets}

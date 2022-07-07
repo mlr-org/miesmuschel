@@ -71,6 +71,7 @@ Other recombinators:
 \code{\link{OperatorCombination}},
 \code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
 \code{\link{dict_recombinators_convex}},
 \code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
