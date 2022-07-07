@@ -3,14 +3,13 @@
 
 * TODOs
 ** Direct TODOs, ordered:
- 3. remove shuffle_after_select
- 4. help
- 5. own param set unification
- 6. id col for fidelity reevals
- 7. autotest class names
- 8. autotest deep cloning
- 9. documentation
- 10. all 'test' tags, test todos
+ 1. help
+ 2. own param set unification
+ 3. id col for fidelity reevals
+ 4. autotest class names
+ 5. autotest deep cloning
+ 6. documentation
+ 7. all 'test' tags, test todos
 ** Write Documentation
 *** vignette
 *** bookdown overview

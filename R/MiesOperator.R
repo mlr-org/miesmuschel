@@ -192,6 +192,15 @@ MiesOperator = R6Class("MiesOperator",
         }
       }
       values
+    },
+    #' @description
+    #' Run [`utils::help()`] for this object.
+    #' @param help_type (`character(1)`)\cr
+    #'   One of `"text"`, `"html"`, or `"pdf"`: The type of help page to open. Defaults to the `"help_type"` option.
+    #' @return `help_files_with_dopic` object, which opens the help page.
+    help = function(help_type = getOption("help_type")) {
+      parts = strsplit(self$man, split = "::", fixed = TRUE)[[1]]
+      match.fun("help")(parts[[2]], package = parts[[1]], help_type = help_type)
     }
   ),
   active = list(
@@ -262,6 +271,12 @@ MiesOperator = R6Class("MiesOperator",
     is_primed = function(val) {
       if (!missing(val)) stop("is_primed is read-only.")
       !is.null(self$primed_ps)
+    },
+    #' @field man (`character(1)`)\cr
+    #' Name of this class, in the form `<package>::<classname>`. Used by the `$help()` method.
+    man = function(x) {
+      if (!missing(x)) stop("man is read-only")
+      paste0(topenv(self$.__enclos_env__)$.__NAMESPACE__.$spec[["name"]], "::", class(self)[[1]])
     }
   ),
   private = list(
