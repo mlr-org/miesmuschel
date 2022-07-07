@@ -286,6 +286,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       properties_determinants = discard(list(parent_selector, survival_selector, elite_selector), is.null)
 
       super$initialize(
+        id = "mies",
         param_set = self$param_set,  # essentially a nop, since at this point we already set private$.param_set, but we can't give NULL here.
         param_classes = Reduce(intersect, map(param_class_determinants, "param_classes")),
         properties = c("dependencies", Reduce(intersect, map(properties_determinants, "supported"))),
