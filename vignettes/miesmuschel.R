@@ -1,9 +1,17 @@
 
-
+remotes::install_github("mlr-org/miesmuschel@devel")
 
 library("bbotk")
+library("data.table")
+library("ggplot2")
+library("imager")
+library("checkmate")
+library("miesmuschel")
+
 
 lgr::threshold("warn")
+
+## preparation
 
 objective <- ObjectiveRFun$new(
   fun = function(xs) {
@@ -13,10 +21,19 @@ objective <- ObjectiveRFun$new(
   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
   codomain = ps(Obj = p_dbl(tags = "maximize"))
 )
-
 xs <- CJ(x = seq(-2, 4, length.out = 50), y = seq(-2, 4, length.out = 50))
 z <- objective$eval_dt(xs)
 
+
+
+######################################################
+## Chapter "Optimization using Evolution Strategies"
+
+
+######################################################
+## Chapter "Let Us Translate this to R"
+
+## Plot for illustration purposes
 origin <- data.frame(x = c(1, 2), y = c(2, 1))
 output <- data.frame(x = c(1.725405, 2.571289), y = c(0.6657748, 0.6890937))
 
@@ -27,23 +44,32 @@ ggplot(cbind(rbind(origin, output),
   geom_point() +
   geom_path(color = "black", arrow = arrow(length=unit(.3, "cm")))
 
-# ------
 
+######################################################
+## Chapter "bbotk"
+
+
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
 oi <- OptimInstanceSingleCrit$new(objective,
   terminator = trm("evals", n_evals = 100)
 )
-
 oi$eval_batch(data.table(x = c(1, 2, 3), y = c(2, 2, 1)))
 oi$archive
 
 
-op.m <- mut("gauss", sdev = .2)
-space <- ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4))
-op.m$prime(space)
-data <- data.frame(x = c(1, 2), y = c(2, 1))
-op.m$operate(data)
+######################################################
+## Chapter "Running miesmuschel"
 
-oi$archive$clear()
+oi$clear()
+
+## init
 
 op.m <- mut("gauss", sdev = .2)
 op.r <- rec("xounif", p = .3)
@@ -51,29 +77,33 @@ op.parent <- sel("random")
 op.survival <- sel("best")
 
 mies_prime_operators(list(op.m), list(op.r), list(op.parent, op.survival),
-  oi$search_space)
+  search_space = oi$search_space)
 
 mies_init_population(oi, 3)
-
 oi$archive$data[, .(x, y, Obj, dob, eol)]
 
-offspring <- mies_generate_offspring(oi, 2, op.parent, op.m, op.r)
 
+## round 1
+
+offspring <- mies_generate_offspring(oi, 2, op.parent, op.m, op.r)
 offspring
 
 mies_evaluate_offspring(oi, offspring)
-
 oi$archive$data[, .(x, y, Obj, dob, eol)]
 
 mies_survival_plus(oi, 3, op.survival)
-
 oi$archive$data[, .(x, y, Obj, dob, eol)]
 
+
+## round 2
 
 offspring <- mies_generate_offspring(oi, 2, op.parent, op.m, op.r)
 mies_evaluate_offspring(oi, offspring)
 mies_survival_plus(oi, 3, op.survival)
 oi$archive$data[, .(x, y, Obj, dob, eol)]
+
+
+# round 3 .. n
 
 repeat {
   offspring <- mies_generate_offspring(oi, 2, op.parent, op.m, op.r)
@@ -83,11 +113,10 @@ repeat {
 
 
 
-library("ggplot2")
-
 ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
   geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
   geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = dob))
+
 
 ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
   geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
@@ -95,7 +124,8 @@ ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
   geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = dob))
 
 
-# ----------
+######################################################
+## Chapter "OptimizerMies"
 
 op.m <- mut("gauss", sdev = .2)
 op.r <- rec("xounif", p = .3)
@@ -126,6 +156,319 @@ oi <- OptimInstanceSingleCrit$new(objective,
 
 mies$optimize(oi)
 
+######################################################
+## Chapter "Mixed Integer"
+
+
+
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+    if (xs$invert) z <- -z
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), invert = p_lgl()),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 100)
+)
+
+op.mcmb <- mut("maybe", p = 0.7,
+  mutator_not = mut("null"),  # redundant
+  mutator = mut("combine", operators = list(
+    ParamDbl = mut("gauss", sdev = 0.1, sdev_is_relative = FALSE),
+    ParamLgl = mut("cmpmaybe", p = 0.3,
+      mutator = mut("unif", can_mutate_to_same = FALSE),
+      mutator_not = mut("null")  # redundant
+    )
+  ))
+)
+
+mies <- opt("mies", mutator = op.mcmb, recombinator = op.r,
+  parent_selector = op.parent, survival_selector = op.survival,
+  mu = 3, lambda = 2)
+
+mies$optimize(oi)
+
+
+ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
+  geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
+  geom_path(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = invert)) +
+  geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = invert))
+
+ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
+  geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
+  geom_point(data = oi$archive$data[order(dob)],
+    aes(x = x, y = y, shape = invert, color = dob), size = 2.5) +
+  scale_shape_manual(values = c(16, 3)) +
+  scale_color_gradientn(colors = c("black", "red", "yellow", "blue"))
+
+ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
+  geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
+  geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = invert, alpha = dob)) + scale_alpha(range = c(.4, 1))
+
+
+######################################################
+## Cat
+
+
+
+
+meanImage <- function(image) {
+  assertArray(image, any.missing = FALSE, mode = "numeric", d = 4)
+  if (any(dim(image)[3:4] != c(1, 3))) stop("Image must have dimension [width] x [height] x 1 x 3.")
+  meanval <- apply(as.array(image), 4, mean)
+  imfill(nrow(image), ncol(image), val = meanval)  # function from 'imager' pkg
+}
+
+plotImage <- function(image) {
+  assertArray(image, any.missing = FALSE, mode = "numeric", d = 4)
+  if (any(dim(image)[3:4] != c(1, 3))) stop("Image must have dimension [width] x [height] x 1 x 3.")
+  plot(as.raster(aperm(array(image, dim = dim(image)[c(1, 2, 4)]), c(2, 1, 3))))
+}
+
+drawIndiv <- function(indiv, canvas) {
+  assertMatrix(indiv, mode = "numeric", any.missing = FALSE, min.rows = 1, ncols = 7)
+  assertNumeric(indiv, lower = 0, upper = 1)
+  assertArray(canvas, any.missing = FALSE, mode = "numeric", d = 4)
+  if (any(dim(canvas)[3:4] != c(1, 3))) stop("Image must have dimension [width] x [height] x 1 x 3.")
+
+  # sort circles by size: we want to draw big circles first, small circles
+  # later. This is to make sure that small circles don't get erased /
+  # overpainted by a single big circle that gets drawn last.
+  indiv <- indiv[order(-indiv[, 3]), , drop = FALSE]
+
+  # maxdim: the larger of the width / height of the image
+  maxdim <- max(dim(canvas)[1:2])
+  # radius is exponential of indiv[, 3] because changes in smaller circles'
+  # sizes should be more precise than for larger ones.
+  # We also make the biggest circle to have a radius at most 1/4 the size of the
+  # largest dimension of the image.
+  radius <- 20 ^ (indiv[, 3] - 1) * maxdim * 0.25
+
+  draw_circle(canvas,
+    # x goes from 1 to nrow(canvas)
+    x = 1 + indiv[, 1] * (nrow(canvas) - 1),
+    # y goes from 1 to ncol(canvas)
+    y = 1 + indiv[, 2] * (ncol(canvas) - 1),
+    radius = radius,
+    color = indiv[, 4:6, drop = FALSE],
+    opacity = indiv[, 7],
+    filled = TRUE
+  )
+}
+
+imageDistance <- function(image1, image2) {
+  assertArray(image1, any.missing = FALSE, mode = "numeric", d = 4)
+  assertArray(image2, any.missing = FALSE, mode = "numeric", d = 4)
+  assertNumeric(image1, len = length(image2))
+  if (any(dim(image1)[3:4] != c(1, 3))) stop("Image must have dimension [width] x [height] x 1 x 3.")
+  if (any(dim(image1) != dim(image2))) stop("Images must have same dimension")
+  mean((image1 - image2)^2)
+}
+
+
+
+
+
+pic.target <- load.image("So_happy_smiling_cat.jpg")  # in 'imager' package
+plotImage(pic.target)
+pic.target.small <- imresize(pic.target, .1)  # function in 'imager' package
+pic.target.vsmall <- imresize(pic.target, .05)  # function in 'imager' package
+
+plotImage(pic.target)
+plotImage(pic.target.small)
+plotImage(pic.target.vsmall)
+
+
+
+pics <- list(pic.target.vsmall, pic.target.small, pic.target)
+bgs <- lapply(pics, meanImage)
+background.small <- bgs[[2]]
+background <- bgs[[3]]
+
+ncirc = 200
+tmat <- matrix(0, ncol = 7, nrow = ncirc)
+pnames <- sprintf("mat_%03g_%1g", row(tmat), col(tmat))
+psargs <- sapply(pnames, function(x) p_dbl(0, 1, default = 0), simplify = FALSE)
+psargs$.extra_trafo = function(x, param_set) list(indiv = matrix(unlist(x[pnames], use.names = FALSE), ncol = 7))
+ss <- do.call(ps, psargs)
+
+random_indiv <- generate_design_random(ss, 1)$transpose()[[1]][[1]]
+plotImage(drawIndiv(random_indiv, bgs[[3]]))
+
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    dist <- imageDistance(
+        drawIndiv(xs$indiv, background.small),
+      pic.target.small)
+    list(Obj = dist)
+  },
+  domain = ps(indiv = p_uty(), fidelity = p_int(1, 3)),
+  codomain = ps(Obj = p_dbl(tags = "minimize"))
+)
+
+oi <- OptimInstanceSingleCrit$new(objective, search_space = ss,
+  terminator = trm("evals", n_evals = 100)
+)
+
+oi$clear()
+system.time(opt("random_search", batch_size = 100)$optimize(oi))
+
+plotImage(drawIndiv(oi$result_x_domain$indiv, background))
+
+
+op <- opt("mies",
+  lambda = 10, mu = 10,
+  mutator = mut("cmpmaybe", mut("gauss", sdev = 0.1), p = 0.01),
+  recombinator = rec("xounif", p = 0.5),
+  parent_selector = sel("random"),
+  survival_selector = sel("best")
+)
+
+
+# oi$clear()
+
+oi$terminator <- trm("gens", generations = 2000)
+
+oi$archive$check_values <- FALSE
+
+profvis::profvis(op$optimize(oi))
+system.time(op$optimize(oi))
+
+plotImage(drawIndiv(oi$result_x_domain$indiv, background))
+plotImage(drawIndiv(oi$archive$data[, x_domain][[1]]$indiv, background))
+
+for (i in seq(1, nrow(oi$archive$data), length.out = 100)) {
+  plotImage(drawIndiv(oi$archive$data[, x_domain][[i]]$indiv, background))
+}
+
+
+
+ss_low <- miesmuschel:::ps_union(list(ss, ps(fidelity = p_int(1, 1, default = 1))))
+ss_mid <- miesmuschel:::ps_union(list(ss, ps(fidelity = p_int(2, 2, default = 2))))
+ss_high <- miesmuschel:::ps_union(list(ss, ps(fidelity = p_int(3, 3, default = 3))))
+
+ss_multifid <- miesmuschel:::ps_union(list(ss, ps(fidelity = p_int(1, 3, default = 1))))
+
+oi_low <- OptimInstanceSingleCrit$new(objective, search_space = ss_low,
+  terminator = trm("evals", n_evals = 100)
+)
+oi_mid <- OptimInstanceSingleCrit$new(objective, search_space = ss_mid,
+  terminator = trm("evals", n_evals = 100)
+)
+oi_high <- OptimInstanceSingleCrit$new(objective, search_space = ss_high,
+  terminator = trm("evals", n_evals = 100)
+)
+
+
+oi_low$clear()
+system.time(opt("random_search", batch_size = 100)$optimize(oi_low))
+oi_mid$clear()
+system.time(opt("random_search", batch_size = 100)$optimize(oi_mid))
+oi_high$clear()
+system.time(opt("random_search", batch_size = 100)$optimize(oi_high))
+
+plotImage(drawIndiv(oi_low$result_x_domain$indiv, bgs[[3]]))
+plotImage(drawIndiv(oi_mid$result_x_domain$indiv, bgs[[3]]))
+plotImage(drawIndiv(oi_high$result_x_domain$indiv, bgs[[3]]))
+
+
+
+oi_mid$clear()
+oi_mid$terminator <- trm("gens", generations = 1000)
+system.time(op$optimize(oi_mid))
+plotImage(drawIndiv(oi_mid$result_x_domain$indiv, bgs[[3]]))
+
+
+
+
+ncirc = 1
+tmat <- matrix(0, ncol = 7, nrow = ncirc)
+pnames <- sprintf("mat_%03g_%1g", row(tmat), col(tmat))
+psargs <- sapply(pnames, function(x) p_dbl(0, 1, default = 0), simplify = FALSE)
+psargs$.extra_trafo = function(x, param_set) list(indiv = matrix(unlist(x[pnames], use.names = FALSE), ncol = 7))
+ss <- do.call(ps, psargs)
+
+random_indiv <- generate_design_random(ss, 1)$transpose()[[1]][[1]]
+plotImage(drawIndiv(random_indiv, bgs[[3]]))
+
+
+
+bgi <- background.small
+
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    dist <- imageDistance(
+        drawIndiv(xs$indiv, bgi),
+      pic.target.small)
+    list(Obj = dist)
+  },
+  domain = ps(indiv = p_uty(), fidelity = p_int(1, 3)),
+  codomain = ps(Obj = p_dbl(tags = "minimize"))
+)
+
+oi <- OptimInstanceSingleCrit$new(objective, search_space = ss,
+  terminator = trm("gens", generations = 100)
+)
+oi$archive$check_values <- FALSE
+
+op <- opt("mies",
+  lambda = 10, mu = 10,
+  mutator = mut("cmpmaybe", mut("gauss", sdev = 0.1), p = 0.5),
+  recombinator = rec("xounif", p = 0.5),
+  parent_selector = sel("random"),
+  survival_selector = sel("best")
+)
+
+# collection <- matrix(numeric(0), nrow = 0, ncol = 7)
+repeat {
+  bgi <- drawIndiv(collection, background.small)
+  plotImage(drawIndiv(collection, background))
+  oi$clear()
+  op$optimize(oi)
+  collection <- rbind(collection, oi$result_x_domain$indiv)
+}
+
+
+
+plotImage(drawIndiv(head(collection, 1), background))
+plotImage(drawIndiv(head(collection, 10), background))
+plotImage(drawIndiv(head(collection, 100), background))
+plotImage(drawIndiv(collection, background))
+
+# oi$clear()
+
+
+
+profvis::profvis(op$optimize(oi))
+
+
+
+######################################################
+## OTHER EXPERIMENTS #################################
+######################################################
+
+
+# ----------------
+
+
+
+
+
+
+op.m <- mut("gauss", sdev = .2)
+space <- ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4))
+op.m$prime(space)
+data <- data.frame(x = c(1, 2), y = c(2, 1))
+op.m$operate(data)
+
+oi$archive$clear()
+
+
+
 # ----------
 
 objective <- ObjectiveRFun$new(
@@ -148,9 +491,7 @@ op.m <- mut("gauss", sdev = .2)
 space <- ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), invert = p_lgl())
 op.m$prime(space)
 
-
 # ----------
-
 
 
 library("mlr3tuning")
@@ -162,12 +503,6 @@ op.survival <- sel("best")
 
 mies <- tnr("mies", mutator = op.m, recombinator = op.r,
   parent_selector = op.parent, survival_selector = op.survival)
-
-
-mut("unif")$param_set
-
-mut("null")$param_set
-
 
 op.mm <- mut("maybe", mutator = mut("gauss"), mutator_not = mut("null"), p = .5)
 
@@ -216,55 +551,6 @@ mut("combine", operators = list(nums = mut("gauss"), ParamAny = mut("unif")),
 
 
 
-objective <- ObjectiveRFun$new(
-  fun = function(xs) {
-    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
-    if (xs$invert) z <- -z
-    list(Obj = z)
-  },
-  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), invert = p_lgl()),
-  codomain = ps(Obj = p_dbl(tags = "maximize"))
-)
-
-oi <- OptimInstanceSingleCrit$new(objective,
-  terminator = trm("evals", n_evals = 100)
-)
-
-op.mcmb <- mut("maybe", p = 0.7,
-  mutator_not = mut("null"),  # redundant
-  mutator = mut("combine", operators = list(
-    ParamDbl = mut("gauss", sdev = 0.1, sdev_is_relative = FALSE),
-    ParamLgl = mut("cmpmaybe", p = 0.3,
-      mutator = mut("unif", can_mutate_to_same = FALSE),
-      mutator_not = mut("null")  # redundant
-    )
-  ))
-)
-
-mies <- opt("mies", mutator = op.mcmb, recombinator = op.r,
-  parent_selector = op.parent, survival_selector = op.survival,
-  mu = 3, lambda = 2)
-
-mies$optimize(oi)
-
-
-ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
-  geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
-  geom_path(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = invert)) +
-  geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = invert))
-
-ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
-  geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
-  geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, shape = invert, color = dob), size = 2.5) + scale_shape_manual(values = c(16, 3)) + scale_color_gradientn(colors = c("black", "red", "yellow", "blue"))
-
-ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
-  geom_contour(data = cbind(xs, z), aes(x = x, y = y, z = Obj)) +
-  geom_point(data = oi$archive$data[order(dob)], aes(x = x, y = y, color = invert, alpha = dob)) + scale_alpha(range = c(.4, 1))
-
-
-
-ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
-  geom_point(data = opd , aes(x = x, y = y, color = invert), alpha = 0.3)
 
 
 op.m.adapt <- mut("combine",
@@ -744,3 +1030,6 @@ ggplot() + theme_bw() + xlim(-2, 4) + ylim(-2, 4) + coord_fixed() +
 
 ggplot(data = oi$archive$data[, .(mean_lstep = mean(lstep)), by = dob],
   aes(x = dob, y = mean_lstep)) + theme_bw() + geom_line()
+
+
+
