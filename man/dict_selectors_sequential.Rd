@@ -77,14 +77,14 @@ dict_selectors$get("sequential", <selectors>)
 Other selectors: 
 \code{\link{SelectorScalar}},
 \code{\link{Selector}},
-\code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}}
 
 Other selector wrappers: 
-\code{\link{dict_selector_maybe}},
+\code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_proxy}}
 }
 \concept{selector wrappers}

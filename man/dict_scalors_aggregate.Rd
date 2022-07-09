@@ -54,7 +54,7 @@ dict_scalors$get("aggregate", <scalors>)
 Other scalors: 
 \code{\link{Scalor}},
 \code{\link{dict_scalors_domcount}},
-\code{\link{dict_scalors_fixedprojections}},
+\code{\link{dict_scalors_fixedprojection}},
 \code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_nondom}},
 \code{\link{dict_scalors_one}},
@@ -62,7 +62,7 @@ Other scalors:
 \code{\link{dict_scalors_single}}
 
 Other scalor wrappers: 
-\code{\link{dict_scalors_fixedprojections}},
+\code{\link{dict_scalors_fixedprojection}},
 \code{\link{dict_scalors_proxy}}
 }
 \concept{scalor wrappers}

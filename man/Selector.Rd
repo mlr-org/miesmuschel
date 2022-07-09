@@ -63,8 +63,8 @@ Other base classes:
 
 Other selectors: 
 \code{\link{SelectorScalar}},
-\code{\link{dict_selector_maybe}},
 \code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
 \code{\link{dict_selectors_random}},

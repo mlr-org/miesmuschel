@@ -48,21 +48,21 @@ dict_recombinators$get("convex")
 
 \examples{
 set.seed(1)
-rxon = rec("xon", n_indivs_in = 3)
+rxon = rec("xonary", n_indivs_in = 3)
 p = ps(x = p_dbl(-5, 5), y = p_dbl(-5, 5), z = p_dbl(-5, 5))
 data = data.frame(x = 0:5, y = 0:5, z = 0:5)
 
 rxon$prime(p)
 rxon$operate(data)  # uniform sampling from groups of 3
 
-rxon = rec("xon", 3, p = c(0, 1, 2))$prime(p)
+rxon = rec("xonary", 3, p = c(0, 1, 2))$prime(p)
 # for groups of 3, take with probability 1/3 from 2nd and with probability 2/3 from 3rd row
 rxon$operate(data)
 
 pmat = matrix(c(0, 1, 2, 1, 1, 1, 1, 0, 0), ncol = 3)
 pmat
 
-rxon = rec("xon", 3, p = pmat)$prime(p)
+rxon = rec("xonary", 3, p = pmat)$prime(p)
 rxon$operate(data)  # componentwise different operation
 
 }

@@ -86,10 +86,10 @@ Further configuration parameters are:
 \itemize{
 \item \code{lambda} :: \code{integer(1)}\cr
 Offspring size: Number of individuals that are created and evaluated anew for each generation. This is equivalent to the
-\code{lambda} parameter of \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Initialized to 10.
+\code{lambda} parameter of \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Must be set by the user.
 \item \code{mu} :: \code{integer(1)}\cr
 Population size: Number of individuals that are sampled in the beginning, and which are selected with each survival step.
-This is equivalent to the \code{mu} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information. Initialized to 1.
+This is equivalent to the \code{mu} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information. Must be set by the user.
 \item \code{survival_strategy} :: \code{character(1)}\cr
 May be \code{"plus"}, or, if the \code{elite_selector} construction argument is not \code{NULL}, \code{"comma"}: Choose whether \code{\link[=mies_survival_plus]{mies_survival_plus()}}
 or \code{\link[=mies_survival_comma]{mies_survival_comma()}} is used for survival selection. Initialized to \code{"plus"}.

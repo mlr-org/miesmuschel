@@ -31,7 +31,6 @@
 *** skip priming in mies_generate_offspring, mies_filter_offspring (#27)
 **** maybe skip null-operator priming 
 ** multifidelity
-*** id column for fidelity reevals (#58)
 *** continuation of eval (e.g. add reps): function that maps old to new results
 ** Package Management
 *** Put Density Estimation in its own package, together with pipeops

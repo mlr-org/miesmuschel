@@ -54,7 +54,7 @@ Other base classes:
 Other scalors: 
 \code{\link{dict_scalors_aggregate}},
 \code{\link{dict_scalors_domcount}},
-\code{\link{dict_scalors_fixedprojections}},
+\code{\link{dict_scalors_fixedprojection}},
 \code{\link{dict_scalors_hypervolume}},
 \code{\link{dict_scalors_nondom}},
 \code{\link{dict_scalors_one}},
