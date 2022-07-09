@@ -66,10 +66,10 @@ RecombinatorCrossoverNary = R6Class("RecombinatorCrossoverNary",
     .recombine = function(values) {
       p = self$param_set$get_values()$p
 
-      if (is.matrix(lambda)) {
-        choices = apply(lambda, 2, sample.int, n = nrow(values), size = 1, replace = TRUE)
+      if (is.matrix(p)) {
+        choices = apply(p, 2, sample.int, n = nrow(values), size = 1, replace = TRUE)
       } else {
-        choices = sample.int(nrow(values), ncol(values), replace = TRUE, prob = lambda)
+        choices = sample.int(nrow(values), ncol(values), replace = TRUE, prob = p)
       }
       setnames(setDT(Map(`[`, values, choices)), names(values))
     }
