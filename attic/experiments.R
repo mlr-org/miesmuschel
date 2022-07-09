@@ -59,8 +59,6 @@ tinytest::run_test_file("inst/tinytest/test_selector_proxy.R")      # ...
 tinytest::run_test_file("inst/tinytest/test_recombinator_proxy.R")  # ...
 
 
-tinytest::run_test_file("inst/tinytest/test_dictionaries.R")
-
 tinytest::run_test_file("inst/tinytest/test_filtor_maybe.R")
 tinytest::run_test_file("inst/tinytest/test_filtor_null.R")
 tinytest::run_test_file("inst/tinytest/test_filtor_proxy.R")
