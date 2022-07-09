@@ -43,7 +43,7 @@ dict_recombinators = R6Class("DictionaryRecombinator",
     #' Show help for a contained object, by its entry key.
     #' @template param_key
     #' @template param_help_type
-    help = function(help_type = getOption("help_type")) dict_help(self = self, private = private, help_type = help_type)
+    help = function(key, help_type = getOption("help_type")) dict_help(self = self, private = private, key = key, help_type = help_type)
   ),
   private = list(.dict_name = "dict_recombinators"),
   cloneable = FALSE

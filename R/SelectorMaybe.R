@@ -2,7 +2,7 @@
 #'
 #' @include Selector.R
 #'
-#' @name dict_selector_maybe
+#' @name dict_selectors_maybe
 #'
 #' @description
 #' [`Selector`] that wraps two other [`Selector`]s given during construction and uses both for selection proportionally.
@@ -124,7 +124,7 @@ SelectorMaybe = R6Class("SelectorMaybe",
         try_unique = p_lgl(tags = "required")
       )
       private$.maybe_param_set$values = list(shuffle_input = TRUE,
-        proportion_in = "exact", proportion_out = "oddsequal", try_unique = TRUE)
+        proportion_in = "exact", proportion_out = "exact", try_unique = TRUE)
       super$initialize(param_classes = intersect(selector$param_classes, selector_not$param_classes),
         param_set = alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
         supported = intersect(selector$supported, selector_not$supported),

@@ -106,7 +106,7 @@ RecombinatorPair = R6Class("RecombinatorPair",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(keep_complement = TRUE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-
+      assert_flag(keep_complement)
       super$initialize(param_classes = param_classes, param_set = param_set, n_indivs_in = 2, n_indivs_out = if (keep_complement) 2 else 1,
         packages = packages, dict_entry = dict_entry, own_param_set = own_param_set)
     }

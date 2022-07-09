@@ -446,7 +446,7 @@ MutatorCombination = R6Class("MutatorCombination",
     initialize = function(operators = list(), groups = list(), adaptions = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop") {
       assert_list(operators, types = "Mutator")
       super$initialize(operators = operators, groups = groups, adaptions = adaptions, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present, dict_entry = "combine", dict_shortaccess = "mut")
-      class(self) = c("Mutator", class(self))
+      class(self) = c(class(self)[[1]], "Mutator", class(self)[-1])
     }
   )
 )
@@ -479,7 +479,7 @@ RecombinatorCombination = R6Class("RecombinatorCombination",
         stop("Combining operators with disagreeing n_indivs_in / n_indivs_out where more than one operator has these values not equal 1 is not yet supported.")
       }
       super$initialize(operators = operators, groups = groups, adaptions = adaptions, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present, granularity = self$n_indivs_in, dict_entry = "combine", dict_shortaccess = "rec")
-      class(self) = c("Recombinator", class(self))
+      class(self) = c(class(self)[[1]], "Recombinator", class(self)[-1])
     }
   ),
   # --- copy-paste from Recombinator.R
