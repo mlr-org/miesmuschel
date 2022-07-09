@@ -115,7 +115,7 @@ eval_batch_handle_zero = function(inst, xdt) {
 }
 
 ## Component names that can not be used inside MIES functions
-reserved_component_names = c("x_domain", "timestamp", "batch_nr", "eol", "dob")
+reserved_component_names = c("x_domain", "timestamp", "batch_nr", "eol", "dob", "x_id")
 
 
 # tolerance of numeric configuration parameter bounds

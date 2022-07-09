@@ -62,7 +62,7 @@ objective <- ObjectiveRFun$new(
   domain = ps(x = p_dbl(-2, 4), z = p_dbl(-2, 4)),
   codomain = ps(y = p_dbl(tags = "maximize"))
 )
-oi <- OptimInstanceSingleCrit$new(objective, terminator = trm("none"))
+oi <- OptimInstanceSingleCrit$new(objective, terminator = trm("evals"))
 
 oi$eval_batch(data.table(x = 1, z = 2))
 
@@ -70,6 +70,7 @@ oi$archive$data
 
 oi$archive$data
 
+opt("random_search")$optimize(oi)
 
 covr::report(xx <- covr::package_coverage(type = "tests"))
 

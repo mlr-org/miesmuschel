@@ -114,6 +114,8 @@ mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity =
 
   reeval = integer(0)  # individuals to be killed; only becomes relevant when `reevaluate_fidelity` is given
 
+  x_id = max(inst$archive$data$x_id, 0, na.rm = TRUE) + seq_len(nrow(offspring))
+
   if (!is.null(budget_id)) {
     assert_scalar(fidelity)
 
@@ -124,16 +126,18 @@ mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity =
     if (!is.null(reevaluate_fidelity) && any(is.na(data$eol))) {
       assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
       assert_integerish(data$eol, lower = 0, tol = 1e-100)
+      assert_integerish(data$x_id, lower = 0, tol = 1e-100)
 
       comparator = if (fidelity_monotonic) `<` else `!=`
       reeval = which(is.na(data$eol) & comparator(data[[budget_id]], reevaluate_fidelity))
       indivs = data[reeval, ocols, with = FALSE]
       offspring = rbind(offspring, set(indivs, , budget_id, reevaluate_fidelity))
+      x_id = c(x_id, data$x_id[reeval])
     }
   }
 
   current_gen = max(data$dob, 0, na.rm = TRUE) + 1
-  ret = eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))
+  ret = eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_, x_id = x_id)[nrow(offspring) != 0]))
 
   set(inst$archive$data, reeval, "eol", current_gen)  # kill old individuals that were fidelity-reevaluated
 
@@ -247,7 +251,7 @@ mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALS
   comparator = if (fidelity_monotonic) `<` else `!=`
   reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], fidelity))
 
-  indivs = data[reeval, c(ss_ids, ac_ids), with = FALSE]
+  indivs = data[reeval, c(ss_ids, ac_ids, "x_id"), with = FALSE]
   set(indivs, , budget_id, fidelity)
 
   # I hate this... but there seems to be no way to avoid the TerminatorGenerations from terminating here :-(
