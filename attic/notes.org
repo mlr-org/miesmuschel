@@ -3,12 +3,11 @@
 
 * TODOs
 ** Direct TODOs, ordered:
- 1. own param set unification
- 2. id col for fidelity reevals
- 3. autotest class names
- 4. autotest deep cloning
- 5. documentation
- 6. all 'test' tags, test todos
+ 1. autotest class names
+ 2. autotest deep cloning
+ 3. documentation
+ 4. all 'test' tags, test todos
+ 5. own param set unification
 ** Write Documentation
 *** vignette
 *** bookdown overview
@@ -24,18 +23,13 @@
 *** own param set unification (#70)
 *** abbrevation of param types
 ** operator things
-*** make 'p' orthogonal
 *** check sbx, seems awfully long
 *** all 'new component' tags
-*** add simple selector that uses scalor by default
 ** internals adjustment
 *** p_vct "depends" (#63)
     - probably needs a workaround for now
 *** skip priming in mies_generate_offspring, mies_filter_offspring (#27)
 **** maybe skip null-operator priming 
-*** remove 'shuffle_after_select'; instead the deterministic selectors should offer this as option.
-**** optimizermies lambda, mu
-**** "Changing MutatorGauss defaults: sdev_is_relative to TRUE, and truncated_normal to FALSE, because I am assuming this is the default people expect"
 ** multifidelity
 *** id column for fidelity reevals (#58)
 *** continuation of eval (e.g. add reps): function that maps old to new results

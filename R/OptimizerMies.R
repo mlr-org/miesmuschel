@@ -77,10 +77,10 @@
 #' Further configuration parameters are:
 #' * `lambda` :: `integer(1)`\cr
 #'   Offspring size: Number of individuals that are created and evaluated anew for each generation. This is equivalent to the
-#'   `lambda` parameter of [`mies_generate_offspring()`], see there for more information. Initialized to 10.
+#'   `lambda` parameter of [`mies_generate_offspring()`], see there for more information. Must be set by the user.
 #' * `mu` :: `integer(1)`\cr
 #'   Population size: Number of individuals that are sampled in the beginning, and which are selected with each survival step.
-#'   This is equivalent to the `mu` parameter of [`mies_init_population()`], see there for more information. Initialized to 1.
+#'   This is equivalent to the `mu` parameter of [`mies_init_population()`], see there for more information. Must be set by the user.
 #' * `survival_strategy` :: `character(1)`\cr
 #'   May be `"plus"`, or, if the `elite_selector` construction argument is not `NULL`, `"comma"`: Choose whether [`mies_survival_plus()`]
 #'   or [`mies_survival_comma()`] is used for survival selection. Initialized to `"plus"`.
@@ -282,7 +282,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         self$parent_selector$param_set, self$survival_selector$param_set), if (!is.null(elite_selector)) alist(self$elite_selector$param_set))
 
       self$param_set$values = insert_named(self$param_set$values, c(
-        list(lambda = 10, mu = 1, initializer = generate_design_random, survival_strategy = "plus"),
+        list(initializer = generate_design_random, survival_strategy = "plus"),
         if (multi_fidelity) list(
           fidelity = crate(function(inst, budget_id, last_fidelity, last_fidelity_offspring) 1),
           fidelity_offspring = crate(function(inst, budget_id, last_fidelity, last_fidelity_offspring) last_fidelity),
