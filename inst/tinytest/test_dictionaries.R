@@ -6,8 +6,8 @@ baseclasses = c("Recombinator", "Mutator", "Selector", "Filtor", "Scalor")
 dictionaries = list(Mutator = dict_mutators, Recombinator = dict_recombinators, Selector = dict_selectors, Filtor = dict_filtors, Scalor = dict_scalors)
 shortformnames = list(Mutator = "mut", Recombinator = "rec", Selector = "sel", Filtor = "ftr", Scalor = "scl")
 
-
-abstracts = c(baseclasses, "MutatorNumeric", "MutatorDiscrete", "FiltorSurrogate")
+abstracts = c(baseclasses, "MutatorNumeric", "MutatorDiscrete", "FiltorSurrogate", "RecombinatorPair", "SelectorScalar")
+non_op_entries = "xounif"  # entries in dictionaries that are r6-operators
 # the constructors of the following don't know about their inheritance
 exceptions = c("MutatorCombination", "RecombinatorCombination")
 
@@ -17,8 +17,9 @@ initargs = list(
   MutatorCmpMaybe = list(mutator = mut("gauss")),
   MutatorCombination = list(operators = list(ParamAny = mut("gauss"))),
   MutatorSequential = list(mutators = list(mut("null"))),
-  RecombinatorMaybe = list(recombinator = rec("xounif")),
-  RecombinatorSequential = list(recombinators = recs("xounif")),
+  RecombinatorMaybe = list(recombinator = rec("swap")),
+  RecombinatorCmpMaybe = list(recombinator = rec("swap")),
+  RecombinatorSequential = list(recombinators = recs(c("swap", "null"))),
   RecombinatorCombination = list(operators = list(ParamAny = rec("xounif"))),
   RecombinatorSequential = list(recombinators = list(rec("null"))),
   FiltorMaybe = list(filtor = ftr("null")),
@@ -45,6 +46,12 @@ nspath = dirname(system.file("NAMESPACE", package = "miesmuschel"))
 exports = parseNamespaceFile(basename(nspath), dirname(nspath))$exports
 
 pkgenv = asNamespace("miesmuschel")
+
+# check that `.dict_name` is correct
+for (d in dictionaries) {
+  expect_identical(get(d$.__enclos_env__$private$.dict_name, pkgenv), d)
+}
+
 operators = Filter(function(x) {
   objgen = get(x, pkgenv)
   "R6ClassGenerator" %in% class(objgen) && inherits_from_base(objgen)
@@ -77,8 +84,23 @@ dicts = sapply(operators, function(op) {
 expect_true("__NOT_FOUND__" %nin% map_chr(dicts, "name"))
 
 for (type in names(dictionaries)) {
-  unexported = setdiff(dictionaries[[type]]$keys(), map(keep(dicts, function(x) identical(x$base, type)), "name"))
+  unexported = setdiff(dictionaries[[type]]$keys(), c(map(keep(dicts, function(x) identical(x$base, type)), "name"), non_op_entries))
   expect_true(length(unexported) == 0, info = sprintf("%s in dictionary that is not exported: %s", type, str_collapse(unexported)))
+}
+
+for (nonop in non_op_entries) {
+  for (type in names(dictionaries)) {
+    if (nonop %in% dictionaries[[type]]$keys()) {
+      expect_class(dictionaries[[type]]$get(nonop), type)
+
+      helpentry = help(paste0(dictionaries[[type]]$.__enclos_env__$private$.dict_name, "_", nonop), package = "miesmuschel")
+      if (identical(help, utils::help)) {  # different behaviour if pkgload / devtools are doing help vs. vanilla R help()
+        expect_equal(c(helpentry), c(dictionaries[[type]]$help(nonop)), info = paste("help for", nonop))
+      } else {
+        expect_equal(helpentry, dictionaries[[type]]$help(nonop), info = paste("help for", nonop))
+      }
+    }
+  }
 }
 
 # make sure all active bindings are executed, normalise pre / post cloning state
@@ -176,6 +198,28 @@ for (opinfo in dicts) {
     expect_equal(construct_from_repr(repr(test_obj)), pv_obj, info = opinfo$operator)
     expect_equal(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), pv_obj, info = opinfo$operator)
 
+  }
+
+  # $help() etc
+
+  expect_equal(test_obj$man, paste0("miesmuschel::", opinfo$operator))
+
+  entryname = paste0(dict$.__enclos_env__$private$.dict_name, "_", dictname)
+
+  helpobj = help(opinfo$operator, package = "miesmuschel")
+  helpobj_2 = help((entryname), package = "miesmuschel")
+
+
+  if (identical(help, utils::help)) {  # different behaviour if pkgload / devtools are doing help vs. vanilla R help()
+        # use c() to strip all attributes; they indicate the actual help()-call which is obviously different here.
+    expect_equal(c(helpobj), c(test_obj$help()), info = paste("help for", opinfo$operator))
+    expect_equal(c(helpobj_2), c(dict$help(dictname)), info = paste("help for", opinfo$operator, "II"))
+    expect_equal(c(helpobj), c(helpobj_2), info = paste("help for", opinfo$operator, "III"))
+  } else {
+    expect_equal(helpobj, test_obj$help(), info = paste("help for", opinfo$operator))
+    expect_equal(helpobj_2, dict$help(dictname), info = paste("help for", opinfo$operator, "II"))
+    helpobj$topic <- helpobj_2$topic
+    expect_equal(helpobj, helpobj_2, info = paste("help for", opinfo$operator, "III"))
   }
 }
 
