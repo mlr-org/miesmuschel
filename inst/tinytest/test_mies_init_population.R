@@ -27,19 +27,19 @@ expect_error(mies_init_population(oilarge, mu = 3), "'eol' but not 'dob' column 
 
 # init empty archive with 3 samples
 mies_init_population(oismall, mu = 3, initializer = generate_design_increasing)
-expected_archive = data.table(p1 = 1:3, dob = 1, eol = NA_real_, pout1 = 1:3, x_domain = list(list(p1 = 1), list(p1 = 2), list(p1 = 3)), batch_nr = 1)
+expected_archive = data.table(p1 = 1:3, dob = 1, eol = NA_real_, pout1 = 1:3, x_domain = list(list(p1 = 1), list(p1 = 2), list(p1 = 3)), batch_nr = 1, x_id = 1:3)
 expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # init initialized archive with 2 more samples
 mies_init_population(oismall, mu = 5, initializer = generate_design_increasing)
-expected_archive = rbind(expected_archive, data.table(p1 = 1:2, dob = 2, eol = NA_real_, pout1 = 1:2, x_domain = list(list(p1 = 1), list(p1 = 2)), batch_nr = 2))
+expected_archive = rbind(expected_archive, data.table(p1 = 1:2, dob = 2, eol = NA_real_, pout1 = 1:2, x_domain = list(list(p1 = 1), list(p1 = 2)), batch_nr = 2, x_id = 4:5))
 expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # recognize need for one more row when one sample is declared dead
 oismall$archive$data[2, eol := 2]
 mies_init_population(oismall, mu = 5, initializer = generate_design_increasing)
 expected_archive[2, eol := 2]
-expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 3, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 3))
+expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 3, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 3, x_id = 6))
 expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # when no eol column is found, the trailing rows are taken
@@ -65,7 +65,7 @@ expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, 
 # additional components when other components already exist
 additional_component_sampler = generate_increasing_sampler(ps(x1 = p_dbl(0, 100), x2 = p_dbl(0, 100)))
 mies_init_population(oismall, mu = 6, initializer = generate_design_increasing, additional_component_sampler = additional_component_sampler)
-expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 2, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 3))
+expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 2, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 3, x_id = 6))
 expected_archive[, c("x1", "x2") := .(1:6, 1:6)]
 expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
@@ -94,7 +94,7 @@ oismall$archive$data[2, x1 := NA]
 oismall$archive$data[2, x2 := NA]
 mies_init_population(oismall, mu = 7, initializer = generate_design_increasing, additional_component_sampler = additional_component_sampler)
 expected_archive[2, c("x1", "x2") := .(1, 1)]
-expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 3, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 4, x1 = 2, x2 = 2))
+expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 3, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 4, x1 = 2, x2 = 2, x_id = 7))
 expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # additional components on empty archive
@@ -217,13 +217,13 @@ expect_equal(copy(oismall3$archive$data)[, timestamp := NULL], expected_archive,
 
 # initializing without additional components, when components are present
 mies_init_population(oismall3, mu = 3, initializer = generate_design_increasing)
-expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 3, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 3, x1 = NA, x2 = NA))
+expected_archive = rbind(expected_archive, data.table(p1 = 1, dob = 3, eol = NA_real_, pout1 = 1, x_domain = list(list(p1 = 1)), batch_nr = 3, x1 = NA, x2 = NA, x_id = 6))
 expect_equal(copy(oismall3$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # multi-objective
 oimo = as_oi(get_objective_passthrough(c("minimize", "maximize"), TRUE))
 mies_init_population(oimo, mu = 3, initializer = generate_design_increasing)
-expected_archive = data.table(p1 = 1:3, p2 = 1:3, dob = 1, eol = NA_real_, pout1 = 1:3, pout2 = 1:3, x_domain = list(list(p1 = 1, p2 = 1), list(p1 = 2, p2 = 2), list(p1 = 3, p2 = 3)), batch_nr = 1)
+expected_archive = data.table(p1 = 1:3, p2 = 1:3, dob = 1, eol = NA_real_, pout1 = 1:3, pout2 = 1:3, x_domain = list(list(p1 = 1, p2 = 1), list(p1 = 2, p2 = 2), list(p1 = 3, p2 = 3)), batch_nr = 1, x_id = 1:3)
 expect_equal(copy(oimo$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # budget
@@ -236,12 +236,12 @@ expect_error(mies_init_population(inst = oibu, mu = 3, initializer = generate_de
   "fidelity.*atomic scalar")
 
 mies_init_population(inst = oibu, mu = 3, initializer = generate_design_increasing, fidelity = 1, budget_id = "bud")
-expected_archive = data.table(p1 = 1:3, bud = 1, dob = 1, eol = NA_real_, pout1 = 1:3, x_domain = lapply(1:3, function(x) list(p1 = x, bud = 1)), batch_nr = 1)
+expected_archive = data.table(p1 = 1:3, bud = 1, dob = 1, eol = NA_real_, pout1 = 1:3, x_domain = lapply(1:3, function(x) list(p1 = x, bud = 1)), batch_nr = 1, x_id = 1:3)
 expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # different budget, no reeval
 mies_init_population(inst = oibu, mu = 5, initializer = generate_design_increasing, fidelity = 3, budget_id = "bud", fidelity_new_individuals_only = TRUE)
-expected_archive = rbind(expected_archive, data.table(p1 = 1:2, bud = 3, dob = 2, eol = NA_real_, pout1 = 1:2, x_domain = lapply(1:2, function(x) list(p1 = x, bud = 3)), batch_nr = 2))
+expected_archive = rbind(expected_archive, data.table(p1 = 1:2, bud = 3, dob = 2, eol = NA_real_, pout1 = 1:2, x_domain = lapply(1:2, function(x) list(p1 = x, bud = 3)), batch_nr = 2, x_id = 4:5))
 expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 
@@ -250,14 +250,14 @@ cached_oibu = oibu$clone(deep = TRUE)
 mies_init_population(inst = oibu, mu = 7, initializer = generate_design_increasing, fidelity = 2, budget_id = "bud")
 expected_archive[(bud == 1), eol := 3]
 
-expected_archive = rbind(expected_archive, data.table(p1 = c(1:2, 1:3), bud = 2, dob = 3, eol = NA_real_, pout1 = c(1:2, 1:3), x_domain = lapply(c(1:2, 1:3), function(x) list(p1 = x, bud = 2)), batch_nr = 3))
+expected_archive = rbind(expected_archive, data.table(p1 = c(1:2, 1:3), bud = 2, dob = 3, eol = NA_real_, pout1 = c(1:2, 1:3), x_domain = lapply(c(1:2, 1:3), function(x) list(p1 = x, bud = 2)), batch_nr = 3, x_id = c(6:7, 1:3)))
 expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 ## fidelity decreases, !monotonic
 oibu = cached_oibu$clone(deep = TRUE)
 mies_init_population(inst = oibu, mu = 9, initializer = generate_design_increasing, fidelity = 2, budget_id = "bud", fidelity_monotonic = FALSE)
 expected_archive[(bud %in% c(1, 3)), eol := 3]
-expected_archive = rbind(expected_archive[1:5], data.table(p1 = c(1:4, 1:3, 1:2), bud = 2, dob = 3, eol = NA_real_, pout1 = c(1:4, 1:3, 1:2), x_domain = lapply(c(1:4, 1:3, 1:2), function(x) list(p1 = x, bud = 2)), batch_nr = 3))
+expected_archive = rbind(expected_archive[1:5], data.table(p1 = c(1:4, 1:3, 1:2), bud = 2, dob = 3, eol = NA_real_, pout1 = c(1:4, 1:3, 1:2), x_domain = lapply(c(1:4, 1:3, 1:2), function(x) list(p1 = x, bud = 2)), batch_nr = 3, x_id = c(6:9, 1:5)))
 expect_equal(copy(oibu$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 

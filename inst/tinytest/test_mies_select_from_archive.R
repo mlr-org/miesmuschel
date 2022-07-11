@@ -22,7 +22,7 @@ oibigmulti$eval_batch(designmultiobj)
 expect_equal(mies_select_from_archive(oibig, 1), design[4, -c("dob", "eol", "additional"), which = FALSE])
 expect_equal(mies_select_from_archive(oibig, 1, get_indivs = FALSE), 4)
 
-sb = sel("best")$prime(oibig$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
+sb = sel("best", shuffle_selection = FALSE)$prime(oibig$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
 sr = sel("random")$prime(oibig$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
 srm = sel("random")$prime(oibigmulti$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
 
@@ -31,7 +31,7 @@ expect_equal(mies_select_from_archive(oibig, 1, selector = sb), design[4, -c("do
 expect_equal(mies_select_from_archive(oibig, 1, 1:3, selector = sb), design[3, -c("dob", "eol"), which = FALSE])
 expect_equal(mies_select_from_archive(oibig, 1, 1:3, selector = sb, get_indivs = FALSE), 3)
 
-expect_error(mies_select_from_archive(oibig, 1, 1:3, selector = sel("best")$prime(ps(p1 = p_dbl()))),
+expect_error(mies_select_from_archive(oibig, 1, 1:3, selector = sel("best", shuffle_selection = FALSE)$prime(ps(p1 = p_dbl()))),
   "Must be a subset of")
 
 

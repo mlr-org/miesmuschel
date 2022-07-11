@@ -68,7 +68,7 @@ FiltorSurrogateTournament = R6Class("FiltorSurrogateTournament",
     #' Initialize the `FiltorSurrogateTournament`.
     #' @template param_surrogate_learner
     #' @template param_surrogate_selector
-    initialize = function(surrogate_learner, surrogate_selector = SelectorProxy$new()) {
+    initialize = function(surrogate_learner, surrogate_selector = SelectorBest$new()) {
       own_param_set = ps(
         per_tournament = p_int(1, tags = "required"),
         tournament_size = p_dbl(1e-100, tags = "required"),

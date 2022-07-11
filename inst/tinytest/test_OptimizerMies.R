@@ -131,7 +131,7 @@ oi$clear()
 opt$optimize(oi)
 
 expect_names(colnames(oi$archive$data), permutation.of = c(oi$search_space$ids(), "dob", "eol", oi$objective$codomain$ids(),
-  "x_domain", "timestamp", "batch_nr", "px1", "px2"))
+  "x_domain", "timestamp", "batch_nr", "px1", "px2", "x_id"))
 
 # supported types are propagated
 set.seed(1)
@@ -165,7 +165,7 @@ oib = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
 oib$search_space$params$bud$tags = "budget"
 oib$terminator = trm("evals", n_evals = 10)
 
-opt = OptimizerMies$new(mutator = MutatorNull$new(), recombinator = RecombinatorCrossoverUniform$new(),
+opt = OptimizerMies$new(mutator = MutatorNull$new(), recombinator = RecombinatorCrossoverUniform(),
   parent_selector = SelectorBest$new(), survival_selector = SelectorBest$new(), multi_fidelity = TRUE)
 
 records = new.env()
@@ -205,7 +205,7 @@ expect_equal(records$fidelity_offspring_gens, c(1, 2, 3))
 expect_equal(records$fidelity_offspring_args, data.table(budget_id = list("bud"), last_fidelity = list(1, 4, 6), last_fidelity_offspring = list(NULL, 1, 2)))
 
 
-expect_names(colnames(oib$archive$data), permutation.of = c(oib$search_space$ids(), "dob", "eol", oib$objective$codomain$ids(), "x_domain", "timestamp", "batch_nr"))
+expect_names(colnames(oib$archive$data), permutation.of = c(oib$search_space$ids(), "dob", "eol", oib$objective$codomain$ids(), "x_domain", "timestamp", "batch_nr", "x_id"))
 
 # cloning, paramsets handled properly
 

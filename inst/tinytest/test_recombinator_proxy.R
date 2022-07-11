@@ -4,7 +4,8 @@ source("setup.R", local = TRUE)
 
 
 rp = RecombinatorProxy$new()
-expect_equal(rp$param_set$values$operation, RecombinatorNull$new(n_indivs_in = 2))
+expect_null(rp$param_set$values$operation)
+rp$param_set$values$operation = RecombinatorNull$new(n_indivs_in = 2)
 expect_recombinator(rp, "RecombinatorProxy")
 
 rp = RecombinatorProxy$new()
@@ -12,7 +13,7 @@ rp$param_set$values$operation = RecombinatorNull$new(n_indivs_in = 1)
 expect_recombinator(rp, "RecombinatorProxy")
 
 rp = RecombinatorProxy$new()
-rp$param_set$values$operation = RecombinatorCrossoverUniform$new()
+rp$param_set$values$operation = RecombinatorCrossoverUniform()
 expect_recombinator(rp, "RecombinatorProxy")
 
 rp$param_set$values$operation$param_set$values$p = 1
@@ -71,12 +72,12 @@ expect_error({rp$param_set$values$operation = RecombinatorNull$new(n_indivs_in =
   "n_indivs_in is a divisor of 2, and where n_indivs_in / n_indivs_out must be 2 / 2")
 
 rpminus = RecombinatorProxy$new(n_indivs_in = 2, n_indivs_out = 1)
-expect_equal(rpminus$param_set$values$operation, RecombinatorNull$new(n_indivs_in = 2, n_indivs_out = 1))
+rpminus$param_set$values$operation = RecombinatorNull$new(n_indivs_in = 2, n_indivs_out = 1)
 rpminus$prime(p)
 
 expect_equal(rpminus$operate(data), data[c(1, 3)])
 
-rpminus$param_set$values$operation = RecombinatorCrossoverUniform$new(keep_complement = FALSE)
+rpminus$param_set$values$operation = RecombinatorCrossoverUniform(keep_complement = FALSE)
 rpminus$param_set$values$operation$param_set$values$p = 1
 
 expect_equal(rpminus$operate(data), data[c(2, 4)])

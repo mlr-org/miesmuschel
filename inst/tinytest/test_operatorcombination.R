@@ -4,7 +4,7 @@ source("setup.R", local = TRUE)
 
 ###################
 # Basics -- Mutator
-ops = list(ParamDbl = MutatorGauss$new(), ParamFct = MutatorDiscreteUniform$new())
+ops = list(ParamDbl = mut("gauss", sdev = 1), ParamFct = MutatorDiscreteUniform$new())
 mcom = MutatorCombination$new(ops, on_name_not_present = "quiet", on_type_not_present = "quiet")
 expect_read_only(mcom, c("operators", "groups", "adaptions", "binary_fct_as_logical"))
 expect_equal(mcom$on_name_not_present, "quiet")
@@ -23,7 +23,7 @@ expect_equal(mcom$binary_fct_as_logical, FALSE)
 
 ###################
 # Basics -- Recombinator
-recops = list(ParamDbl = RecombinatorCrossoverUniform$new(), ParamFct = RecombinatorNull$new())
+recops = list(ParamDbl = RecombinatorCrossoverUniform(), ParamFct = RecombinatorNull$new())
 rcom = RecombinatorCombination$new(recops, on_name_not_present = "quiet", on_type_not_present = "quiet")
 expect_read_only(rcom, c("operators", "groups", "adaptions", "binary_fct_as_logical", "n_indivs_in", "n_indivs_out"))
 expect_equal(rcom$on_name_not_present, "quiet")

@@ -4,10 +4,11 @@ source("setup.R", local = TRUE)
 expect_equal(mies_prime_operators(ps()), list(mutators = list(), recombinators = list(), selectors = list(), filtors = list()))
 
 ms = muts(c("null", "gauss"))
+ms[[2]]$param_set$values$sdev = 0.1
 rs = recs(c("null", "xounif"))
 ss = sels(c("best", "random"))
 fs = ftrs(c("null", "proxy"))
-
+fs[[2]]$param_set$values$operation = ftr("null")
 p = ps(x = p_dbl(0, 1), y = p_int(-1, 1))
 
 expect_equal(mies_prime_operators(p, mutators = ms, recombinators = rs, selectors = ss),

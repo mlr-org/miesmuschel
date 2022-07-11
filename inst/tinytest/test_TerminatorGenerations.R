@@ -60,7 +60,7 @@ oib$terminator = tg
 
 
 
-opt = OptimizerMies$new(mutator = MutatorGauss$new(), recombinator = RecombinatorCrossoverUniform$new(),
+opt = OptimizerMies$new(mutator = mut("gauss", sdev = 0.1), recombinator = RecombinatorCrossoverUniform(),
   parent_selector = SelectorBest$new(), survival_selector = SelectorBest$new(), multi_fidelity = TRUE)
 opt$param_set$values$fidelity = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 4, 6)[[max(1, min(mies_generation(inst), 3))]]
 opt$param_set$values$fidelity_offspring = function(inst, budget_id, last_fidelity, last_fidelity_offspring) c(1, 2, 3)[[max(1, min(mies_generation(inst), 3))]]

@@ -2,6 +2,7 @@
 source("setup.R", local = TRUE)
 
 mgauss = MutatorGauss$new()
+mgauss$param_set$values$sdev = 1
 mgauss$param_set$values$sdev_is_relative = TRUE
 mgauss$param_set$values$truncated_normal = TRUE
 expect_mutator(mgauss, "MutatorGauss")

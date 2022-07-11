@@ -1,5 +1,9 @@
 source("setup.R", local = TRUE)
 
+fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.featureless"), surrogate_selector = SelectorRandom$new())
+expect_filtor(fsp, "FiltorSurrogateProgressive")
+
+
 fsp = FiltorSurrogateProgressive$new(mlr3::lrn("regr.featureless"))
 expect_filtor(fsp, "FiltorSurrogateProgressive")
 
