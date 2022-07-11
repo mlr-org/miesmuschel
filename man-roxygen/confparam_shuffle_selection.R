@@ -1,3 +1,4 @@
+#' @section Configuration Parameters:
 #' * `shuffle_selection` :: `logical(1)`\cr
 #'   Whether to shuffle the selected output. When this is `TRUE`, selected individuals are returned in random order, so when this
 #'   operator is e.g. used in [`mies_generate_offspring()`], then subsequent recombination operators effectively operate on pairs

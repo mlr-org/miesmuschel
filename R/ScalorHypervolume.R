@@ -11,7 +11,7 @@
 #' * smaller than the respective value in the given point in all dimensions, and
 #' * greater than all points in `baseline` in at least one dimension.
 #'
-#' `baseline` should probably be a [`ContextPV`][paradox::ContextPV] and generate fitness values from the [`Archive`][bbotk::Archive]
+#' `baseline` should probably be a `paradox::ContextPV` and generate fitness values from the [`Archive`][bbotk::Archive]
 #' in the context using [`mies_get_fitnesses`].
 #'
 #' @section Configuration Parameters:
