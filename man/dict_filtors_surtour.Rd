@@ -112,7 +112,7 @@ Initialize the \code{FiltorSurrogateTournament}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogateTournament$new(
   surrogate_learner,
-  surrogate_selector = SelectorProxy$new()
+  surrogate_selector = SelectorBest$new()
 )}\if{html}{\out{</div>}}
 }
 

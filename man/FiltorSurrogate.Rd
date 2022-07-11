@@ -92,7 +92,7 @@ Initialize the base class components of the \code{FiltorSurrogate}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogate$new(
   surrogate_learner,
-  surrogate_selector = SelectorProxy$new(),
+  surrogate_selector = SelectorBest$new(),
   param_set = ps(),
   packages = character(0),
   dict_entry = NULL

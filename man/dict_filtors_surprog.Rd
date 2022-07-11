@@ -132,7 +132,7 @@ Initialize the \code{FiltorSurrogateProgressive}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorSurrogateProgressive$new(
   surrogate_learner,
-  surrogate_selector = SelectorProxy$new()
+  surrogate_selector = SelectorBest$new()
 )}\if{html}{\out{</div>}}
 }
 
