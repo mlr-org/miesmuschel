@@ -15,6 +15,7 @@ the most common use cases.
 }
 \seealso{
 Other Scalarizers: 
+\code{\link{scalarizer_chebyshev}()},
 \code{\link{scalarizer_linear}()}
 }
 \concept{Scalarizers}

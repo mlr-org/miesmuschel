@@ -14,7 +14,7 @@ Small positive value.}
 a \code{\link{Scalarizer}} object.
 }
 \description{
-Constructs a \code{\link{Scalarizer}} that does Chebyshev scalarization.
+Constructs a \code{\link{Scalarizer}} that does Chebyshev scalarization, as employed in ParEGO by Knowles (2006).
 
 The Chebyshev scalarization for a single individual with
 fitness values \code{f} and given weight vector \code{w} is
@@ -42,3 +42,14 @@ sc(fitnesses, weights)
 sc <- scalarizer_chebyshev(rho = 0.1)
 sc(fitnesses, weights)
 }
+\references{
+Knowles, Joshua (2006).
+\dQuote{ParEGO: A hybrid algorithm with on-line landscape approximation for expensive multiobjective optimization problems.}
+\emph{IEEE Transactions on Evolutionary Computation}, \bold{10}(1), 50--66.
+}
+\seealso{
+Other Scalarizers: 
+\code{\link{Scalarizer}},
+\code{\link{scalarizer_linear}()}
+}
+\concept{Scalarizers}

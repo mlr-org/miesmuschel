@@ -32,6 +32,7 @@ sc(fitnesses, weights)
 }
 \seealso{
 Other Scalarizers: 
-\code{\link{Scalarizer}}
+\code{\link{Scalarizer}},
+\code{\link{scalarizer_chebyshev}()}
 }
 \concept{Scalarizers}

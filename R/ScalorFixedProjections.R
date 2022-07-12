@@ -160,7 +160,7 @@ scalarizer_linear = function() {
 #' @title Chebyshev Scalarizer
 #'
 #' @description
-#' Constructs a [`Scalarizer`] that does Chebyshev scalarization.
+#' Constructs a [`Scalarizer`] that does Chebyshev scalarization, as employed in ParEGO by `r cite_bib("knowles2006parego")`.
 #'
 #' The Chebyshev scalarization for a single individual with
 #' fitness values `f` and given weight vector `w` is
@@ -170,6 +170,10 @@ scalarizer_linear = function() {
 #' @param rho (`numeric(1)`)\cr
 #'   Small positive value.
 #' @return a [`Scalarizer`] object.
+#' @family Scalarizers
+#'
+#' @references
+#' `r format_bib("knowles2006parego")`
 #' @examples
 #' # fitnesses: three rows (i.e. thee indivs) with two objective values each
 #' fitnesses <- matrix(0:5, ncol = 2)
