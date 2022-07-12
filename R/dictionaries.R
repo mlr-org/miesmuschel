@@ -20,6 +20,7 @@ DictionaryEx = R6Class("DictionaryEx",
 #' @title Dictionary of Mutators
 #'
 #' @template methods_dictionary
+#' @family dictionaries
 #' @export
 dict_mutators = R6Class("DictionaryMutator",
   inherit = DictionaryEx,
@@ -33,6 +34,7 @@ dict_mutators = R6Class("DictionaryMutator",
 #' @title Dictionary of Recombinators
 #'
 #' @template methods_dictionary
+#' @family dictionaries
 #' @export
 dict_recombinators = R6Class("DictionaryRecombinator",
   inherit = DictionaryEx,
@@ -46,6 +48,7 @@ dict_recombinators = R6Class("DictionaryRecombinator",
 #' @title Dictionary of Selectors
 #'
 #' @template methods_dictionary
+#' @family dictionaries
 #' @export
 dict_selectors = R6Class("DictionarySelector",
   inherit = DictionaryEx,
@@ -59,6 +62,7 @@ dict_selectors = R6Class("DictionarySelector",
 #' @title Dictionary of Scalors
 #'
 #' @template methods_dictionary
+#' @family dictionaries
 #' @export
 dict_scalors = R6Class("DictionaryScalor",
   inherit = DictionaryEx,
@@ -72,6 +76,7 @@ dict_scalors = R6Class("DictionaryScalor",
 #' @title Dictionary of Filtors
 #'
 #' @template methods_dictionary
+#' @family dictionaries
 #' @export
 dict_filtors = R6Class("DictionaryFiltor",
   inherit = DictionaryEx,
@@ -116,6 +121,7 @@ dict_help = function(self, private, key, help_type) {
 #' * list of [`Selector`] for `sels()`.
 #' * [`Scalor`] for `scl()`.
 #' * list of [`Scalor`] for `scls()`.
+#' @family dictionaries
 #' @export
 #' @examples
 #' mut("gauss", sdev = 0.5)

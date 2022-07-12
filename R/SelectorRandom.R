@@ -11,8 +11,8 @@
 #' @section Configuration Parameters:
 #' * `sample_unique` :: `character(1)`\cr
 #'   Whether to sample individuals globally unique (`"global"`), unique within groups (`"groups"`), or not unique at all (`"no"`, sample with replacement).
-#'   This is done with best effort; if `group_size` (when `sample_unique` is `"groups"`) or `nrow(values)` (when `sample_unique` is `"global"`)
-#'   is smaller than `n_select`, then individuals are selected with as few repeats as possible. Initialized to `"groups"`.
+#'   This is done with best effort; if `group_size` (when `sample_unique` is `"groups"`) or `n_select` (when `sample_unique` is `"global"`)
+#'   is greater than `nrow(values)`, then individuals are selected with as few repeats as possible. Initialized to `"groups"`.
 #'
 #' @templateVar id random
 #' @template autoinfo_prepare_sel
