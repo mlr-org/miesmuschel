@@ -19,14 +19,11 @@ DictionaryEx = R6Class("DictionaryEx",
 
 #' @title Dictionary of Mutators
 #'
+#' @template methods_dictionary
 #' @export
 dict_mutators = R6Class("DictionaryMutator",
   inherit = DictionaryEx,
   public = list(
-    #' @description
-    #' Show help for a contained object, by its entry key.
-    #' @template param_key
-    #' @template param_help_type
     help = function(key, help_type = getOption("help_type")) dict_help(self = self, private = private, key = key, help_type = help_type)
   ),
   private = list(.dict_name = "dict_mutators"),
@@ -35,14 +32,11 @@ dict_mutators = R6Class("DictionaryMutator",
 
 #' @title Dictionary of Recombinators
 #'
+#' @template methods_dictionary
 #' @export
 dict_recombinators = R6Class("DictionaryRecombinator",
   inherit = DictionaryEx,
   public = list(
-    #' @description
-    #' Show help for a contained object, by its entry key.
-    #' @template param_key
-    #' @template param_help_type
     help = function(key, help_type = getOption("help_type")) dict_help(self = self, private = private, key = key, help_type = help_type)
   ),
   private = list(.dict_name = "dict_recombinators"),
@@ -51,14 +45,11 @@ dict_recombinators = R6Class("DictionaryRecombinator",
 
 #' @title Dictionary of Selectors
 #'
+#' @template methods_dictionary
 #' @export
 dict_selectors = R6Class("DictionarySelector",
   inherit = DictionaryEx,
   public = list(
-    #' @description
-    #' Show help for a contained object, by its entry key.
-    #' @template param_key
-    #' @template param_help_type
     help = function(key, help_type = getOption("help_type")) dict_help(self = self, private = private, key = key, help_type = help_type)
   ),
   private = list(.dict_name = "dict_selectors"),
@@ -67,14 +58,11 @@ dict_selectors = R6Class("DictionarySelector",
 
 #' @title Dictionary of Scalors
 #'
+#' @template methods_dictionary
 #' @export
 dict_scalors = R6Class("DictionaryScalor",
   inherit = DictionaryEx,
   public = list(
-    #' @description
-    #' Show help for a contained object, by its entry key.
-    #' @template param_key
-    #' @template param_help_type
     help = function(key, help_type = getOption("help_type")) dict_help(self = self, private = private, key = key, help_type = help_type)
   ),
   private = list(.dict_name = "dict_scalors"),
@@ -83,14 +71,11 @@ dict_scalors = R6Class("DictionaryScalor",
 
 #' @title Dictionary of Filtors
 #'
+#' @template methods_dictionary
 #' @export
 dict_filtors = R6Class("DictionaryFiltor",
   inherit = DictionaryEx,
   public = list(
-    #' @description
-    #' Show help for a contained object, by its entry key.
-    #' @template param_key
-    #' @template param_help_type
     help = function(key, help_type = getOption("help_type")) dict_help(self = self, private = private, key = key, help_type = help_type)
   ),
   private = list(.dict_name = "dict_filtors"),

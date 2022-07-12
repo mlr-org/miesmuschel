@@ -105,7 +105,7 @@ print.Scalarizer = function(x, ...) {
 
 #' @export
 repr.Scalarizer = function(obj, ...) {
-  parse(text = attr(x, "repr"))[[1]]
+  parse(text = attr(obj, "repr"))[[1]]
 }
 
 #' @title Scalarizer

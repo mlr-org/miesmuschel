@@ -10,14 +10,18 @@ An object of class \code{DictionaryMutator} (inherits from \code{DictionaryEx}, 
 \usage{
 dict_mutators
 }
-\arguments{
-\item{key}{(\code{character(1)})\cr
-The dictionary entry for which to display the help record.}
-
-\item{help_type}{(\code{character(1)})\cr
-one of \code{"text"}, \code{"html"}, \code{"pdf"}, given as the \code{help_type} argument of R's \code{help()}.}
-}
 \description{
-Show help for a contained object, by its entry key.
+Dictionary of Mutators
 }
+\section{Methods}{
+
+Methods inherited from \code{\link[mlr3misc:Dictionary]{Dictionary}}, as well as:
+\itemize{
+\item \code{help(key, help_type)}\cr
+(\code{character(1)}, \code{character(1)})\cr
+Displays help for the dictionary entry \code{key}. \code{help_type} is one of
+\code{"text"}, \code{"html"}, \code{"pdf"} and given as the \code{help_type} argument of R's \code{help()}.
+}
+}
+
 \keyword{datasets}

@@ -58,7 +58,7 @@ reg_mlr3tuning = function(...) {  # nocov start
 
 
   if (!is.null(paradox::ps()$context_available)) { # use paradox context if variable
-    message("Using context sensitive configuration parameters")
+    packageStartupMessage("Using context sensitive configuration parameters")
     assign("paradox_context_available", TRUE, envir = parent.env(environment()))
   }
 
