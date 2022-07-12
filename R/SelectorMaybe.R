@@ -225,7 +225,7 @@ SelectorMaybe = R6Class("SelectorMaybe",
 
       ###########
       ## determine group_size
-      group_size = vectorize_group_size(group_size, n_selector)
+      group_size = vectorize_group_size(group_size, n_select)
 
       if (params$proportion_out == "random") {
         # random: distribute inputs among groups
@@ -303,7 +303,7 @@ SelectorMaybe = R6Class("SelectorMaybe",
       }
       output = integer(n_select)
       output[group_bitmap] = selected_out
-      output[!group_bitmap] = selected_out_not
+      output[!group_bitmap] = selected_not_out
       output
     },
     .wrapped = NULL,

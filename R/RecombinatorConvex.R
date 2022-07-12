@@ -66,9 +66,9 @@ RecombinatorConvex = R6Class("RecombinatorConvex",
       lambda = self$param_set$get_values()$lambda
 
       if (is.matrix(lambda)) {
-        setnames(setDT(Map(weighted.mean, values, as.data.frame(lambda))), names(values))
+        setnames(setDT(Map(stats::weighted.mean, values, as.data.frame(lambda))), names(values))
       } else {
-        setDT(lapply(values, weighted.mean, w = lambda))
+        setDT(lapply(values, stats::weighted.mean, w = lambda))
       }
     }
   )

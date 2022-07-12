@@ -45,7 +45,7 @@ ScalorNondom = R6Class("ScalorNondom",
         scale_output = p_lgl(tags = "required"),
         tiebreak = p_fct(c("crowdingdist", "hvcontrib", "domcount", "none")))
       param_set$values = list(epsilon = 0, jitter = TRUE, scale_output = TRUE, tiebreak= "crowdingdist")
-      super$initialize(param_set = param_set, dict_entry = "nondom")
+      super$initialize(param_set = param_set, packages = "stats", dict_entry = "nondom")
     }
   ),
   private = list(
@@ -53,7 +53,7 @@ ScalorNondom = R6Class("ScalorNondom",
       params = self$param_set$get_values()
       if (params$jitter) {
         fitnesses = fitnesses *
-          (1 + runif(length(fitnesses)) * sqrt(.Machine$double.eps))
+          (1 + stats::runif(length(fitnesses)) * sqrt(.Machine$double.eps))
       }
       rnd = rank_nondominated(fitnesses, epsilon = params$epsilon)
       ranked = rnd$fronts
@@ -64,7 +64,7 @@ ScalorNondom = R6Class("ScalorNondom",
           fronts = lapply(split(as.data.frame(fitnesses), ranked), as.matrix)
           subrank = switch(params$tiebreak,
             crowdingdist = lapply(fronts, function(x) rank(dist_crowding(x)) / (nrow(x) + 1)),
-            hvcontrib = lapply(fonts, function(x) rank(domhv_contribution(x, nadir = params$nadir, epsilon = epsilon))),
+            hvcontrib = lapply(fronts, function(x) rank(domhv_contribution(x, nadir = params$nadir, epsilon = params$epsilon))),
           )
         }
         for (i in seq_along(subrank)) {

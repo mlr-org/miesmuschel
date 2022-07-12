@@ -15,7 +15,8 @@
 #'   Function taking a fitness-matrix `fitnesses` (Nindivs x Nobjectives, with higher values indicating higher desirability)
 #'   and a list of weight matrices `weights` (Nindivs elements of Nobjectives x Nweights matrices; positive weights should indicate a positive contribution
 #'   to scale)
-#'   and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability)
+#'   and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability).\cr
+#'   While custom functions can be used, it is recommended to use a [`Scalarizer`], such as [`scalarizer_linear()`], or [`scalarizer_chebyshev()`].
 #'
 #' @param weights_component_id (`character(1)`)\cr
 #'   Id of the search space component identifying the weights by which to scalarize. Default `"scalarization_weights"`.
@@ -66,7 +67,7 @@ ScalorFixedProjection = R6Class("ScalorFixedProjection",
       scalarization = self$param_set$get_values()$scalarization
 
       weights = values[[private$.weight_id]]
-      lapply(weights, assert_matrix, mode = "numeric", nrows = ncol(fitnesses), ncols = ncols(weights[[1]]))  # scalor asserts that values has at least one row
+      lapply(weights, assert_matrix, mode = "numeric", nrows = ncol(fitnesses), ncols = ncol(weights[[1]]))  # scalor asserts that values has at least one row
 
       scaled = scalarization(fitnesses, weights)
 
@@ -85,7 +86,7 @@ make_scalarizer = function(name, fn) {
   cl = match.call(sys.function(-1), sys.call(-1), envir = parent.frame(2))
   for (n in names2(cl)) if (!is.na(n)) cl[[n]] = get(n, pos = parent.frame(1))
   cl[[1]] = as.symbol(name)
-  repr = str_collapse(c(capture.output(print(cl)), ""), sep = "\n")
+  repr = str_collapse(c(utils::capture.output(print(cl)), ""), sep = "\n")
 
   structure(function(fitnesses, weights) {
       assert_matrix(fitnesses, mode = "numeric")
@@ -103,11 +104,53 @@ print.Scalarizer = function(x, ...) {
 }
 
 #' @export
-repr.Scalarizer = function(x, ...) {
+repr.Scalarizer = function(obj, ...) {
   parse(text = attr(x, "repr"))[[1]]
 }
 
+#' @title Scalarizer
+#'
+#' @name Scalarizer
+#'
+#' @description
+#' `Scalarizer` objects are functions taking a fitness-matrix `fitnesses` (Nindivs x Nobjectives, with higher values indicating higher desirability)
+#' and a list of weight matrices `weights` (Nindivs elements of Nobjectives x Nweights matrices; positive weights indicate a positive contribution
+#' to scale) and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability).
+#'
+#' Any other function conforming to these requirements can also be used in place of a `Scalarizer`, but the provided `Scalarizer` functions cover
+#' the most common use cases.
+#'
+#' `Scalarizer`s are constructed from constructor-functions, such as [`scalarizer_linear()`] or [`scalarizer_chebyshev()`].
+#' @family Scalarizers
+#' @export
+NULL
 
+
+#' @title Linear Scalarizer
+#'
+#' @description
+#' Constructs a linear [`Scalarizer`], which performs linear scalarization for [`ScalorFixedProjection`].
+#'
+#' @return a [`Scalarizer`] object.
+#'
+#' @family Scalarizers
+#' @examples
+#' # fitnesses: three rows (i.e. thee indivs) with two objective values each
+#' fitnesses <- matrix(0:5, ncol = 2)
+#'
+#' # weights: contains one matrix for each row of 'fitnesses' (i.e. each indiv)
+#' # which get multiplied with their respective row.
+#' weights <- list(
+#'  matrix(c(1, 0, 0, 1), ncol = 2),
+#'  matrix(c(1, 2, 0, 0), ncol = 2),
+#'  matrix(c(0, 1, 0, 1), ncol = 2)
+#' )
+#'
+#' sc <- scalarizer_linear()
+#'
+#' # The resulting row-vectors are the different scalarizations according to the
+#' # columns in the 'weights' matrices.
+#' sc(fitnesses, weights)
 #' @export
 scalarizer_linear = function() {
   make_scalarizer("scalarizer_linear", function(fitnesses, weights) {
@@ -115,6 +158,38 @@ scalarizer_linear = function() {
   })
 }
 
+#' @title Chebyshev Scalarizer
+#'
+#' @description
+#' Constructs a [`Scalarizer`] that does Chebyshev scalarization.
+#'
+#' The Chebyshev scalarization for a single individual with
+#' fitness values `f` and given weight vector `w` is
+#' `min(w * f) + rho * sum(w * f)`, where `rho` is a hyperparameter
+#' given during construction.
+#'
+#' @param rho (`numeric(1)`)\cr
+#'   Small positive value.
+#' @return a [`Scalarizer`] object.
+#' # fitnesses: three rows (i.e. thee indivs) with two objective values each
+#' fitnesses <- matrix(0:5, ncol = 2)
+#'
+#' # weights: contains one matrix for each row of 'fitnesses' (i.e. each indiv)
+#' # which get multiplied with their respective row.
+#' weights <- list(
+#'  matrix(c(1, 0, 0, 1), ncol = 2),
+#'  matrix(c(1, 2, 0, 0), ncol = 2),
+#'  matrix(c(0, 1, 0, 1), ncol = 2)
+#' )
+#'
+#' sc <- scalarizer_chebyshev()
+#'
+#' # The resulting row-vectors are the different scalarizations according to the
+#' # columns in the 'weights' matrices.
+#' sc(fitnesses, weights)
+#'
+#' sc <- scalarizer_chebyshev(rho = 0.1)
+#' sc(fitnesses, weights)
 #' @export
 scalarizer_chebyshev = function(rho = 0.05) {
   assert_number(rho)
@@ -184,11 +259,11 @@ SamplerRandomWeights = R6Class("SamplerRandomWeights", inherit = paradox::Sample
       nobjectives = private$.nobjectives
       matrixsize = nweights * nobjectives
       matrices = replicate(n, simplify = FALSE, {
-        mat = matrix(rexp(matrixsize), ncol = nobjectives, nrow = nweights)
+        mat = matrix(stats::rexp(matrixsize), ncol = nobjectives, nrow = nweights)
         normalizer = rowSums(mat)
         t(mat / normalizer)
       })
-      setNames(data.table(matrices), self$weights_component_id)
+      setnames(data.table(matrices), self$weights_component_id)
     },
     .nweights = NULL,
     .nobjectives = NULL

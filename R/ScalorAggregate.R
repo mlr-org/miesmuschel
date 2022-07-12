@@ -106,7 +106,7 @@ ScalorAggregate = R6Class("ScalorAggregate",
         tiebreak = {
           if (any(weights <= 0)) stop("Only positive weights allowed when 'scaling' is \"tiebreak\".")
           weights = rank(weights, ties.method = "first")
-          weithsteps = split(seq_along(weights), weights)  # weightsteps: list going from low to high weights, contains indices of weights with these values
+          weightsteps = split(seq_along(weights), weights)  # weightsteps: list going from low to high weights, contains indices of weights with these values
           ranking = rep(1, length(weights))
           # iterate from scalor(s) with lowest weights to ones with highest weights
           for (current_scalors in weightsteps) {

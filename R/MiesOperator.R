@@ -154,7 +154,7 @@ MiesOperator = R6Class("MiesOperator",
     #'   Ignored.
     print = function(verbose = FALSE, ...) {
       hasparams = length(self$param_set$ids())
-      txt = paste(capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE)), collapse = "\n")
+      txt = paste(utils::capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE)), collapse = "\n")
       txt = paste0(gsub("stop\\(\"<([^>]*)>\"\\)", "<\\1>", txt), "\n$param_set:", if (hasparams) "\n" else " empty.\n")
       cat(txt)
       if (hasparams) {

@@ -36,7 +36,7 @@ ScalorDomcount = R6Class("ScalorDomcount",
         scale_output = p_lgl(tags = "required")
       )
       param_set$values = list(output = "count_not_dominating", epsilon = 0, jitter = TRUE, scale_output = TRUE)
-      super$initialize(param_set = param_set, dict_entry = "domcount")
+      super$initialize(param_set = param_set, packages = "stats", dict_entry = "domcount")
     }
   ),
   private = list(
@@ -44,7 +44,7 @@ ScalorDomcount = R6Class("ScalorDomcount",
       params = self$param_set$get_values()
       if (params$jitter) {
         fitnesses = fitnesses *
-          (1 + runif(length(fitnesses)) * sqrt(.Machine$double.eps))
+          (1 + stats::runif(length(fitnesses)) * sqrt(.Machine$double.eps))
       }
       if (params$output == "number_dominated") {
         domcount = rank_nondominated(-fitnesses, epsilon = params$epsilon)$domcount

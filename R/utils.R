@@ -170,7 +170,7 @@ p_mtx = function(rows, lower = -Inf, upper = Inf, default = NO_DEF, tags = chara
 
 check_fidelity = function(x, null.ok = FALSE) {
   if (test_scalar(x, null.ok = null.ok)) return(TRUE)
-  if (test_atomic(x, null.ok = null.ok, any.missing = FALSE, len = 2, names = "named") && test_names(names(x), permutation.of = c("budget_new", "budget_survivors"))) return(TRUE)
+  if (test_atomic(x, any.missing = FALSE, len = 2, names = "named") && test_names(names(x), permutation.of = c("budget_new", "budget_survivors"))) return(TRUE)
   "'fidelity' must be scalar, or a two-element atomic vector with entries 'budget_new' and 'budget_survivors'."
 }
 
@@ -189,7 +189,7 @@ normie_scale = function(values) {
 # TODO: submit this as PR to mlr3misc
 crate <- function(.fn, ..., .parent = topenv(parent.frame())) {
     nn = map_chr(substitute(list(...)), as.character)[-1L]
-    environment(.fn) = list2env(setNames(list(...), nn), parent = .parent)
+    environment(.fn) = list2env(set_names(list(...), nn), parent = .parent)
     .fn
 }
 

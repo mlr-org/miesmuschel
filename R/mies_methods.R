@@ -1404,7 +1404,7 @@ mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only
 #'
 #' # TODO: missing budget, multiobjective
 #' @export
-mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$ids(), aggregations = list(min = min, mean = mean, max = max, median = median, size = length),
+mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$ids(), aggregations = list(min = min, mean = mean, max = max, median = stats::median, size = length),
     as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
   assert_optim_instance(inst)
   assert_character(objectives, any.missing = FALSE, unique = TRUE)

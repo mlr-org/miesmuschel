@@ -82,7 +82,7 @@ RecombinatorSequential = R6Class("RecombinatorSequential",
         if (!allow_lcm_packing && !(current_fullout %% next_in == 0) && !(next_in %% current_out == 0)) {
           stopf("recombinators[[%s]]$n_indivs_out is %s and recombinators[[%s]]$n_indivs_in is %s. None is an integer multiple of the other.
 Either match input and output sizes using a RecombinatorNull, or allow rescaling of both, set 'allow_lcm_packing' to TRUE.",
-            i, current_out, i + 1, current_in)
+            i, current_out, i + 1, next_in)
         }
         step_gcd = gcd(current_fullout, next_in)
         current_mul = current_fullout / step_gcd
