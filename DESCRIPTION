@@ -82,6 +82,7 @@ Collate:
     'SelectorProxy.R'
     'SelectorRandom.R'
     'SelectorSequential.R'
+    'SelectorTournament.R'
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
     'TunerMies.R'

@@ -66,3 +66,12 @@ rec("xounif")
 sel("random")
 scl("nondom")
 }
+\seealso{
+Other dictionaries: 
+\code{\link{dict_filtors}},
+\code{\link{dict_mutators}},
+\code{\link{dict_recombinators}},
+\code{\link{dict_scalors}},
+\code{\link{dict_selectors}}
+}
+\concept{dictionaries}

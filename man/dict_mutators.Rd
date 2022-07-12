@@ -24,4 +24,13 @@ Displays help for the dictionary entry \code{key}. \code{help_type} is one of
 }
 }
 
+\seealso{
+Other dictionaries: 
+\code{\link{dict_filtors}},
+\code{\link{dict_recombinators}},
+\code{\link{dict_scalors}},
+\code{\link{dict_selectors}},
+\code{\link{mut}()}
+}
+\concept{dictionaries}
 \keyword{datasets}

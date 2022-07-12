@@ -13,8 +13,8 @@ it samples with or without replacement.
 \itemize{
 \item \code{sample_unique} :: \code{character(1)}\cr
 Whether to sample individuals globally unique (\code{"global"}), unique within groups (\code{"groups"}), or not unique at all (\code{"no"}, sample with replacement).
-This is done with best effort; if \code{group_size} (when \code{sample_unique} is \code{"groups"}) or \code{nrow(values)} (when \code{sample_unique} is \code{"global"})
-is smaller than \code{n_select}, then individuals are selected with as few repeats as possible. Initialized to \code{"groups"}.
+This is done with best effort; if \code{group_size} (when \code{sample_unique} is \code{"groups"}) or \code{n_select} (when \code{sample_unique} is \code{"global"})
+is greater than \code{nrow(values)}, then individuals are selected with as few repeats as possible. Initialized to \code{"groups"}.
 }
 }
 
@@ -65,7 +65,8 @@ Other selectors:
 \code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
-\code{\link{dict_selectors_sequential}}
+\code{\link{dict_selectors_sequential}},
+\code{\link{dict_selectors_tournament}}
 }
 \concept{selectors}
 \section{Super classes}{

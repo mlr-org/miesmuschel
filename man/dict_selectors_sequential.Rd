@@ -81,7 +81,8 @@ Other selectors:
 \code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
-\code{\link{dict_selectors_random}}
+\code{\link{dict_selectors_random}},
+\code{\link{dict_selectors_tournament}}
 
 Other selector wrappers: 
 \code{\link{dict_selectors_maybe}},
