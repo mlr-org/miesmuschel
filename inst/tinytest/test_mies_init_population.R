@@ -1,6 +1,7 @@
 
 source("setup.R", local = TRUE)
 
+set.seed(1)
 oismall = as_oi(get_objective_passthrough("minimize", TRUE))
 
 # dob and eol are not accepted in either search space or additional components
@@ -101,6 +102,7 @@ expect_equal(copy(oismall$archive$data)[, timestamp := NULL], expected_archive, 
 oismall2 = as_oi(get_objective_passthrough("minimize", TRUE))
 halfss_selector = SelectorBest$new()$prime(oismall2$search_space)
 fullss_selector = SelectorBest$new()
+
 mies_prime_operators(oismall2$search_space, selectors = list(fullss_selector), additional_components = additional_component_sampler$param_set)
 cached_expected = copy(expected_archive)
 
@@ -149,20 +151,20 @@ cached_expected = copy(expected_archive)
 cached_oismall3 = oismall3$clone(deep = TRUE)
 
 oismall3$archive$data[, x1 := NULL][, x2 := NULL]
-mies_init_population(oismall3, mu = 3, initializer = generate_design_increasing, additional_component_sampler = additional_component_sampler)
-deleting = c(3, 5)
+mies_init_population(oismall3, mu = 2, initializer = generate_design_increasing, additional_component_sampler = additional_component_sampler)
+deleting = c(2, 3, 5)
 expected_archive$eol = NA_real_
 expected_archive$eol[deleting] = 2
 expected_archive$x1[deleting] = expected_archive$x2[deleting] = NA_real_
-expected_archive$x1[-deleting] = expected_archive$x2[-deleting] = c(1, 2, 3)
+expected_archive$x1[-deleting] = expected_archive$x2[-deleting] = c(1, 2)
 expect_equal(copy(oismall3$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # same, but with fullss_selector
 expected_archive = copy(cached_expected)
 oismall3 = cached_oismall3$clone(deep = TRUE)
 oismall3$archive$data[, x1 := NULL][, x2 := NULL]
-mies_init_population(oismall3, mu = 3, initializer = generate_design_increasing, survival_selector = fullss_selector, additional_component_sampler = additional_component_sampler)
-deleting = c(3, 5)
+mies_init_population(oismall3, mu = 2, initializer = generate_design_increasing, survival_selector = fullss_selector, additional_component_sampler = additional_component_sampler)
+deleting = c(2, 3, 5)
 expected_archive$eol = NA_real_
 expected_archive$eol[deleting] = 2
 expected_archive$x1 = expected_archive$x2 = as.numeric(1:5)
@@ -172,12 +174,12 @@ expect_equal(copy(oismall3$archive$data)[, timestamp := NULL], expected_archive,
 expected_archive = copy(cached_expected)
 oismall3 = cached_oismall3$clone(deep = TRUE)
 oismall3$archive$data[, x1 := NULL][, x2 := NULL]
-mies_init_population(oismall3, mu = 3, initializer = generate_design_increasing, survival_selector = halfss_selector, additional_component_sampler = additional_component_sampler)
-deleting = c(3, 5)
+mies_init_population(oismall3, mu = 2, initializer = generate_design_increasing, survival_selector = halfss_selector, additional_component_sampler = additional_component_sampler)
+deleting = c(2, 3, 5)
 expected_archive$eol = NA_real_
 expected_archive$eol[deleting] = 2
 expected_archive$x1[deleting] = expected_archive$x2[deleting] = NA_real_
-expected_archive$x1[-deleting] = expected_archive$x2[-deleting] = c(1, 2, 3)
+expected_archive$x1[-deleting] = expected_archive$x2[-deleting] = c(1, 2)
 expect_equal(copy(oismall3$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 
@@ -200,8 +202,8 @@ oismall3$archive$data$x1 = oismall3$archive$data$x2 = c(NA, NA, NA, 2, NA)
 mies_init_population(oismall3, mu = 2, initializer = generate_design_increasing, survival_selector = fullss_selector, additional_component_sampler = additional_component_sampler)
 expected_archive$eol = NA_real_
 expected_archive[(pout1 != 1), eol := 2][, `:=`(x1 = NA_real_, x2 = NA_real_)]
-expected_archive[c(1, 2, 4), x1 := c(1, 2, 2)]
-expected_archive[c(1, 2, 4), x2 := c(1, 2, 2)]
+expected_archive[c(1, 4), x1 := c(1, 2)]
+expected_archive[c(1, 4), x2 := c(1, 2)]
 expect_equal(copy(oismall3$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 
 # same, but with halfss_selector
