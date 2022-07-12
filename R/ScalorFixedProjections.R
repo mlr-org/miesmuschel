@@ -122,7 +122,6 @@ repr.Scalarizer = function(obj, ...) {
 #'
 #' `Scalarizer`s are constructed from constructor-functions, such as [`scalarizer_linear()`] or [`scalarizer_chebyshev()`].
 #' @family Scalarizers
-#' @export
 NULL
 
 
@@ -171,6 +170,7 @@ scalarizer_linear = function() {
 #' @param rho (`numeric(1)`)\cr
 #'   Small positive value.
 #' @return a [`Scalarizer`] object.
+#' @examples
 #' # fitnesses: three rows (i.e. thee indivs) with two objective values each
 #' fitnesses <- matrix(0:5, ncol = 2)
 #'
