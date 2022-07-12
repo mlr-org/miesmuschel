@@ -7,7 +7,7 @@
 mies_aggregate_generations(
   inst,
   objectives = inst$archive$codomain$ids(),
-  aggregations = list(min = min, mean = mean, max = max, median = median, size =
+  aggregations = list(min = min, mean = mean, max = max, median = stats::median, size =
     length),
   as_fitnesses = TRUE,
   survivors_only = TRUE,

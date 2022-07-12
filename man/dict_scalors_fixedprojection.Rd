@@ -17,7 +17,8 @@ weight matrices (Nobjectives x Nweights) or vectors (if Nweights is 1).
 Function taking a fitness-matrix \code{fitnesses} (Nindivs x Nobjectives, with higher values indicating higher desirability)
 and a list of weight matrices \code{weights} (Nindivs elements of Nobjectives x Nweights matrices; positive weights should indicate a positive contribution
 to scale)
-and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability)
+and returns a matrix of scalarizations (Nindivs x Nweights, with higher values indicating greater desirability).\cr
+While custom functions can be used, it is recommended to use a \code{\link{Scalarizer}}, such as \code{\link[=scalarizer_linear]{scalarizer_linear()}}, or \code{\link[=scalarizer_chebyshev]{scalarizer_chebyshev()}}.
 }
 }
 

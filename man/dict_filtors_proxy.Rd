@@ -5,8 +5,7 @@
 \alias{FiltorProxy}
 \title{Proxy-Filtor that Filters According to its Configuration Parameter}
 \description{
-Filtor that performs the operation in its \code{operation} configuration parameter. This is useful, e.g., to make \code{\link{OptimizerSmashy}}'s
-filtor operation fully parametrizable.
+Filtor that performs the operation in its \code{operation} configuration parameter. This can be used to make filtor operations fully parametrizable.
 }
 \section{Configuration Parameters}{
 
