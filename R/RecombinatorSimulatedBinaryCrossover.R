@@ -73,7 +73,7 @@ RecombinatorSimulatedBinaryCrossover = R6Class("RecombinatorSimulatedBinaryCross
       lower = self$primed_ps$lower[nms]
       upper = self$primed_ps$upper[nms]
 
-      set(values, , nms, imap(values, .f = function(x, name) {
+      set(values, , nms, imap(values[nms], .f = function(x, name) {
         y1 = min(x)
         y2 = max(x)
         betaq1 = calculate_betaq(1 + (2 * (y1 - lower[name]) / (y2 - y1)), n[name])
