@@ -66,7 +66,7 @@ rank_nondominated = function(fitnesses, epsilon = 0) {
     assignedfronts[[orow]] = ifront
     domcount[[orow]] = numdomd
   }
-  list(fronts = assignedfronts, domcounts = domcount)
+  list(fronts = assignedfronts, domcount = domcount)
 }
 
 #' @title Calculate Crowding Distance
@@ -119,8 +119,14 @@ dist_crowding = function(fitnesses) {
 #'   be a scalar, in which case it is used for all dimensions, or a vector, in which case its length must match
 #'   the number of dimensions. Default 0.
 #' @return `numeric`: The vector of dominated hypervolume contributions for each individual in `fitnesses`.
+#'
 #' @examples
-#' # TODO example
+#' (fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+#'
+#' # to see the fitness matrix, use:
+#' ## plot(fitnesses, pch = as.character(1:5))
+#'
+#' domhv_contribution(fitnesses)
 #' @export
 domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
@@ -130,13 +136,13 @@ domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
 
   nd = nondominated(fitnesses, epsilon = epsilon)
   nonzeroes = nd$front
-  strongfront = fitnesses[nd$strongfront, , drop = FALSE]
+  strongfront = fitnesses[nd$strong_front, , drop = FALSE]
   result = numeric(nrow(fitnesses))
 
   volume_baseline = domhv(strongfront, nadir, prefilter = FALSE)
 
   result[nonzeroes] = map_dbl(nonzeroes, function(nz) {
-    replace = which(nz == nd$strongfront)
+    replace = which(nz == nd$strong_front)
     if (has_epsilon) {
       if (length(replace)) {
         strongfront[replace, ] = strongfront[replace, ] + epsilon
@@ -181,7 +187,14 @@ domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
 #'   Default 0.
 #' @return `numeric`: The vector of dominated hypervolume contributions for each individual in `fitnesses`.
 #' @examples
-#' # TODO example
+#' (fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+#'
+#' # to see the fitness matrix, use:
+#' ## plot(fitnesses, pch = as.character(1:5))
+#'
+#' domhv_improvement(fitnesses)
+#'
+#' domhv_improvement(fitnesses, fitnesses[1, , drop = FALSE])
 #' @export
 domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)

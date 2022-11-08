@@ -129,3 +129,66 @@ sd(dd$operate(data.table(x = rep(0.5, 1000)))$x)^2
 1+1
 
 # RecombinatorSequential$new(list(rec("
+
+
+MutatorSequential$new(list(mut("gauss"))
+
+mut("sequential", list(mut("gauss"), mut("unif")))
+
+
+mut("sequential", list(
+    mut("gauss", sdev = .3),
+    mut("gauss", sdev = .4)
+))
+
+
+mut()
+
+
+
+
+p = ps(x = p_dbl(-5, 5))
+data = data.frame(x = rep(0, 5))
+
+sa = scl("aggregate", list(
+    scl("one", objective = 1),
+    scl("one", objective = 2)
+))
+sa$prime(p)
+
+(fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+
+# to see the fitness matrix, use:
+## plot(fitnesses, pch = as.character(1:5))
+
+domhv_improvement(fitnesses)
+
+domhv_improvement(fitnesses, fitnesses[1, , drop = FALSE])
+
+
+
+
+
+# default weight 1 -- sum of both objectives
+sa$operate(data, fitnesses)
+
+
+
+# only first objective
+sa$param_set$values[c("weight_1", "weight_2")] = c(1, 0)
+sa$operate(data, fitnesses)
+
+# only 2 * second objective
+sa$param_set$values[c("weight_1", "weight_2")] = c(0, 2)
+sa$operate(data, fitnesses)
+
+
+sd$param_set$values$scale_output = FALSE
+sd$operate(data, fitnesses)
+
+sd$param_set$values$output = "count_dominated"
+# point 4 dominates three other points, point 2 only one other point.
+sd$operate(data, fitnesses)
+
+
+sa = scl("aggregate")

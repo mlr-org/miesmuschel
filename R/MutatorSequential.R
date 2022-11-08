@@ -24,7 +24,64 @@
 #' @family mutators
 #' @family mutator wrappers
 #' @examples
-#' # TODO examples
+#' set.seed(1)
+#'
+#' # dataset:
+#' #  - x1 is mutated around +- 10
+#' #  - x2 influences sdev of mutation of x1
+#' ds = data.frame(x1 = 0, x2 = c(.01, 0.1, 1))
+#' p = ps(x1 = p_dbl(-10, 10), x2 = p_dbl(0, 10))
+#'
+#' # operator that only mutates x1, with sdev given by x2
+#' gauss_x1 = mut("combine",
+#'   operators = list(
+#'     x1 = mut("gauss", sdev_is_relative = FALSE),
+#'     x2 = mut("null")
+#'   ),
+#'   adaptions = list(x1.sdev = function(x) x$x2)
+#' )
+#'
+#' gauss_x1$prime(p)
+#' gauss_x1$operate(ds)  # see how x1[1] changes little, x1[3] changes a lot
+#'
+#' # operator that mutates x1  with sdev given by x2, as well as x2. However,
+#' # the value that x2 takes after mutation does not influence the value that
+#' # the mutator of x1 "sees" -- although x2 is mutated to extreme values,
+#' # mutation of x1 happens as in `gauss_x1`.
+#' gauss_x1_x2 = mut("combine",
+#'   operators = list(
+#'     x1 = mut("gauss", sdev_is_relative = FALSE),
+#'     x2 = mut("gauss", sdev = 100)
+#'   ),
+#'   adaptions = list(x1.sdev = function(x) x$x2)
+#' )
+#'
+#' gauss_x1_x2$prime(p)
+#' gauss_x1_x2$operate(ds)  # see how x1 changes in similar ways to above
+#'
+#' # operator that mutates sequentially: first x2, and then x1 with sdev given
+#' # by x2. The value that x2 takes after mutation *does* influence the value
+#' # that the mutator of x1 "sees": x1 is mutated either to a large degree,
+#' # or not at all.
+#'
+#' gauss_x2_then_x1 = mut("sequential", list(
+#'     mut("combine",
+#'       operators = list(
+#'         x1 = mut("null"),
+#'         x2 = mut("gauss", sdev = 100)
+#'       )
+#'     ),
+#'     mut("combine",
+#'       operators = list(
+#'         x1 = mut("gauss", sdev_is_relative = FALSE),
+#'         x2 = mut("null")
+#'       ),
+#'       adaptions = list(x1.sdev = function(x) x$x2)
+#'     )
+#' ))
+#'
+#' gauss_x2_then_x1$prime(p)
+#' gauss_x2_then_x1$operate(ds)
 #' @export
 MutatorSequential = R6Class("MutatorSequential",
   inherit = Mutator,

@@ -1275,8 +1275,6 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budge
 #'
 #' # Individuals that died are included:
 #' mies_get_generation_results(oi, survivors_only = FALSE)
-#'
-#' # TODO: missing budget
 #' @export
 mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
   assert_optim_instance(inst)
@@ -1401,8 +1399,6 @@ mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only
 #'
 #' # Individuals that died are included:
 #' mies_aggregate_generations(oi, survivors_only = FALSE)
-#'
-#' # TODO: missing budget, multiobjective
 #' @export
 mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$ids(), aggregations = list(min = min, mean = mean, max = max, median = stats::median, size = length),
     as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {

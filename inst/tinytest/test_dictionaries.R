@@ -200,9 +200,15 @@ for (opinfo in dicts) {
 
   }
 
+  # class name
+
+  expect_equal(opinfo$base, substr(class(test_obj)[[1]], 1, nchar(opinfo$base)))
+
   # $help() etc
 
   expect_equal(test_obj$man, paste0("miesmuschel::", opinfo$operator))
+
+
 
   entryname = paste0(dict$.__enclos_env__$private$.dict_name, "_", dictname)
 

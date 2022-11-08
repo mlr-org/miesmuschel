@@ -40,7 +40,24 @@
 #' @family recombinators
 #' @family recombinator wrappers
 #' @examples
-#' # TODO
+#' set.seed(1)
+#'
+#' ds = data.frame(a = c(0, 1), b = c(0, 1))
+#' p = ps(a = p_dbl(0, 1), b = p_dbl(0, 1))
+#'
+#'
+#' convex = rec("cvxpair", lambda = 0.7)
+#' swap = rec("swap")
+#'
+#' convex_then_swap = rec("sequential", list(convex, swap))
+#'
+#' ds
+#'
+#' convex$prime(p)$operate(ds)
+#'
+#' swap$prime(p)$operate(ds)
+#'
+#' convex_then_swap$prime(p)$operate(ds)
 #' @export
 RecombinatorSequential = R6Class("RecombinatorSequential",
   inherit = Recombinator,

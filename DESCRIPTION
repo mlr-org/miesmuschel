@@ -30,7 +30,7 @@ Suggests:
   ranger,
   xgboost,
   rpart
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Collate: 
     'dictionaries.R'
     'MiesOperator.R'
