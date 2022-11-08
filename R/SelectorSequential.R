@@ -55,8 +55,6 @@
 #'
 #' @family selectors
 #' @family selector wrappers
-#' @examples
-#' # TODO
 #' @export
 SelectorSequential = R6Class("SelectorSequential",
   inherit = Selector,

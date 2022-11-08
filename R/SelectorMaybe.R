@@ -91,8 +91,6 @@
 #'
 #' @family selectors
 #' @family selector wrappers
-#' @examples
-#' # TODO
 #' @export
 SelectorMaybe = R6Class("SelectorMaybe",
   inherit = Selector,
