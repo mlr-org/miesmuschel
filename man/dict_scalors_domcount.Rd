@@ -69,7 +69,6 @@ sd$operate(data, fitnesses)
 sd$param_set$values$output = "count_dominated"
 # point 4 dominates three other points, point 2 only one other point.
 sd$operate(data, fitnesses)
-#' @export
 }
 \seealso{
 Other scalors: 
