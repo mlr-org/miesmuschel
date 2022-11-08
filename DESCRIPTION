@@ -1,6 +1,6 @@
 Package: miesmuschel
 Title: Mixed Integer Evolutionary Strategies
-Description: Evolutionary black box optimization algorithms building on the "bbotk" package. "miesmuschel" offers both ready-to-use optimization algorithms, as well as their fundamental building blocks that can be used to manually construct specialized optimization loops.
+Description: Evolutionary black box optimization algorithms building on the 'bbotk' package. 'miesmuschel' offers both ready-to-use optimization algorithms, as well as their fundamental building blocks that can be used to manually construct specialized optimization loops.
 Authors@R: c(
   person("Martin", "Binder", email = "mlr.developer@mb706.com", role = c("aut", "cre")),
   person(given = "Lennart", family = "Schneider", role = c("ctb"), email = "lennart.sch@web.de", comment = c(ORCID = "0000-0003-4152-5308")),
