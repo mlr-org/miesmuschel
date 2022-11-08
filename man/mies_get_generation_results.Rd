@@ -79,6 +79,4 @@ mies_get_generation_results(oi, as_fitnesses = FALSE)
 
 # Individuals that died are included:
 mies_get_generation_results(oi, survivors_only = FALSE)
-
-# TODO: missing budget
 }

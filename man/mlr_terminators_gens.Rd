@@ -57,10 +57,10 @@ trm("gens", generations = 10)
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="format"><a href='../../bbotk/html/Terminator.html#method-Terminator-format'><code>bbotk::Terminator$format()</code></a></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="print"><a href='../../bbotk/html/Terminator.html#method-Terminator-print'><code>bbotk::Terminator$print()</code></a></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="remaining_time"><a href='../../bbotk/html/Terminator.html#method-Terminator-remaining_time'><code>bbotk::Terminator$remaining_time()</code></a></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="status"><a href='../../bbotk/html/Terminator.html#method-Terminator-status'><code>bbotk::Terminator$status()</code></a></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="format"><a href='../../bbotk/html/Terminator.html#method-Terminator-format'><code>bbotk::Terminator$format()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="print"><a href='../../bbotk/html/Terminator.html#method-Terminator-print'><code>bbotk::Terminator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="remaining_time"><a href='../../bbotk/html/Terminator.html#method-Terminator-remaining_time'><code>bbotk::Terminator$remaining_time()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Terminator" data-id="status"><a href='../../bbotk/html/Terminator.html#method-Terminator-status'><code>bbotk::Terminator$status()</code></a></span></li>
 </ul>
 </details>
 }}

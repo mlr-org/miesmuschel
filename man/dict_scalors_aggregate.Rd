@@ -48,7 +48,30 @@ dict_scalors$get("aggregate", <scalors>)
 }
 
 \examples{
-# TODO
+p = ps(x = p_dbl(-5, 5))
+data = data.frame(x = rep(0, 5))
+
+sa = scl("aggregate", list(
+    scl("one", objective = 1),
+    scl("one", objective = 2)
+))
+sa$prime(p)
+
+(fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+
+# to see the fitness matrix, use:
+## plot(fitnesses, pch = as.character(1:5))
+
+# default weight 1 -- sum of both objectives
+sa$operate(data, fitnesses)
+
+# only first objective
+sa$param_set$values[c("weight_1", "weight_2")] = c(1, 0)
+sa$operate(data, fitnesses)
+
+# only 2 * second objective
+sa$param_set$values[c("weight_1", "weight_2")] = c(0, 2)
+sa$operate(data, fitnesses)
 }
 \seealso{
 Other scalors: 
@@ -89,10 +112,10 @@ Other scalor wrappers:
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
 </ul>
 </details>
 }}

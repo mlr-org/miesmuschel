@@ -115,12 +115,12 @@ Other filtors:
 \if{html}{\out{
 <details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="Filtor" data-id="needed_input"><a href='../../miesmuschel/html/Filtor.html#method-Filtor-needed_input'><code>miesmuschel::Filtor$needed_input()</code></a></li>
-<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="FiltorSurrogate" data-id="prime"><a href='../../miesmuschel/html/FiltorSurrogate.html#method-FiltorSurrogate-prime'><code>miesmuschel::FiltorSurrogate$prime()</code></a></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="Filtor" data-id="needed_input"><a href='../../miesmuschel/html/Filtor.html#method-Filtor-needed_input'><code>miesmuschel::Filtor$needed_input()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="FiltorSurrogate" data-id="prime"><a href='../../miesmuschel/html/FiltorSurrogate.html#method-FiltorSurrogate-prime'><code>miesmuschel::FiltorSurrogate$prime()</code></a></span></li>
 </ul>
 </details>
 }}

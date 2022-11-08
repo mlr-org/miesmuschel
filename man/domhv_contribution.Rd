@@ -34,5 +34,10 @@ Individuals that are less than another individual more than \code{epsilon} in an
 of 0.
 }
 \examples{
-# TODO example
+(fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+
+# to see the fitness matrix, use:
+## plot(fitnesses, pch = as.character(1:5))
+
+domhv_contribution(fitnesses)
 }

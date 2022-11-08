@@ -37,5 +37,12 @@ Individuals in \code{fitnesses} are considered independently of each other. A po
 \code{baseline} individuals only need to be pre-filtered once.
 }
 \examples{
-# TODO example
+(fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+
+# to see the fitness matrix, use:
+## plot(fitnesses, pch = as.character(1:5))
+
+domhv_improvement(fitnesses)
+
+domhv_improvement(fitnesses, fitnesses[1, , drop = FALSE])
 }
