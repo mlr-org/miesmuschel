@@ -4,8 +4,7 @@ Description: Evolutionary black box optimization algorithms building on the 'bbo
 Authors@R: c(
   person("Martin", "Binder", email = "mlr.developer@mb706.com", role = c("aut", "cre")),
   person(given = "Lennart", family = "Schneider", role = c("ctb"), email = "lennart.sch@web.de", comment = c(ORCID = "0000-0003-4152-5308")),
-  person(given = "Susanne", family = "Dandl", role = c("ctb"), email = "dandl.susanne@googlemail.com", comment = c(ORCID = "0000-0003-4324-4163")),
-  person(given = "Andreas", family = "Hofheinz", role = c("ctb"), email = "andreas.hofheinz@outlook.com")
+  person(given = "Susanne", family = "Dandl", role = c("ctb"), email = "dandl.susanne@googlemail.com", comment = c(ORCID = "0000-0003-4324-4163"))
   )
 URL: https://github.com/mlr-org/miesmuschel
 BugReports: https://github.com/mlr-org/miesmuschel/issues
