@@ -46,7 +46,6 @@ Other contributors:
 \itemize{
   \item Lennart Schneider \email{lennart.sch@web.de} (\href{https://orcid.org/0000-0003-4152-5308}{ORCID}) [contributor]
   \item Susanne Dandl \email{dandl.susanne@googlemail.com} (\href{https://orcid.org/0000-0003-4324-4163}{ORCID}) [contributor]
-  \item Andreas Hofheinz \email{andreas.hofheinz@outlook.com} [contributor]
 }
 
 }
