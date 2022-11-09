@@ -24,21 +24,41 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Filtor}} can be created with the short access form \code{\link[=ftr]{ftr()}}
 (\code{\link[=ftrs]{ftrs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_filtors}} in the following way:\preformatted{# preferred:
+\code{\link{dict_filtors}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 ftr("null")
 ftrs("null")  # takes vector IDs, returns list of Filtors
 
 # long form:
 dict_filtors$get("null")
-}
+}\if{html}{\out{</div>}}
 }
 
+\examples{
+fn = ftr("null")
+
+p = ps(x = p_dbl(-5, 5))
+known_data = data.frame(x = 1:5)
+fitnesses = 1:5
+
+new_data = data.frame(x = c(2.5, 4.5))
+
+fn$prime(p)
+
+fn$needed_input(1)
+
+fn$operate(new_data, known_data, fitnesses, 1)
+
+}
 \seealso{
 Other filtors: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
-\code{\link{dict_filtor_maybe}},
+\code{\link{dict_filtors_maybe}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtour}}
 }
 \concept{filtors}
 \section{Super classes}{
@@ -47,31 +67,35 @@ Other filtors:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{FiltorNull$new()}}
-\item \href{#method-clone}{\code{FiltorNull$clone()}}
+\item \href{#method-FiltorNull-new}{\code{FiltorNull$new()}}
+\item \href{#method-FiltorNull-clone}{\code{FiltorNull$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="Filtor" data-id="needed_input">}\href{../../miesmuschel/html/Filtor.html#method-needed_input}{\code{miesmuschel::Filtor$needed_input()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="Filtor" data-id="needed_input"><a href='../../miesmuschel/html/Filtor.html#method-Filtor-needed_input'><code>miesmuschel::Filtor$needed_input()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-FiltorNull-new"></a>}}
+\if{latex}{\out{\hypertarget{method-FiltorNull-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize the \code{FiltorNull} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{FiltorNull$new()}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-FiltorNull-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-FiltorNull-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -24,20 +24,31 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
+\code{\link{Scalor}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
+\code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{base classes}
@@ -59,21 +70,24 @@ Number of individuals produced for each group of \verb{$n_indivs_in} individuals
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{Recombinator$new()}}
-\item \href{#method-clone}{\code{Recombinator$clone()}}
+\item \href{#method-Recombinator-new}{\code{Recombinator$new()}}
+\item \href{#method-Recombinator-clone}{\code{Recombinator$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-Recombinator-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Recombinator-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{Recombinator}.
 \subsection{Usage}{
@@ -81,7 +95,10 @@ Initialize base class components of the \code{Recombinator}.
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
   n_indivs_in = 2,
-  n_indivs_out = n_indivs_in
+  n_indivs_out = n_indivs_in,
+  packages = character(0),
+  dict_entry = NULL,
+  own_param_set = quote(self$param_set)
 )}\if{html}{\out{</div>}}
 }
 
@@ -111,13 +128,31 @@ The \verb{$n_indivs_in} field will reflect this value.}
 Number of individuals that result for each \code{n_indivs_in} lines of input. The number of results from the recombinator will be
 \code{nrow(values) / n_indivs_in * n_indivs_out}. Default equal to \code{n_indivs_in}.\cr
 The \verb{$n_indivs_out} field will reflect this value.}
+
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\cr
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-Recombinator-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-Recombinator-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

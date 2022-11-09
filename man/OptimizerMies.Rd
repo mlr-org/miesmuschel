@@ -3,24 +3,24 @@
 \name{OptimizerMies}
 \alias{OptimizerMies}
 \alias{TunerMies}
-\title{Mixed Integer Evolutionary Strategies Optimizer}
+\title{Mixed Integer Evolution Strategies Optimizer}
 \description{
-Perform optimization using evolutionary strategies. \code{OptimizerMies} and \code{TunerMies} implement a standard ES optimization
+Perform optimization using evolution strategies. \code{OptimizerMies} and \code{TunerMies} implement a standard ES optimization
 algorithm, performing initialization first, followed by a loop of performance evaluation, survival selection, parent selection, mutation, and
-recombination. Currently two different survival modes ("comma" and "plus") are supported. Multi-fidelity optimization, similar
-to the "rolling-tide" algorithm described in Fieldsend (2014). The modular design and reliance on
-\code{\link{MiesOperator}} objects to perform central parts of the optimization algorithm makes this \code{\link[bbotk:Optimizer]{Optimizer}}
-highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
+recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
+Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in Fieldsend (2014), is supported.
+The modular design and reliance on \code{\link{MiesOperator}} objects to perform central parts of the optimization algorithm makes this
+\code{\link[bbotk:Optimizer]{Optimizer}} highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
 as presented in Li (2013) can easily be implemented.
 
-\code{OptimizerMies} implements a standard evolutionary strategies loop:
+\code{OptimizerMies} implements a standard evolution strategies loop:
 \enumerate{
 \item Prime operators, using \code{mies_prime_operators()}
 \item Initialize and evaluate population, using \code{mies_init_population()}
-\item Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 \item Generate offspring by selecting parents, recombining and mutating them, using \code{mies_generate_offspring()}
 \item Evaluate performance, using \code{mies_evaluate_offspring()}
 \item Select survivors, using either \code{mies_survival_plus()} or \code{mies_survival_comma()}, depending on the \code{survival_strategy} configuration parameter
+\item Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 \item Jump to 3.
 }
 }
@@ -29,34 +29,42 @@ as presented in Li (2013) can easily be implemented.
 As with all optimizers, \code{\link[bbotk:Terminator]{Terminator}}s are used to end optimization after a specific number of evaluations were performed,
 time elapsed, or other conditions are satisfied. Of particular interest is \code{\link{TerminatorGenerations}}, which terminates after a number
 of generations were evaluated in \code{OptimizerMies}. The initial population counts as generation 1, its offspring as generation 2 etc.;
-fidelity refinements are always included in their generation, \code{\link{TerminatorGenerations}} avoids terminating right before they are evaluated.
-Other terminators may, however, end the optimization process at any time.
+fidelity refinements (step 6. in the algorithm description above) are always included in their generation, \code{\link{TerminatorGenerations}}
+avoids terminating right before they are evaluated. Other terminators may, however, end the optimization process at any time.
 }
 
 \section{Multi-Fidelity}{
 
-\code{miesmuschel} provides a simple multi-fidelity optimization mechanism that allows increasing fidelity both by generation
-number and survival status. When \code{multi_fidelity} is \code{TRUE}, then one search space component of the \code{\link[bbotk:OptimInstance]{OptimInstance}}
-must have the \code{"budget"} tag, which is then optimized as the "budget" component. This means that the value of this component is
-determined by the \code{fidelity_schedule} configuration parameter, which must contain a \code{data.frame} with columns \code{"generation"}, \code{"budget_new"} and
-\code{"budget_survivors"}. The budget component's value of newly sampled individuals is set to the \code{"budget_new"} entry in the generation's row,
-and surviving individuals are evaluated again with the budget set to the \code{"budget_survivors"} value (unless they are the same). At the
-end of a generation, if the \code{"budget_survivors"} value changes, all individuals from previous generations are re-evaluated with the
-new budget value, unless \code{fidelity_current_gen_only} is set to \code{TRUE} (and unless the budget value decreases and \code{fidelity_monotonic} is \code{TRUE}).
-This makes it possible to implement increasing fidelity by generation, and also increasing fidelity for samples that survived a generation.
+\code{miesmuschel} provides a simple multi-fidelity optimization mechanism that allows both the refinement of fidelity as the optimization progresses,
+as well as fidelity refinement within each generation. When \code{multi_fidelity} is \code{TRUE}, then one search space component of the
+\code{\link[bbotk:OptimInstance]{OptimInstance}} must have the \code{"budget"} tag, which is then optimized as the "budget" component. This means that the value of this component is
+determined by the \code{fidelity}/\code{fidelity_offspring} parameters, which are functions that get called whenever individuals get evaluated.
+The \code{fidelity} function is evaluated before step 2 and before every occurrence of step 6 in the algorithm, it returns the value of the budget search space component that all individuals
+that survive the current generation should be evaluated with. \code{fidelity_offspring} is called before step 4 and determines the fidelity that newly
+sampled offspring individuals should be evaluated with; it may be desirable to set this to a lower value than \code{fidelity} to save budget when
+preliminarily evaluating newly sampled individuals that may or may not perform well compared to already sampled individuals.
+Individuals that survive the generation and are not removed in step 5 will be re-evaluated with the \code{fidelity}-value in step 6 before the next loop
+iteration.
 
-The \code{fidelity_schedule} configuration parameter's \code{"generation"} column determines which row is currently active. A row becomes active in the
-generation that is listed, and becomes inactive whenever a different row becomes active. So e.g. if \code{fidelity_schedule} contains a row
-with \code{"generation"} set to 1, and one set to 4, then the first row is active during generations 1, 2, and 3, and the second row
-is active for all following generations.
+\code{fidelity} and \code{fidelity_offspring} must have arguments \code{inst}, \code{budget_id}, \code{last_fidelity} and \code{last_fidelity_offspring}. \code{inst} is the
+\code{\link[bbotk:OptimInstance]{OptimInstance}} bein optimized, the functions can use it to determine the progress of the optimization, e.g. query
+the current generation with \code{\link{mies_generation}}. \code{budget_id} identifies the search space component being used as budget parameter. \code{last_fidelity}
+and \code{last_fidelity_offspring} contain the last values given by \code{fidelity} / \code{fidelity_offspring}. Should the offspring-fidelity (as returned
+by \code{fidelity_offspring} always be the same as the parent generation fidelity (as returned by \code{fidelity}), for example, then \code{fidelity_offspring}
+can be set to a function that just returns \code{last_fidelity}; this is actually the behaviour that \code{fidelity_offspring} is initialized with.
 
-Note that the multifidelity functionality is experimental and the UI may change in the future.
+\code{OptimizerMies} avoids re-evaluating individuals if the fidelity parameter does not change. This means that setting \code{fidelity} and \code{fidelity_offspring}
+to the same value avoids re-evaluating individuals in step 6. When \code{fidelity_monotonic} is \code{TRUE}, re-evaluation is also avoided should the
+desired fidelity parameter value decrease. When \code{fidelity_current_gen_only} is \code{TRUE}, then step 6 only re-evaluates individuals that were
+created in the current generation (in the previous step 4) and sets the fidelity for individuals that are created in step 6, but it does not
+re-evaluate individuals that survived from earlier generations or were already in the \code{\link[bbotk:OptimInstance]{OptimInstance}} when
+optimization started; it is recommended to leave this value at \code{TRUE} which it is initialized with.
 }
 
 \section{Additional Components}{
 
 The search space over which the optimization is performed is fundamentally tied to the \code{\link[bbotk:Objective]{Objective}}, and therefore
-to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolutionary Strategy based
+to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolution Strategy based
 algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 self-adaption as implemented in \code{\link{OperatorCombination}}, where one or several components can be used to adjust operator behaviour.
 These additional components are supplied to the optimizer through the \code{additional_component_sampler} configuration parameter, which takes
@@ -68,7 +76,7 @@ that is seen by the \code{\link{MiesOperator}}s is then the union of the \code{\
 
 \section{Configuration Parameters}{
 
-\code{OptimizerMies} has the configuration parameters of the \code{mutator}, \code{recombinator}, \code{parent_selector}, \code{survival_selector}, and, if given,
+\code{OptimizerMies} has the configuration parameters of the \code{mutator}, \code{recombinator}, \code{parent_selector}, \code{survival_selector}, \code{init_selector}, and, if given,
 \code{elite_selector} operator given during construction, and prefixed according to the name of the argument (\code{mutator}'s configuration parameters
 are prefixed \code{"mutator."} etc.). When using the construction arguments' default values, they are all "proxy" operators: \code{\link{MutatorProxy}},
 \code{\link{RecombinatorProxy}} and \code{\link{SelectorProxy}}. This means that the respective configuration parameters become \code{mutator.operation}, \code{recombinator.operation} etc.,
@@ -78,10 +86,10 @@ Further configuration parameters are:
 \itemize{
 \item \code{lambda} :: \code{integer(1)}\cr
 Offspring size: Number of individuals that are created and evaluated anew for each generation. This is equivalent to the
-\code{lambda} parameter of \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Initialized to 10.
+\code{lambda} parameter of \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, see there for more information. Must be set by the user.
 \item \code{mu} :: \code{integer(1)}\cr
 Population size: Number of individuals that are sampled in the beginning, and which are selected with each survival step.
-This is equivalent to the \code{mu} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information. Initialized to 1.
+This is equivalent to the \code{mu} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information. Must be set by the user.
 \item \code{survival_strategy} :: \code{character(1)}\cr
 May be \code{"plus"}, or, if the \code{elite_selector} construction argument is not \code{NULL}, \code{"comma"}: Choose whether \code{\link[=mies_survival_plus]{mies_survival_plus()}}
 or \code{\link[=mies_survival_comma]{mies_survival_comma()}} is used for survival selection. Initialized to \code{"plus"}.
@@ -99,34 +107,33 @@ Additional components that may be part of individuals as seen by mutation, recom
 that are not part of the search space of the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized.
 This is equivalent to the \code{additional_component_sampler} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information.
 Initialized to \code{NULL} (no additional components).
-\item \code{fidelity_schedule} :: \code{data.frame}\cr
+\item \code{fidelity} :: \code{function}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
-Table that determines the value of the "budget" component of individuals being evaluated when doing multi-fidelity optimization.
-This is equivalent to the \code{fidelity_schedule} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, \code{\link[=mies_evaluate_offspring]{mies_evaluate_offspring()}}, and \code{\link[=mies_step_fidelity]{mies_step_fidelity()}};
-see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to a \code{data.frame} containing one row
-for generation 1, setting budget to 1 for both new and survivor individuals.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.
-\item \code{fidelity_generation_lookahead} :: \code{logical(1)}\cr
+Function that determines the value of the "budget" component of surviving individuals being evaluated when doing multi-fidelity optimization.
+It must have arguments named \code{inst}, \code{budget_id}, \code{last_fidelity} and \code{last_fidelity_offspring}, see the "Multi-Fidelity"-section
+for more details. Its return value is given to \code{\link[=mies_init_population]{mies_init_population()}} and \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to a \code{function} returning the value 1.
+\item \code{fidelity_offspring} :: \code{function}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
-Whether to use the \code{"survivor_budget"} of the \emph{next} generation, instead of the \emph{current} generation, when doing fidelity refinement
-in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}.
-This is equivalent to the \code{generation_lookahead} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.
+Function that determines the value of the "budget" component of newly sampled offspring individuals being evaluated when doing multi-fidelity optimization.
+It must have arguments named \code{inst}, \code{budget_id}, \code{last_fidelity} and \code{last_fidelity_offspring}, see the "Multi-Fidelity"-section
+for more details. Its return value is given to \code{\link[=mies_evaluate_offspring]{mies_evaluate_offspring()}}.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to a \code{function} returning the value of \code{last_fidelity},
+i.e. the value returned by the last call to the \code{fidelity} configuration parameter. This is the recommended value when fidelity should not change within
+a generation, since this means that survivor selection is performed with individuals that were evaluated with the same fidelity
+(at least if \code{fidelity_current_gen_only} is also set to \code{FALSE}) .
 \item \code{fidelity_current_gen_only} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 When doing fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, whether to refine all individuals with different budget component,
 or only individuals created in the current generation.
 This is equivalent to the \code{current_gen_only} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}, the recommended value.
 \item \code{fidelity_monotonic} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
 Whether to only do fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}} for individuals for which the when budget component value would \emph{increase}.
 This is equivalent to the \code{monotonic} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
-When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.
+When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}. When optimization is performed
+on problems that have a categorical "budget" parameter, then this value should be set to \code{FALSE}.
 }
 }
 
@@ -134,7 +141,7 @@ Note that the multifidelity functionality is experimental and the UI may change 
 \donttest{
 lgr::threshold("warn")
 
-op.m <- mut("gauss")
+op.m <- mut("gauss", sdev = 0.1)
 op.r <- rec("xounif", p = .3)
 op.parent <- sel("random")
 op.survival <- sel("best")
@@ -213,10 +220,6 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \dQuote{Mixed integer evolution strategies for parameter optimization.}
 \emph{Evolutionary computation}, \bold{21}(1), 29--64.
 }
-\seealso{
-Other optimizers: 
-\code{\link{OptimizerSumoHB}}
-}
 \concept{optimizers}
 \section{Super class}{
 \code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerMies}
@@ -239,6 +242,9 @@ Survival selection operation to use in \code{\link[=mies_survival_plus]{mies_sur
 \item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})\cr
 Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}.}
 
+\item{\code{init_selector}}{(\code{\link{Selector}})\cr
+Selection operation to use when there are more than \code{mu} individuals present at the beginning of the optimization.}
+
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
 Configuration parameters of the optimization algorithm.}
 }
@@ -247,22 +253,23 @@ Configuration parameters of the optimization algorithm.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{OptimizerMies$new()}}
-\item \href{#method-clone}{\code{OptimizerMies$clone()}}
+\item \href{#method-OptimizerMies-new}{\code{OptimizerMies$new()}}
+\item \href{#method-OptimizerMies-clone}{\code{OptimizerMies$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="format">}\href{../../bbotk/html/Optimizer.html#method-format}{\code{bbotk::Optimizer$format()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="optimize">}\href{../../bbotk/html/Optimizer.html#method-optimize}{\code{bbotk::Optimizer$optimize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="print">}\href{../../bbotk/html/Optimizer.html#method-print}{\code{bbotk::Optimizer$print()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="format"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-format'><code>bbotk::Optimizer$format()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="help"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-help'><code>bbotk::Optimizer$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="optimize"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-optimize'><code>bbotk::Optimizer$optimize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="print"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-print'><code>bbotk::Optimizer$print()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-OptimizerMies-new"></a>}}
+\if{latex}{\out{\hypertarget{method-OptimizerMies-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{OptimizerMies} object.
 \subsection{Usage}{
@@ -272,6 +279,7 @@ Initialize the \code{OptimizerMies} object.
   parent_selector = SelectorProxy$new(),
   survival_selector = SelectorProxy$new(),
   elite_selector = NULL,
+  init_selector = survival_selector,
   multi_fidelity = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -306,20 +314,26 @@ Elite selector used in \code{\link[=mies_survival_comma]{mies_survival_comma()}}
 argument is not \code{NULL}. Default \code{NULL}.\cr
 The \verb{$elite_selector} field will reflect this value.}
 
+\item{\code{init_selector}}{(\code{\link{Selector}})\cr
+Survival selection operation to give to the \code{survival_selector} argument of \code{\link[=mies_init_population]{mies_init_population()}}; it is used if
+the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized already
+contains more (alive) individuals than \code{mu}. Default is the value given to \code{survival_selector}.
+The \verb{$init_selector} field will reflect this value.}
+
 \item{\code{multi_fidelity}}{(\code{logical(1)})\cr
 Whether to enable multi-fidelity optimization. When this is \code{TRUE}, then the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized must
 contain a \code{\link[paradox:Param]{Param}} tagged \code{"budget"}, which is then used as the "budget" search space component, determined by
-\code{fidelity_schedule} instead of by the \code{\link{MiesOperator}}s themselves. For multi-fidelity optimization, the \code{fidelity_schedule},
-\code{fidelity_generation_lookahead}, \code{fidelity_current_gen_only}, and \code{fidelity_monotonic} configuration parameters must be given to determine
+\code{fidelity} and \code{fidelity_offspring} instead of by the \code{\link{MiesOperator}}s themselves. For multi-fidelity optimization, the \code{fidelity},
+\code{fidelity_offspring}, \code{fidelity_current_gen_only}, and \code{fidelity_monotonic} configuration parameters must be given to determine
 multi-fidelity behaviour. (While the initial values for most of these are probably good for most cases in which more budget implies
-higher fidelity, the \code{fidelity_schedule} configuration parameter should be adjusted in most cases). Default is \code{FALSE}.}
+higher fidelity, at least the \code{fidelity} configuration parameter should be adjusted in most cases). Default is \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-OptimizerMies-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-OptimizerMies-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
@@ -341,22 +355,23 @@ The objects of this class are cloneable with this method.
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{TunerMies$new()}}
-\item \href{#method-clone}{\code{TunerMies$clone()}}
+\item \href{#method-TunerMies-new}{\code{TunerMies$new()}}
+\item \href{#method-TunerMies-clone}{\code{TunerMies$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="format">}\href{../../mlr3tuning/html/Tuner.html#method-format}{\code{mlr3tuning::Tuner$format()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="print">}\href{../../mlr3tuning/html/Tuner.html#method-print}{\code{mlr3tuning::Tuner$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerFromOptimizer" data-id="optimize">}\href{../../mlr3tuning/html/TunerFromOptimizer.html#method-optimize}{\code{mlr3tuning::TunerFromOptimizer$optimize()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="format"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-format'><code>mlr3tuning::Tuner$format()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="help"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-help'><code>mlr3tuning::Tuner$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="print"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-print'><code>mlr3tuning::Tuner$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerFromOptimizer" data-id="optimize"><a href='../../mlr3tuning/html/TunerFromOptimizer.html#method-TunerFromOptimizer-optimize'><code>mlr3tuning::TunerFromOptimizer$optimize()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-TunerMies-new"></a>}}
+\if{latex}{\out{\hypertarget{method-TunerMies-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{TunerMies} object.
 \subsection{Usage}{
@@ -366,6 +381,7 @@ Initialize the \code{TunerMies} object.
   parent_selector = SelectorProxy$new(),
   survival_selector = SelectorProxy$new(),
   elite_selector = NULL,
+  init_selector = survival_selector,
   multi_fidelity = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -383,14 +399,16 @@ Initialize the \code{TunerMies} object.
 
 \item{\code{elite_selector}}{(\code{\link{Selector}} | \code{NULL})}
 
+\item{\code{init_selector}}{(\code{\link{Selector}})}
+
 \item{\code{multi_fidelity}}{(\code{logical(1)})}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-TunerMies-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-TunerMies-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

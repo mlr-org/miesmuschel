@@ -9,8 +9,8 @@ mies_filter_offspring(
   individuals,
   lambda,
   filtor = NULL,
-  fidelity_schedule = NULL,
   budget_id = NULL,
+  fidelity = NULL,
   get_indivs = TRUE
 )
 }
@@ -28,19 +28,14 @@ Number of individuals to filter down to.}
 \code{\link{Filtor}} operator that filters. When \code{NULL} is given, then the \code{\link{FiltorNull}} operation is performed and the first \code{lambda} individuals are
 taken from \code{individuals}.}
 
-\item{fidelity_schedule}{(\code{data.frame} | \code{NULL})\cr
-\code{data.frame} with three columns \code{"generation"}, \code{"budget_new"}, \code{"budget_survivors"}, in that order. \code{"budget_new"} and \code{"budget_survivors"}
-are atomic columns assigned to the \code{budget_id} component of \code{offspring}; which one is chosen depends on \code{survivor_budget}.
-\code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-\code{generation == 1} must be present.\cr
-This value may be \code{NULL} if no multi-fidelity optimization is performed, \strong{or} when, instead of the current generation's budget, the
-maximum budget found in \code{inst$archive} should be used (the default).\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.}
-
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
-Budget compnent when doing multi-fidelity optimization. This component of the search space is added
-to \code{individuals} according to \code{fidelity_schedule} and the current generation's \code{"budget_survivors"}. Should be \code{NULL}
-when and only when \code{fidelity_schedule} is \code{NULL}.}
+Budget component when doing multi-fidelity optimization. This component of the search space is added
+to \code{individuals} according to \code{fidelity}. Should be \code{NULL} when no multi-fidelity optimization is performed (default).}
+
+\item{fidelity}{(\code{atomic} | \code{NULL})\cr
+scalar indicating the value of the \code{budget_id} component with which to evaluate individuals to be filtered.\cr
+This value must be \code{NULL} when no multi-fidelity optimization is performed, but it may \strong{also} be \code{NULL} when the
+maximum value of the \code{budget_id} found in \code{inst$archive} should be used (the default).}
 
 \item{get_indivs}{(\code{logical(1)})\cr
 Whether to return the \code{data.frame} or \code{\link[data.table:data.table]{data.table}} of selected individuals, or an index into \code{individuals}.}

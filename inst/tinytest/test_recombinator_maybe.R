@@ -2,12 +2,12 @@
 source("setup.R", local = TRUE)
 
 ## general tests
-rmaybe = RecombinatorMaybe$new(RecombinatorCrossoverUniform$new())
+rmaybe = RecombinatorMaybe$new(RecombinatorCrossoverUniform())
 rmaybe$param_set$values$p = 0.5
 expect_recombinator(rmaybe, "RecombinatorMaybe(RecombinatorCrossoverUniform)")
 
 
-rmaybe = RecombinatorMaybe$new(RecombinatorCrossoverUniform$new(), RecombinatorCrossoverUniform$new())
+rmaybe = RecombinatorMaybe$new(RecombinatorCrossoverUniform(), RecombinatorCrossoverUniform())
 rmaybe$param_set$values$p = 0.5
 expect_recombinator(rmaybe, "RecombinatorMaybe(RecombinatorCrossoverUniform)")
 

@@ -1,0 +1,214 @@
+- [ ] does gp work better than rf?
+  -  with special uncertainty est? -- no, not today
+- [X] use CB infill? no, seems to perform worse in experiments
+- [X] does the surrogate model work with dependencies?
+- [X] what does intermbo actually do? with RF model and with GP model
+  - seems so, things just kinda suck
+- [ ] what is the uncertainty of evals?
+- [X] other infill crit?
+- [X] multipoint proposal?
+  - parallelization is difficult, we're going to work with the old system
+- [X] acceleration?
+  - doesn't seem to be feasible or profitable
+
+* runs:
+- mbo rf
+- mbo gp
+- random search
+- replicates
+* continuing
+- [X] build sampler
+- [X] check sampler works
+- [X] finish bohb learner
+- [X] check bohb learner works
+- [X] reconstruct hb, bohb
+- [ ] check these work and look as they should
+- [X] write mbo for abs regret
+- [X] write mbo for different & conditioned search spaces
+- [X] write mbo script for different eval subsets
+- [X] re-setup surrogates
+- [ ] expand mbo run script for large scale
+- [ ] run optimization
+* experiments
+
+ - infill: rs, vario, all
+ - batch: smashy, hb
+ -
+
+
+
+ - batch smashy, infill all, my vary
+ - batch hb, infill all, my vary
+ -
+
+ options: -o -M -S -B -I
+
+ -o:  lcbench, rbv2_super, all
+<times>
+
+
+
+ -B smashy -I all   -M 0
+ -B smashy -I all   -M 32 -b 960
+ -B hb     -I all   -M 0
+ -B smashy -I all   -M 0         -S
+ -B smashy -I all   -M 32 -b 960 -S
+ -B hb     -I all   -M 0         -S
+
+
+
+
+for (infill in c("all", "rs")) {
+  for (siman in list(list("siman", "-S"), list("nosiman", ""))) {
+    for (mu in list(list("fixmu", "-b 960 -M 32"), list("varymu", "-b 30 -M 0"))) {
+      for (schedule in c("smashy", "hb")) {
+        if (schedule == "hb" && mu[[1]] == "fixmu") next
+        for (objective in c("lcbench", "rbv2_super")) {
+	  for (seed in 1:3) {
+	    path <- sprintf("results/%s/%s/%s/%s/%s/%s", objective, mu[[1]], schedule, infill, siman[[1]], seed)
+	    file <- sprintf("run_s%s_%s_%s_%s_%s_%s.rds", seed, objective, mu[[1]], schedule, infill, siman[[1]])
+	    call <- sprintf("Rscript prepare_mbo.R -s %s00000 -o %s %s -B %s -I %s %s -f %s",
+	      seed, objective, mu[[2]], schedule, infill, siman[[2]], file.path(path, file))
+#	    system(sprintf("mkdir -p %s", path))
+	    cat(file.path(path, file))
+	    cat("\n")
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+parallel -j 16 < create.txt
+
+# ---------- tier 1 -------
+
+# top prio: all search, mu varies
+results/lcbench/varymu/smashy/all/siman/1/run_s1_lcbench_varymu_smashy_all_siman.rds
+results/lcbench/varymu/hb/all/siman/1/run_s1_lcbench_varymu_hb_all_siman.rds
+
+results/rbv2_super/varymu/smashy/all/siman/1/run_s1_rbv2_super_varymu_smashy_all_siman.rdsj
+results/rbv2_super/varymu/hb/all/siman/1/run_s1_rbv2_super_varymu_hb_all_siman.rds
+
+# all search, mu = 32
+
+results/lcbench/fixmu/smashy/all/siman/1/run_s1_lcbench_fixmu_smashy_all_siman.rds
+
+results/rbv2_super/fixmu/smashy/all/siman/1/run_s1_rbv2_super_fixmu_smashy_all_siman.rds
+
+
+# ---------- tier 2 -------
+
+# infill random search only
+results/lcbench/varymu/smashy/rs/siman/1/run_s1_lcbench_varymu_smashy_rs_siman.rds
+results/rbv2_super/varymu/smashy/rs/siman/1/run_s1_rbv2_super_varymu_smashy_rs_siman.rds
+results/lcbench/varymu/hb/rs/siman/1/run_s1_lcbench_varymu_hb_rs_siman.rds
+results/rbv2_super/varymu/hb/rs/siman/1/run_s1_rbv2_super_varymu_hb_rs_siman.rds
+
+# no simulated annealing
+results/lcbench/varymu/smashy/all/nosiman/1/run_s1_lcbench_varymu_smashy_all_nosiman.rds
+results/rbv2_super/varymu/smashy/all/nosiman/1/run_s1_rbv2_super_varymu_smashy_all_nosiman.rds
+results/lcbench/varymu/hb/all/nosiman/1/run_s1_lcbench_varymu_hb_all_nosiman.rds
+results/rbv2_super/varymu/hb/all/nosiman/1/run_s1_rbv2_super_varymu_hb_all_nosiman.rds
+
+# no siman, only random search
+results/lcbench/varymu/smashy/rs/nosiman/1/run_s1_lcbench_varymu_smashy_rs_nosiman.rds
+results/rbv2_super/varymu/smashy/rs/nosiman/1/run_s1_rbv2_super_varymu_smashy_rs_nosiman.rds
+results/lcbench/varymu/hb/rs/nosiman/1/run_s1_lcbench_varymu_hb_rs_nosiman.rds
+results/rbv2_super/varymu/hb/rs/nosiman/1/run_s1_rbv2_super_varymu_hb_rs_nosiman.rds
+
+# ---------- tier 3 -------
+
+# all of these with mu 32
+results/lcbench/fixmu/smashy/all/nosiman/1/run_s1_lcbench_fixmu_smashy_all_nosiman.rds
+results/rbv2_super/fixmu/smashy/all/nosiman/1/run_s1_rbv2_super_fixmu_smashy_all_nosiman.rds
+results/lcbench/fixmu/smashy/rs/siman/1/run_s1_lcbench_fixmu_smashy_rs_siman.rds
+results/rbv2_super/fixmu/smashy/rs/siman/1/run_s1_rbv2_super_fixmu_smashy_rs_siman.rds
+results/lcbench/fixmu/smashy/rs/nosiman/1/run_s1_lcbench_fixmu_smashy_rs_nosiman.rds
+results/rbv2_super/fixmu/smashy/rs/nosiman/1/run_s1_rbv2_super_fixmu_smashy_rs_nosiman.rds
+
+
+
+# priority
+## highest
+
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B smashy -I all -S -f run_0000000_lcbench_m0__smashy_allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B hb     -I all -S -f run_0000000_lcbench_m0__hb_____allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B smashy -I all -S -f run_0000000_rbv2sup_m0__smashy_allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B hb     -I all -S -f run_0000000_rbv2sup_m0__hb_____allinfill_siman.rds
+
+## second
+
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 960 -M 32 -B smashy -I all -S -f run_0000000_rbv2sup_m32_smashy_allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 960 -M 32 -B smashy -I all -S -f run_0000000_lcbench_m32_smashy_allinfill_siman.rds
+
+
+## third
+
+# wyoming
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B smashy -I rs     -f run_0000000_lcbench_m0__smashy_rsinfill_______.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B hb     -I rs     -f run_0000000_lcbench_m0__hb_____rsinfill_______.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 960 -M 32 -B smashy -I rs     -f run_0000000_lcbench_m32_smashy_rsinfill_______.rds
+
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B smashy -I rs  -S -f run_0000000_lcbench_m0__smashy_rsinfill__siman.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B hb     -I rs  -S -f run_0000000_lcbench_m0__hb_____rsinfill__siman.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 960 -M 32 -B smashy -I rs  -S -f run_0000000_lcbench_m32_smashy_rsinfill__siman.rds
+
+Rscript prepare_mbo.R -s 0000000 -o all        -b 960 -M 32 -B smashy -I all -S -f run_0000000_all_____m32_smashy_allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B smashy -I all -S -f run_0000000_all_____m0__smashy_allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B hb     -I all -S -f run_0000000_all_____m0__hb_____allinfill_siman.rds
+
+
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B smashy -I all    -f run_0000000_lcbench_m0__smashy_allinfill______.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 30  -M 0  -B hb     -I all    -f run_0000000_lcbench_m0__hb_____allinfill______.rds
+Rscript prepare_mbo.R -s 0000000 -o lcbench    -b 960 -M 32 -B smashy -I all    -f run_0000000_lcbench_m32_smashy_allinfill______.rds
+
+
+
+
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B smashy -I all    -f run_0000000_rbv2sup_m0__smashy_allinfill______.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B hb     -I all    -f run_0000000_rbv2sup_m0__hb_____allinfill______.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 960 -M 32 -B smashy -I all    -f run_0000000_rbv2sup_m32_smashy_allinfill______.rds
+
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B smashy -I rs     -f run_0000000_rbv2sup_m0__smashy_rsinfill_______.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B hb     -I rs     -f run_0000000_rbv2sup_m0__hb_____rsinfill_______.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 960 -M 32 -B smashy -I rs     -f run_0000000_rbv2sup_m32_smashy_rsinfill_______.rds
+
+
+
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B smashy -I rs  -S -f run_0000000_rbv2sup_m0__smashy_rsinfill__siman.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 30  -M 0  -B hb     -I rs  -S -f run_0000000_rbv2sup_m0__hb_____rsinfill__siman.rds
+Rscript prepare_mbo.R -s 0000000 -o rbv2_super -b 960 -M 32 -B smashy -I rs  -S -f run_0000000_rbv2sup_m32_smashy_rsinfill__siman.rds
+
+
+
+
+
+
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B smashy -I all    -f run_0000000_all_____m0__smashy_allinfill______.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B hb     -I all    -f run_0000000_all_____m0__hb_____allinfill______.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 960 -M 32 -B smashy -I all    -f run_0000000_all_____m32_smashy_allinfill______.rds
+
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B smashy -I rs     -f run_0000000_all_____m0__smashy_rsinfill_______.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B hb     -I rs     -f run_0000000_all_____m0__hb_____rsinfill_______.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 960 -M 32 -B smashy -I rs     -f run_0000000_all_____m32_smashy_rsinfill_______.rds
+
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B smashy -I all -S -f run_0000000_all_____m0__smashy_allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B hb     -I all -S -f run_0000000_all_____m0__hb_____allinfill_siman.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 960 -M 32 -B smashy -I all -S -f run_0000000_all_____m32_smashy_allinfill_siman.rds
+
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B smashy -I rs  -S -f run_0000000_all_____m0__smashy_rsinfill__siman.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 30  -M 0  -B hb     -I rs  -S -f run_0000000_all_____m0__hb_____rsinfill__siman.rds
+Rscript prepare_mbo.R -s 0000000 -o all        -b 960 -M 32 -B smashy -I rs  -S -f run_0000000_all_____m32_smashy_rsinfill__siman.rds
+
+
+
+
+
+## jobs to calculate
+
+120000 jobs
+

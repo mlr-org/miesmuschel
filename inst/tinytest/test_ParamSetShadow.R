@@ -35,7 +35,7 @@ expect_error({pshadow$values$x = -0.5}, "'x' not available")
 expect_stdout(print(pshadow), "ParamSetShadow.* a .* b .* c ")
 
 # $add
-expect_error(pshadow$add(ps(x = p_dbl(-2, 2))), "Must have unique names")
+expect_error(pshadow$add(ps(x = p_dbl(-2, 2))), "Must have unique names|duplicated name")
 
 pshadow$add(ps(zz = p_dbl()))
 expect_equal(p$params$zz, ps(zz = p_dbl())$params$zz)

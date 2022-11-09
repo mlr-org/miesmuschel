@@ -4,15 +4,17 @@
 \name{miesmuschel-package}
 \alias{miesmuschel}
 \alias{miesmuschel-package}
-\title{miesmuschel: Mixed Integer Evolutionary Strategies}
+\title{miesmuschel: Mixed Integer Evolution Strategies}
 \description{
 \code{miesmuschel} offers both an \code{\link[bbotk:Optimizer]{Optimizer}} and a \code{\link[mlr3tuning:Tuner]{Tuner}} for general
 MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
-is more flexible and can be used for research into novel evolutionary strategies.
+is more flexible and can be used for research into novel evolution strategies.
 
 The call-graph of the default algorithm in \code{\link{OptimizerMies}} / \code{\link{TunerMies}} is as follows, and is shown
 here as an overview over the \verb{mies_*} functions, and how they are usually connected. (Note that only the
-exported \verb{mies_*} functions are shown.) See the help information of these functions for more info.\preformatted{OptimizerMies$.optimize(inst)
+exported \verb{mies_*} functions are shown.) See the help information of these functions for more info.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{OptimizerMies$.optimize(inst)
 |- mies_prime_operators()  # prime operators on instance's search_space
 |- mies_init_population()  # sample and evaluate first generation
 |  `- mies_evaluate_offspring()  # evaluate sampled individuals
@@ -27,7 +29,7 @@ exported \verb{mies_*} functions are shown.) See the help information of these f
    |  `- inst$eval_batch()  # The OptimInst's evaluation method
    `- mies_survival_plus() / mies_survival_comma()  # survival
       `- mies_select_from_archive()  # Use 'Selector' on 'Archive'
-}
+}\if{html}{\out{</div>}}
 }
 \seealso{
 Useful links:
@@ -39,5 +41,12 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Martin Binder \email{mlr.developer@mb706.com}
+
+Other contributors:
+\itemize{
+  \item Lennart Schneider \email{lennart.sch@web.de} (\href{https://orcid.org/0000-0003-4152-5308}{ORCID}) [contributor]
+  \item Susanne Dandl \email{dandl.susanne@googlemail.com} (\href{https://orcid.org/0000-0003-4324-4163}{ORCID}) [contributor]
+  \item Andreas Hofheinz \email{andreas.hofheinz@outlook.com} [contributor]
+}
 
 }

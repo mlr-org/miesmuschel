@@ -9,6 +9,9 @@ loadNamespace("bbotk")
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 
+options(miesmuschel.testing = TRUE)
+
+
 for (helper in list.files(pattern = "^helper_.*\\.R$")) {
   source(helper, local = TRUE)
 }

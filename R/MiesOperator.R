@@ -31,22 +31,137 @@ MiesOperator = R6Class("MiesOperator",
     #' Initialize base class components of the `MiesOperator`.
     #' @template param_param_classes
     #' @template param_param_set
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_dict_shortaccess
+    #' @template param_own_param_set
     #' @param endomorphism (`logical(1)`)\cr
     #'   Whether the private `$.operate()` operation creates a [`data.table`][data.table::data.table] with the same columns as the input
     #'   (i.e. conforming to the primed [`ParamSet`][paradox::ParamSet]). If this is `TRUE` (default), then the return value of `$.operate()`
     #'   is checked for this and columns are put in the correct order.\cr
     #'   The `$endomorphsim` field will reflect this value.
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), endomorphism = TRUE) {
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(),
+        packages = character(0), dict_entry = NULL, dict_shortaccess = NULL, own_param_set = quote(self$param_set), endomorphism = TRUE) {
       assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
         private$.param_set = assert_param_set(param_set)
+        if (paradox_context_available) {
+          private$.param_set$context_available = "inst"
+        }
         private$.param_set_source = NULL
       } else {
         lapply(param_set, function(x) assert_param_set(eval(x)))
         private$.param_set_source = param_set
       }
       private$.param_classes = param_classes
+      private$.packages = unique(assert_character(packages, any.missing = FALSE))
+      private$.dict_entry = assert_string(dict_entry, null.ok = TRUE)
+      private$.dict_shortaccess = assert_character(dict_shortaccess, null.ok = TRUE)
+      assert_true(is.language(own_param_set))
+      if (paradox_context_available && !inherits(param_set, "ParamSet")) {
+        # Doing the following in a less convoluted way gives `Error in ps()$context_available = "inst"` because of the default value of own_param_set.
+        eval(substitute({x = own_param_set ; x$context_available = "inst"}, list(own_param_set = own_param_set)))  # TODO: there has to be a better way
+      }
+      private$.own_param_set_symbol = own_param_set
+      private$.own_defaults = assert_r6(eval(own_param_set), "ParamSet")$values
       private$.endomorphism = assert_flag(endomorphism)
+    },
+    #' @description
+    #' Create a [`call`][base::call] object representing this operator.
+    #' @param skip_defaults (`logical(1)`)\cr
+    #'   Whether to skip construction arguments that have their default value. Default `TRUE`.
+    #' @param show_params (`logical(1)`)\cr
+    #'   Whether to show [`ParamSet`][paradox::ParamSet] values. Default `TRUE`.
+    #' @param show_constructor_args (`logical(1)`)\cr
+    #'   Whether to show construction args that are not [`ParamSet`][paradox::ParamSet] values. Default `TRUE`.
+    #' @param ... (any)\cr
+    #'   Ignored.
+    repr = function(skip_defaults = TRUE, show_params = TRUE, show_constructor_args = TRUE, ...) {
+      assert_flag(skip_defaults)
+      assert_flag(show_params)
+      assert_flag(show_constructor_args)
+      initformals = formals(self$initialize)
+      formalvalues = list()
+      deviantformals = list()
+      deviantparams = list()
+
+      selfnames = names(self)
+      ownps = eval(private$.own_param_set_symbol)
+      pnames = ownps$ids()
+      pnamesrep = pnames
+      if (ownps$set_id != "" && !identical(ownps, self$param_set)) {
+        pnamesrep = sprintf("%s.%s", ownps$set_id, pnames)
+      }
+      names(pnamesrep) = pnames
+
+      representable = (!show_constructor_args || all(names(initformals) %in% selfnames)) &&
+        !is.null(self$dict_entry) && !is.null(self$dict_shortaccess) &&
+        !any(names(initformals) %in% pnames)
+
+      if (representable) {
+        for (formalname in if (show_constructor_args) names(initformals)) {
+
+          truevalue = self[[formalname]]
+          truerep = repr(truevalue, skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...)
+
+          validrep = tryCatch({
+            eval(truerep, envir = environment(self$initialize))
+            TRUE
+          }, error = function(e) {
+            FALSE
+          })
+
+          has_inferred_value = FALSE
+          if (skip_defaults && validrep) {
+            inferredvalue = NULL
+            tryCatch({
+              inferredvalue = eval(initformals[[formalname]], envir = formalvalues, enclos = environment(self$initialize))
+              has_inferred_value = TRUE
+            }, error = function(e) NULL)
+            has_inferred_value = has_inferred_value && identical(truerep, repr(inferredvalue, skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...))
+          }
+          if (!has_inferred_value) {
+            deviantformals[[formalname]] = truerep
+          }
+          formalvalues[[formalname]] = truevalue
+        }
+
+        for (paramname in if (show_params) pnames) {
+          truevalue = ownps$values[[paramname]]
+          truerep = repr(truevalue, skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...)
+          validrep = tryCatch({
+            eval(truerep, envir = environment(self$initialize))
+            TRUE
+          }, error = function(e) {
+            FALSE
+          })
+          if (!skip_defaults || !validrep || !identical(truerep, repr(private$.own_defaults[[paramname]], skip_defaults = skip_defaults, show_params = show_params, show_constructor_args = show_constructor_args, ...))) {
+
+            deviantparams[[pnamesrep[[paramname]]]] = truerep
+          }
+        }
+      }
+      if (!representable) {
+        return(substitute(stop(msg), list(msg = sprintf("<%s>", class(self)[[1]]))))
+      }
+      as.call(c(list(as.symbol(self$dict_shortaccess), self$dict_entry), deviantparams, deviantformals))
+    },
+    #' @description
+    #' Print this operator.
+    #' @param verbose (`logical(1)`)\cr
+    #'   Whether to show all construction arguments, even the ones at default values. Default `FALSE`.
+    #' @param ... (any)\cr
+    #'   Ignored.
+    print = function(verbose = FALSE, ...) {
+      hasparams = length(self$param_set$ids())
+      txt = paste(utils::capture.output(repr(self, skip_defaults = !verbose, show_params = FALSE)), collapse = "\n")
+      txt = paste0(gsub("stop\\(\"<([^>]*)>\"\\)", "<\\1>", txt), "\n$param_set:", if (hasparams) "\n" else " empty.\n")
+      cat(txt)
+      if (hasparams) {
+        pids = as.data.table(self$param_set)[, c("id", "lower", "upper", "levels")]
+        pids = cbind(pids, value = self$param_set$values[pids$id])
+        print(pids)
+      }
     },
     #' @description
     #' Prepare the `MiesOperator` to function on the given [`ParamSet`][paradox::ParamSet]. This must be called before
@@ -75,22 +190,33 @@ MiesOperator = R6Class("MiesOperator",
     operate = function(values, ...) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       ids = private$.primed_ps$ids()
-      private$.primed_ps$assert_dt(values)
+      if (getOption("miesmuschel.testing")) private$.primed_ps$assert_dt(values)
       assert_names(colnames(values), permutation.of = private$.primed_ps$ids())
       convert = !is.data.table(values)
       if (convert) {
         # don't change input by reference
         values = as.data.table(values)
       }
+      # load packages
+      require_namespaces(self$packages, msg = sprintf("The following packages are required for %s operator: %%s", class(self)[[1]]))
       # make sure input / output cols are in the order as inndicated by paramset --> use `match` on input (and output if endomorphic)
       values = private$.operate(values[, match(ids, colnames(values), 0), with = FALSE], ...)
       if (self$endomorphism) {
-        values = private$.primed_ps$assert_dt(values)[, match(ids, colnames(values), 0), with = FALSE]
+        if (getOption("miesmuschel.testing")) values = private$.primed_ps$assert_dt(values)[, match(ids, colnames(values), 0), with = FALSE]
         if (convert) {
           setDF(values)
         }
       }
       values
+    },
+    #' @description
+    #' Run [`utils::help()`] for this object.
+    #' @param help_type (`character(1)`)\cr
+    #'   One of `"text"`, `"html"`, or `"pdf"`: The type of help page to open. Defaults to the `"help_type"` option.
+    #' @return `help_files_with_dopic` object, which opens the help page.
+    help = function(help_type = getOption("help_type")) {
+      parts = strsplit(self$man, split = "::", fixed = TRUE)[[1]]
+      match.fun("help")(parts[[2]], package = parts[[1]], help_type = help_type)
     }
   ),
   active = list(
@@ -98,12 +224,15 @@ MiesOperator = R6Class("MiesOperator",
     #' Configuration parameters of the `MiesOperator` object. Read-only.
     param_set = function(val) {
       if (is.null(private$.param_set)) {
+        # TODO: need test that checks that all paramset elements have good context
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))
         if (length(sourcelist) > 1) {
           private$.param_set = ParamSetCollection$new(sourcelist)
         } else {
           private$.param_set = sourcelist[[1]]
         }
+
+
         if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
       }
       if (!missing(val) && !identical(val, private$.param_set)) {
@@ -116,6 +245,27 @@ MiesOperator = R6Class("MiesOperator",
     param_classes = function(val) {
       if (!missing(val)) stop("param_classes is read-only.")
       private$.param_classes
+    },
+    #' @field packages (`character`)\cr
+    #' Packages needed for the operator. Read-only.
+    packages = function(val) {
+      if (!missing(val)) stop("packages is read-only.")
+      private$.packages
+    },
+    #' @field dict_entry (`character(1)` | `NULL`)\cr
+    #' Key of this class in its respective [`Dictionary`][mlr3misc::Dictionary].
+    #' Is `NULL` if this class it not (known to be) in a [`Dictionary`][mlr3misc::Dictionary]. Read-only.
+    dict_entry = function(val) {
+      if (!missing(val)) stop("dict_entry is read-only.")
+      private$.dict_entry
+    },
+    #' @field dict_shortaccess (`character(1)` | `NULL`)\cr
+    #' Name of [`Dictionary`][mlr3misc::Dictionary] short-access function where an object of this class can be retrieved.
+    #' Is `NULL` if this class is not (known to be) in a [`Dictionary`][mlr3misc::Dictionary]
+    #' with a short-access function. Read-only.
+    dict_shortaccess = function(val) {
+      if (!missing(val)) stop("dict_shortaccess is read-only.")
+      private$.dict_shortaccess
     },
     #' @field endomorphism (`logical(1)`)\cr
     #' Whether the output of `$operate()` is a `data.frame` / [`data.table`][data.table::data.table] in the same domain as its input. Read-only.
@@ -137,6 +287,12 @@ MiesOperator = R6Class("MiesOperator",
     is_primed = function(val) {
       if (!missing(val)) stop("is_primed is read-only.")
       !is.null(self$primed_ps)
+    },
+    #' @field man (`character(1)`)\cr
+    #' Name of this class, in the form `<package>::<classname>`. Used by the `$help()` method.
+    man = function(x) {
+      if (!missing(x)) stop("man is read-only")
+      paste0(topenv(self$.__enclos_env__)$.__NAMESPACE__.$spec[["name"]], "::", class(self)[[1]])
     }
   ),
   private = list(
@@ -163,6 +319,11 @@ MiesOperator = R6Class("MiesOperator",
     .param_classes = NULL,
     .param_set_source = NULL,
     .operate = function(values, ...) stop(".operate needs to be implemented by inheriting class."),
+    .packages = NULL,
+    .dict_entry = NULL,
+    .dict_shortaccess = NULL,
+    .own_param_set_symbol = NULL,
+    .own_defaults = NULL,
     .endomorphism = NULL
   )
 )

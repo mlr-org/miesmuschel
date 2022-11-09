@@ -18,10 +18,10 @@
 #'
 #' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
-#'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument.
+#'   Probability per group of `n_indivs_in` individuals with which to apply the operator given to the `recombinator` construction argument. Must be set by the user.
 #'
 #' @templateVar id maybe
-#' @templateVar additional , <recombinator> \[, <recombinator_not>\]
+#' @templateVar additional , \<recombinator\> \[, \<recombinator_not\>\]
 #' @template autoinfo_prepare_rec
 #'
 #' @section Supported Operand Types:
@@ -61,14 +61,16 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     #' @param recombinator ([`Recombinator`])\cr
     #'   [`Recombinator`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$recombinator` field will reflect this value.
     #' @param recombinator_not ([`Recombinator`])\cr
     #'   Another [`Recombinator`] to wrap. This operator runs when `recombinator` is not chosen. By
     #'   default, this is [`RecombinatorNull`], i.e. no operation, with both `n_indivs_in` and `n_indivs_out` set
     #'   to match `recombinator`. This does not work when `recombinator` has `n_indivs_in < n_indivs_out`, in which
-    #'   case this argument must be set explicitly.
-    #'   With the default behaviour, the `RecombinatorMaybe` object applies the `recombinator` operation with probability `p`, and
+    #'   case this argument must be set explicitly.\cr
+    #'   With this default, the `RecombinatorMaybe` object applies the `recombinator` operation with probability `p`, and
     #'   no operation at all otherwise.\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$recombinator_not` field will reflect this value.
     initialize = function(recombinator, recombinator_not = NULL) {
       private$.wrapped = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       if (is.null(recombinator_not)) {
@@ -85,10 +87,11 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       private$.wrapped_not$param_set$set_id = "maybe_not"
 
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
-      private$.maybe_param_set$values = list(p = 1)
       super$initialize(recombinator$param_classes,
         alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
-        recombinator$n_indivs_in, recombinator$n_indivs_out)
+        recombinator$n_indivs_in, recombinator$n_indivs_out,
+        packages = c("stats", recombinator$packages, recombinator_not$packages), dict_entry = "maybe",
+        own_param_set = quote(private$.maybe_param_set))
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
@@ -103,9 +106,23 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
       invisible(self)
     }
   ),
+  active = list(
+    #' @field recombinator ([`Recombinator`])\cr
+    #' [`Recombinator`] being wrapped. This operator gets run with probability `p` (configuration parameter).
+    recombinator = function(val) {
+      if (!missing(val)) stop("recombinator is read-only.")
+      private$.wrapped
+    },
+    #' @field recombinator_not ([`Recombinator`])\cr
+    #' Alternative [`Recombinator`] being wrapped. This operator gets run with probability `1 - p` (configuration parameter).
+    recombinator_not = function(val) {
+      if (!missing(val)) stop("recombinator_not is read-only.")
+      private$.wrapped_not
+    }
+  ),
   private = list(
     .recombine = function(values) {
-      if (stats::runif(1) < self$param_set$get_values()$p) {
+      if (stats::runif(1) < private$.maybe_param_set$get_values()$p) {
         private$.wrapped$operate(values)
       } else {
         private$.wrapped_not$operate(values)
@@ -116,4 +133,4 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_recombinators$add("maybe", RecombinatorMaybe)
+dict_recombinators$add("maybe", RecombinatorMaybe, aux_construction_args = alist(recombinator = RecombinatorNull$new()))

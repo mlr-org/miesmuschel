@@ -26,13 +26,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("null")
 recs("null")  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("null")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -50,10 +52,17 @@ rn_half$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
+\code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{recombinators}
@@ -63,21 +72,24 @@ Other recombinators:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorNull$new()}}
-\item \href{#method-clone}{\code{RecombinatorNull$clone()}}
+\item \href{#method-RecombinatorNull-new}{\code{RecombinatorNull$new()}}
+\item \href{#method-RecombinatorNull-clone}{\code{RecombinatorNull$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorNull-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorNull-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{Recombinator}.
 \subsection{Usage}{
@@ -106,8 +118,8 @@ The \verb{$n_indivs_out} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorNull-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorNull-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

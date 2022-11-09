@@ -57,11 +57,11 @@ expect_equal(mies_generate_offspring(oibig, 1, recombinator = rn_bud, parent_sel
 expect_equal(mies_generate_offspring(oibig, 1, mutator = mn_bud, recombinator = rn_bud, parent_selector = sb, budget_id = "bud"), design[8, -c("dob", "eol", "bud")])
 
 # disagreement about space
-expect_error(mies_generate_offspring(oibig, 1, parent_selector = sb_small, mutator = mn), "Must be equal to set.*'additional'")
-expect_error(mies_generate_offspring(oibig, 1, parent_selector = sb, mutator = mn_small), "Must be equal to set.*'additional'")
-expect_error(mies_generate_offspring(oibig, 1, recombinator = rn, mutator = mn_small), "Must be equal to set.*'additional'")
-expect_error(mies_generate_offspring(oibig, 1, recombinator = rn, budget_id = "bud"), "Must be equal to set.*'bud'")
-expect_error(mies_generate_offspring(oibig, 1, mutator = mn, budget_id = "bud"), "Must be equal to set.*'bud'")
+expect_error(mies_generate_offspring(oibig, 1, parent_selector = sb_small, mutator = mn), "Must be (equal to set .* but is|a permutation of set .* but has extra)")
+expect_error(mies_generate_offspring(oibig, 1, parent_selector = sb, mutator = mn_small), "Must be (equal to set .* but is|a set equal to .* but is missing)")
+expect_error(mies_generate_offspring(oibig, 1, recombinator = rn, mutator = mn_small), "Must be (equal to set .* but is|a permutation of set .* but has extra)")
+expect_error(mies_generate_offspring(oibig, 1, recombinator = rn, budget_id = "bud"), "Must be (equal to set|a permutation of set).*'bud'")
+expect_error(mies_generate_offspring(oibig, 1, mutator = mn, budget_id = "bud"), "Must be (equal to set|a permutation of set).*'bud'")
 
 # mutator
 expect_equal(mies_generate_offspring(oibig, 3, mutator = mutator)$p1 %% 1, c(0.1, 0.2, 0.3))

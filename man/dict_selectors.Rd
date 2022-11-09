@@ -5,7 +5,7 @@
 \alias{dict_selectors}
 \title{Dictionary of Selectors}
 \format{
-An object of class \code{DictionarySelector} (inherits from \code{Dictionary}, \code{R6}) of length 13.
+An object of class \code{DictionarySelector} (inherits from \code{DictionaryEx}, \code{Dictionary}, \code{R6}) of length 15.
 }
 \usage{
 dict_selectors
@@ -13,4 +13,24 @@ dict_selectors
 \description{
 Dictionary of Selectors
 }
+\section{Methods}{
+
+Methods inherited from \code{\link[mlr3misc:Dictionary]{Dictionary}}, as well as:
+\itemize{
+\item \code{help(key, help_type)}\cr
+(\code{character(1)}, \code{character(1)})\cr
+Displays help for the dictionary entry \code{key}. \code{help_type} is one of
+\code{"text"}, \code{"html"}, \code{"pdf"} and given as the \code{help_type} argument of R's \code{help()}.
+}
+}
+
+\seealso{
+Other dictionaries: 
+\code{\link{dict_filtors}},
+\code{\link{dict_mutators}},
+\code{\link{dict_recombinators}},
+\code{\link{dict_scalors}},
+\code{\link{mut}()}
+}
+\concept{dictionaries}
 \keyword{datasets}

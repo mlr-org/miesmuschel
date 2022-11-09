@@ -1,9 +1,17 @@
 Package: miesmuschel
-Title: Mixed Integer Evolutionary Strategies
-Description: Evolutionary black box optimization algorithms building on the "bbotk" package. "miesmuschel" offers both ready-to-use optimization algorithms, as well as their fundamental building blocks that can be used to manually construct specialized optimization loops.
+Title: Mixed Integer Evolution Strategies
+Description: Evolutionary black box optimization algorithms building on the
+  'bbotk' package. 'miesmuschel' offers both ready-to-use optimization
+  algorithms, as well as their fundamental building blocks that can be used to
+  manually construct specialized optimization loops. The Mixed Integer Evolution
+  Strategies as described by Li et al. (2013) <doi:10.1162/EVCO_a_00059> can be
+  implemented, as well as the multi-objective optimization algorithms NSGA-II
+  by Deb, Pratap, Agarwal, and Meyarivan (2002) <doi:10.1109/4235.996017>.
 Authors@R: c(
   person("Martin", "Binder", email = "mlr.developer@mb706.com", role = c("aut", "cre")),
-  person(given = "Lennart", family = "Schneider", role = c("ctb"), email = "lennart.sch@web.de", comment = c(ORCID = "0000-0003-4152-5308"))
+  person(given = "Lennart", family = "Schneider", role = c("ctb"), email = "lennart.sch@web.de", comment = c(ORCID = "0000-0003-4152-5308")),
+  person(given = "Susanne", family = "Dandl", role = c("ctb"), email = "dandl.susanne@googlemail.com", comment = c(ORCID = "0000-0003-4324-4163")),
+  person(given = "Andreas", family = "Hofheinz", role = c("ctb"), email = "andreas.hofheinz@outlook.com")
   )
 URL: https://github.com/mlr-org/miesmuschel
 BugReports: https://github.com/mlr-org/miesmuschel/issues
@@ -11,7 +19,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 ByteCompile: yes
-Version: 0.0.0-9000
+Version: 0.0.1
 Depends:
   paradox (>= 0.7.1)
 Imports:
@@ -20,6 +28,7 @@ Imports:
   R6,
   bbotk (>= 0.3.0.900),
   data.table,
+  matrixStats,
   lgr
 Suggests:
   tinytest,
@@ -29,7 +38,7 @@ Suggests:
   ranger,
   xgboost,
   rpart
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Collate: 
     'dictionaries.R'
     'MiesOperator.R'
@@ -37,7 +46,9 @@ Collate:
     'FiltorMaybe.R'
     'FiltorNull.R'
     'FiltorProxy.R'
+    'FiltorSurrogate.R'
     'FiltorSurrogateProgressive.R'
+    'FiltorSurrogateTournament.R'
     'Mutator.R'
     'MutatorCmpMaybe.R'
     'MutatorDiscreteUniform.R'
@@ -46,25 +57,45 @@ Collate:
     'MutatorMaybe.R'
     'MutatorNull.R'
     'MutatorProxy.R'
+    'MutatorSequential.R'
     'ParamSetShadow.R'
     'OperatorCombination.R'
     'Recombinator.R'
     'Selector.R'
     'mies_methods.R'
     'OptimizerMies.R'
-    'OptimizerSumoHB.R'
+    'RecombinatorCmpMaybe.R'
+    'RecombinatorConvex.R'
+    'RecombinatorConvexPair.R'
+    'RecombinatorCrossoverNary.R'
     'RecombinatorCrossoverUniform.R'
     'RecombinatorMaybe.R'
     'RecombinatorNull.R'
     'RecombinatorProxy.R'
+    'RecombinatorSequential.R'
     'RecombinatorSimulatedBinaryCrossover.R'
+    'RecombinatorSwap.R'
+    'Scalor.R'
+    'ScalorAggregate.R'
+    'ScalorDomcount.R'
+    'ScalorFixedProjections.R'
+    'ScalorHypervolume.R'
+    'ScalorNondom.R'
+    'ScalorOne.R'
+    'ScalorProxy.R'
+    'ScalorSingleObjective.R'
     'SelectorBest.R'
+    'SelectorMaybe.R'
+    'SelectorNull.R'
     'SelectorProxy.R'
     'SelectorRandom.R'
+    'SelectorSequential.R'
+    'SelectorTournament.R'
     'TerminatorBudget.R'
     'TerminatorGenerations.R'
     'TunerMies.R'
-    'TunerSumoHB.R'
     'bibentries.R'
+    'repr.R'
     'utils.R'
+    'utils_mo.R'
     'zzz.R'

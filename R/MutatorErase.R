@@ -41,10 +41,10 @@ MutatorErase = R6Class("MutatorErase",
     #' Initialize the `MutatorErase` object.
     initialize = function() {
       param_set = ps(
-        initializer = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required"))  # arguments: param_set, n
+        initializer = p_uty(custom_check = crate(function(x) check_function(x, args = c("param_set", "n"))), tags = c("init", "required"))  # arguments: param_set, n
       )
       param_set$values = list(initializer = generate_design_random)
-      super$initialize(param_set = param_set)
+      super$initialize(param_set = param_set, dict_entry = "erase")
     }
   ),
   private = list(

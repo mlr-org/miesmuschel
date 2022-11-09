@@ -1,71 +1,71 @@
 #' @title Progressive Surrogate Model Filtering
 #'
-#' @include Filtor.R
+#' @include FiltorSurrogate.R
 #'
 #' @name dict_filtors_surprog
 #'
 #' @description
-#' Performs progressive surrogate model filtering.
-#'
-#' A *surrogate model* is a regression model, based on an [`mlr3::Learner`], which predicts the approximate performance of newly sampled configurations
-#' given the empirical performance of already evaluated configurations. If the optional `surrogate_learner` construction argument is given to `SumoHB`,
-#' then the surrogate model is used to propose points that have, according to the surrogate model, a relatively high chance of performing well.
-#'
+#' Performs progressive surrogate model filtering. A surrogate model is used, as described in the parent class [`FiltorSurrogate`].
 #' The filtering is "progressive" in that successive values are filtered more agressively.
 #'
 #' @section Algorithm:
 #'
-#' Given the number `n_filter` of of individuals to sample, progressive surrogate model filtering proceeds as follows:
+#' Given the number `n_filter` of of individuals to sample, and the desired pool size at round `i` `pool_size(i)`, progressive
+#' surrogate model filtering proceeds as follows:
 #' 1. Train the `surrogate_learner` [`LearnerRegr`][mlr3::LearnerRegr] on the `known_values` and their `fitnesses`.
-#' 2. Take `filter_pool_first` configurations, predict their expected performance using the surrogate model, and put them
+#' 2. Take `pool_size(1)` configurations, predict their expected performance using the surrogate model, and put them
 #'    into a pool `P` of configurations to consider.
-#' 3. Take the individual that is optimal according to predicted performance, remove it from `P` and add it to solution set `S`.
-#' 4. If the number of solutions in `S` equals `n_filter`, quit.
-#' 5. Take the next `filter_pool_per_sample` configurations, predict their expected performance using the surrogate model, and add them to `P`.
-#' 6. Jump to 3.
+#' 3. Initialize `i` to 1.
+#' 4. Take the individual that is optimal according to predicted performance, remove it from `P` and add it to solution set `S`.
+#' 5. If the number of solutions in `S` equals `n_filter`, quit.
+#' 6. If `pool_size(i + 1)` is larger than `pool_size(i)`, take the next `pool_size(i + 1) - pool_size(i)` configurations,
+#'   predict their expected performance using the surrogate model, and add them to `P`. Otherwise, remove `pool_size(i) - pool_size(i + 1)`
+#'   random individuals from the pool. The size of `P` ends up being `pool_size(i + 1) - i`, as `i` individuals have also been removed and
+#'   added to `S`.
+#' 7. Increment `i`, jump to 4.
 #'
 #' (The algorithm presented here is optimized for clarity; the actual implementation does all the surrogate model prediction in one go, but is functionally
 #' equivalent).
 #'
-#' The `filter_pool_first` and `filter_pool_per_sample` configuration parameters of this algorithm determine how agressively the surrogate model is used to
-#' filter out sampled configurations. If the filtering is agressive (`filter_pool_first` is large), then more "exploitation" at the cost of "exploration" is performed.
-#' When `filter_pool_first` is small but `filter_pool_per_sample` is large, then successive individuals are filtered successively more agressively, potentially
+#' `pool_size(i)` is calculated as `round(n_filter * pool_factor * (pool_factor_last / pool_factor) ^ (i / n_filter))`, i.e. a log-linear interpolation from
+#' `pool_factor * n_filter` to `pool_factor_last * n_filter`.
+#'
+#' The `pool_factor` and `pool_factor_last` configuration parameters of this algorithm determine how agressively the surrogate model is used to
+#' filter out sampled configurations. If the filtering is agressive (large values), then more "exploitation" at the cost of "exploration" is performed.
+#' When `pool_factor` is small but `pool_factor_last` is large (or vice-versa), then different individuals are filtered with different agressiveness, potentially
 #' leading to a tradeoff between "exploration" and "exploitation".
 #'
-#' When `filter_pool_per_sample` is set to 0, then the method is equivalent to sampling the top `n_filter` individuals from `filter_pool_first`
-#' sampled ones. When `filter_pool_per_sample` is 1 and `filter_pool_first` is 0, then the method is equivalent to random sampling.
-#'
-#' `filter_pool_first` and `filter_pool_per_sample` may be fractional; the total number of individuals to select from when selecting the `i`th
-#' individuals is always `round(filter_pool_first + (filter_pool_per_sample - 1) * (i - 1))`. However, `filter_pool_first` must
-#' be at least 1, and `filter_pool_first + filter_pool_per_sample * (n_filter - 1)` must be at least `n_filter`.
+#' When `pool_factor_last` is set, it defaults to `pool_factor`, with no new individuals added and no individuals removed from the filter pool during filtering.
+#' It is equivalent to taking the top `n_filter` individuals out of a sample of `n_filter * pool_factor`.
 #'
 #' @section Configuration Parameters:
-#' `FiltorSurrogateProgressive`'s configuration parameters are the hyperparameters of the `surrogate_learner` [`Learner`][mlr3::Learner], as well as:
+#' `FiltorSurrogateProgressive`'s configuration parameters are the hyperparameters of the [`FiltorSurrogate`] base class, as well as:
 #'
-#' @template param_filter_pool_first
-#' @template param_filter_pool_per_sample
+#' * `filter.pool_factor` :: `numeric(1)`\cr
+#'   `pool_factor` parameter of the progressive surrogate model filtering algorithm, see the corresponding section. Initialized to 1. Together with the
+#'   default of `filter.pool_factor_last`, this is equivalent to random sampling new individuals.
+#' * `filter.pool_factor_last` :: `numeric(1)`\cr
+#'   `pool_factor_last` parameter of the progressive surrogate model filtering algorithm, see the corresponding section.
+#'   When not given, it defaults to `filter.pool_factor`, equivalent to taking the top `n_filter` from `n_filter * pool_factor` individuals.
 #'
 #' @templateVar id surprog
-#' @templateVar additional , <surrogate_learner>
+#' @templateVar additional , \<surrogate_learner\> \[, \<surrogate_selector\>\]
 #' @template autoinfo_prepare_ftr
 #'
 #' @section Supported Operand Types:
-#'
-#' Supported [`Param`][paradox::Param] classes depend on the supported feature types of the `surrogate_learner`, as reported
-#' by `surrogate_learner$feature_types`: `"ParamInt"` requires
-#' `"integer"`, `"ParamDbl"` requires `"numeric"`, `"ParamLgl"` requires `"logical"`, and `"ParamFct"` requires `"factor"`.
+#' See [`FiltorSurrogate`] about supported operand types.
 #'
 #' @template autoinfo_dict
 #'
-#' @param surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
-#'   Regression learner for the surrogate model filtering algorithm.
+#' @template param_surrogate_learner
+#' @template param_surrogate_selector
 #'
 #' @family filtors
 #'
-#' @example
+#' @examples
 #' library("mlr3")
 #' library("mlr3learners")
-#' fp = ftr("surprog", lrn("regr.lm"), filter_pool_first = 2)
+#' fp = ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2)
 #'
 #' p = ps(x = p_dbl(-5, 5))
 #' known_data = data.frame(x = 1:5)
@@ -80,79 +80,47 @@
 #'
 #' @export
 FiltorSurrogateProgressive = R6Class("FiltorSurrogateProgressive",
-  inherit = Filtor,
+  inherit = FiltorSurrogate,
   public = list(
-    initialize = function(surrogate_learner) {
-      # TODO: could be extended with selector and then support multi-crit.
-      private$.surrogate_learner = assert_r6(surrogate_learner, "LearnerRegr")
-      private$.own_param_set = ps(
-        filter_pool_first = p_dbl(1, tags = "required"),
-        filter_pool_per_sample = p_dbl(0, tags = "required")
+    #' @description
+    #' Initialize the `FiltorSurrogateProgressive`.
+    #' @template param_surrogate_learner
+    #' @template param_surrogate_selector
+    initialize = function(surrogate_learner, surrogate_selector = SelectorBest$new()) {
+      own_param_set = ps(
+        pool_factor = p_dbl(1, tags = "required"),
+        pool_factor_last = p_dbl(1)
       )
-      private$.own_param_set$values = list(filter_pool_first = 1, filter_pool_per_sample = 1)
+      own_param_set$values = list(pool_factor= 1)
 
-      param_classes = c("ParamInt", "ParamDbl", "ParamLgl", "ParamFct")
-      if (!is.null(surrogate_learner)) {
-        param_classes = param_classes[c("integer", "numeric", "logical", "factor") %in% surrogate_learner$feature_types]
-      }
-
-      super$initialize(param_classes, alist(private$.own_param_set, private$.surrogate_learner$param_set), supported = "single-crit")
-    }
-  ),
-  active = list(
-    #' @field surrogate_learner ([`mlr3::LearnerRegr`] | `NULL`)\cr
-    #' Regression learner for the surrogate model filtering algorithm.
-    surrogate_learner = function(rhs) {
-      if (!missing(rhs) && !identical(rhs, private$.surrogate_learner)) {
-        stop("surrogate_learner is read-only.")
-      }
-      private$.surrogate_learner
+      super$initialize(surrogate_learner = surrogate_learner, param_set = own_param_set, surrogate_selector = surrogate_selector, dict_entry = "surprog")
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_filter) {
-      params = self$param_set$get_values()
-      primed = self$primed_ps
-      values = first(values, self$needed_input(n_filter))
-      fcolname = "fitnesses"
-      while (fcolname %in% colnames(known_values)) {
-        fcolname = paste0(".", fcolname)
-      }
-      known_values[[fcolname]] = c(fitnesses)
-      surrogate_prediction = self$surrogate_learner$train(
-        mlr3::TaskRegr$new("surrogate", with_factor_cols(known_values, primed), target = fcolname)
-      )$predict_newdata(with_factor_cols(values, primed))$data$response
+    .filter_surrogate = function(values, surrogate_prediction, known_values, fitnesses, n_filter) {
+      params = private$.own_param_set$get_values()
+      poolsizes = round(exp(seq(log(params$pool_factor), log(params$pool_factor_last %??% params$pool_factor), length.out = n_filter)) * n_filter) - seq_len(n_filter) + 1
+      original_indices = seq_len(nrow(values))
       selected = integer(0)
       for (i in seq_len(n_filter)) {
-        population_size = round(params$filter_pool_first + params$filter_pool_per_sample * (i - 1))
-        consider = first(surrogate_prediction, population_size)
-        selected[[i]] = which.max(consider)
-        assert_true(is.finite(consider[[selected[[i]]]]))
-        surrogate_prediction[[selected[[i]]]] = -Inf
+        cpop = first(values, poolsizes[[i]])
+        cfitness = first(surrogate_prediction, poolsizes[[i]])
+        selecting = private$.surrogate_selector$operate(cpop, cfitness, 1, 1)
+        # we may have removed things before, in which case we need to adjust the index.
+        selected[[i]] = original_indices[selecting]
+        # don't consider the selected value any more
+        surrogate_prediction = surrogate_prediction[-selecting, , drop = FALSE]
+        values = values[-selecting]
+        original_indices = original_indices[-selecting]
       }
       selected
     },
+
     .needed_input = function(output_size) {
-      params = self$param_set$get_values()
-      requested = params$filter_pool_first + params$filter_pool_per_sample * (output_size - 1)
-      if (requested < output_size) stopf("filter_pool_first (which is %s) + filter_pool_per_sample (which is %s) times (output_size (which is %s) minus one) must at least be output_size.",
-        params$filter_pool_first, params$filter_pool_per_sample, output_size)
-      round(requested)
-    },
-    .surrogate_learner = NULL,
-    .own_param_set = NULL
+      params = private$.own_param_set$get_values()
+      round(max(params$pool_factor, if (output_size > 1) params$pool_factor_last) * output_size)
+    }
   )
 )
-dict_filtors$add("surprog", FiltorSurrogateProgressive)
+dict_filtors$add("surprog", FiltorSurrogateProgressive, aux_construction_args = alist(surrogate_learner = mlr3::LearnerRegrDebug$new()))
 
-with_factor_cols = function(table, param_set) {
-  table = copy(table)
-  pclass  = param_set$class
-  fcols = names(pclass)[pclass == "ParamFct"]
-  plevels = param_set$levels
-
-  for (col in fcols) {
-    set(table, , col, factor(table[[col]], plevels[[col]]))
-  }
-  table
-}

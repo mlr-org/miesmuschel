@@ -22,13 +22,21 @@ and may not have any missing components.
 \item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
 Fitnesses for each individual given in \code{values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
 this is a \code{matrix}, if number of rows must be equal to the number of rows in \code{values}, and it must have one column when doing single-crit optimization
-and one column each for each  "criterion" when doing multi-crit optimization.
+and one column each for each  "criterion" when doing multi-crit optimization.\cr
+The \code{fitnesses}-value passed on to \verb{$.select()} is always a \code{matrix}.
 \item \code{n_select} :: \code{integer(1)}\cr
 Number of individuals to select. Some \code{Selector}s select individuals with replacement, for which this value may be greater than the number of
 rows in \code{values}.
+\item \code{group_size} :: \code{integer}\cr
+Sampling group size hint, indicating that the caller would prefer there to not be any duplicates within this group size, e.g. because the
+\code{\link{Selector}} is called to select individuals to be given to a \code{\link{Recombinator}} with a certain \code{n_indivs_in}, or because it is called as a
+\code{survival_selector} in \code{\link[=mies_survival_comma]{mies_survival_comma()}} or \code{\link[=mies_survival_plus]{mies_survival_plus()}}. The \code{\link{Selector}} may or may not ignore this value, however.
+This may possibly happen because of certain configuration parameters, or because the input size is too small.\cr
+Must either be a scalar value or sum up to \code{n_select}. Must be non-negative. A scalar value of 0 is interpreted the same as 1.\cr
+If not given, this value defaults to 1.
 }
 
-The return value for an operation will be a numeric vector of integer values of ength \code{n_select} indexing the individuals that were selected. Some \code{Selector}s
+The return value for an operation will be a numeric vector of integer values of length \code{n_select} indexing the individuals that were selected. Some \code{Selector}s
 select individuals with replacement, for which the return value may contain indices more than once.
 }
 \section{Inheriting}{
@@ -41,18 +49,27 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{Recombinator}}
+\code{\link{RecombinatorPair}},
+\code{\link{Recombinator}},
+\code{\link{Scalor}},
+\code{\link{SelectorScalar}}
 
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{dict_selectors_best}},
+\code{\link{dict_selectors_maybe}},
+\code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
-\code{\link{dict_selectors_random}}
+\code{\link{dict_selectors_random}},
+\code{\link{dict_selectors_sequential}},
+\code{\link{dict_selectors_tournament}}
 }
 \concept{base classes}
 \concept{selectors}
@@ -70,34 +87,45 @@ Optimization supported by this \code{Selector}, can be \code{"single-crit"}, \co
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{Selector$new()}}
-\item \href{#method-clone}{\code{Selector$clone()}}
+\item \href{#method-Selector-new}{\code{Selector$new()}}
+\item \href{#method-Selector-clone}{\code{Selector$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-Selector-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Selector-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{Selector}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Selector$new(
+  is_deterministic = FALSE,
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
-  supported = c("single-crit", "multi-crit")
+  supported = c("single-crit", "multi-crit"),
+  packages = character(0),
+  dict_entry = NULL,
+  own_param_set = quote(self$param_set)
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{is_deterministic}}{(\code{logical(1)})\cr
+Whether the \code{\link{Selector}} is deterministic. Setting this to \code{TRUE} adds a configuration parameter \code{shuffle_selection} (initialized to \code{TRUE})
+that causes the selection to be shuffled.}
+
 \item{\code{param_classes}}{(\code{character})\cr
 Classes of parameters that the operator can handle. May contain any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}.
 Default is all of them.\cr
@@ -116,13 +144,31 @@ The \verb{$param_set} field will reflect this value.}
 Subset of \code{"single-crit"} and \code{"multi-crit"}, indicating wether single and / or multi-criterion optimization is supported.
 Default both of them.\cr
 The \verb{$supported} field will reflect this value.}
+
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\cr
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-Selector-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-Selector-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -23,7 +23,7 @@
 #'   Individuals to use for filtering. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components. Note that `known_values` may be empty.
 #' * `fitnesses` :: `numeric` | `matrix`\cr
-#'   Fitnesses for each individual given in `old_values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
+#'   Fitnesses for each individual given in `known_values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
 #'   this is a `matrix`, if number of rows must be equal to the number of rows in `values`, and it must have one column when doing single-crit optimization
 #'   and one column each for each  "criterion" when doing multi-crit optimization.
 #' * `n_filter` :: `integer(1)`\cr
@@ -38,9 +38,8 @@
 #' function. The user of the object calls `$operate()`, and the arguments are passed on to private `$.filter()` after checking that
 #' the operator is primed, that the `values` and `known_values` arguments conforms to the primed domain and that other values match.
 #'
-#' The `private$.needed_input()` function should also be overloaded. It is a function that gets a single input, `output_size`, a positive integer indicating
-#' the number of individuals that the caller desires. The function should calculate the number of `values` that are required to
-#' filter down to `output_size`, given the current configuraiton parameter settings. The needed input should always be at least `output_size`.
+#' The `private$.needed_input()` function should also be overloaded, it is called by the public `$needed_input()` function after initial checks;
+#' see the documentation there.
 #'
 #' Typically, the `$initialize()` function should also be overloaded, and optionally the `$prime()` function; they should call their `super` equivalents.
 #'
@@ -58,12 +57,21 @@ Filtor = R6Class("Filtor",
     #'   Subset of `"single-crit"` and `"multi-crit"`, indicating wether single and / or multi-criterion optimization is supported.
     #'   Default both of them.\cr
     #'   The `$supported` field will reflect this value.
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit")) {
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_own_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_subset(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
-      super$initialize(param_classes, param_set, endomorphism = FALSE)
+      super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "ftr", own_param_set = own_param_set)
     },
+    #' @description
+    #' Calculate the number of `values` that are required to
+    #' filter down to `output_size`, given the current configuraiton parameter settings.
+    #' @param output_size (`integer(1)`)\cr
+    #'   A positive integer indicating the number of individuals for which the needed input size should be calculated.
+    #' @return `integer(1)`: The minimum number of rows required to filter down to `output_size`. At least `output_size`.
     needed_input = function(output_size) {
       if (is.null(private$.primed_ps)) stop("Operator must be primed first!")
       assert_int(output_size, tol = 1e-100, lower = 0)
@@ -82,9 +90,8 @@ Filtor = R6Class("Filtor",
   private = list(
     .supported = NULL,
     .operate = function(values, known_values, fitnesses, n_filter) {
-      assert_data_table(values, min.rows = 1)
 
-      private$.primed_ps$assert_dt(known_values)
+      if (getOption("miesmuschel.testing")) private$.primed_ps$assert_dt(known_values)
       assert_names(colnames(known_values), permutation.of = private$.primed_ps$ids())
       if (!is.data.table(known_values)) {
         # don't change input by reference
@@ -104,6 +111,9 @@ Filtor = R6Class("Filtor",
       assert_int(n_filter, lower = 0, tol = 1e-100)
 
       if (n_filter == 0) return(integer(0))
+
+      assert_data_table(values, min.rows = 1)
+
 
       needed_input = self$needed_input(n_filter)
       if (nrow(values) < needed_input) stopf("Needs at least %s individuals to select %s individuals, but got %s.", needed_input, n_filter, nrow(values))

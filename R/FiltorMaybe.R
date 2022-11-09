@@ -2,7 +2,7 @@
 #'
 #' @include Filtor.R
 #'
-#' @name dict_filtor_maybe
+#' @name dict_filtors_maybe
 #'
 #' @description
 #' [`Filtor`] that wraps two other [`Filtor`]s given during construction and chooses which operation to perform.
@@ -31,13 +31,13 @@
 #' Additional configuration parameters:
 #' * `p` :: `numeric(1)` \cr
 #'   Probability per individual (when `random_choise` is `TRUE`), or fraction of individuals (when `random_choice` is `FALSE`),
-#'   that are chosen from `$filtor` instead of `$filtor_not`.
+#'   that are chosen from `$filtor` instead of `$filtor_not`. Must be set by the user.
 #' * `random_choice` :: `logical(1)` \cr
 #'   Whether to sample the number of individuals chosen by `$filtor` according to `rbinom(1, n_filter, p)`, or to use a fixed fraction.
 #'   Initialized to `FALSE`.
 #'
 #' @templateVar id maybe
-#' @templateVar additional , <filtor> \[, <filtor_not>\]
+#' @templateVar additional , \<filtor\> \[, \<filtor_not\>\]
 #' @template autoinfo_prepare_ftr
 #'
 #' @section Supported Operand Types:
@@ -52,7 +52,7 @@
 #' library("mlr3")
 #' library("mlr3learners")
 #'
-#' fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter_pool_first = 2), p = 0.5)
+#' fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2), p = 0.5)
 #' p = ps(x = p_dbl(-5, 5))
 #' known_data = data.frame(x = 1:5)
 #' fitnesses = 1:5
@@ -79,12 +79,14 @@ FiltorMaybe = R6Class("FiltorMaybe",
     #' @param filtor ([`Filtor`])\cr
     #'   [`Filtor`] to wrap. This operator gets run with probability `p` (Configuration parameter).\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$filtor` field will reflect this value.
     #' @param filtor_not ([`Filtor`])\cr
     #'   Another [`Filtor`] to wrap. This operator runs when `filtor` is not chosen. By
     #'   default, this is [`FiltorNull`], i.e. no filtering. With this default, the
     #'   `FiltorMaybe` object applies the `filtor` operation with probability / proportion `p`, and
     #'   no operation at all otherwise.\cr
     #'   The constructed object gets a *clone* of this argument.
+    #'   The `$filtor_not` field will reflect this value.
     initialize = function(filtor, filtor_not = FiltorNull$new()) {
       private$.wrapped = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(filtor_not, "Filtor")$clone(deep = TRUE)
@@ -92,9 +94,12 @@ FiltorMaybe = R6Class("FiltorMaybe",
       private$.wrapped$param_set$set_id = "maybe"
       private$.wrapped_not$param_set$set_id = "maybe_not"
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"), random_choice = p_lgl(tags = "required"))
-      private$.maybe_param_set$values = list(p = 1, random_choice = FALSE)
+      private$.maybe_param_set$values = list(random_choice = FALSE)
       super$initialize(intersect(filtor$param_classes, filtor_not$param_classes),
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set))
+        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        supported = intersect(filtor$supported, filtor_not$supported),
+        packages = c("stats", filtor$packages, filtor_not$packages), dict_entry = "maybe",
+        own_param_set = quote(private$.maybe_param_set))
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the wrapped operators
@@ -109,9 +114,23 @@ FiltorMaybe = R6Class("FiltorMaybe",
       invisible(self)
     }
   ),
+  active = list(
+    #' @field filtor ([`Filtor`])\cr
+    #' [`Filtor`] being wrapped. This operator gets run with probability / proportion `p` (configuration parameter).
+    filtor = function(val) {
+      if (!missing(val)) stop("mutator is read-only.")
+      private$.wrapped
+    },
+    #' @field filtor_not ([`Filtor`])\cr
+    #' Alternative [`Filtor`] being wrapped. This operator gets run with probability / proportion `1 - p` (configuration parameter).
+    filtor_not = function(val) {
+      if (!missing(val)) stop("mutator_not is read-only.")
+      private$.wrapped_not
+    }
+  ),
   private = list(
     .filter = function(values, known_values, fitnesses, n_filter) {
-      params = self$param_set$get_values()
+      params = private$.maybe_param_set$get_values()
 
       if (params$random_choice) {
         filter_min = stats::qbinom(-20, n_filter, params$p, log.p = TRUE, lower.tail = TRUE)
@@ -136,7 +155,7 @@ FiltorMaybe = R6Class("FiltorMaybe",
       }
     },
     .needed_input = function(output_size) {
-      params = self$param_set$get_values()
+      params = private$.maybe_param_set$get_values()
       if (params$random_choice) {
         filter_min = stats::qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = TRUE)
         filter_max = stats::qbinom(-20, output_size, params$p, log.p = TRUE, lower.tail = FALSE)
@@ -158,4 +177,4 @@ FiltorMaybe = R6Class("FiltorMaybe",
     .maybe_param_set = NULL
   )
 )
-dict_filtors$add("maybe", FiltorMaybe)
+dict_filtors$add("maybe", FiltorMaybe, aux_construction_args = alist(filtor = FiltorNull$new()))

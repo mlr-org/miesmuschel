@@ -7,13 +7,15 @@
 \description{
 Numeric Values between two individuals are recombined via component-wise independent simulated
 binary crossover. See Deb (1995) for more details.
+
+This operator is applied to all components; It is common to apply the operator to only some randomly
+chosen components, in which case the \code{\link[=RecombinatorCmpMaybe]{rec("cmpmaybe")}} operator should
+be used; see examples.
 }
 \section{Configuration Parameters}{
 
 \itemize{
-\item \code{p} :: \code{numeric(1)}\cr
-Component-wise probability with which to crossover values. Initialized to 0.5.
-\item \code{n} :: \code{double}\cr
+\item \code{n} :: \code{numeric}\cr
 Non-negative distribution index of the polynomial distribution for each component.
 Generally spoken, the higher \code{n}, the higher the probability of creating near parent values.
 This may either be a scalar in which case it is applied to all input components, or a vector,
@@ -32,26 +34,28 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("sbx")
 recs("sbx")  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("sbx")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
 set.seed(1)
-rsbx = rec("sbx")
+rsbx = rec("cmpmaybe", rec("sbx"), p = 0.5)
 p = ps(x = p_dbl(-5, 5), y = p_dbl(-5, 5), z = p_dbl(-5, 5))
 data = data.frame(x = 0:5, y = 0:5, z = 0:5)
 
 rsbx$prime(p)
 rsbx$operate(data)
 
-rsbx$param_set$values$n = c(0.5, 1, 10)
-rsbx$param_set$values$p = 1
+rsbx = rec("sbx", n = c(0.5, 1, 10))
+rsbx$prime(p)
 rsbx$operate(data)
 }
 \references{
@@ -62,44 +66,64 @@ Deb, Kalyanmoy, Agrawal, Bhushan R, others (1995).
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 }
 \concept{recombinators}
 \section{Super classes}{
-\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorSimulatedBinaryCrossover}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{\link[miesmuschel:RecombinatorPair]{miesmuschel::RecombinatorPair}} -> \code{RecombinatorSimulatedBinaryCrossover}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorSimulatedBinaryCrossover$new()}}
-\item \href{#method-clone}{\code{RecombinatorSimulatedBinaryCrossover$clone()}}
+\item \href{#method-RecombinatorSimulatedBinaryCrossover-new}{\code{RecombinatorSimulatedBinaryCrossover$new()}}
+\item \href{#method-RecombinatorSimulatedBinaryCrossover-clone}{\code{RecombinatorSimulatedBinaryCrossover$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorSimulatedBinaryCrossover-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorSimulatedBinaryCrossover-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{RecombinatorSimulatedBinaryCrossover} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RecombinatorSimulatedBinaryCrossover$new(keep_complement = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{keep_complement}}{(\code{logical(1)})\cr
+Whether the operation should keep both resulting individuals (\code{TRUE}), or only the first and discard
+the complement (\code{FALSE}). Default \code{TRUE}.
+The \verb{$keep_complement} field will reflect this value.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorSimulatedBinaryCrossover-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorSimulatedBinaryCrossover-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

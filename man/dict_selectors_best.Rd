@@ -5,13 +5,21 @@
 \alias{SelectorBest}
 \title{Best Value Selector}
 \description{
-Selector that selects the top \code{n_select} individuals based on the  fitness value. When \code{n_select} is larger than the number
+\code{\link{Selector}} that selects the top \code{n_select} individuals based on the  fitness value, breaking ties randomly. When \code{n_select} is larger than the number
 of individuals, the selection wraps around: All \code{nrow(values)} individuals are selected at least \code{floor(nrow(values) / n_select)}
 times, with the top \code{nrow(values) \%\% n_select} individuals being selected one more time.
 }
 \section{Configuration Parameters}{
 
-This operator has no configuration parameters.
+
+
+\itemize{
+\item \code{shuffle_selection} :: \code{logical(1)}\cr
+Whether to shuffle the selected output. When this is \code{TRUE}, selected individuals are returned in random order, so when this
+operator is e.g. used in \code{\link[=mies_generate_offspring]{mies_generate_offspring()}}, then subsequent recombination operators effectively operate on pairs
+(or larger groups) of random individuals. Otherwise they are returned in order, and recombination operates on the first
+batch of \code{n_indivs_in} returned individuals first, then the second batch etc. in order. Initialized to \code{TRUE} (recommended).
+}
 }
 
 \section{Supported Operand Types}{
@@ -24,13 +32,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Selector}} can be created with the short access form \code{\link[=sel]{sel()}}
 (\code{\link[=sels]{sels()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_selectors}} in the following way:\preformatted{# preferred:
+\code{\link{dict_selectors}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 sel("best")
 sels("best")  # takes vector IDs, returns list of Selectors
 
 # long form:
 dict_selectors$get("best")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -44,46 +54,66 @@ sb$prime(p)
 
 sb$operate(data, fitnesses, 2)
 
+sb$param_set$values$shuffle_selection = FALSE
+
 sb$operate(data, fitnesses, 4)
 }
 \seealso{
 Other selectors: 
+\code{\link{SelectorScalar}},
 \code{\link{Selector}},
+\code{\link{dict_selectors_maybe}},
+\code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},
-\code{\link{dict_selectors_random}}
+\code{\link{dict_selectors_random}},
+\code{\link{dict_selectors_sequential}},
+\code{\link{dict_selectors_tournament}}
 }
 \concept{selectors}
 \section{Super classes}{
-\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{SelectorBest}
+\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Selector]{miesmuschel::Selector}} -> \code{\link[miesmuschel:SelectorScalar]{miesmuschel::SelectorScalar}} -> \code{SelectorBest}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{SelectorBest$new()}}
-\item \href{#method-clone}{\code{SelectorBest$clone()}}
+\item \href{#method-SelectorBest-new}{\code{SelectorBest$new()}}
+\item \href{#method-SelectorBest-clone}{\code{SelectorBest$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="SelectorScalar" data-id="prime"><a href='../../miesmuschel/html/SelectorScalar.html#method-SelectorScalar-prime'><code>miesmuschel::SelectorScalar$prime()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-SelectorBest-new"></a>}}
+\if{latex}{\out{\hypertarget{method-SelectorBest-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{SelectorBest} object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{SelectorBest$new(scalor = ScalorSingleObjective$new())}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{scalor}}{(\code{\link{Scalor}})\cr
+\code{\link{Scalor}} to use to generate scalar values from multiple objectives, if multi-objective optimization is performed.
+Initialized to \code{\link{ScalorSingleObjective}}: Doing single-objective optimization normally, throwing an error if used
+in multi-objective setting: In that case, a \code{\link{Scalor}} needs to be explicitly chosen.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-SelectorBest-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-SelectorBest-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

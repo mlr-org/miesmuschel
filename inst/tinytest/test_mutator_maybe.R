@@ -5,11 +5,11 @@ mmaybe = MutatorMaybe$new(MutatorDiscreteUniform$new())
 mmaybe$param_set$values$p = 0.5
 expect_mutator(mmaybe, "MutatorMaybe(MutatorDiscreteUniform)")
 
-mmaybe = MutatorMaybe$new(MutatorGauss$new(), MutatorGauss$new())
+mmaybe = MutatorMaybe$new(mut("gauss", sdev = 0.1), mut("gauss", sdev = 0.2))
 mmaybe$param_set$values$p = 0.5
 expect_mutator(mmaybe, "MutatorMaybe(MutatorGauss,MutatorGauss)")
 
-mmaybe = MutatorMaybe$new(MutatorGauss$new())
+mmaybe = MutatorMaybe$new(mut("gauss", sdev = 0.3))
 mmaybe$param_set$values$p = 0.5
 expect_mutator(mmaybe, "MutatorMaybe(MutatorGauss)")
 

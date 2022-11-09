@@ -1,4 +1,4 @@
-#' @title Null-Mutator
+#' @title Null Mutator
 #'
 #' @include Mutator.R
 #'
@@ -31,7 +31,7 @@ MutatorNull = R6Class("MutatorNull",
     #' Initialize the `MutatorNull` object.
     initialize = function() {
       # call initialization with standard options: allow everything etc.
-      super$initialize()
+      super$initialize(dict_entry = "null")
     }
   ),
   private = list(

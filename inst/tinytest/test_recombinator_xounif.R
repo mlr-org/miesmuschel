@@ -1,10 +1,10 @@
 
 source("setup.R", local = TRUE)
 
-rxounif = RecombinatorCrossoverUniform$new(keep_complement = TRUE)
+rxounif = RecombinatorCrossoverUniform(keep_complement = TRUE)
 expect_recombinator(rxounif, "RecombinatorCrossoverUniform(keep_complement = TRUE)")
 
-rxounif = RecombinatorCrossoverUniform$new(keep_complement = FALSE)
+rxounif = RecombinatorCrossoverUniform(keep_complement = FALSE)
 expect_recombinator(rxounif, "RecombinatorCrossoverUniform(keep_complement = FALSE)")
 
 set.seed(1)
@@ -20,7 +20,7 @@ rxounif$param_set$values$p = 1
 expect_identical(vals[(0:4) * 2 + 2], rxounif$operate(vals))
 
 
-rxounif = RecombinatorCrossoverUniform$new(keep_complement = TRUE)
+rxounif = RecombinatorCrossoverUniform(keep_complement = TRUE)
 rxounif$prime(p)
 
 rxounif$param_set$values$p = 0

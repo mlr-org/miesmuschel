@@ -35,7 +35,7 @@ expect_filtor = function(ftr, filtor_name, is_primed = FALSE) {
   pbigvals_allowed = generate_design_random(pbig_allowed, datasize)$data
 
 
-  expect_error(ftr$operate(pvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "Must be a permutation of set")
+  expect_error(ftr$operate(pvals_allowed, pvals_allowed, seq_len(nrow(pvals_allowed)), 1), "[mM]ust be a (permutation of set|set equal to)")
 
   ftr$prime(p_allowed)
   expect_error(ftr$operate(pvals_allowed, pbigvals_allowed, seq_len(nrow(pbigvals_allowed)), 1), "Parameter .*\\.1.*not available")
@@ -104,9 +104,9 @@ FiltorDebug = R6::R6Class("FiltorDebug",
     }
   ),
   private = list(
-    .filter = function(values, known_values, fitnesses, n_select) {
+    .filter = function(values, known_values, fitnesses, n_select, context) {
       self$handler(v = values, k = known_values, f = fitnesses, n = n_select, p = self$param_set$values)
     },
-    .needed_input = function(output_size) self$ni(o = output_size, p = self$param_set$values)
+    .needed_input = function(output_size, context) self$ni(o = output_size, p = self$param_set$values)
   )
 )

@@ -24,7 +24,7 @@ and may not have any missing components.
 Individuals to use for filtering. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
 and may not have any missing components. Note that \code{known_values} may be empty.
 \item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
-Fitnesses for each individual given in \code{old_values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
+Fitnesses for each individual given in \code{known_values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
 this is a \code{matrix}, if number of rows must be equal to the number of rows in \code{values}, and it must have one column when doing single-crit optimization
 and one column each for each  "criterion" when doing multi-crit optimization.
 \item \code{n_filter} :: \code{integer(1)}\cr
@@ -41,28 +41,33 @@ must always return unique integers, i.e. select every individual at most once.
 function. The user of the object calls \verb{$operate()}, and the arguments are passed on to private \verb{$.filter()} after checking that
 the operator is primed, that the \code{values} and \code{known_values} arguments conforms to the primed domain and that other values match.
 
-The \code{private$.needed_input()} function should also be overloaded. It is a function that gets a single input, \code{output_size}, a positive integer indicating
-the number of individuals that the caller desires. The function should calculate the number of \code{values} that are required to
-filter down to \code{output_size}, given the current configuraiton parameter settings. The needed input should always be at least \code{output_size}.
+The \code{private$.needed_input()} function should also be overloaded, it is called by the public \verb{$needed_input()} function after initial checks;
+see the documentation there.
 
 Typically, the \verb{$initialize()} function should also be overloaded, and optionally the \verb{$prime()} function; they should call their \code{super} equivalents.
 }
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{Scalor}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 
 Other filtors: 
-\code{\link{dict_filtor_maybe}},
+\code{\link{FiltorSurrogate}},
+\code{\link{dict_filtors_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
-\code{\link{dict_filtors_surprog}}
+\code{\link{dict_filtors_surprog}},
+\code{\link{dict_filtors_surtour}}
 }
 \concept{base classes}
 \concept{filtors}
@@ -80,29 +85,35 @@ Optimization supported by this \code{Filtor}, can be \code{"single-crit"}, \code
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{Filtor$new()}}
-\item \href{#method-needed_input}{\code{Filtor$needed_input()}}
-\item \href{#method-clone}{\code{Filtor$clone()}}
+\item \href{#method-Filtor-new}{\code{Filtor$new()}}
+\item \href{#method-Filtor-needed_input}{\code{Filtor$needed_input()}}
+\item \href{#method-Filtor-clone}{\code{Filtor$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-prime'><code>miesmuschel::MiesOperator$prime()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-Filtor-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Filtor-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{Filtor}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Filtor$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
-  supported = c("single-crit", "multi-crit")
+  supported = c("single-crit", "multi-crit"),
+  packages = character(0),
+  dict_entry = NULL,
+  own_param_set = quote(self$param_set)
 )}\if{html}{\out{</div>}}
 }
 
@@ -127,22 +138,53 @@ The \verb{$param_set} field will reflect this value.}
 Subset of \code{"single-crit"} and \code{"multi-crit"}, indicating wether single and / or multi-criterion optimization is supported.
 Default both of them.\cr
 The \verb{$supported} field will reflect this value.}
+
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\cr
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-needed_input"></a>}}
-\if{latex}{\out{\hypertarget{method-needed_input}{}}}
+\if{html}{\out{<a id="method-Filtor-needed_input"></a>}}
+\if{latex}{\out{\hypertarget{method-Filtor-needed_input}{}}}
 \subsection{Method \code{needed_input()}}{
+Calculate the number of \code{values} that are required to
+filter down to \code{output_size}, given the current configuraiton parameter settings.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Filtor$needed_input(output_size)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{output_size}}{(\code{integer(1)})\cr
+A positive integer indicating the number of individuals for which the needed input size should be calculated.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{integer(1)}: The minimum number of rows required to filter down to \code{output_size}. At least \code{output_size}.
+}
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-Filtor-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-Filtor-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

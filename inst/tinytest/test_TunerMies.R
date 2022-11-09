@@ -13,7 +13,7 @@ ti = mlr3tuning::TuningInstanceSingleCrit$new(
   terminator = bbotk::trm("gens", generations = 10)
 )
 
-mies_tune <- mlr3tuning::tnr("mies", mutator = MutatorGauss$new(), recombinator = RecombinatorCrossoverUniform$new(),
+mies_tune <- mlr3tuning::tnr("mies", mutator = mut("gauss", sdev = 0.1), recombinator = RecombinatorCrossoverUniform(),
   parent_selector = SelectorRandom$new(), survival_selector = SelectorBest$new(),
   mu = 10, lambda = 5
 )

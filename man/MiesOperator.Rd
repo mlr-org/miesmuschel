@@ -30,12 +30,16 @@ In most cases, the \code{MiesOperator} class should not be inherited from, direc
 
 \seealso{
 Other base classes: 
+\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{Scalor}},
+\code{\link{SelectorScalar}},
 \code{\link{Selector}}
 }
 \concept{base classes}
@@ -48,6 +52,18 @@ Configuration parameters of the \code{MiesOperator} object. Read-only.}
 \item{\code{param_classes}}{(\code{character})\cr
 Classes of parameters that the operator can handle, contains any of \code{"ParamLgl"}, \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}. Read-only.}
 
+\item{\code{packages}}{(\code{character})\cr
+Packages needed for the operator. Read-only.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of this class in its respective \code{\link[mlr3misc:Dictionary]{Dictionary}}.
+Is \code{NULL} if this class it not (known to be) in a \code{\link[mlr3misc:Dictionary]{Dictionary}}. Read-only.}
+
+\item{\code{dict_shortaccess}}{(\code{character(1)} | \code{NULL})\cr
+Name of \code{\link[mlr3misc:Dictionary]{Dictionary}} short-access function where an object of this class can be retrieved.
+Is \code{NULL} if this class is not (known to be) in a \code{\link[mlr3misc:Dictionary]{Dictionary}}
+with a short-access function. Read-only.}
+
 \item{\code{endomorphism}}{(\code{logical(1)})\cr
 Whether the output of \verb{$operate()} is a \code{data.frame} / \code{\link[data.table:data.table]{data.table}} in the same domain as its input. Read-only.}
 
@@ -57,27 +73,37 @@ Writing to this acrive binding calls \verb{$prime()}.}
 
 \item{\code{is_primed}}{(\code{logical(1)})\cr
 Whether the \code{MiesOperator} was primed before. Is \code{FALSE} exactly when \verb{$primed_ps} is \code{NULL}. Read-only.}
+
+\item{\code{man}}{(\code{character(1)})\cr
+Name of this class, in the form \verb{<package>::<classname>}. Used by the \verb{$help()} method.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MiesOperator$new()}}
-\item \href{#method-prime}{\code{MiesOperator$prime()}}
-\item \href{#method-operate}{\code{MiesOperator$operate()}}
-\item \href{#method-clone}{\code{MiesOperator$clone()}}
+\item \href{#method-MiesOperator-new}{\code{MiesOperator$new()}}
+\item \href{#method-MiesOperator-repr}{\code{MiesOperator$repr()}}
+\item \href{#method-MiesOperator-print}{\code{MiesOperator$print()}}
+\item \href{#method-MiesOperator-prime}{\code{MiesOperator$prime()}}
+\item \href{#method-MiesOperator-operate}{\code{MiesOperator$operate()}}
+\item \href{#method-MiesOperator-help}{\code{MiesOperator$help()}}
+\item \href{#method-MiesOperator-clone}{\code{MiesOperator$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MiesOperator-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize base class components of the \code{MiesOperator}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MiesOperator$new(
   param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"),
   param_set = ps(),
+  packages = character(0),
+  dict_entry = NULL,
+  dict_shortaccess = NULL,
+  own_param_set = quote(self$param_set),
   endomorphism = TRUE
 )}\if{html}{\out{</div>}}
 }
@@ -99,6 +125,30 @@ These \code{\link[paradox:ParamSet]{ParamSet}} are then combined using a \code{\
 Default is the empty \code{\link[paradox:ParamSet]{ParamSet}}.\cr
 The \verb{$param_set} field will reflect this value.}
 
+\item{\code{packages}}{(\code{character})
+Packages that need to be loaded for the operator to function. This should
+be declared so these packages can be loaded when operators run on parallel
+instances. Default is \code{character(0)}.\cr
+The \verb{$packages} field will reflect this values.}
+
+\item{\code{dict_entry}}{(\code{character(1)} | \code{NULL})\cr
+Key of the class inside the \code{\link[mlr3misc:Dictionary]{Dictionary}} (usually one of
+\code{\link{dict_mutators}}, \code{\link{dict_recombinators}}, \code{\link{dict_selectors}}), where it can
+be retrieved using a \link[=mut]{short access function}. May be \code{NULL} if the operator
+is not entered in a dictionary.\cr
+The \verb{$dict_entry} field will reflect this value.}
+
+\item{\code{dict_shortaccess}}{(\code{character(1)} | \code{NULL})\cr
+Name of the \code{\link[mlr3misc:Dictionary]{Dictionary}} short access function in which the operator is registered.
+This is used to inform the user about how to construct a given object. Should ordinarily be one of
+\code{"mut"}, \code{"rec"}, \code{"sel"}.\cr
+The \verb{$dict_shortaccess} field will reflect this value.}
+
+\item{\code{own_param_set}}{(\code{language})\cr
+An expression that evaluates to a \code{\link[paradox:ParamSet]{ParamSet}} indicating the configuration parameters that are entirely owned by
+this operator class (and not proxied from a construction argument object). This should be \code{quote(self$param_set)} (the default) when
+the \code{param_set} argument is not a list of expressions.}
+
 \item{\code{endomorphism}}{(\code{logical(1)})\cr
 Whether the private \verb{$.operate()} operation creates a \code{\link[data.table:data.table]{data.table}} with the same columns as the input
 (i.e. conforming to the primed \code{\link[paradox:ParamSet]{ParamSet}}). If this is \code{TRUE} (default), then the return value of \verb{$.operate()}
@@ -109,8 +159,61 @@ The \verb{$endomorphsim} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-MiesOperator-repr"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-repr}{}}}
+\subsection{Method \code{repr()}}{
+Create a \code{\link[base:call]{call}} object representing this operator.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$repr(
+  skip_defaults = TRUE,
+  show_params = TRUE,
+  show_constructor_args = TRUE,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{skip_defaults}}{(\code{logical(1)})\cr
+Whether to skip construction arguments that have their default value. Default \code{TRUE}.}
+
+\item{\code{show_params}}{(\code{logical(1)})\cr
+Whether to show \code{\link[paradox:ParamSet]{ParamSet}} values. Default \code{TRUE}.}
+
+\item{\code{show_constructor_args}}{(\code{logical(1)})\cr
+Whether to show construction args that are not \code{\link[paradox:ParamSet]{ParamSet}} values. Default \code{TRUE}.}
+
+\item{\code{...}}{(any)\cr
+Ignored.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MiesOperator-print"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-print}{}}}
+\subsection{Method \code{print()}}{
+Print this operator.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$print(verbose = FALSE, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{verbose}}{(\code{logical(1)})\cr
+Whether to show all construction arguments, even the ones at default values. Default \code{FALSE}.}
+
+\item{\code{...}}{(any)\cr
+Ignored.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MiesOperator-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-prime}{}}}
 \subsection{Method \code{prime()}}{
 Prepare the \code{MiesOperator} to function on the given \code{\link[paradox:ParamSet]{ParamSet}}. This must be called before
 \verb{$operate()}. It may be called multiple times in the lifecycle of the \code{MiesOperator} object, and prior primings are
@@ -134,8 +237,8 @@ May only contiain \code{\link[paradox:ParamSet]{Param}} objects that conform to 
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-operate"></a>}}
-\if{latex}{\out{\hypertarget{method-operate}{}}}
+\if{html}{\out{<a id="method-MiesOperator-operate"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-operate}{}}}
 \subsection{Method \code{operate()}}{
 Operate on the given individuals. This calls private \verb{$.operate()}, which must be overloaded by an inheriting class,
 passing through all function arguments after performing some checks.
@@ -161,8 +264,29 @@ a \code{data.frame}, the output is also \code{\link[data.table:data.table]{data.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MiesOperator-help"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-help}{}}}
+\subsection{Method \code{help()}}{
+Run \code{\link[utils:help]{utils::help()}} for this object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MiesOperator$help(help_type = getOption("help_type"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{help_type}}{(\code{character(1)})\cr
+One of \code{"text"}, \code{"html"}, or \code{"pdf"}: The type of help page to open. Defaults to the \code{"help_type"} option.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{help_files_with_dopic} object, which opens the help page.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MiesOperator-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MiesOperator-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

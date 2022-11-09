@@ -4,17 +4,25 @@
 \alias{dict_recombinators_xounif}
 \alias{RecombinatorCrossoverUniform}
 \title{Crossover Recombinator}
+\usage{
+RecombinatorCrossoverUniform(keep_complement = TRUE)
+}
+\arguments{
+\item{keep_complement}{(\code{logical(1)})\cr
+Whether the operation should keep both resulting individuals (\code{TRUE}), or only the first and discard
+the complement (\code{FALSE}). Default \code{TRUE}.
+The \verb{$keep_complement} field will reflect this value.}
+}
+\value{
+an object of class \code{\link{Recombinator}}: \code{rec("cmpmaybe", rec("swap"))}.
+}
 \description{
 Values between two individuals are exchanged with component-wise independent probability.
-}
-\section{Configuration Parameters}{
 
-\itemize{
-\item \code{p} :: \code{numeric(1)}\cr
-Component-wise probability with which to exchange values. Initialized to 0.5.
+This is a pseudo-class: It does not create a single R6-object of a class;
+instead, it creates the object \code{rec("cmpmaybe", rec("swap"), p = 0.5)},
+making use of the \code{\link{RecombinatorCmpMaybe}} and \code{\link{RecombinatorSwap}} operators.
 }
-}
-
 \section{Supported Operand Types}{
 
 
@@ -25,18 +33,23 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("xounif")
 recs("xounif")  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("xounif")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
 set.seed(1)
 rx = rec("xounif")
+
+print(rx)
+
 p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_dbl(-5, 5))
 data = data.frame(x = 0:5, y = 0:5, z = 0:5)
 
@@ -49,65 +62,17 @@ rx$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
-\code{\link{dict_recombinators_sbx}}
+\code{\link{dict_recombinators_sbx}},
+\code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}}
 }
 \concept{recombinators}
-\section{Super classes}{
-\code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorCrossoverUniform}
-}
-\section{Methods}{
-\subsection{Public methods}{
-\itemize{
-\item \href{#method-new}{\code{RecombinatorCrossoverUniform$new()}}
-\item \href{#method-clone}{\code{RecombinatorCrossoverUniform$clone()}}
-}
-}
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="prime">}\href{../../miesmuschel/html/MiesOperator.html#method-prime}{\code{miesmuschel::MiesOperator$prime()}}\out{</span>}
-}
-\out{</details>}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize the \code{RecombinatorCrossoverUniform} object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RecombinatorCrossoverUniform$new(keep_complement = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{keep_complement}}{(\code{logical(1)})\cr
-Whether the operation should keep both individuals that were crossed over (\code{TRUE}), or only the first and discard
-the crossover complement (\code{FALSE}). Default \code{TRUE}}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RecombinatorCrossoverUniform$clone(deep = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
-}

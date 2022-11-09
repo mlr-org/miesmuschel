@@ -12,7 +12,7 @@ Recombinator that performs the operation in its \code{operation} configuration p
 
 \itemize{
 \item \code{operation} :: \code{\link{Recombinator}}\cr
-Operation to perform. Initialized to \code{\link{RecombinatorNull}} with appropriate \code{n_indivs_in} and \code{n_indivs_out} values.
+Operation to perform. Must be set by the user.
 This is primed when \verb{$prime()} of \code{RecombinatorProxy} is called, and also when \verb{$operate()} is called, to make changing
 the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{RecombinatorProxy}
 objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid
@@ -30,18 +30,20 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("proxy")
 recs("proxy")  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("proxy")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
 set.seed(1)
-rp = rec("proxy")
+rp = rec("proxy", operation = rec("xounif"))
 p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
 data = data.frame(x = 1:4, y = 0:3, z = rep(TRUE, 4))
 
@@ -54,15 +56,24 @@ rp$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_sbx}},
+\code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{OperatorCombination}},
-\code{\link{dict_recombinators_maybe}}
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_maybe}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{recombinator wrappers}
 \concept{recombinators}
@@ -72,21 +83,24 @@ Other recombinator wrappers:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorProxy$new()}}
-\item \href{#method-prime}{\code{RecombinatorProxy$prime()}}
-\item \href{#method-clone}{\code{RecombinatorProxy$clone()}}
+\item \href{#method-RecombinatorProxy-new}{\code{RecombinatorProxy$new()}}
+\item \href{#method-RecombinatorProxy-prime}{\code{RecombinatorProxy$prime()}}
+\item \href{#method-RecombinatorProxy-clone}{\code{RecombinatorProxy$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorProxy-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorProxy-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{RecombinatorProxy} object.
 \subsection{Usage}{
@@ -113,8 +127,8 @@ The \verb{$n_indivs_out} field will reflect this value.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-RecombinatorProxy-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorProxy-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
 Note that this modifies the \verb{$param_set$values$operation} object.
@@ -135,8 +149,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorProxy-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorProxy-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

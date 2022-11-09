@@ -28,9 +28,10 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
 
   rec$prime(pbig_allowed)
   expect_equal(rec$primed_ps, pbig_allowed)
-  expect_error(rec$operate(pvals_allowed), "Must be a permutation of set")
+  expect_error(rec$operate(pvals_allowed), "[mM]ust be a (permutation of set|set equal to)")
 
   rec$prime(p_allowed)
+
   expect_error(rec$operate(pbigvals_allowed), "Parameter .*\\.1.*not available")
 
   recombined = rec$operate(as.data.frame(pvals_allowed))
@@ -86,7 +87,7 @@ RecombinatorDebug = R6::R6Class("RecombinatorDebug",
     }
   ),
   private = list(
-    .recombine = function(values) {
+    .recombine = function(values, context) {
       as.data.table(sapply(names(values), function(n) self$handler(n, values[[n]], self$param_set$values), simplify = FALSE))
     }
   )

@@ -9,7 +9,7 @@
 #'
 #' `miesmuschel` offers both an [`Optimizer`][bbotk::Optimizer] and a [`Tuner`][mlr3tuning::Tuner] for general
 #' MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
-#' is more flexible and can be used for research into novel evolutionary strategies.
+#' is more flexible and can be used for research into novel evolution strategies.
 #'
 #' The call-graph of the default algorithm in [`OptimizerMies`] / [`TunerMies`] is as follows, and is shown
 #' here as an overview over the `mies_*` functions, and how they are usually connected. (Note that only the
@@ -34,11 +34,11 @@
 "_PACKAGE"
 
 lg = NULL
+paradox_context_available = FALSE
 
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
   mlr_optimizers$add("mies", OptimizerMies)
-  mlr_optimizers$add("sumohb", OptimizerSumoHB)
 
   mlr_terminators = utils::getFromNamespace("mlr_terminators", ns = "bbotk")
   mlr_terminators$add("gens", TerminatorGenerations)
@@ -49,7 +49,6 @@ reg_mlr3tuning = function(...) {  # nocov start
   if (requireNamespace("mlr3tuning", quietly = TRUE)) {
     mlr_tuners = utils::getFromNamespace("mlr_tuners", ns = "mlr3tuning")
     mlr_tuners$add("mies", TunerMies)
-    mlr_tuners$add("sumohb", TunerSumoHB)
   }
 }  # nocov end
 
@@ -57,9 +56,16 @@ reg_mlr3tuning = function(...) {  # nocov start
   reg_bbotk()
   reg_mlr3tuning()
 
+
+  if (!is.null(paradox::ps()$context_available)) { # use paradox context if variable
+    # packageStartupMessage("Using context sensitive configuration parameters")
+    assign("paradox_context_available", TRUE, envir = parent.env(environment()))
+  }
+
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
+  options(miesmuschel.testing = getOption("miesmuschel.testing") %??% FALSE)
 }  # nocov end
 
 .onUnload = function(libpath) {  # nocov start
@@ -79,3 +85,4 @@ utils::globalVariables(c("dob", "eol"))
 if (!Sys.getenv("DEVTOOLS_LOAD") == "true") {
   leanify_package()
 }
+

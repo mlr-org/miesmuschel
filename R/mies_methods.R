@@ -8,28 +8,23 @@
 #' This function can be used directly, but it is easier to use it within the [`OptimizerMies`]
 #' [`Optimizer`][bbotk::Optimizer] if standard GA operation is desired.
 #'
-#' "Rolling-tide" multifidelity is supported as described in [`OptimizerMies`] or more thoroughly
-#' in `vignette("mies-multifid")`. For this,
+#' Multifidelity evaluation is supported as described in `vignette("mies-multifid")`. For this,
 #' an extra component named after `budget_id` is appended to each individual, chosen from
-#' the `fidelity_schedule` depending on the value of `survivor_budget`. Both `fidelity_schedule`
-#' and `budget_id` should be the same values as given to the other `mies_*` functions.
+#' the `fidelity` argument and depending on the value of `survivor_budget`. `budget_id` should
+#' have the same values as given to the other `mies_*` functions.
 #'
 #' @template param_inst
 #' @param offspring (`data.frame`)\cr
 #'   Proposed configurations to be evaluated, must have columns named after the `inst`'s search space, minus `budget_id` if not `NULL`.
-#' @template param_fidelity_schedule_maybenull
 #' @template param_budget_id_maybenull
-#' @param survivor_budget (`logical(1)`)\cr
-#'   When doing multi-fidelity optimization, determines which column of `fidelity_schedule` to use to determine the budget component value.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' @param step_fidelity (`logical(1)`)\cr
-#'   Whether to *also* evaluate alive individuals from previous generations that have a budget value below the current `budget_survivors`.
-#'   Default `FALSE`. Ignored when `budget_id` and `fidelity_schedule` are `NULL`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' @param monotonic (`logical(1)`)\cr
-#'   When `step_fidelity` is `TRUE`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
-#'   Ignored when `step_fidelity` is `FALSE` or when `budget_id` and `fidelity_schedule` are `NULL`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#' @template param_fidelity_maybenull
+#' @param reevaluate_fidelity (`atomic(1)`)\cr
+#'   Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if `fidelity_monotonic` is `TRUE`) or
+#'   different from the current `fidelity` value. Default `NULL`: Do not re-evaluate. Must be `NULL` when `budget_id` and `fidelity` are `NULL`.
+#'   See also [`mies_step_fidelity`].
+#' @param fidelity_monotonic (`logical(1)`)\cr
+#'   When `reevaluate_fidelity` is non-`NULL`, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
+#'   Default `TRUE`. Ignored when `reevaluate_fidelity` is `NULL`
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
 #' @family mies building blocks
@@ -69,135 +64,106 @@
 #' # function.
 #'
 #' ###
-#' # Advanced demo, making use of additional components and fidelity_schedule
-#' # Note that the multifidelity functionality is experimental and the UI may
-#' # change in the future.
+#' # Advanced demo, making use of additional components and doing multi-fidelity
 #' ##
 #'
-#' # declare 'y' the budget parameter. It does not occur in 'offspring' any more.
+#' # declare 'y' the budget parameter. It will not be in the 'offspring'
+#' # table any more.
 #' budget_id = "y"
-#' # but: offspring may contain any other value that is appended to 'oi'. They
+#' # but: offspring may contain any other value that is appended to 'oi'. These
 #' # are ignored by the objective.
 #' offspring = data.frame(x = 0:1, z = 3)
 #'
-#' fidelity_schedule = data.frame(
-#'   generation = c(1, 5),
-#'   budget_new = c(1, 2),
-#'   budget_survivors = c(3, 4)
-#' )
-#' # The fidelity schedule:
-#' fidelity_schedule
-#'
-#' # When given a fidelity_schedule and budget_id, the 'budget_new' budget
-#' # is used. Here it is '1', because the geeneration number 3 is being evaluated.
-#' mies_evaluate_offspring(oi, offspring = offspring,
-#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 1)
 #'
 #' # This now has the additional column 'z'. Values of y for the new evaluations
 #' # are 1.
 #' oi$archive
 #'
-#' # setting 'survivor_budget = TRUE' uses the 'budget_survivors' schedule column.
-#' mies_evaluate_offspring(oi, offspring = offspring,
-#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id,
-#'   survivor_budget = TRUE)
-#'
-#' # the new row has y set to 2.
+#' offspring = data.frame(x = 2, z = 3)
+#' # Increasing the fidelity will not cause re-evaluation of existing individuals
+#' # when `reevaluate_fidelity` is not given.
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 2)
 #' oi$archive
 #'
-#' # When calling 'mies_evaluate_offspring()' with the same 'fidelity_schedule'
-#' # now, then the generation 5 is evaluated. Therefore the next row of
-#' # the schedule is used, and 'y' is therefore set to 2 (or 4, ir survivor budget
-#' # is used).
+#' offspring = data.frame(x = 3, z = 3)
+#' # Depending on the effect of fidelity, this may however have a biasing effect,
+#' # so it may be desirable to re-evaluate surviving individuals from previous
+#' # generations. The 'reevaluate_fidelity' may even be different from 'fidelity'
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 3, reevaluate_fidelity = 2)
 #'
-#' mies_evaluate_offspring(oi, offspring = offspring,
-#'   fidelity_schedule = fidelity_schedule, budget_id = budget_id)
-#'
+#' # In this example, only individuals with 'y = 1' were re-evaluated, since
+#' # 'fidelity_monotonic' is TRUE.
 #' oi$archive
-#' # TODO example with step_fidelity = TRUE
+#'
 #' @export
-mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, budget_id = NULL, survivor_budget = FALSE, step_fidelity = FALSE, monotonic = TRUE) {
+mies_evaluate_offspring = function(inst, offspring, budget_id = NULL, fidelity = NULL, reevaluate_fidelity = NULL, fidelity_monotonic = TRUE) {
   assert_optim_instance(inst)
 
   offspring = as.data.table(assert_data_frame(offspring))
   ss_ids = inst$search_space$ids()
-  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
-  assert_flag(survivor_budget)
-  assert_flag(step_fidelity)
-  assert_flag(monotonic)
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
+  if (!is.null(reevaluate_fidelity) && is.null(budget_id)) stop("reevaluate_fidelity must be NULL when budget_id is not given.")
+  assert_flag(fidelity_monotonic)
   data = inst$archive$data
-  current_gen = max(data$dob, 0, na.rm = TRUE) + 1
   ocols = colnames(offspring)
-  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)  # TODO: must not include survivor_budget, but can include other things
+  assert_names(ocols, must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id)
 
-  reeval = integer(0)  # individuals to be killed; only becomes relevant when `step_fidelity` is `TRUE`
+  reeval = integer(0)  # individuals to be killed; only becomes relevant when `reevaluate_fidelity` is given
+
+  x_id = max(inst$archive$data$x_id, 0, na.rm = TRUE) + seq_len(nrow(offspring))
 
   if (!is.null(budget_id)) {
-    assert(check_fidelity_schedule(fidelity_schedule))
-    fidelity_schedule = as.data.table(fidelity_schedule)
-    fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
-    fidelity_column = if (survivor_budget) "budget_survivors" else "budget_new"
-    fidelity = fidelity_schedule[data.table(generation = current_gen), fidelity_column, on = "generation", roll = TRUE, with = FALSE]
-    setnames(fidelity, budget_id)
+    assert_scalar(fidelity)
 
-    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])  # the conditional is to avoid edge-cases for empty tables here.
+    fidelity = setnames(data.table(fidelity), budget_id)
 
-    if (step_fidelity && any(is.na(data$eol))) {
+    offspring = cbind(offspring, fidelity[nrow(offspring) != 0])  # the conditional is to handle the edge-case for empty offspring tables
+
+    if (!is.null(reevaluate_fidelity) && any(is.na(data$eol))) {
       assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
       assert_integerish(data$eol, lower = 0, tol = 1e-100)
-      budget_survivors = NULL
-      survivor_fidelity = fidelity_schedule[data.table(generation = current_gen), budget_survivors, on = "generation", roll = TRUE]
-      comparator = if (monotonic) `<` else `!=`
-      reeval = which(is.na(data$eol) & comparator(data[[budget_id]], survivor_fidelity))
+      assert_integerish(data$x_id, lower = 0, tol = 1e-100)
+
+      comparator = if (fidelity_monotonic) `<` else `!=`
+      reeval = which(is.na(data$eol) & comparator(data[[budget_id]], reevaluate_fidelity))
       indivs = data[reeval, ocols, with = FALSE]
-      offspring = rbind(offspring, set(indivs, , budget_id, survivor_fidelity))
+      offspring = rbind(offspring, set(indivs, , budget_id, reevaluate_fidelity))
+      x_id = c(x_id, data$x_id[reeval])
     }
   }
 
-  ret = eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_)[nrow(offspring) != 0]))
+  current_gen = max(data$dob, 0, na.rm = TRUE) + 1
+  ret = eval_batch_handle_zero(inst, cbind(offspring, data.table(dob = current_gen, eol = NA_real_, x_id = x_id)[nrow(offspring) != 0]))
 
-  set(inst$archive$data, reeval, "eol", current_gen)
+  set(inst$archive$data, reeval, "eol", current_gen)  # kill old individuals that were fidelity-reevaluated
 
   invisible(ret)
 }
 
-#' @title Re-Evaluate Configurations with Higher Fidelity
+#' @title Re-Evaluate Existing Configurations with Higher Fidelity
 #'
 #' @description
 #' As part of the "rolling-tide" multifidelity-setup, do reevaluation of configurations with
-#' higher fidelity that have survived lower-fidelity selection.
-#'
-#' The `fidelity_schedule` specifies what the fidelity (i.e. value of the "budget" component) of evaluations
-#' done or compared at generation `i` should be. The `generation_lookahead` parameter has a subtle influence.
-#' If it is `TRUE`, then, at the end of generation `i`, reevaluation is done with the `"budget_survivors"`
-#' fidelity of generation `i + 1`, otherwise the entry of generation `i` is used. This gives the `"budget_survivors"`
-#' column a slightly different meaning in the two cases: either it is the budget, with which survivors "entering"
-#' generation `i` have been evaluated, or it is the budget with which survivors "coming out of" that generation
-#' were evaluated. The evaluations are done as part of the *current* generation in any case (see examples).
+#' higher fidelity that have survived lower-fidelity selection. The evaluations are done as part of the
+#' *current* generation, so the `dob` value is not increased.
 #'
 #' This function should only be called when doing rolling-tide multifidelity, and should not be part of the
 #' MIES cycle otherwise.
 #'
-#' Note that the multifidelity functionality is experimental and the UI may change in the future.
-#'
 #' @template param_inst
-#' @param fidelity_schedule (`data.frame`)\cr
-#'   `data.frame` with three columns `"generation"`, `"budget_new"`, `"budget_survivors"`, in that order. `"budget_new"` and `"budget_survivors"`
-#'   are atomic columns. The value of `"budget_survivors"` of the appropriate row is assigned to the `budget_id` component of `offspring`.
-#'   `"generation"` is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-#'   `generation == 1` must be present.
 #' @param budget_id (`character(1)`)\cr
-#'   Budget component that is set to the value found in `fidelity_schedule`.
-#' @param generation_lookahead (`logical(1)`)\cr
-#'   Whether to re-evaluate alive individuals with the `"budget_survivors"` entry of the current generation (`FALSE`), or
-#'   of the next generation (`TRUE`).
+#'   Budget component that is set to the `fidelity` value.
+#' @param fidelity (`atomic(1)`)\cr
+#'   Atomic scalar indicating the value to be assigned to the `budget_id` component of offspring.
 #' @param current_gen_only (`logical(1)`)\cr
 #'   Whether to only re-evaluate survivors individuals generated in the latest generation (`TRUE`), or re-evaluate all currently alive
 #'   individuals (`FALSE`). In any case, only individuals that were not already evaluated with the chosen fidelity are evaluated,
-#'   so this will usually only affect individuals from before the latest generation if the `"budget_survivors"` changed between
-#'   generations (i.e. when a different row from `fidelity_schedule` is used).
-#' @param monotonic (`logical(1)`)\cr
-#'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
+#'   so this will usually only have an effect when the fidelity of surviving individuals changed between generations.
+#' @template param_fidelity_monotonic
 #' @template param_additional_components
 #' @return [invisible] [`data.table`][data.table::data.table]: the performance values returned when evaluating the `offspring` values
 #'   through `eval_batch`.
@@ -223,53 +189,47 @@ mies_evaluate_offspring = function(inst, offspring, fidelity_schedule = NULL, bu
 #'
 #' budget_id = "y"
 #'
-#' fidelity_schedule = data.frame(
-#'   generation = c(1, 2),
-#'   budget_new = c(1, 3),
-#'   budget_survivors = c(2, 4)
-#' )
-#'
-#' # The initial population gets evaluated with 'budget_survivors', so y = 2.
-#' mies_init_population(oi, mu = 2, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id)
+#' # Create an initial population with fidelity ("y") value 1
+#' mies_init_population(oi, mu = 2, budget_id = budget_id, fidelity = 1)
 #'
 #' oi$archive
 #'
-#' # By default, mies_step_fidelity() will re-evaluate all survivors with
-#' # budget_survivors of the *next* generation. This is the reason why it
-#' # usually does not make sense to have 'budget_survivors' change between
-#' # generations 1 and 2!
-#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id)
-#'
-#' # The first two evaluations have 'eol = 1' (died in generation 1) and were
-#' # re-evaluated with y = 4.
-#' oi$archive
-#'
-#' # Using 'generation_lookahead = FALSE' will use the 'budget_survivors' of the
-#' # current genereation, where the current generation is always the max() of the
-#' # 'dob' column in the archive.
-#' # Calling 'mies_step_fidelity()' multiple times within one generation barely
-#' # ever makes sense and is done here for demonstration.
-#' # The following call will have *no* effect: The 'budget_survivors' of the
-#' # current generation (generation 1) is 2, but the alive individuals were
-#' # evaluated with budget 4.
-#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id, generation_lookahead = FALSE)
+#' # Re-evaluate these individuals with higher fidelity
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 2)
 #'
 #' oi$archive
 #'
-#' # To also re-evaluate individuals with *lower* budget, use 'monotonic = FALSE':
-#' mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-#'   budget_id = budget_id, generation_lookahead = FALSE, monotonic = FALSE)
+#' # The following creates a new generation without killing the initial
+#' # generation
+#' offspring = data.frame(x = 0:1)
+#' mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+#'   fidelity = 3)
+#'
+#' oi$archive
+#'
+#' # Re-evaluate only individuals from last generation by setting current_gen_only
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 4,
+#'   current_gen_only = TRUE)
+#'
+#' oi$archive
+#'
+#' # Default: Re-evaluate all that *increase* fidelity: Only the initial
+#' # population is re-evaluated here.
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3)
+#'
+#' oi$archive
+#'
+#' # To also re-evaluate individuals with *higher* fidelity, use
+#' # 'fidelity_monotonic = FALSE'. This does not re-evaluate the points that already have
+#' # the requested fidelity, however.
+#' mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, fidelity_monotonic = FALSE)
 #'
 #' oi$archive
 #' @export
-mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_lookahead = TRUE, current_gen_only = FALSE, monotonic = TRUE, additional_components = NULL) {
+mies_step_fidelity = function(inst, budget_id, fidelity, current_gen_only = FALSE, fidelity_monotonic = TRUE, additional_components = NULL) {
   assert_optim_instance(inst)
-  assert_flag(generation_lookahead)
   assert_flag(current_gen_only)
-  assert_flag(monotonic)
+  assert_flag(fidelity_monotonic)
   assert_r6(additional_components, "ParamSet", null.ok = TRUE)
   ss_ids = inst$search_space$ids()
   ac_ids = character(0)
@@ -281,33 +241,30 @@ mies_step_fidelity = function(inst, fidelity_schedule, budget_id, generation_loo
   data = inst$archive$data
   current_gen = max(data$dob, 0)
   assert_choice(budget_id, ss_ids)
-  assert(check_fidelity_schedule(fidelity_schedule))
-  fidelity_schedule = as.data.table(fidelity_schedule)
+  assert_scalar(fidelity)
 
   if (!any(is.na(data$eol))) stop("No alive individuals. Need to run mies_init_population()?")
 
   assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
   assert_integerish(data$eol, lower = 0, tol = 1e-100)
 
-  next_fidelity = fidelity_schedule[data.table(generation = current_gen + generation_lookahead), "budget_survivors", on = "generation", roll = TRUE, with = FALSE][[1]]
+  comparator = if (fidelity_monotonic) `<` else `!=`
+  reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], fidelity))
 
-  comparator = if (monotonic) `<` else `!=`
-  reeval = which((!current_gen_only | data$dob == current_gen) & is.na(data$eol) & comparator(data[[budget_id]], next_fidelity))
-
-  indivs = data[reeval, c(ss_ids, ac_ids), with = FALSE]
-  set(indivs, , budget_id, next_fidelity)
+  indivs = data[reeval, c(ss_ids, ac_ids, "x_id"), with = FALSE]
+  set(indivs, , budget_id, fidelity)
 
   # I hate this... but there seems to be no way to avoid the TerminatorGenerations from terminating here :-(
-  # What happens here is that we decrease dob by 1 everywhere, evaluate with current-generation-minus-one,
-  # and then increase dob by 1 again. This avoids TerminatorGenerations from firing because if it *did*
-  # mind about dob minus 1, then it would have fired already.
+  # What happens here is that we decrease dob by 1 for the entries of the current generation, evaluate with
+  # current-generation-minus-one, and then increase dob by 1 again. This avoids TerminatorGenerations from
+  # firing because if it *did* mind about dob minus 1, then it would have fired already.
   # Weird edge-case: A TerminatorGenerations with `generations` set to 0 will not prevent reevals of initial
   # pop if the initial pop is entirely made up of preexisting values.
-  inst$archive$data[, dob := dob - 1]
-  # stupid race condition. Hope we don't get trapped here...
-  on.exit(inst$archive$data[, dob := dob + 1])
+  current_gen_rows = which(inst$archive$data$dob == current_gen)
+  on.exit(set(inst$archive$data, current_gen_rows, "dob", current_gen))  # first sset the on.exit to prevent leaving data in a bad state.
+  set(inst$archive$data, current_gen_rows, "dob", current_gen - 1)
 
-  ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen - 1, NA_real_)))
+  ret = eval_batch_handle_zero(inst, set(indivs, , c("dob", "eol"), list(current_gen, NA_real_)))
 
   set(inst$archive$data, reeval, "eol", current_gen)  # do this once we are done evaluating replacements, e.g. in case the terminator triggers
 
@@ -380,7 +337,7 @@ mies_survival_plus = function(inst, mu, survival_selector, ...) {
   if (length(alive) < mu) {
     survivors = alive
   } else {
-    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE, group_size = mu)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
   }
 
@@ -486,7 +443,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   } else if (n_elite == 0) {
     elites = integer(0)
   } else {
-    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE)
+    elites = mies_select_from_archive(inst, n_elite, alive_before, elite_selector, get_indivs = FALSE, group_size = n_elite)
     if (anyDuplicated(elites)) stop("elite_selector may not generate duplicates.")
   }
 
@@ -495,7 +452,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
   } else if (mu - n_elite == 0) {  # don't use survival_selector when not needed.
     survivors = integer(0)
   } else {
-    survivors = mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE)
+    survivors = mies_select_from_archive(inst, mu - n_elite, current_offspring, survival_selector, get_indivs = FALSE, group_size = mu - n_elite)
     if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
   }
 
@@ -626,8 +583,22 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'   or [`paradox::generate_design_lhs`]. Note that [`paradox::generate_design_grid`] can not be used and must be wrapped with
 #'   a custom function that ensures that only `n` individuals are produced. The generated design must correspond to the `inst`'s `$search_space`; for
 #'   components that are not in the objective's search space, the `additional_component_sampler` is used.
-#' @template param_fidelity_schedule_maybenull
+#' @param survival_selector ([`Selector`])\cr
+#'   Used when the given [`OptimInstance`][bbotk::OptimInstance] already contains more individuals than `mu`.\cr
+#'   [`Selector`] operator that selects surviving individuals depending on configuration values
+#'   and objective results,  When `survival_selector$operate()` is called, then objectives that
+#'   are being minimized are multiplied with -1 (through [`mies_get_fitnesses`]), since [`Selector`]s always try to maximize fitness.\cr
+#'   The [`Selector`] must be primed on `inst$search_space`; this *includes* the "budget" component
+#'   when performing multi-fidelity optimization. Default is [`SelectorBest`].\cr
+#'   The given [`Selector`] may *not* return duplicates.\cr
 #' @template param_budget_id_maybenull
+#' @template param_fidelity_maybenull
+#' @param fidelity_new_individuals_only (`logical(1)`)\cr
+#'   When `fidelity` is not `NULL`: Whether to re-evaluate individuals that are already present in `inst` should they have a smaller (if `fidelity_monotonic` is `TRUE`) or different
+#'   (if `fidelity_monotonic` is `FALSE`) value from the one given to `fidelity`. Default `FALSE`. Ignored when `fidelity` is `NULL`.
+#' @param fidelity_monotonic (`logical(1)`)\cr
+#'   Whether to only re-evaluate configurations for which the fidelity would increase. Default `TRUE`.
+#'   Ignored when `fidelity` is `NULL` or when `fidelity_new_individuals_only` is `TRUE`.
 #' @param additional_component_sampler ([`Sampler`][paradox::Sampler] | `NULL`)\cr
 #'   [`Sampler`][paradox::Sampler] for components of individuals that are not part of `inst`'s `$search_space`. These components
 #'   are never used for performance evaluation, but they may be useful for self-adaptive [`OperatorCombination`]s. See the description
@@ -666,9 +637,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #' oi$archive
 #'
 #' ###
-#' # Advanced demo, making use of additional components and fidelity_schedule
-#' # Note that the multifidelity functionality is experimental and the UI may
-#' # change in the future.
+#' # Advanced demo, making use of additional components and fidelity
 #' ##
 #'
 #' # Get a new OptimInstance
@@ -676,12 +645,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'   terminator = trm("evals", n_evals = 100)
 #' )
 #'
-#' mies_init_population(inst = oi, mu = 3,
-#'   fidelity_schedule = data.frame(
-#'     generation = c(1, 3),
-#'     budget_new = c(1, 2),
-#'     budget_survivors = c(2, 3)
-#'   ), budget_id = "y",
+#' mies_init_population(inst = oi, mu = 3, budget_id = "y", fidelity = 2,
 #'   additional_component_sampler = Sampler1DRfun$new(
 #'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
 #'   )
@@ -689,25 +653,29 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'
 #' # 3 evaluations. We also have 'additional', sampled from rfun (always -1),
 #' # which is ignored by the objective. Besides, we have "y", which is 2,
-#' # according to the fidelity_schedule: `budget_survivors` of `generation` 1.
+#' # according to 'fidelity'.
 #' oi$archive
 #'
 #' @export
-mies_init_population = function(inst, mu, initializer = generate_design_random, fidelity_schedule = NULL, budget_id = NULL, additional_component_sampler = NULL) {
+mies_init_population = function(inst, mu, initializer = generate_design_random, survival_selector = SelectorBest$new()$prime(inst$search_space), budget_id = NULL, fidelity = NULL, fidelity_new_individuals_only = FALSE, fidelity_monotonic = TRUE, additional_component_sampler = NULL) {
   assert_optim_instance(inst)
 
   assert_int(mu, lower = 0, tol = 1e-100)
   assert_function(initializer, args = c("param_set", "n"))
+  assert_r6(survival_selector, "Selector")
+
   assert_r6(additional_component_sampler, "Sampler", null.ok = TRUE)
 
   ss_ids = inst$search_space$ids()
   ac_ids = if (is.null(additional_component_sampler)) character(0) else additional_component_sampler$param_set$ids()
   present_cols = colnames(inst$archive$data)
 
-  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
-  if (!is.null(fidelity_schedule)) {
-    assert(check_fidelity_schedule(fidelity_schedule))
-  }
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
+  assert_scalar(fidelity, null.ok = TRUE)
+  assert_flag(fidelity_monotonic)
+  assert_flag(fidelity_new_individuals_only)
+  if (is.null(fidelity)) fidelity_new_individuals_only = TRUE  # indicate that fidelity-reevals won't be necessary
+
 
   if (any(c("dob", "eol") %in% ac_ids)) {
     stop("'dob' and 'eol' may not be additional component dimensions.")
@@ -725,13 +693,13 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   dob = batch_nr = NULL
   if (nrow(inst$archive$data)) {
     if ("eol" %nin% present_cols) {
-      inst$archive$data[, eol := NA_real_]
+      set(inst$archive$data, , "eol", NA_real_)
     } else if ("dob" %nin% present_cols) {
       stop("'eol' but not 'dob' column found in archive; this is an undefined state that would probably lead to bad behaviour, so stopping.")
     }
 
     if ("dob" %nin% present_cols) {
-      inst$archive$data[, dob := 0]
+      set(inst$archive$data, , "dob", 0)
     }
     data = inst$archive$data  # adding columns is not guaranteed to happen by reference, so we need to be careful with copies of data!
     assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
@@ -739,14 +707,30 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   }
   alive = which(is.na(inst$archive$data$eol))
   n_alive = length(alive)
+
+  # use survival_selector to kill superfluous individuals, if any
+  # if the survival selector does not depend on the additional components, then we can do this right away here.
+  # otherwise we sample the remaining additional components and *then* select
+  if (n_alive > mu && !any(survival_selector$primed_ps$ids() %in% ac_ids)) {
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE, group_size = mu)
+    if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+    died = setdiff(alive, survivors)
+    set(data, died, "eol", max(data$dob))
+    alive = sort(survivors)  # want deterministic assignment of additional_component_sampler results
+    n_alive = mu
+  }
   mu_remaining = mu - n_alive
 
   # take care of additional components
   # we need to check if / how many additional components we need to sample. If there are no alive individuals,
   # then this is just mu. If there are alive individuals, it *may* also be mu (we will have to insert components
   # at those rows where there are alive individuals!)
-  additional_needed = mu  # how many more rows of additional components need to be sampled. by default: mu
-  row_insert = last(alive, mu)  # at what rows of `data` the components are inserted
+
+  # how many more rows of additional components need to be sampled.
+  # at least mu (if new indivs are sampled)
+  # but maybe more (if more than mu are alive *and* they need to be selected using a survival_selector that depends on additional components.
+  additional_needed = max(mu, n_alive)
+  row_insert = alive  # at what rows of `data` additional components are inserted (some alive indivs may have them already, check this next)
   if (n_alive && length(ac_ids) && all(ac_ids %in% present_cols)) {
     # additional components already present in the archive. Let's check if there are any rows with NAs.
     missing_info = is.na(data[row_insert, ac_ids, with = FALSE])
@@ -761,31 +745,42 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
   additional_components = NULL
   if (!is.null(additional_component_sampler)) {
     additional_components = assert_data_frame(additional_component_sampler$sample(additional_needed)$data, nrows = additional_needed)
-
+    assert_names(colnames(additional_components), identical.to = ac_ids)
     # assert here that:
     # we either have some individuals that need to be sampled (mu_remaining > 0)
     #   in which case the additional_components table's first `length(row_insert)` and last `mu_remaining` rows are complementary
     # or that we have no more individuals to sample, in which case `additional_components` are exactly equal to the number of rows where things get inserted.
     assert_true((mu_remaining > 0 && length(row_insert) + mu_remaining == additional_needed) || (mu_remaining <= 0 && length(row_insert) == additional_needed))
 
-    # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise
-    inst$archive$data[row_insert, ac_ids] <- first(additional_components, length(row_insert))
+
+    if (length(row_insert)) {
+      set(data, row_insert, ac_ids, first(additional_components, length(row_insert)))
+    } else {
+      # if we don't insert anything, then this operation just adds the necessary columns in case they are missing, and does nothing otherwise.
+      # ideally the set() above would do this, but it does not: https://github.com/Rdatatable/data.table/issues/5409
+      inst$archive$data[0, ac_ids] = additional_components[0]
+      data = inst$archive$data
+    }
   }
 
   if (mu_remaining < 0) {
-    # TODO: we are currently killing the earliest evals, maybe do something smarter.
-    # TODO: also we are not doing anything about budget here, we just hope the user knows what he's doing.
-    # TODO: also also the additional component handling above depends on killing earliest now.
-    inst$archive$data[first(which(is.na(eol)), -mu_remaining), eol := max(dob)]
-  } else if (mu_remaining > 0) {
+    # kill superfluous individuals, in the case that the survival selector needs additional components
+    survivors = mies_select_from_archive(inst, mu, alive, survival_selector, get_indivs = FALSE, group_size = mu)
+    if (anyDuplicated(survivors)) stop("survival_selector may not generate duplicates.")
+    died = setdiff(alive, survivors)
+    set(data, died, "eol", max(data$dob))
+    mu_remaining = 0  # for further down where we call mies_evaluate_offspring to do budget re-evaluations
+  }
+  if (mu_remaining > 0 || !fidelity_new_individuals_only) {
+    # mies_evaluate_offspring needs to be evaluated even if there are no new indivs if fidelity-reevals could be necessary.
     sample_space = inst$search_space
     if (!is.null(budget_id)) {
       sample_space = ParamSetShadow$new(sample_space, budget_id)
     }
-    mies_evaluate_offspring(inst,
-      cbind(as.data.table(assert_data_frame(initializer(sample_space, mu_remaining)$data, nrows = mu_remaining)),
-        last(additional_components, mu_remaining)),
-      fidelity_schedule, budget_id, survivor_budget = TRUE)
+    offspring = cbind(as.data.table(assert_data_frame(initializer(sample_space, mu_remaining)$data, nrows = mu_remaining)), last(additional_components, mu_remaining))
+
+    mies_evaluate_offspring(inst, offspring = offspring, budget_id = budget_id, fidelity = fidelity,
+      reevaluate_fidelity = if (!fidelity_new_individuals_only) fidelity, fidelity_monotonic = fidelity_monotonic)
   }
   invisible(inst)
 }
@@ -888,6 +883,12 @@ mies_get_fitnesses = function(inst, rows) {
 #'   The [`Selector`] must be primed on a superset of `inst$search_space`; this *includes* the "budget" component
 #'   when performing multi-fidelity optimization. All components on which `selector` is primed on must occur in the archive.\cr
 #'   The given [`Selector`] *may* return duplicates.
+#' @param group_size (`integer`)\cr
+#'   Sampling group size hint, indicating that the caller would prefer there to not be any duplicates within this group size.
+#'   The [`Selector`] may or may not ignore this value, however.
+#'   This may possibly happen because of certain configuration parameters, or because the input size is too small.\cr
+#'   Must either be a scalar value or sum up to `n_select`. Must be non-negative. A scalar value of 0 is interpreted the same as 1.\cr
+#'   Default is 1.
 #' @param get_indivs (`logical(1)`)\cr
 #'   Whether to return configuration values from within the archive (`TRUE`) or just the indices within
 #'   the archive (`FALSE`). Default is `TRUE`.
@@ -959,7 +960,7 @@ mies_get_fitnesses = function(inst, rows) {
 #'
 #' mies_select_from_archive(oi, n_select = 2, rows = 1:6, selector = s)
 #' @export
-mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), get_indivs = TRUE) {
+mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBest$new()$prime(inst$search_space), group_size = 1, get_indivs = TRUE) {
   assert_optim_instance(inst)
 
   assert_r6(selector, "Selector")
@@ -976,7 +977,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 
   fitnesses = mies_get_fitnesses(inst, rows)
 
-  selected = selector$operate(indivs, fitnesses, n_select)
+  selected = selector$operate(indivs, fitnesses, n_select, group_size)
   if (get_indivs) {
     indivs[selected]
   } else {
@@ -1054,7 +1055,7 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
 #' # Demo operators
 #' m = mut("gauss", sdev = 0.1)
 #' r = rec("xounif")
-#' s = sel("random", replace = TRUE)
+#' s = sel("random")
 #' # Operators must be primed
 #' mies_prime_operators(objective$domain, list(m), list(r), list(s))
 #'
@@ -1144,10 +1145,10 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
   needed_recombinations = ceiling(lambda / recombinator$n_indivs_out)
   needed_parents = needed_recombinations * recombinator$n_indivs_in
 
-  parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector)
-  if (!is.null(budget_id)) parents[, (budget_id) := NULL]
+  parents = mies_select_from_archive(inst, needed_parents, which(is.na(data$eol)), parent_selector, group_size = recombinator$n_indivs_in)
+  if (!is.null(budget_id)) set(parents, , budget_id, NULL)
 
-  recombined = recombinator$operate(parents[sample.int(nrow(parents))])
+  recombined = recombinator$operate(parents)
   recombined = first(recombined, lambda)  # throw away things if we have too many (happens when n_indivs_out is not a divider of lambda)
 
   mutator$operate(recombined)
@@ -1169,24 +1170,17 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
 #' @param filtor ([`Filtor`] | `NULL`)\cr
 #'   [`Filtor`] operator that filters. When `NULL` is given, then the [`FiltorNull`] operation is performed and the first `lambda` individuals are
 #'   taken from `individuals`.
-#' @param fidelity_schedule (`data.frame` | `NULL`)\cr
-#'   `data.frame` with three columns `"generation"`, `"budget_new"`, `"budget_survivors"`, in that order. `"budget_new"` and `"budget_survivors"`
-#'   are atomic columns assigned to the `budget_id` component of `offspring`; which one is chosen depends on `survivor_budget`.
-#'   `"generation"` is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-#'   `generation == 1` must be present.\cr
-#'   This value may be `NULL` if no multi-fidelity optimization is performed, **or** when, instead of the current generation's budget, the
-#'   maximum budget found in `inst$archive` should be used (the default).\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' @param budget_id (`character(1)` | `NULL`)\cr
-#'   Budget compnent when doing multi-fidelity optimization. This component of the search space is added
-#'   to `individuals` according to `fidelity_schedule` and the current generation's `"budget_survivors"`. Should be `NULL`
-#'   when and only when `fidelity_schedule` is `NULL`.
+#' @template param_budget_id_maybenull
+#' @param fidelity (`atomic` | `NULL`)\cr
+#'   scalar indicating the value of the `budget_id` component with which to evaluate individuals to be filtered.\cr
+#'   This value must be `NULL` when no multi-fidelity optimization is performed, but it may **also** be `NULL` when the
+#'   maximum value of the `budget_id` found in `inst$archive` should be used (the default).
 #' @param get_indivs (`logical(1)`)\cr
 #'   Whether to return the `data.frame` or [`data.table`][data.table::data.table] of selected individuals, or an index into `individuals`.
 #' @return If `get_indivs` is `TRUE`: a `data.frame` or [`data.table`][data.table::data.table] (depending on the input type of `individuals`) of filtered configurations.
 #'   If `get_indivs` is `FALSE`: an `integer` vector indexing the filtered individuals.
 #' @export
-mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidelity_schedule = NULL, budget_id = NULL, get_indivs = TRUE) {
+mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budget_id = NULL, fidelity = NULL, get_indivs = TRUE) {
   assert_optim_instance(inst)
   assert_int(lambda, lower = 0, tol = 1e-100)
   individuals_dt = as.data.table(assert_data_frame(individuals, min.rows = lambda))
@@ -1194,7 +1188,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
   data = inst$archive$data
   if (!nrow(data)) stop("mies_filter_offspring does not work with empty OptimInstance.")
   ss_ids = inst$search_space$ids()
-  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity_schedule))
+  assert_choice(budget_id, ss_ids, null.ok = is.null(fidelity))
 
   assert_names(colnames(individuals), must.include = setdiff(ss_ids, budget_id), disjunct.from = budget_id, subset.of = colnames(data))
 
@@ -1202,16 +1196,12 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
 
   if (lambda == 0) if (get_indivs) individuals_dt[0] else integer(0)
   if (!is.null(budget_id)) {
-    if (is.null(fidelity_schedule)) {
+    if (is.null(fidelity)) {
       fidelity = max(data[[budget_id]])
     } else {
-      assert(check_fidelity_schedule(fidelity_schedule))
-      fidelity_schedule = as.data.table(fidelity_schedule)
-      fidelity_schedule = setkeyv(copy(fidelity_schedule), "generation")
-      budget_survivors = NULL
-      fidelity = fidelity_schedule[data.table(generation = current_gen), budget_survivors, on = "generation", roll = TRUE]
+      assert_scalar(fidelity)
     }
-    individuals_dt[, (budget_id) := fidelity]
+    set(individuals_dt, , budget_id, fidelity)
   }
 
   if (is.null(filtor)) {
@@ -1230,4 +1220,251 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, fidel
   } else {
     selected
   }
+}
+
+
+#' @title Get Performance Values by Generation
+#'
+#' @description
+#' Get evaluated performance values from an [`OptimInstance`][bbotk::OptimInstance] for all individuals that were alive
+#' at a given generation. Depending on `survivors_only`, all individuals alive at the *end* of a generation are returned,
+#' or all individuals alive at any point during a generation.
+#'
+#' The resulting [`data.table`][data.table::data.table] object is formatted for easy manipulation to get relevant
+#' information about optimization progress. To get aggregated values per generation, use `by = "dob"`.
+#'
+#' @template param_inst
+#' @template param_as_fitnesses
+#' @template param_survivors_only
+#' @template param_condition_on_budget_id
+#' @return a [`data.table`][data.table::data.table] with the column `"dob"`, indicating the generation, as well as further
+#'   columns named by the [`OptimInstance`][bbotk::OptimInstance]'s objectives.
+#'
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 6)
+#' )
+#'
+#' op <- opt("mies",
+#'   lambda = 2, mu = 2,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("best")
+#' )
+#' set.seed(1)
+#' op$optimize(oi)
+#'
+#' # negates objectives that are minimized:
+#' mies_get_generation_results(oi)
+#'
+#' # real objective values:
+#' mies_get_generation_results(oi, as_fitnesses = FALSE)
+#'
+#' # Individuals that died are included:
+#' mies_get_generation_results(oi, survivors_only = FALSE)
+#' @export
+mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
+  assert_optim_instance(inst)
+  assert_flag(as_fitnesses)
+  assert_flag(survivors_only)
+  ss_ids = inst$search_space$ids()
+  assert_choice(condition_on_budget_id, ss_ids, null.ok = TRUE)
+  if (!is.null(condition_on_budget_id) && !inst$search_space$is_number[[condition_on_budget_id]]) {
+    stopf("condition_on_budget_id for non-numeric components is not supported. It is '%s', which is not numeric.", condition_on_budget_id)
+  }
+  data = copy(inst$archive$data)
+  present_cols = colnames(data)
+
+  if ("eol" %nin% present_cols) {
+    if (nrow(data)) set(data, , "eol", NA_real_)
+  } else if ("dob" %nin% present_cols) {
+    stop("'eol' but not 'dob' column found in archive; this is an undefined state.")
+  }
+
+  objectives = inst$archive$codomain$ids()
+
+  if (as_fitnesses) {
+    fitness_negate = map_lgl(inst$archive$codomain$tags, function(x) switch(x, minimize = TRUE, maximize = FALSE, NA))
+    objectives = objectives[!is.na(fitness_negate)]
+    fitness_negate = fitness_negate[!is.na(fitness_negate)]
+    for (col_negate in objectives[fitness_negate]) {
+      set(data, , col_negate, -data[[col_negate]])
+    }
+  }
+
+  if (!nrow(data)) {
+    return(data[, c("dob", objectives), with = FALSE])
+  }
+
+  if ("dob" %nin% present_cols) {
+    set(data, , "dob", 0)
+  }
+  assert_integerish(data$dob, lower = 0, any.missing = FALSE, tol = 1e-100)
+  assert_integerish(data$eol, lower = 0, tol = 1e-100)
+
+  data$eol[is.na(data$eol)] = Inf  # don't set() here because 'eol' could be integer, in which case this doesn't work.
+
+  generations = seq.int(min(data$dob), max(data$dob))
+
+  gentbl = data.table(generations = generations)
+
+  if (survivors_only) {
+    conditions = c("dob <= generations", "eol > generations")
+  } else {
+    conditions = c("dob <= generations", "eol >= generations")
+  }
+  results = data[gentbl, c("dob", objectives, condition_on_budget_id), on = conditions, nomatch = NULL, with = FALSE]
+
+  if (!is.null(condition_on_budget_id)) {
+    results = results[, .SD[get(condition_on_budget_id) == max(get(condition_on_budget_id))], by = "dob"]
+    set(results, , condition_on_budget_id, NULL)
+  }
+
+  results
+}
+
+#' @title Get Aggregated Performance Values by Generation
+#'
+#' @description
+#' Get evaluated performance values from an [`OptimInstance`][bbotk::OptimInstance] aggregated for each generation.
+#' This may either concern all individuals that were alive at the end of a given generation (`survivors_only` `TRUE`)
+#' or at any point during a generation (`survivors_only` `FALSE`).
+#'
+#' The result is a single [`data.table`][data.table::data.table] object with a `dob` column indicating the
+#' generation, as well as one column for each `aggregations` entry crossed with each objective of `inst`.
+#'
+#' @template param_inst
+#' @param objectives (`character`)\cr
+#'   Objectives for which to calculate aggregates. Must be a subset of the codomain elements of `inst`, but when `as_fitnesses` is `TRUE`, elements
+#'   that are neither being minimized nor maximized are ignored.
+#' @param aggregations (named `list` of `function`)\cr
+#'   List containing aggregation functions to be evaluated on a vector of objective falues for each generation. These functions should take
+#'   a single argument and return a scalar value.
+#' @template param_as_fitnesses
+#' @template param_survivors_only
+#' @template param_condition_on_budget_id
+#' @return a [`data.table`][data.table::data.table] with the column `"dob"`, indicating the generation, as well as further
+#'   columns named by the items in `aggregations`. There is more on element in `objectives`
+#'   (or more than one element not being minimized/maximized when `as_fitnesses` is `TRUE`), then columns are named `<aggregations element name>.<objective name>`.
+#'   Otherwise, they are named by `<aggregations element name>` only. To get a guarantee that elements are only named after elements in `aggregations`, set `objectives`
+#'   to a length 1 `character`.
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 6)
+#' )
+#'
+#' op <- opt("mies",
+#'   lambda = 2, mu = 2,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("best")
+#' )
+#' set.seed(1)
+#' op$optimize(oi)
+#'
+#' # negates objectives that are minimized:
+#' mies_aggregate_generations(oi)
+#'
+#' # silly aggregation: first element
+#' mies_aggregate_generations(oi, aggregations = list(first = function(x) x[1]))
+#'
+#' # real objective values:
+#' mies_aggregate_generations(oi, as_fitnesses = FALSE)
+#'
+#' # Individuals that died are included:
+#' mies_aggregate_generations(oi, survivors_only = FALSE)
+#' @export
+mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$ids(), aggregations = list(min = min, mean = mean, max = max, median = stats::median, size = length),
+    as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
+  assert_optim_instance(inst)
+  assert_character(objectives, any.missing = FALSE, unique = TRUE)
+  assert_subset(objectives, inst$archive$codomain$ids())
+
+  generationed = mies_get_generation_results(inst, as_fitnesses = as_fitnesses, survivors_only = survivors_only, condition_on_budget_id = condition_on_budget_id)
+
+  generationed = generationed[, c("dob", intersect(colnames(generationed), objectives)), with = FALSE]
+
+  if (ncol(generationed) == 1) return(generationed)  # 'objectives' did not contain any columns that are minimized/maximized; may in particular happen when as_fitnesses is TRUE
+
+  eol = aggregations  # 'generationed' is guaranteed not to contain the 'eol' column. This is necessary, unfortunately, for the case that an objective is named 'aggregations'.
+  generationed[, unlist(lapply(eol, function(agf) lapply(if (length(.SD) == 1) unname(.SD) else .SD, agf)), recursive = FALSE), by = "dob"]
+}
+
+#' @title Get the Last Generation that was Evaluated
+#'
+#' @description
+#' Gets the last generation that was evaluated as counted by the `"dob"` column in the [`OptimInstance`][bbotk::OptimInstance]'s [`Archive`][bbotk::Archive].
+#'
+#' This accepts [`OptimInstance`][bbotk::OptimInstance]s that were not evaluated with `miesmuschel` and are therefore missing the `"dob"` column, returning
+#' a value of 0. However, if the `"dob"` column is invalid (the inferred generation is not integer numeric or not non-negative), an error is thrown.
+#'
+#' @template param_inst
+#' @return a scalar integer value indicating the last generation that was evaluated in `inst`. It is 0 when `inst` is empty, and also typically 0 if all evaluations
+#'   in `inst` so far were performed outside of `miesmuschel`. Every call of [`mies_init_population`] that actually performs evaluations, as well as each call to
+#'   [`mies_evaluate_offspring`] with non-empty `offspring`, increases the generation by 1.
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' # Define the objective to optimize
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     z <- 10 - exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2)
+#'     list(Obj = z)
+#'   },
+#'   domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4)),
+#'   codomain = ps(Obj = p_dbl(tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceSingleCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 6)
+#' )
+#'
+#' op <- opt("mies",
+#'   lambda = 2, mu = 2,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("best")
+#' )
+#' set.seed(1)
+#'
+#' mies_generation(oi)
+#'
+#' op$optimize(oi)
+#' mies_generation(oi)
+#'
+#' oi$terminator = trm("evals", n_evals = 10)
+#'
+#' op$optimize(oi)
+#' mies_generation(oi)
+#' @export
+mies_generation = function(inst) {
+  assert_optim_instance(inst)
+  (assert_int(max(inst$archive$data$dob, 0, na.rm = TRUE), lower = 0, tol = 1e-100))  # parentheses because we don't want to return invisibly
 }

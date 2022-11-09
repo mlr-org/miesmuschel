@@ -9,6 +9,7 @@ mies_select_from_archive(
   n_select,
   rows,
   selector = SelectorBest$new()$prime(inst$search_space),
+  group_size = 1,
   get_indivs = TRUE
 )
 }
@@ -30,6 +31,13 @@ Defaults to \code{\link{SelectorBest}}.\cr
 The \code{\link{Selector}} must be primed on a superset of \code{inst$search_space}; this \emph{includes} the "budget" component
 when performing multi-fidelity optimization. All components on which \code{selector} is primed on must occur in the archive.\cr
 The given \code{\link{Selector}} \emph{may} return duplicates.}
+
+\item{group_size}{(\code{integer})\cr
+Sampling group size hint, indicating that the caller would prefer there to not be any duplicates within this group size.
+The \code{\link{Selector}} may or may not ignore this value, however.
+This may possibly happen because of certain configuration parameters, or because the input size is too small.\cr
+Must either be a scalar value or sum up to \code{n_select}. Must be non-negative. A scalar value of 0 is interpreted the same as 1.\cr
+Default is 1.}
 
 \item{get_indivs}{(\code{logical(1)})\cr
 Whether to return configuration values from within the archive (\code{TRUE}) or just the indices within

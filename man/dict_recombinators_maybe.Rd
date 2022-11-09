@@ -20,7 +20,7 @@ are prefixed with \code{"maybe."}, the configuration parameters of the operator 
 Additional configuration parameters:
 \itemize{
 \item \code{p} :: \code{numeric(1)} \cr
-Probability per group of \code{n_indivs_in} individuals with which to apply the operator given to the \code{recombinator} construction argument.
+Probability per group of \code{n_indivs_in} individuals with which to apply the operator given to the \code{recombinator} construction argument. Must be set by the user.
 }
 }
 
@@ -34,13 +34,15 @@ Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of
 
 This \code{\link{Recombinator}} can be created with the short access form \code{\link[=rec]{rec()}}
 (\code{\link[=recs]{recs()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_recombinators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_recombinators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 rec("maybe", <recombinator> [, <recombinator_not>])
 recs("maybe", <recombinator> [, <recombinator_not>])  # takes vector IDs, returns list of Recombinators
 
 # long form:
 dict_recombinators$get("maybe", <recombinator> [, <recombinator_not>])
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
@@ -67,39 +69,62 @@ rm2$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
+\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_convex}},
+\code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_null}},
 \code{\link{dict_recombinators_proxy}},
 \code{\link{dict_recombinators_sbx}},
+\code{\link{dict_recombinators_sequential}},
+\code{\link{dict_recombinators_swap}},
+\code{\link{dict_recombinators_xonary}},
 \code{\link{dict_recombinators_xounif}}
 
 Other recombinator wrappers: 
 \code{\link{OperatorCombination}},
-\code{\link{dict_recombinators_proxy}}
+\code{\link{dict_recombinators_cmpmaybe}},
+\code{\link{dict_recombinators_proxy}},
+\code{\link{dict_recombinators_sequential}}
 }
 \concept{recombinator wrappers}
 \concept{recombinators}
 \section{Super classes}{
 \code{\link[miesmuschel:MiesOperator]{miesmuschel::MiesOperator}} -> \code{\link[miesmuschel:Recombinator]{miesmuschel::Recombinator}} -> \code{RecombinatorMaybe}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
+\code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{p} (configuration parameter).}
+
+\item{\code{recombinator_not}}{(\code{\link{Recombinator}})\cr
+Alternative \code{\link{Recombinator}} being wrapped. This operator gets run with probability \code{1 - p} (configuration parameter).}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{RecombinatorMaybe$new()}}
-\item \href{#method-prime}{\code{RecombinatorMaybe$prime()}}
-\item \href{#method-clone}{\code{RecombinatorMaybe$clone()}}
+\item \href{#method-RecombinatorMaybe-new}{\code{RecombinatorMaybe$new()}}
+\item \href{#method-RecombinatorMaybe-prime}{\code{RecombinatorMaybe$prime()}}
+\item \href{#method-RecombinatorMaybe-clone}{\code{RecombinatorMaybe$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-RecombinatorMaybe-new"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorMaybe-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{RecombinatorMaybe} object.
 \subsection{Usage}{
@@ -111,23 +136,25 @@ Initialize the \code{RecombinatorMaybe} object.
 \describe{
 \item{\code{recombinator}}{(\code{\link{Recombinator}})\cr
 \code{\link{Recombinator}} to wrap. This operator gets run with probability \code{p} (Configuration parameter).\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$recombinator} field will reflect this value.}
 
 \item{\code{recombinator_not}}{(\code{\link{Recombinator}})\cr
 Another \code{\link{Recombinator}} to wrap. This operator runs when \code{recombinator} is not chosen. By
 default, this is \code{\link{RecombinatorNull}}, i.e. no operation, with both \code{n_indivs_in} and \code{n_indivs_out} set
 to match \code{recombinator}. This does not work when \code{recombinator} has \code{n_indivs_in < n_indivs_out}, in which
-case this argument must be set explicitly.
-With the default behaviour, the \code{RecombinatorMaybe} object applies the \code{recombinator} operation with probability \code{p}, and
+case this argument must be set explicitly.\cr
+With this default, the \code{RecombinatorMaybe} object applies the \code{recombinator} operation with probability \code{p}, and
 no operation at all otherwise.\cr
-The constructed object gets a \emph{clone} of this argument.}
+The constructed object gets a \emph{clone} of this argument.
+The \verb{$recombinator_not} field will reflect this value.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-RecombinatorMaybe-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorMaybe-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the wrapped operators
 given to \code{recombinator} and \code{recombinator_not} during construction.
@@ -148,8 +175,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-RecombinatorMaybe-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-RecombinatorMaybe-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

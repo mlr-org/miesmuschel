@@ -20,7 +20,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `budget` :: `numeric(1)`\cr
-#'   Total budget available, after which to stop. Initialized to `Inf`.
+#'   Total budget available, after which to stop. Not initialized and should be set to the desired value during construction.
 #' * `aggregate` :: `function`\cr
 #'   Function taking a vector of values of the budget search space component, returning a scalar value to be compared
 #'   to the `budget` configuration parameter. If this function returns a value greater or equal to `budget` the termination
@@ -40,11 +40,11 @@ TerminatorBudget = R6Class("TerminatorBudget", inherit = Terminator,
     #' @description
     #' Initialize the `TerminatorBudget` object.
     initialize = function() {
-      param_set = ps(budget = p_dbl(tags = "required"), aggregate = p_uty(tags = "required", custom_check = function(x) {
+      param_set = ps(budget = p_dbl(tags = "required"), aggregate = p_uty(tags = "required", custom_check = crate(function(x) {
         if (test_function(x) && test_number(x(NULL), finite = TRUE)) return(TRUE)
         "must be a function with one argument, which when called with NULL must return a finite numeric value."
-      }))
-      param_set$values = list(budget = Inf, aggregate = sum)
+      })))
+      param_set$values = list(aggregate = sum)
       super$initialize(id = "budget", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "percent")
     },
 

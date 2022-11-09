@@ -18,14 +18,14 @@
 #' @template autoinfo_dict
 #'
 #' @family filtors
-#' @example
+#' @examples
 #' fn = ftr("null")
 #'
 #' p = ps(x = p_dbl(-5, 5))
 #' known_data = data.frame(x = 1:5)
 #' fitnesses = 1:5
 #'
-#' new_data = data.frame(x = c(2.5, 4.5)
+#' new_data = data.frame(x = c(2.5, 4.5))
 #'
 #' fn$prime(p)
 #'
@@ -37,8 +37,10 @@
 FiltorNull = R6Class("FiltorNull",
   inherit = Filtor,
   public = list(
+    #' @description
+    #' Initialize the `FiltorNull` object.
     initialize = function() {
-      super$initialize()
+      super$initialize(dict_entry = "null")
     }
   ),
   private = list(

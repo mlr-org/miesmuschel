@@ -7,11 +7,10 @@
 mies_evaluate_offspring(
   inst,
   offspring,
-  fidelity_schedule = NULL,
   budget_id = NULL,
-  survivor_budget = FALSE,
-  step_fidelity = FALSE,
-  monotonic = TRUE
+  fidelity = NULL,
+  reevaluate_fidelity = NULL,
+  fidelity_monotonic = TRUE
 )
 }
 \arguments{
@@ -21,31 +20,22 @@ Optimization instance to evaluate.}
 \item{offspring}{(\code{data.frame})\cr
 Proposed configurations to be evaluated, must have columns named after the \code{inst}'s search space, minus \code{budget_id} if not \code{NULL}.}
 
-\item{fidelity_schedule}{(\code{data.frame} | \code{NULL})\cr
-\code{data.frame} with three columns \code{"generation"}, \code{"budget_new"}, \code{"budget_survivors"}, in that order. \code{"budget_new"} and \code{"budget_survivors"}
-are atomic columns assigned to the \code{budget_id} component of \code{offspring}; which one is chosen depends on \code{survivor_budget}.
-\code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-\code{generation == 1} must be present.\cr
-This value may be \code{NULL} if no multi-fidelity optimization is performed (the default).\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.}
-
 \item{budget_id}{(\code{character(1)} | \code{NULL})\cr
-Budget component that is set to the value found in \code{fidelity_schedule} when doing multi-fidelity optimization. Should be \code{NULL}
-when and only when \code{fidelity_schedule} is \code{NULL}.}
+Budget component when doing multi-fidelity optimization. This component of the search space is added
+to \code{individuals} according to \code{fidelity}. Should be \code{NULL} when no multi-fidelity optimization is performed (default).}
 
-\item{survivor_budget}{(\code{logical(1)})\cr
-When doing multi-fidelity optimization, determines which column of \code{fidelity_schedule} to use to determine the budget component value.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.}
+\item{fidelity}{(\code{atomic(1)} | \code{NULL})\cr
+Atomic scalar indicating the value to be assigned to the \code{budget_id} component of offspring.
+This value must be \code{NULL} if no multi-fidelity optimization is performed (the default).}
 
-\item{step_fidelity}{(\code{logical(1)})\cr
-Whether to \emph{also} evaluate alive individuals from previous generations that have a budget value below the current \code{budget_survivors}.
-Default \code{FALSE}. Ignored when \code{budget_id} and \code{fidelity_schedule} are \code{NULL}.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.}
+\item{reevaluate_fidelity}{(\code{atomic(1)})\cr
+Fidelity with which to evaluate alive individuals from previous generations that have a budget value below (if \code{fidelity_monotonic} is \code{TRUE}) or
+different from the current \code{fidelity} value. Default \code{NULL}: Do not re-evaluate. Must be \code{NULL} when \code{budget_id} and \code{fidelity} are \code{NULL}.
+See also \code{\link{mies_step_fidelity}}.}
 
-\item{monotonic}{(\code{logical(1)})\cr
-When \code{step_fidelity} is \code{TRUE}, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
-Ignored when \code{step_fidelity} is \code{FALSE} or when \code{budget_id} and \code{fidelity_schedule} are \code{NULL}.\cr
-Note that the multifidelity functionality is experimental and the UI may change in the future.}
+\item{fidelity_monotonic}{(\code{logical(1)})\cr
+When \code{reevaluate_fidelity} is non-\code{NULL}, then this indicates whether individuals should only ever be re-evaluated when fidelity would be increased.
+Default \code{TRUE}. Ignored when \code{reevaluate_fidelity} is \code{NULL}}
 }
 \value{
 \link{invisible} \code{\link[data.table:data.table]{data.table}}: the performance values returned when evaluating the \code{offspring} values
@@ -59,11 +49,10 @@ is also set properly to indicate a progressed generation.
 This function can be used directly, but it is easier to use it within the \code{\link{OptimizerMies}}
 \code{\link[bbotk:Optimizer]{Optimizer}} if standard GA operation is desired.
 
-"Rolling-tide" multifidelity is supported as described in \code{\link{OptimizerMies}} or more thoroughly
-in \code{vignette("mies-multifid")}. For this,
+Multifidelity evaluation is supported as described in \code{vignette("mies-multifid")}. For this,
 an extra component named after \code{budget_id} is appended to each individual, chosen from
-the \code{fidelity_schedule} depending on the value of \code{survivor_budget}. Both \code{fidelity_schedule}
-and \code{budget_id} should be the same values as given to the other \verb{mies_*} functions.
+the \code{fidelity} argument and depending on the value of \code{survivor_budget}. \code{budget_id} should
+have the same values as given to the other \verb{mies_*} functions.
 }
 \examples{
 library("bbotk")
@@ -101,52 +90,41 @@ oi$archive
 # function.
 
 ###
-# Advanced demo, making use of additional components and fidelity_schedule
-# Note that the multifidelity functionality is experimental and the UI may
-# change in the future.
+# Advanced demo, making use of additional components and doing multi-fidelity
 ##
 
-# declare 'y' the budget parameter. It does not occur in 'offspring' any more.
+# declare 'y' the budget parameter. It will not be in the 'offspring'
+# table any more.
 budget_id = "y"
-# but: offspring may contain any other value that is appended to 'oi'. They
+# but: offspring may contain any other value that is appended to 'oi'. These
 # are ignored by the objective.
 offspring = data.frame(x = 0:1, z = 3)
 
-fidelity_schedule = data.frame(
-  generation = c(1, 5),
-  budget_new = c(1, 2),
-  budget_survivors = c(3, 4)
-)
-# The fidelity schedule:
-fidelity_schedule
-
-# When given a fidelity_schedule and budget_id, the 'budget_new' budget
-# is used. Here it is '1', because the geeneration number 3 is being evaluated.
-mies_evaluate_offspring(oi, offspring = offspring,
-  fidelity_schedule = fidelity_schedule, budget_id = budget_id)
+mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+  fidelity = 1)
 
 # This now has the additional column 'z'. Values of y for the new evaluations
 # are 1.
 oi$archive
 
-# setting 'survivor_budget = TRUE' uses the 'budget_survivors' schedule column.
-mies_evaluate_offspring(oi, offspring = offspring,
-  fidelity_schedule = fidelity_schedule, budget_id = budget_id,
-  survivor_budget = TRUE)
-
-# the new row has y set to 2.
+offspring = data.frame(x = 2, z = 3)
+# Increasing the fidelity will not cause re-evaluation of existing individuals
+# when `reevaluate_fidelity` is not given.
+mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+  fidelity = 2)
 oi$archive
 
-# When calling 'mies_evaluate_offspring()' with the same 'fidelity_schedule'
-# now, then the generation 5 is evaluated. Therefore the next row of
-# the schedule is used, and 'y' is therefore set to 2 (or 4, ir survivor budget
-# is used).
+offspring = data.frame(x = 3, z = 3)
+# Depending on the effect of fidelity, this may however have a biasing effect,
+# so it may be desirable to re-evaluate surviving individuals from previous
+# generations. The 'reevaluate_fidelity' may even be different from 'fidelity'
+mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+  fidelity = 3, reevaluate_fidelity = 2)
 
-mies_evaluate_offspring(oi, offspring = offspring,
-  fidelity_schedule = fidelity_schedule, budget_id = budget_id)
-
+# In this example, only individuals with 'y = 1' were re-evaluated, since
+# 'fidelity_monotonic' is TRUE.
 oi$archive
-# TODO example with step_fidelity = TRUE
+
 }
 \seealso{
 Other mies building blocks: 

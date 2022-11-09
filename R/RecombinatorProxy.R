@@ -10,7 +10,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Recombinator`]\cr
-#'   Operation to perform. Initialized to [`RecombinatorNull`] with appropriate `n_indivs_in` and `n_indivs_out` values.
+#'   Operation to perform. Must be set by the user.
 #'   This is primed when `$prime()` of `RecombinatorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `RecombinatorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -25,7 +25,7 @@
 #' @family recombinator wrappers
 #' @examples
 #' set.seed(1)
-#' rp = rec("proxy")
+#' rp = rec("proxy", operation = rec("xounif"))
 #' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5), z = p_lgl())
 #' data = data.frame(x = 1:4, y = 0:3, z = rep(TRUE, 4))
 #'
@@ -55,16 +55,15 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
       assert_int(n_indivs_out, lower = 1, tol = 1e-100)
       assert_int(n_indivs_in, lower = n_indivs_out, tol = 1e-100)
 
-      param_set = ps(operation = p_uty(custom_check = crate(.parent = topenv(), function(x) {
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) {
         if (test_r6(x, "Recombinator") && (n_indivs_in %% x$n_indivs_in == 0) && (n_indivs_out * x$n_indivs_in == x$n_indivs_out * n_indivs_in)) {
           return(TRUE)
         }
         sprintf("Must be a 'Recombinator' where n_indivs_in is a divisor of %s, and where n_indivs_in / n_indivs_out must be %s / %s",
           n_indivs_in, n_indivs_in, n_indivs_out)
-      }, n_indivs_in, n_indivs_out)))
-      param_set$values = list(operation = RecombinatorNull$new(n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out))
+      }, n_indivs_in, n_indivs_out), tags = "required"))
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out)
+      super$initialize(param_set = param_set, n_indivs_in = n_indivs_in, n_indivs_out = n_indivs_out, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -74,9 +73,19 @@ RecombinatorProxy = R6Class("RecombinatorProxy",
     #' @return [invisible] `self`.
     prime = function(param_set) {
       operation = self$param_set$get_values()$operation
-      operation$prime(param_set)
+      if (!is.null(operation)) operation$prime(param_set)
       super$prime(param_set)
-      private$.primed_with = operation$primed_ps  # keep uncloned copy of primed ParamSet for check in `.recombine()`
+      private$.primed_with = operation$primed_ps  # keep uncloned copy of configuration parameter value for check in `.select()`
+      ######### the following may be necessary for context dependent params
+
+      ## primed_with = self$param_set$values$operation
+      ## super$prime(param_set)
+      ## if (inherits(primed_with, "MiesOperator")) {
+      ##   # if primed_with is context-dependent then we need to prime during operation.
+      ##   operation = primed_with$clone(deep = TRUE)
+      ##   operation$prime(param_set)
+      ##   private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
+      ## }
       invisible(self)
     }
   ),

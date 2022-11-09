@@ -5,12 +5,11 @@
 #' @name dict_filtors_proxy
 #'
 #' @description
-#' Filtor that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make [`OptimizerSumoHB`]'s
-#' filtor operation fully parametrizable.
+#' Filtor that performs the operation in its `operation` configuration parameter. This can be used to make filtor operations fully parametrizable.
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Filtor`]\cr
-#'   Operation to perform. Initialized to [`SelectorBest`].
+#'   Operation to perform. Must be set by the user.
 #'   This is primed when `$prime()` of `SelectorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `SelectorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -36,7 +35,7 @@
 #' fp$prime(p)
 #' fp$operate(new_data, known_data, fitnesses, 1)
 #'
-#' fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter_pool_first = 2)
+#' fp$param_set$values$operation = ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2)
 #' fp$operate(new_data, known_data, fitnesses, 1)
 #' @export
 FiltorProxy = R6Class("FiltorProxy",
@@ -45,10 +44,9 @@ FiltorProxy = R6Class("FiltorProxy",
     #' @description
     #' Initialize the `FiltorProxy` object.
     initialize = function() {
-      param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Filtor"), tags = "required"))
-      param_set$values = list(operation = FiltorNull$new())
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Filtor")), tags = "required"))
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set)
+      super$initialize(param_set = param_set, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -60,7 +58,16 @@ FiltorProxy = R6Class("FiltorProxy",
       operation = self$param_set$get_values()$operation
       operation$prime(param_set)
       super$prime(param_set)
-      private$.primed_with = operation$primed_ps  # keep uncloned copy of primed ParamSet for check in `.filter()`
+      private$.primed_with = operation$primed_ps  # keep uncloned copy of configuration parameter value for check in `.select()`
+      ######### the following may be necessary for context dependent params
+      ## primed_with = self$param_set$values$operation
+      ## super$prime(param_set)
+      ## if (inherits(primed_with, "MiesOperator")) {
+      ##   # if primed_with is context-dependent then we need to prime during operation.
+      ##   operation = primed_with$clone(deep = TRUE)
+      ##   operation$prime(param_set)
+      ##   private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
+      ## }
       invisible(self)
     }
   ),

@@ -29,6 +29,16 @@ bibentries = c(
     pages = "115--148",
     year = "1995",
     publisher = "Citeseer"
+  ),
+  knowles2006parego = bibentry("article",
+    title = "ParEGO: A hybrid algorithm with on-line landscape approximation for expensive multiobjective optimization problems",
+    author = "Knowles, Joshua",
+    journal = "IEEE Transactions on Evolutionary Computation",
+    volume = "10",
+    number = "1",
+    pages = "50--66",
+    year = "2006",
+    publisher = "IEEE"
   )
 )
 

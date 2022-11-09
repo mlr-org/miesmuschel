@@ -1,11 +1,11 @@
-#' @title Proxy-Selectior that Selects According to its Configuration Parameter
+#' @title Proxy-Selector that Selects According to its Configuration Parameter
 #'
 #' @include Selector.R
 #'
 #' @name dict_selectors_proxy
 #'
 #' @description
-#' Selector that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
+#' [`Selector`] that performs the operation in its `operation` configuration parameter. This is useful, e.g., to make
 #' [`OptimizerMies`]'s selection operations fully parametrizable.
 #'
 #' @section Configuration Parameters:
@@ -44,10 +44,10 @@ SelectorProxy = R6Class("SelectorProxy",
     #' @description
     #' Initialize the `SelectorProxy` object.
     initialize = function() {
-      param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Selector")))
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Selector"))))
       param_set$values = list(operation = SelectorBest$new())
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set)
+      super$initialize(param_set = param_set, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -56,17 +56,19 @@ SelectorProxy = R6Class("SelectorProxy",
     #'   Passed to [`MiesOperator`]`$prime()`.
     #' @return [invisible] `self`.
     prime = function(param_set) {
-      primed_with = self$param_set$get_values()$operation
-      operation = primed_with$clone(deep = TRUE)
-      operation$prime(param_set)
+      primed_with = self$param_set$values$operation
       super$prime(param_set)
-      private$.operation = operation  # only change operation once everything else succeeded
-      private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
+      if (inherits(primed_with, "MiesOperator")) {
+        # if primed_with is context-dependent then we need to prime during operation.
+        operation = primed_with$clone(deep = TRUE)
+        operation$prime(param_set)
+        private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
+      }
       invisible(self)
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select, group_size) {
       operation = self$param_set$get_values()$operation
       if (is.null(private$.primed_with) || !identical(operation$primed_ps, private$.primed_with)) {
         # Unfortunately, when we clone, we can't keep track of self$param_set$values$operation.
@@ -74,9 +76,8 @@ SelectorProxy = R6Class("SelectorProxy",
         operation$prime(private$.primed_ps)
         private$.primed_with = operation$primed_ps
       }
-      operation$operate(values, fitnesses, n_select)
+      operation$operate(values, fitnesses, n_select, group_size)
     },
-    .operation = NULL,
     .primed_with = NULL,
     deep_clone = function(name, value) {
       if (name == ".primed_with") return(NULL)  # don't even bother cloning this

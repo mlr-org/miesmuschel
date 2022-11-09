@@ -7,6 +7,8 @@
 \alias{recs}
 \alias{sel}
 \alias{sels}
+\alias{scl}
+\alias{scls}
 \alias{ftr}
 \alias{ftrs}
 \title{Short Access Forms for Operators}
@@ -22,6 +24,10 @@ recs(.key, ...)
 sel(.key, ...)
 
 sels(.key, ...)
+
+scl(.key, ...)
+
+scls(.key, ...)
 
 ftr(.key, ...)
 
@@ -46,6 +52,8 @@ Keys passed to the respective \link[mlr3misc:Dictionary]{dictionary} to retrieve
 \item list of \code{\link{Recombinator}} for \code{recs()}.
 \item \code{\link{Selector}} for \code{sel()}.
 \item list of \code{\link{Selector}} for \code{sels()}.
+\item \code{\link{Scalor}} for \code{scl()}.
+\item list of \code{\link{Scalor}} for \code{scls()}.
 }
 }
 \description{
@@ -56,4 +64,14 @@ of \link[mlr3:mlr_sugar]{mlr3::mlr_sugar}.
 mut("gauss", sdev = 0.5)
 rec("xounif")
 sel("random")
+scl("nondom")
 }
+\seealso{
+Other dictionaries: 
+\code{\link{dict_filtors}},
+\code{\link{dict_mutators}},
+\code{\link{dict_recombinators}},
+\code{\link{dict_scalors}},
+\code{\link{dict_selectors}}
+}
+\concept{dictionaries}

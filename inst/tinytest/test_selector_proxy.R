@@ -7,7 +7,7 @@ expect_selector(sp, "SelectorProxy", can_oversample = FALSE)
 
 sp = SelectorProxy$new()
 sp$param_set$values$operation = SelectorRandom$new()
-sp$param_set$values$operation$param_set$values$replace = TRUE
+sp$param_set$values$operation$param_set$values$sample_unique = "no"
 expect_selector(sp, "SelectorProxy", can_oversample = TRUE)
 
 p = ps(x = p_dbl(0, 1), y = p_dbl(-1, 0))
@@ -23,6 +23,7 @@ expect_true(!isTRUE(all.equal(sp$operate(data, seq(0, 1, length.out = 100), 100)
 # auto-priming
 sp$param_set$values$operation = R6::R6Class("anon", inherit = SelectorBest,
   public = list(prime = function(...) { cat("priming\n") ; super$prime(...) }))$new()
+sp$param_set$values$operation$param_set$values$shuffle_selection = FALSE
 expect_stdout({operated = sp$operate(data, seq(0, 1, length.out = 100), 100)}, "^priming$")
 expect_true(all.equal(operated, 100:1))
 
@@ -42,7 +43,7 @@ expect_true(all.equal(operated, 100:1))
 sp = sp$clone(deep = TRUE)
 sp$param_set$values$operation = R6::R6Class("anon", inherit = SelectorBest,
   public = list(prime = function(...) { cat("priming\n") ; super$prime(...) }))$new()
-
+sp$param_set$values$operation$param_set$values$shuffle_selection = FALSE
 expect_stdout({operated = sp$operate(data, seq(0, 1, length.out = 100), 100)}, "^priming$")
 expect_true(all.equal(operated, 100:1))
 

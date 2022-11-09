@@ -10,7 +10,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `operation` :: [`Mutator`]\cr
-#'   Operation to perform. Initialized to [`MutatorNull`].
+#'   Operation to perform. Must be set by the user.
 #'   This is primed when `$prime()` of `MutatorProxy` is called, and also when `$operate()` is called, to make changing
 #'   the operation as part of self-adaption possible. However, if the same operation gets used inside multiple `MutatorProxy`
 #'   objects, then it is recommended to `$clone(deep = TRUE)` the object before assigning them to `operation` to avoid
@@ -25,14 +25,14 @@
 #' @family mutator wrappers
 #' @examples
 #' set.seed(1)
-#' mp = mut("proxy")
+#' mp = mut("proxy", operation = mut("gauss", sdev = 0.1))
 #' p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
 #' data = data.frame(x = rep(0, 5), y = rep(0, 5))
 #'
 #' mp$prime(p)
-#' mp$operate(data)  # default operation: null
+#' mp$operate(data)
 #'
-#' mp$param_set$values$operation = mut("gauss", sdev = 5)
+#' mp$param_set$values$operation = mut("null")
 #' mp$operate(data)
 #' @export
 MutatorProxy = R6Class("MutatorProxy",
@@ -41,10 +41,9 @@ MutatorProxy = R6Class("MutatorProxy",
     #' @description
     #' Initialize the `MutatorProxy` object.
     initialize = function() {
-      param_set = ps(operation = p_uty(custom_check = function(x) check_r6(x, "Mutator"), tags = "required"))
-      param_set$values = list(operation = MutatorNull$new())
+      param_set = ps(operation = p_uty(custom_check = crate(function(x) check_r6(x, "Mutator")), tags = "required"))
       # call initialization with standard options: allow everything etc.
-      super$initialize(param_set = param_set)
+      super$initialize(param_set = param_set, dict_entry = "proxy")
     },
     #' @description
     #' See [`MiesOperator`] method. Primes both this operator, as well as the operator given to the `operation` configuration parameter.
@@ -56,7 +55,16 @@ MutatorProxy = R6Class("MutatorProxy",
       operation = self$param_set$get_values()$operation
       operation$prime(param_set)
       super$prime(param_set)
-      private$.primed_with = operation$primed_ps  # keep uncloned copy of primed ParamSet for check in `.recombine()`
+      private$.primed_with = operation$primed_ps  # keep uncloned copy of configuration parameter value for check in `.select()`
+      ######### the following may be necessary for context dependent params
+      ## primed_with = self$param_set$values$operation
+      ## super$prime(param_set)
+      ## if (inherits(primed_with, "MiesOperator")) {
+      ##   # if primed_with is context-dependent then we need to prime during operation.
+      ##   operation = primed_with$clone(deep = TRUE)
+      ##   operation$prime(param_set)
+      ##   private$.primed_with = primed_with  # keep uncloned copy of configuration parameter value for check in `.select()`
+      ## }
       invisible(self)
     }
   ),

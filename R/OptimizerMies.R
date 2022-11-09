@@ -1,4 +1,4 @@
-#' @title Mixed Integer Evolutionary Strategies Optimizer
+#' @title Mixed Integer Evolution Strategies Optimizer
 #'
 #' @include Selector.R
 #' @include Mutator.R
@@ -6,51 +6,59 @@
 #' @include mies_methods.R
 #'
 #' @description
-#' Perform optimization using evolutionary strategies. `OptimizerMies` and `TunerMies` implement a standard ES optimization
+#' Perform optimization using evolution strategies. `OptimizerMies` and `TunerMies` implement a standard ES optimization
 #' algorithm, performing initialization first, followed by a loop of performance evaluation, survival selection, parent selection, mutation, and
-#' recombination. Currently two different survival modes ("comma" and "plus") are supported. Multi-fidelity optimization, similar
-#' to the "rolling-tide" algorithm described in `r cite_bib("fieldsend2014rolling")`. The modular design and reliance on
-#' [`MiesOperator`] objects to perform central parts of the optimization algorithm makes this [`Optimizer`][bbotk::Optimizer]
-#' highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
+#' recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
+#' Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in `r cite_bib("fieldsend2014rolling")`, is supported.
+#' The modular design and reliance on [`MiesOperator`] objects to perform central parts of the optimization algorithm makes this
+#' [`Optimizer`][bbotk::Optimizer] highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
 #' as presented in `r cite_bib("li2013mixed")` can easily be implemented.
 #'
-#' `OptimizerMies` implements a standard evolutionary strategies loop:
+#' `OptimizerMies` implements a standard evolution strategies loop:
 #' 1. Prime operators, using `mies_prime_operators()`
 #' 2. Initialize and evaluate population, using `mies_init_population()`
-#' 3. Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
-#' 4. Generate offspring by selecting parents, recombining and mutating them, using `mies_generate_offspring()`
-#' 5. Evaluate performance, using `mies_evaluate_offspring()`
-#' 6. Select survivors, using either `mies_survival_plus()` or `mies_survival_comma()`, depending on the `survival_strategy` configuration parameter
+#' 3. Generate offspring by selecting parents, recombining and mutating them, using `mies_generate_offspring()`
+#' 4. Evaluate performance, using `mies_evaluate_offspring()`
+#' 5. Select survivors, using either `mies_survival_plus()` or `mies_survival_comma()`, depending on the `survival_strategy` configuration parameter
+#' 6. Optionally, evaluate survivors with higher fidelity if the multi-fidelity functionality is being used
 #' 7. Jump to 3.
 #'
 #' @section Terminating:
 #' As with all optimizers, [`Terminator`][bbotk::Terminator]s are used to end optimization after a specific number of evaluations were performed,
 #' time elapsed, or other conditions are satisfied. Of particular interest is [`TerminatorGenerations`], which terminates after a number
 #' of generations were evaluated in `OptimizerMies`. The initial population counts as generation 1, its offspring as generation 2 etc.;
-#' fidelity refinements are always included in their generation, [`TerminatorGenerations`] avoids terminating right before they are evaluated.
-#' Other terminators may, however, end the optimization process at any time.
+#' fidelity refinements (step 6. in the algorithm description above) are always included in their generation, [`TerminatorGenerations`]
+#' avoids terminating right before they are evaluated. Other terminators may, however, end the optimization process at any time.
 #'
 #' @section Multi-Fidelity:
-#' `miesmuschel` provides a simple multi-fidelity optimization mechanism that allows increasing fidelity both by generation
-#' number and survival status. When `multi_fidelity` is `TRUE`, then one search space component of the [`OptimInstance`][bbotk::OptimInstance]
-#' must have the `"budget"` tag, which is then optimized as the "budget" component. This means that the value of this component is
-#' determined by the `fidelity_schedule` configuration parameter, which must contain a `data.frame` with columns `"generation"`, `"budget_new"` and
-#' `"budget_survivors"`. The budget component's value of newly sampled individuals is set to the `"budget_new"` entry in the generation's row,
-#' and surviving individuals are evaluated again with the budget set to the `"budget_survivors"` value (unless they are the same). At the
-#' end of a generation, if the `"budget_survivors"` value changes, all individuals from previous generations are re-evaluated with the
-#' new budget value, unless `fidelity_current_gen_only` is set to `TRUE` (and unless the budget value decreases and `fidelity_monotonic` is `TRUE`).
-#' This makes it possible to implement increasing fidelity by generation, and also increasing fidelity for samples that survived a generation.
+#' `miesmuschel` provides a simple multi-fidelity optimization mechanism that allows both the refinement of fidelity as the optimization progresses,
+#' as well as fidelity refinement within each generation. When `multi_fidelity` is `TRUE`, then one search space component of the
+#' [`OptimInstance`][bbotk::OptimInstance] must have the `"budget"` tag, which is then optimized as the "budget" component. This means that the value of this component is
+#' determined by the `fidelity`/`fidelity_offspring` parameters, which are functions that get called whenever individuals get evaluated.
+#' The `fidelity` function is evaluated before step 2 and before every occurrence of step 6 in the algorithm, it returns the value of the budget search space component that all individuals
+#' that survive the current generation should be evaluated with. `fidelity_offspring` is called before step 4 and determines the fidelity that newly
+#' sampled offspring individuals should be evaluated with; it may be desirable to set this to a lower value than `fidelity` to save budget when
+#' preliminarily evaluating newly sampled individuals that may or may not perform well compared to already sampled individuals.
+#' Individuals that survive the generation and are not removed in step 5 will be re-evaluated with the `fidelity`-value in step 6 before the next loop
+#' iteration.
 #'
-#' The `fidelity_schedule` configuration parameter's `"generation"` column determines which row is currently active. A row becomes active in the
-#' generation that is listed, and becomes inactive whenever a different row becomes active. So e.g. if `fidelity_schedule` contains a row
-#' with `"generation"` set to 1, and one set to 4, then the first row is active during generations 1, 2, and 3, and the second row
-#' is active for all following generations.
+#' `fidelity` and `fidelity_offspring` must have arguments `inst`, `budget_id`, `last_fidelity` and `last_fidelity_offspring`. `inst` is the
+#' [`OptimInstance`][bbotk::OptimInstance] bein optimized, the functions can use it to determine the progress of the optimization, e.g. query
+#' the current generation with [`mies_generation`]. `budget_id` identifies the search space component being used as budget parameter. `last_fidelity`
+#' and `last_fidelity_offspring` contain the last values given by `fidelity` / `fidelity_offspring`. Should the offspring-fidelity (as returned
+#' by `fidelity_offspring` always be the same as the parent generation fidelity (as returned by `fidelity`), for example, then `fidelity_offspring`
+#' can be set to a function that just returns `last_fidelity`; this is actually the behaviour that `fidelity_offspring` is initialized with.
 #'
-#' Note that the multifidelity functionality is experimental and the UI may change in the future.
+#' `OptimizerMies` avoids re-evaluating individuals if the fidelity parameter does not change. This means that setting `fidelity` and `fidelity_offspring`
+#' to the same value avoids re-evaluating individuals in step 6. When `fidelity_monotonic` is `TRUE`, re-evaluation is also avoided should the
+#' desired fidelity parameter value decrease. When `fidelity_current_gen_only` is `TRUE`, then step 6 only re-evaluates individuals that were
+#' created in the current generation (in the previous step 4) and sets the fidelity for individuals that are created in step 6, but it does not
+#' re-evaluate individuals that survived from earlier generations or were already in the [`OptimInstance`][bbotk::OptimInstance] when
+#' optimization started; it is recommended to leave this value at `TRUE` which it is initialized with.
 #'
 #' @section Additional Components:
 #' The search space over which the optimization is performed is fundamentally tied to the [`Objective`][bbotk::Objective], and therefore
-#' to the [`OptimInstance`][bbotk::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolutionary Strategy based
+#' to the [`OptimInstance`][bbotk::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolution Strategy based
 #' algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 #' self-adaption as implemented in [`OperatorCombination`], where one or several components can be used to adjust operator behaviour.
 #' These additional components are supplied to the optimizer through the `additional_component_sampler` configuration parameter, which takes
@@ -60,7 +68,7 @@
 #' [`Sampler`][paradox::Sampler]'s [`ParamSet`][paradox::ParamSet].
 #'
 #' @section Configuration Parameters:
-#' `OptimizerMies` has the configuration parameters of the `mutator`, `recombinator`, `parent_selector`, `survival_selector`, and, if given,
+#' `OptimizerMies` has the configuration parameters of the `mutator`, `recombinator`, `parent_selector`, `survival_selector`, `init_selector`, and, if given,
 #' `elite_selector` operator given during construction, and prefixed according to the name of the argument (`mutator`'s configuration parameters
 #' are prefixed `"mutator."` etc.). When using the construction arguments' default values, they are all "proxy" operators: [`MutatorProxy`],
 #' [`RecombinatorProxy`] and [`SelectorProxy`]. This means that the respective configuration parameters become `mutator.operation`, `recombinator.operation` etc.,
@@ -69,10 +77,10 @@
 #' Further configuration parameters are:
 #' * `lambda` :: `integer(1)`\cr
 #'   Offspring size: Number of individuals that are created and evaluated anew for each generation. This is equivalent to the
-#'   `lambda` parameter of [`mies_generate_offspring()`], see there for more information. Initialized to 10.
+#'   `lambda` parameter of [`mies_generate_offspring()`], see there for more information. Must be set by the user.
 #' * `mu` :: `integer(1)`\cr
 #'   Population size: Number of individuals that are sampled in the beginning, and which are selected with each survival step.
-#'   This is equivalent to the `mu` parameter of [`mies_init_population()`], see there for more information. Initialized to 1.
+#'   This is equivalent to the `mu` parameter of [`mies_init_population()`], see there for more information. Must be set by the user.
 #' * `survival_strategy` :: `character(1)`\cr
 #'   May be `"plus"`, or, if the `elite_selector` construction argument is not `NULL`, `"comma"`: Choose whether [`mies_survival_plus()`]
 #'   or [`mies_survival_comma()`] is used for survival selection. Initialized to `"plus"`.
@@ -90,34 +98,33 @@
 #'   that are not part of the search space of the [`OptimInstance`][bbotk::OptimInstance] being optimized.
 #'   This is equivalent to the `additional_component_sampler` parameter of [`mies_init_population()`], see there for more information.
 #'   Initialized to `NULL` (no additional components).
-#' * `fidelity_schedule` :: `data.frame`\cr
+#' * `fidelity` :: `function`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
-#'   Table that determines the value of the "budget" component of individuals being evaluated when doing multi-fidelity optimization.
-#'   This is equivalent to the `fidelity_schedule` parameter of [`mies_init_population()`], [`mies_evaluate_offspring()`], and [`mies_step_fidelity()`];
-#'   see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to a `data.frame` containing one row
-#'   for generation 1, setting budget to 1 for both new and survivor individuals.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
-#' * `fidelity_generation_lookahead` :: `logical(1)`\cr
+#'   Function that determines the value of the "budget" component of surviving individuals being evaluated when doing multi-fidelity optimization.
+#'   It must have arguments named `inst`, `budget_id`, `last_fidelity` and `last_fidelity_offspring`, see the "Multi-Fidelity"-section
+#'   for more details. Its return value is given to [`mies_init_population()`] and [`mies_step_fidelity()`].
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to a `function` returning the value 1.
+#' * `fidelity_offspring` :: `function`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
-#'   Whether to use the `"survivor_budget"` of the *next* generation, instead of the *current* generation, when doing fidelity refinement
-#'   in [`mies_step_fidelity()`].
-#'   This is equivalent to the `generation_lookahead` parameter of [`mies_step_fidelity()`], see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#'   Function that determines the value of the "budget" component of newly sampled offspring individuals being evaluated when doing multi-fidelity optimization.
+#'   It must have arguments named `inst`, `budget_id`, `last_fidelity` and `last_fidelity_offspring`, see the "Multi-Fidelity"-section
+#'   for more details. Its return value is given to [`mies_evaluate_offspring()`].
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to a `function` returning the value of `last_fidelity`,
+#'   i.e. the value returned by the last call to the `fidelity` configuration parameter. This is the recommended value when fidelity should not change within
+#'   a generation, since this means that survivor selection is performed with individuals that were evaluated with the same fidelity
+#'   (at least if `fidelity_current_gen_only` is also set to `FALSE`) .
 #' * `fidelity_current_gen_only` :: `logical(1)`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
 #'   When doing fidelity refinement in [`mies_step_fidelity()`], whether to refine all individuals with different budget component,
 #'   or only individuals created in the current generation.
 #'   This is equivalent to the `current_gen_only` parameter of [`mies_step_fidelity()`], see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `FALSE`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `FALSE`, the recommended value.
 #' * `fidelity_monotonic` :: `logical(1)`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
 #'   Whether to only do fidelity refinement in [`mies_step_fidelity()`] for individuals for which the when budget component value would *increase*.
 #'   This is equivalent to the `monotonic` parameter of [`mies_step_fidelity()`], see there for more information.\cr
-#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`.\cr
-#'   Note that the multifidelity functionality is experimental and the UI may change in the future.
+#'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`. When optimization is performed
+#'   on problems that have a categorical "budget" parameter, then this value should be set to `FALSE`.
 #'
 #' @param mutator ([`Mutator`])\cr
 #'   Mutation operation to perform during [`mies_generate_offspring()`], see there for more information. Default is [`MutatorProxy`], which
@@ -141,13 +148,18 @@
 #'   Elite selector used in [`mies_survival_comma()`], see there for more information. "Comma" selection is only available when this
 #'   argument is not `NULL`. Default `NULL`.\cr
 #'   The `$elite_selector` field will reflect this value.
+#' @param init_selector ([`Selector`])\cr
+#'   Survival selection operation to give to the `survival_selector` argument of [`mies_init_population()`]; it is used if
+#'   the [`OptimInstance`][bbotk::OptimInstance] being optimized already
+#'   contains more (alive) individuals than `mu`. Default is the value given to `survival_selector`.
+#'   The `$init_selector` field will reflect this value.
 #' @param multi_fidelity (`logical(1)`)\cr
 #'   Whether to enable multi-fidelity optimization. When this is `TRUE`, then the [`OptimInstance`][bbotk::OptimInstance] being optimized must
 #'   contain a [`Param`][paradox::Param] tagged `"budget"`, which is then used as the "budget" search space component, determined by
-#'   `fidelity_schedule` instead of by the [`MiesOperator`]s themselves. For multi-fidelity optimization, the `fidelity_schedule`,
-#'   `fidelity_generation_lookahead`, `fidelity_current_gen_only`, and `fidelity_monotonic` configuration parameters must be given to determine
+#'   `fidelity` and `fidelity_offspring` instead of by the [`MiesOperator`]s themselves. For multi-fidelity optimization, the `fidelity`,
+#'   `fidelity_offspring`, `fidelity_current_gen_only`, and `fidelity_monotonic` configuration parameters must be given to determine
 #'   multi-fidelity behaviour. (While the initial values for most of these are probably good for most cases in which more budget implies
-#'   higher fidelity, the `fidelity_schedule` configuration parameter should be adjusted in most cases). Default is `FALSE`.
+#'   higher fidelity, at least the `fidelity` configuration parameter should be adjusted in most cases). Default is `FALSE`.
 #' @references
 #' `r format_bib("fieldsend2014rolling")`
 #'
@@ -158,7 +170,7 @@
 #' \donttest{
 #' lgr::threshold("warn")
 #'
-#' op.m <- mut("gauss")
+#' op.m <- mut("gauss", sdev = 0.1)
 #' op.r <- rec("xounif", p = .3)
 #' op.parent <- sel("random")
 #' op.survival <- sel("best")
@@ -233,11 +245,12 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     #' @description
     #' Initialize the `OptimizerMies` object.
     initialize = function(mutator = MutatorProxy$new(), recombinator = RecombinatorProxy$new(), parent_selector = SelectorProxy$new(),
-        survival_selector = SelectorProxy$new(), elite_selector = NULL, multi_fidelity = FALSE) {
+        survival_selector = SelectorProxy$new(), elite_selector = NULL, init_selector = survival_selector, multi_fidelity = FALSE) {
       private$.mutator = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.recombinator = assert_r6(recombinator, "Recombinator")$clone(deep = TRUE)
       private$.parent_selector = assert_r6(parent_selector, "Selector")$clone(deep = TRUE)
       private$.survival_selector = assert_r6(survival_selector, "Selector")$clone(deep = TRUE)
+      private$.init_selector = assert_r6(init_selector, "Selector")$clone(deep = TRUE)
 
       assert_r6(elite_selector, "Selector", null.ok = TRUE)
       if (!is.null(elite_selector)) {
@@ -251,11 +264,11 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         if (!is.null(elite_selector)) list(
           n_elite = p_int(0, depends = commareq, tags = "survival")),
         list(
-          initializer = p_uty(custom_check = function(x) check_function(x, args = c("param_set", "n")), tags = c("init", "required")),  # arguments: param_set, n
-          additional_component_sampler = p_uty(custom_check = function(x) if (is.null(x)) TRUE else check_r6(x, "Sampler"))),
+          initializer = p_uty(custom_check = crate(function(x) check_function(x, args = c("param_set", "n"))), tags = c("init", "required")),  # arguments: param_set, n
+          additional_component_sampler = p_uty(custom_check = crate(function(x) if (is.null(x)) TRUE else check_r6(x, "Sampler")))),
         if (multi_fidelity) list(
-          fidelity_schedule = p_uty(custom_check = check_fidelity_schedule, tags = "required"),
-          fidelity_generation_lookahead = p_lgl(tags = "required"),
+          fidelity = p_uty(custom_check = crate(function(x) check_function(x, args = c("inst", "budget_id", "last_fidelity", "last_fidelity_offspring"))), tags = "required"),
+          fidelity_offspring = p_uty(custom_check = crate(function(x) check_function(x, args = c("inst", "budget_id", "last_fidelity", "last_fidelity_offspring"))), tags = "required"),
           fidelity_current_gen_only = p_lgl(tags = "required"),
           fidelity_monotonic = p_lgl(tags = "required"))
       ))
@@ -269,10 +282,11 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
         self$parent_selector$param_set, self$survival_selector$param_set), if (!is.null(elite_selector)) alist(self$elite_selector$param_set))
 
       self$param_set$values = insert_named(self$param_set$values, c(
-        list(lambda = 10, mu = 1, initializer = generate_design_random, survival_strategy = "plus"),
+        list(initializer = generate_design_random, survival_strategy = "plus"),
         if (multi_fidelity) list(
-          fidelity_schedule = data.frame(generation = 1, budget_new = 1, budget_survivors = 1),
-          fidelity_generation_lookahead = TRUE, fidelity_current_gen_only = FALSE, fidelity_monotonic = TRUE)
+          fidelity = crate(function(inst, budget_id, last_fidelity, last_fidelity_offspring) 1),
+          fidelity_offspring = crate(function(inst, budget_id, last_fidelity, last_fidelity_offspring) last_fidelity),
+          fidelity_current_gen_only = FALSE, fidelity_monotonic = TRUE)
       ))
 
       param_class_determinants = c(
@@ -335,6 +349,14 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       }
       private$.elite_selector
     },
+    #' @field init_selector ([`Selector`])\cr
+    #' Selection operation to use when there are more than `mu` individuals present at the beginning of the optimization.
+    init_selector = function(rhs) {
+      if (!missing(rhs) && !identical(rhs, private$.init_selector)) {
+        stop("init_selector is read-only.")
+      }
+      private$.init_selector
+    },
     #' @field param_set ([`ParamSet`][paradox::ParamSet])\cr
     #' Configuration parameters of the optimization algorithm.
     param_set = function(rhs) {
@@ -370,8 +392,13 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .optimize = function(inst) {
       params = private$.own_param_set$get_values()
 
+      survival = switch(params$survival_strategy,
+          plus = mies_survival_plus,
+          comma = mies_survival_comma)
+
       budget_id = NULL
-      if (!is.null(params$fidelity_schedule)) {
+      fidelity = fidelity_offspring = NULL
+      if (!is.null(params$fidelity)) {
         budget_id = inst$search_space$ids(tags = "budget")
         if (length(budget_id) != 1) stopf("Need exactly one budget parameter for multifidelity, but found %s: %s",
           length(budget_id), str_collapse(budget_id))
@@ -379,27 +406,31 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
 
       additional_components = params$additional_component_sampler$param_set
       mies_prime_operators(mutators = list(self$mutator), recombinators = list(self$recombinator),
-        selectors = discard(list(self$survival_selector, self$parent_selector, self$elite_selector), is.null),
+        selectors = discard(list(self$survival_selector, self$parent_selector, self$elite_selector, self$init_selector), is.null),
         search_space = inst$search_space, additional_components = additional_components,
         budget_id = budget_id)
 
-      mies_init_population(inst, mu = params$mu, initializer = params$initializer, fidelity_schedule = params$fidelity_schedule,
-        budget_id = budget_id, additional_component_sampler = params$additional_component_sampler)
+      if (!is.null(params$fidelity)) {
+        fidelity = params$fidelity(inst = inst, budget_id = budget_id, last_fidelity = fidelity, last_fidelity_offspring = fidelity_offspring)
+      }
 
-      survival = switch(params$survival_strategy,
-          plus = mies_survival_plus,
-          comma = mies_survival_comma)
+      mies_init_population(inst, mu = params$mu, initializer = params$initializer, survival_selector = self$init_selector,
+        budget_id = budget_id, fidelity = fidelity, fidelity_new_individuals_only = params$current_gen_only %??% TRUE,
+        fidelity_monotonic = params$fidelity_monotonic %??% FALSE, additional_component_sampler = params$additional_component_sampler)
 
       repeat {
-        if (!is.null(params$fidelity_schedule)) {
-          mies_step_fidelity(inst, params$fidelity_schedule, budget_id, generation_lookahead = params$fidelity_generation_lookahead,
-            current_gen_only = params$fidelity_current_gen_only, monotonic = params$fidelity_monotonic,
-            additional_components = additional_components)
-        }
         offspring = mies_generate_offspring(inst, lambda = params$lambda,
           parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator, budget_id = budget_id)
-        mies_evaluate_offspring(inst, offspring = offspring, fidelity_schedule = params$fidelity_schedule, budget_id = budget_id)
+        if (!is.null(params$fidelity_offspring)) {
+          fidelity_offspring = params$fidelity_offspring(inst = inst, budget_id = budget_id, last_fidelity = fidelity, last_fidelity_offspring = fidelity_offspring)
+        }
+        mies_evaluate_offspring(inst, offspring = offspring, budget_id = budget_id, fidelity = fidelity_offspring)
         survival(inst, mu = params$mu, survival_selector = self$survival_selector, n_elite = params$n_elite, elite_selector = self$elite_selector)
+        if (!is.null(params$fidelity)) {
+          fidelity = params$fidelity(inst = inst, budget_id = budget_id, last_fidelity = fidelity, last_fidelity_offspring = fidelity_offspring)
+          mies_step_fidelity(inst, budget_id = budget_id, fidelity = fidelity, current_gen_only = params$fidelity_current_gen_only,
+            fidelity_monotonic = params$fidelity_monotonic, additional_components = additional_components)
+        }
       }
     },
     .mutator = NULL,
@@ -407,6 +438,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .parent_selector = NULL,
     .survival_selector = NULL,
     .elite_selector = NULL,
+    .init_selector = NULL,
     .own_param_set = NULL,
     .param_set_id = NULL,
     .param_set_source = NULL

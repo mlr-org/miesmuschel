@@ -30,9 +30,12 @@ Mutator = R6Class("Mutator",
     #' Initialize base class components of the `Mutator`.
     #' @template param_param_classes
     #' @template param_param_set
-    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps()) {
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_own_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       # remove `endomorphism` option
-      super$initialize(param_classes = param_classes, param_set = param_set)
+      super$initialize(param_classes = param_classes, param_set = param_set, packages = packages, dict_entry = dict_entry, dict_shortaccess = "mut", own_param_set = own_param_set)
     }
   ),
   private = list(
@@ -76,7 +79,10 @@ MutatorNumeric = R6Class("MutatorNumeric",
     #' @templateVar allowedparams ParamInt ParamDbl
     #' @template param_param_classes
     #' @template param_param_set
-    initialize = function(param_classes = c("ParamInt", "ParamDbl"), param_set = ps()) {
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_own_param_set
+    initialize = function(param_classes = c("ParamInt", "ParamDbl"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_subset(param_classes, c("ParamInt", "ParamDbl"))
       if (identical(param_classes, "ParamDbl")) {
         param_classes = c("ParamInt", "ParamDbl")
@@ -84,7 +90,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
       } else {
         private$.integer_native = TRUE
       }
-      super$initialize(param_classes, param_set)
+      super$initialize(param_classes, param_set, packages = packages, dict_entry = dict_entry, own_param_set = own_param_set)
     }
   ),
   private = list(
@@ -147,9 +153,12 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     #' @templateVar allowedparams ParamLgl ParamFct
     #' @template param_param_classes
     #' @template param_param_set
-    initialize = function(param_classes = c("ParamLgl", "ParamFct"), param_set = ps()) {
+    #' @template param_packages
+    #' @template param_dict_entry
+    #' @template param_own_param_set
+    initialize = function(param_classes = c("ParamLgl", "ParamFct"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
       assert_subset(param_classes, c("ParamLgl", "ParamFct"))
-      super$initialize(param_classes, param_set)
+      super$initialize(param_classes, param_set, packages = packages, dict_entry = dict_entry, own_param_set = own_param_set)
     }
   ),
   private = list(

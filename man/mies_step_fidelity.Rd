@@ -2,15 +2,14 @@
 % Please edit documentation in R/mies_methods.R
 \name{mies_step_fidelity}
 \alias{mies_step_fidelity}
-\title{Re-Evaluate Configurations with Higher Fidelity}
+\title{Re-Evaluate Existing Configurations with Higher Fidelity}
 \usage{
 mies_step_fidelity(
   inst,
-  fidelity_schedule,
   budget_id,
-  generation_lookahead = TRUE,
+  fidelity,
   current_gen_only = FALSE,
-  monotonic = TRUE,
+  fidelity_monotonic = TRUE,
   additional_components = NULL
 )
 }
@@ -18,26 +17,18 @@ mies_step_fidelity(
 \item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
-\item{fidelity_schedule}{(\code{data.frame})\cr
-\code{data.frame} with three columns \code{"generation"}, \code{"budget_new"}, \code{"budget_survivors"}, in that order. \code{"budget_new"} and \code{"budget_survivors"}
-are atomic columns. The value of \code{"budget_survivors"} of the appropriate row is assigned to the \code{budget_id} component of \code{offspring}.
-\code{"generation"} is an integer valued column, indicating the first generation at which a row is valid. At least one row with
-\code{generation == 1} must be present.}
-
 \item{budget_id}{(\code{character(1)})\cr
-Budget component that is set to the value found in \code{fidelity_schedule}.}
+Budget component that is set to the \code{fidelity} value.}
 
-\item{generation_lookahead}{(\code{logical(1)})\cr
-Whether to re-evaluate alive individuals with the \code{"budget_survivors"} entry of the current generation (\code{FALSE}), or
-of the next generation (\code{TRUE}).}
+\item{fidelity}{(\code{atomic(1)})\cr
+Atomic scalar indicating the value to be assigned to the \code{budget_id} component of offspring.}
 
 \item{current_gen_only}{(\code{logical(1)})\cr
 Whether to only re-evaluate survivors individuals generated in the latest generation (\code{TRUE}), or re-evaluate all currently alive
 individuals (\code{FALSE}). In any case, only individuals that were not already evaluated with the chosen fidelity are evaluated,
-so this will usually only affect individuals from before the latest generation if the \code{"budget_survivors"} changed between
-generations (i.e. when a different row from \code{fidelity_schedule} is used).}
+so this will usually only have an effect when the fidelity of surviving individuals changed between generations.}
 
-\item{monotonic}{(\code{logical(1)})\cr
+\item{fidelity_monotonic}{(\code{logical(1)})\cr
 Whether to only re-evaluate configurations for which the fidelity would increase. Default \code{TRUE}.}
 
 \item{additional_components}{(\code{\link[paradox:ParamSet]{ParamSet}} | \code{NULL})\cr
@@ -50,20 +41,11 @@ through \code{eval_batch}.
 }
 \description{
 As part of the "rolling-tide" multifidelity-setup, do reevaluation of configurations with
-higher fidelity that have survived lower-fidelity selection.
-
-The \code{fidelity_schedule} specifies what the fidelity (i.e. value of the "budget" component) of evaluations
-done or compared at generation \code{i} should be. The \code{generation_lookahead} parameter has a subtle influence.
-If it is \code{TRUE}, then, at the end of generation \code{i}, reevaluation is done with the \code{"budget_survivors"}
-fidelity of generation \code{i + 1}, otherwise the entry of generation \code{i} is used. This gives the \code{"budget_survivors"}
-column a slightly different meaning in the two cases: either it is the budget, with which survivors "entering"
-generation \code{i} have been evaluated, or it is the budget with which survivors "coming out of" that generation
-were evaluated. The evaluations are done as part of the \emph{current} generation in any case (see examples).
+higher fidelity that have survived lower-fidelity selection. The evaluations are done as part of the
+\emph{current} generation, so the \code{dob} value is not increased.
 
 This function should only be called when doing rolling-tide multifidelity, and should not be part of the
 MIES cycle otherwise.
-
-Note that the multifidelity functionality is experimental and the UI may change in the future.
 }
 \examples{
 library("bbotk")
@@ -86,45 +68,40 @@ oi <- OptimInstanceSingleCrit$new(objective,
 
 budget_id = "y"
 
-fidelity_schedule = data.frame(
-  generation = c(1, 2),
-  budget_new = c(1, 3),
-  budget_survivors = c(2, 4)
-)
-
-# The initial population gets evaluated with 'budget_survivors', so y = 2.
-mies_init_population(oi, mu = 2, fidelity_schedule = fidelity_schedule,
-  budget_id = budget_id)
+# Create an initial population with fidelity ("y") value 1
+mies_init_population(oi, mu = 2, budget_id = budget_id, fidelity = 1)
 
 oi$archive
 
-# By default, mies_step_fidelity() will re-evaluate all survivors with
-# budget_survivors of the *next* generation. This is the reason why it
-# usually does not make sense to have 'budget_survivors' change between
-# generations 1 and 2!
-mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-  budget_id = budget_id)
-
-# The first two evaluations have 'eol = 1' (died in generation 1) and were
-# re-evaluated with y = 4.
-oi$archive
-
-# Using 'generation_lookahead = FALSE' will use the 'budget_survivors' of the
-# current genereation, where the current generation is always the max() of the
-# 'dob' column in the archive.
-# Calling 'mies_step_fidelity()' multiple times within one generation barely
-# ever makes sense and is done here for demonstration.
-# The following call will have *no* effect: The 'budget_survivors' of the
-# current generation (generation 1) is 2, but the alive individuals were
-# evaluated with budget 4.
-mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-  budget_id = budget_id, generation_lookahead = FALSE)
+# Re-evaluate these individuals with higher fidelity
+mies_step_fidelity(oi, budget_id = budget_id, fidelity = 2)
 
 oi$archive
 
-# To also re-evaluate individuals with *lower* budget, use 'monotonic = FALSE':
-mies_step_fidelity(oi, fidelity_schedule = fidelity_schedule,
-  budget_id = budget_id, generation_lookahead = FALSE, monotonic = FALSE)
+# The following creates a new generation without killing the initial
+# generation
+offspring = data.frame(x = 0:1)
+mies_evaluate_offspring(oi, offspring = offspring, budget_id = budget_id,
+  fidelity = 3)
+
+oi$archive
+
+# Re-evaluate only individuals from last generation by setting current_gen_only
+mies_step_fidelity(oi, budget_id = budget_id, fidelity = 4,
+  current_gen_only = TRUE)
+
+oi$archive
+
+# Default: Re-evaluate all that *increase* fidelity: Only the initial
+# population is re-evaluated here.
+mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3)
+
+oi$archive
+
+# To also re-evaluate individuals with *higher* fidelity, use
+# 'fidelity_monotonic = FALSE'. This does not re-evaluate the points that already have
+# the requested fidelity, however.
+mies_step_fidelity(oi, budget_id = budget_id, fidelity = 3, fidelity_monotonic = FALSE)
 
 oi$archive
 }

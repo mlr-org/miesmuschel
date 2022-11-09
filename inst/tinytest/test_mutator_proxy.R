@@ -1,14 +1,16 @@
 
 source("setup.R", local = TRUE)
 
-allmutator = MutatorCombination$new(operators = list(numerics = MutatorGauss$new(), discretes = MutatorDiscreteUniform$new()),
+allmutator = MutatorCombination$new(operators = list(numerics = mut("gauss", sdev = 1), discretes = MutatorDiscreteUniform$new()),
   groups = list(numerics = c("ParamInt", "ParamDbl"), discretes = c("ParamLgl", "ParamFct")),
   on_type_not_present = "quiet")
 
 allmutator$param_set$values$discretes.can_mutate_to_same = FALSE
 
 mp = MutatorProxy$new()
-expect_equal(mp$param_set$values$operation, MutatorNull$new())
+expect_null(mp$param_set$values$operation)
+mp$param_set$values$operation = MutatorNull$new()
+
 expect_mutator(mp, "MutatorProxy")
 
 mp = MutatorProxy$new()

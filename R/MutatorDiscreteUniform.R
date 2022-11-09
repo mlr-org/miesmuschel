@@ -42,7 +42,7 @@ MutatorDiscreteUniform = R6Class("MutatorDiscreteUniform",
     initialize = function() {
       param_set = ps(can_mutate_to_same = p_lgl(tags = "required"))
       param_set$values = list(can_mutate_to_same = TRUE)
-      super$initialize(c("ParamLgl", "ParamFct"), param_set)
+      super$initialize(c("ParamLgl", "ParamFct"), param_set, dict_entry = "unif")
     }
   ),
   private = list(

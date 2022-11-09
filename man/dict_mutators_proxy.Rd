@@ -12,7 +12,7 @@ Mutator that performs the operation in its \code{operation} configuration parame
 
 \itemize{
 \item \code{operation} :: \code{\link{Mutator}}\cr
-Operation to perform. Initialized to \code{\link{MutatorNull}}.
+Operation to perform. Must be set by the user.
 This is primed when \verb{$prime()} of \code{MutatorProxy} is called, and also when \verb{$operate()} is called, to make changing
 the operation as part of self-adaption possible. However, if the same operation gets used inside multiple \code{MutatorProxy}
 objects, then it is recommended to \verb{$clone(deep = TRUE)} the object before assigning them to \code{operation} to avoid
@@ -30,25 +30,27 @@ Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:Pa
 
 This \code{\link{Mutator}} can be created with the short access form \code{\link[=mut]{mut()}}
 (\code{\link[=muts]{muts()}} to get a list), or through the the \link[mlr3misc:Dictionary]{dictionary}
-\code{\link{dict_mutators}} in the following way:\preformatted{# preferred:
+\code{\link{dict_mutators}} in the following way:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred:
 mut("proxy")
 muts("proxy")  # takes vector IDs, returns list of Mutators
 
 # long form:
 dict_mutators$get("proxy")
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{
 set.seed(1)
-mp = mut("proxy")
+mp = mut("proxy", operation = mut("gauss", sdev = 0.1))
 p = ps(x = p_int(-5, 5), y = p_dbl(-5, 5))
 data = data.frame(x = rep(0, 5), y = rep(0, 5))
 
 mp$prime(p)
-mp$operate(data)  # default operation: null
+mp$operate(data)
 
-mp$param_set$values$operation = mut("gauss", sdev = 5)
+mp$param_set$values$operation = mut("null")
 mp$operate(data)
 }
 \seealso{
@@ -62,12 +64,14 @@ Other mutators:
 \code{\link{dict_mutators_gauss}},
 \code{\link{dict_mutators_maybe}},
 \code{\link{dict_mutators_null}},
+\code{\link{dict_mutators_sequential}},
 \code{\link{dict_mutators_unif}}
 
 Other mutator wrappers: 
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
-\code{\link{dict_mutators_maybe}}
+\code{\link{dict_mutators_maybe}},
+\code{\link{dict_mutators_sequential}}
 }
 \concept{mutator wrappers}
 \concept{mutators}
@@ -77,21 +81,24 @@ Other mutator wrappers:
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{MutatorProxy$new()}}
-\item \href{#method-prime}{\code{MutatorProxy$prime()}}
-\item \href{#method-clone}{\code{MutatorProxy$clone()}}
+\item \href{#method-MutatorProxy-new}{\code{MutatorProxy$new()}}
+\item \href{#method-MutatorProxy-prime}{\code{MutatorProxy$prime()}}
+\item \href{#method-MutatorProxy-clone}{\code{MutatorProxy$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate">}\href{../../miesmuschel/html/MiesOperator.html#method-operate}{\code{miesmuschel::MiesOperator$operate()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="help"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-help'><code>miesmuschel::MiesOperator$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="operate"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-operate'><code>miesmuschel::MiesOperator$operate()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="print"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-print'><code>miesmuschel::MiesOperator$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="miesmuschel" data-topic="MiesOperator" data-id="repr"><a href='../../miesmuschel/html/MiesOperator.html#method-MiesOperator-repr'><code>miesmuschel::MiesOperator$repr()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-MutatorProxy-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorProxy-new}{}}}
 \subsection{Method \code{new()}}{
 Initialize the \code{MutatorProxy} object.
 \subsection{Usage}{
@@ -100,8 +107,8 @@ Initialize the \code{MutatorProxy} object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-prime"></a>}}
-\if{latex}{\out{\hypertarget{method-prime}{}}}
+\if{html}{\out{<a id="method-MutatorProxy-prime"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorProxy-prime}{}}}
 \subsection{Method \code{prime()}}{
 See \code{\link{MiesOperator}} method. Primes both this operator, as well as the operator given to the \code{operation} configuration parameter.
 Note that this modifies the \verb{$param_set$values$operation} object.
@@ -122,8 +129,8 @@ Passed to \code{\link{MiesOperator}}\verb{$prime()}.}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-MutatorProxy-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-MutatorProxy-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

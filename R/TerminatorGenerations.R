@@ -30,7 +30,7 @@
 #'
 #' @section Configuration Parameters:
 #' * `generations` :: `integer(1)`\cr
-#'   Number of generations to evaluate, after which to stop. Initialized to `Inf`.
+#'   Number of generations to evaluate, after which to stop. Not initialized and should be set to the desired value during construction.
 #'
 #' @examples
 #' library("bbotk")
@@ -42,7 +42,6 @@ TerminatorGenerations = R6Class("TerminatorGenerations", inherit = Terminator,
     #' Initialize the `TerminatorGenerations` object.
     initialize = function() {
       param_set = ps(generations = p_int(0, special_vals = list(Inf), tags = "required"))
-      param_set$values$generations = Inf
       super$initialize(id = "gens", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "generations")
     },
 

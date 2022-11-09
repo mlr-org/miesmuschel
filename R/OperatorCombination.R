@@ -47,7 +47,7 @@
 #' Configuration parameter names are prefixed with the name of the [`MiesOperator`] in the `operators` list.
 #'
 #' @templateVar id combine
-#' @templateVar additional , <operators>, ...
+#' @templateVar additional , \<operators\>, ...
 #' @template autoinfo_prepare_mut
 #' @template autoinfo_dict
 #' @template autoinfo_prepare_rec
@@ -186,7 +186,9 @@ OperatorCombination = R6Class("OperatorCombination",
   public = list(
     #' @description
     #' Initialize the `OperatorCombination` object.
-    initialize = function(operators, groups = list(), adaptions = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop", granularity = 1) {
+    #' @template param_dict_entry
+    #' @template param_dict_shortaccess
+    initialize = function(operators, groups = list(), adaptions = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop", granularity = 1, dict_entry = NULL, dict_shortaccess = NULL) {
       private$.granularity = assert_int(granularity, lower = 1, tol = 1e-100)
       private$.on_name_not_present = assert_choice(on_name_not_present, c("quiet", "warn", "stop"))
       private$.on_type_not_present = assert_choice(on_type_not_present, c("quiet", "warn", "stop"))
@@ -271,7 +273,11 @@ OperatorCombination = R6Class("OperatorCombination",
             ParamSetCollection$new(map(self$operators, "param_set")),
             names(self$adaptions)
           )
-        )
+        ),
+        packages = unlist(map(self$operators, "packages")),
+        dict_entry = dict_entry,
+        dict_shortaccess = dict_shortaccess,
+        own_param_set = quote(ps())
       )
     },
     #' @description
@@ -439,8 +445,8 @@ MutatorCombination = R6Class("MutatorCombination",
     #' @param on_name_not_present see above.
     initialize = function(operators = list(), groups = list(), adaptions = list(), binary_fct_as_logical = FALSE, on_type_not_present = "warn", on_name_not_present = "stop") {
       assert_list(operators, types = "Mutator")
-      super$initialize(operators = operators, groups = groups, adaptions = adaptions, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present)
-      class(self) = c("Mutator", class(self))
+      super$initialize(operators = operators, groups = groups, adaptions = adaptions, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present, dict_entry = "combine", dict_shortaccess = "mut")
+      class(self) = c(class(self)[[1]], "Mutator", class(self)[-1])
     }
   )
 )
@@ -472,8 +478,8 @@ RecombinatorCombination = R6Class("RecombinatorCombination",
       } else {
         stop("Combining operators with disagreeing n_indivs_in / n_indivs_out where more than one operator has these values not equal 1 is not yet supported.")
       }
-      super$initialize(operators = operators, groups = groups, adaptions = adaptions, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present, granularity = self$n_indivs_in)
-      class(self) = c("Recombinator", class(self))
+      super$initialize(operators = operators, groups = groups, adaptions = adaptions, binary_fct_as_logical = binary_fct_as_logical, on_type_not_present = on_type_not_present, on_name_not_present = on_name_not_present, granularity = self$n_indivs_in, dict_entry = "combine", dict_shortaccess = "rec")
+      class(self) = c(class(self)[[1]], "Recombinator", class(self)[-1])
     }
   ),
   # --- copy-paste from Recombinator.R

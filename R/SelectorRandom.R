@@ -9,9 +9,10 @@
 #' it samples with or without replacement.
 #'
 #' @section Configuration Parameters:
-#' * `replace` :: `logical(1)`\cr
-#'   Whether to sample individuals with (`TRUE`) or without (`FALSE`) replacement. When sampling is done without replacement, then
-#'   `n_select` must be less or equal the number of rows in `values` when calling `$operate()`. Initialized to `FALSE`.
+#' * `sample_unique` :: `character(1)`\cr
+#'   Whether to sample individuals globally unique (`"global"`), unique within groups (`"groups"`), or not unique at all (`"no"`, sample with replacement).
+#'   This is done with best effort; if `group_size` (when `sample_unique` is `"groups"`) or `n_select` (when `sample_unique` is `"global"`)
+#'   is greater than `nrow(values)`, then individuals are selected with as few repeats as possible. Initialized to `"groups"`.
 #'
 #' @templateVar id random
 #' @template autoinfo_prepare_sel
@@ -43,16 +44,32 @@ SelectorRandom = R6Class("SelectorRandom",
     #' @description
     #' Initialize the `SelectorRandom` object.
     initialize = function() {
-      param_set = ps(replace = p_lgl(tags = "required"))
-      param_set$values = list(replace = FALSE)
-      super$initialize(c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set)
+      param_set = ps(sample_unique = p_fct(c("global", "groups", "no"), tags = "required"))
+      param_set$values = list(sample_unique = "groups")
+      super$initialize(param_set = param_set, dict_entry = "random")
     }
   ),
   private = list(
-    .select = function(values, fitnesses, n_select) {
+    .select = function(values, fitnesses, n_select, group_size) {
       params = self$param_set$get_values()
-      sample(nrow(values), n_select, replace = params$replace)
+      if (group_size == 1 && params$sample_unique == "groups") params$sample_unique = "no"
+      switch(params$sample_unique,
+        groups = {
+          unlist(lapply(vectorize_group_size(group_size, n_select), sample_least_replaces, set_size = nrow(values)))
+        },
+        global = {
+          sample_least_replaces(n_select, nrow(values))
+        },
+        no = {
+          sample(nrow(values), n_select, replace = TRUE)
+        }
+      )
     }
   )
 )
 dict_selectors$add("random", SelectorRandom)
+
+sample_least_replaces = function(n_select, set_size) {
+  if (set_size >= n_select) return(sample(set_size, n_select, replace = FALSE))
+  c(rep.int(seq_len(set_size), n_select / set_size), sample(set_size, n_select %% set_size, replace = FALSE))[sample.int(n_select)]
+}

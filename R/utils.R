@@ -115,7 +115,7 @@ eval_batch_handle_zero = function(inst, xdt) {
 }
 
 ## Component names that can not be used inside MIES functions
-reserved_component_names = c("x_domain", "timestamp", "batch_nr", "eol", "dob")
+reserved_component_names = c("x_domain", "timestamp", "batch_nr", "eol", "dob", "x_id")
 
 
 # tolerance of numeric configuration parameter bounds
@@ -147,13 +147,58 @@ assert_optim_instance = function(inst) {
   invisible(inst)
 }
 
-check_fidelity_schedule = function(x) {
-  if (test_data_frame(x, ncols = 3, min.rows = 1) &&
-      test_names(colnames(x), identical.to = c("generation", "budget_new", "budget_survivors")) &&
-      test_integerish(x$generation, tol = 1e-100, any.missing = FALSE, unique = TRUE) &&
-      1 %in% x$generation) {
-    TRUE
+
+# vector-domain
+p_vct = function(lower = -Inf, upper = Inf, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
+  if (!is.null(depends)) stop("depends support not in paradox yet")
+  p_uty(custom_check = crate(function(x) check_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE, min.len = 1), lower, upper), tags = tags, trafo = trafo)
+}
+
+# matrix-domain
+# is either a matrix with 'rows' rows, or a vector of length 'rows'
+p_mtx = function(rows, lower = -Inf, upper = Inf, default = NO_DEF, tags = character(), depends = NULL, trafo = NULL) {
+  if (!is.null(depends)) stop("depends support not in paradox yet")
+  p_uty(custom_check = crate(function(x) {
+    if (!test_numeric(x, lower = tol_bound(lower, "lower"), upper = tol_bound(upper, "upper"), any.missing = FALSE) ||  # check numeric and bounds
+        (!test_matrix(x, nrows = rows, min.cols = 1) && !test_numeric(x, len = rows))) {
+      sprintf("must either be a matrix with %s rows, or a vector of length %s.", rows, rows)
+    } else {
+      TRUE
+    }
+  }, rows, lower, upper), tags = tags, trafo = trafo)
+}
+
+check_fidelity = function(x, null.ok = FALSE) {
+  if (test_scalar(x, null.ok = null.ok)) return(TRUE)
+  if (test_atomic(x, any.missing = FALSE, len = 2, names = "named") && test_names(names(x), permutation.of = c("budget_new", "budget_survivors"))) return(TRUE)
+  "'fidelity' must be scalar, or a two-element atomic vector with entries 'budget_new' and 'budget_survivors'."
+}
+
+
+# scale to 0-1, default to 1 if values are constant
+normie_scale = function(values) {
+  rng = range(values)
+  if (rng[[1]] == rng[[2]]) {
+    rep(1, length(values))
   } else {
-    "must be a data.frame with integer column 'generation' (with unique non-missing values and at least one row with value 1) and columns 'budget_new', 'budget_survivors'."
+    (values - rng[[1]]) / diff(rng)
   }
+}
+
+# replace mlr3misc's default 'parent' with topenv()
+# TODO: submit this as PR to mlr3misc
+crate <- function(.fn, ..., .parent = topenv(parent.frame())) {
+    nn = map_chr(substitute(list(...)), as.character)[-1L]
+    environment(.fn) = list2env(set_names(list(...), nn), parent = .parent)
+    .fn
+}
+
+
+vectorize_group_size = function(group_size, n_select) {
+  if (length(group_size) != 1) {
+    assert_true(sum(group_size) == n_select)
+    return(group_size)
+  }
+  gs_remainder = n_select %% group_size
+  c(rep(group_size, n_select / group_size), if (gs_remainder) gs_remainder)
 }
