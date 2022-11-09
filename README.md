@@ -8,7 +8,7 @@
 
 ## Project Status
 
-Although `miesmuschel` is currently still evolving, it can already be used for optimization. All exported functions (should) work, are well tested and [well documented](https://mlr-org.github.io/miesmuschel/reference/index.html).
+Although `miesmuschel` is currently still evolving, it can already be used for optimization. All exported functions are [thoroughly documented](https://mlr-org.github.io/miesmuschel/reference/index.html).
 
 ## Installation
 
@@ -17,13 +17,6 @@ Install the github version, using `remotes`:
 ```r
 remotes::install_github("mlr-org/miesmuschel")
 ```
-
-If you're feeling brave, install the `devel` branch version:
-
-```r
-remotes::install_github("mlr-org/miesmuschel@devel")
-```
-
 
 ## Some Code to Get Started
 
