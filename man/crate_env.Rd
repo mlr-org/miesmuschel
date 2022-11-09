@@ -11,11 +11,11 @@ crate_env(fun, namespace = "R_GlobalEnv", ..., selfref = NULL)
 Function of which the environment should be set.}
 
 \item{namespace}{(\code{character(1)})\cr
-Name of namespace within which \code{fun} should be placed, as given by
-\code{\link[base:environment]{environmentName()}}. Special values
+Name of the namespace, as given by \code{\link[base:environment]{environmentName()}},
+to be used as the (parent of the) environment of \code{fun}. Special values
 \code{"R_GlobalEnv"} (global environment), \code{"R_BaseEnv"} (base environment;
 note this one is non-standard within R), \code{"R_EmptyEnv"} (empty environment).
-Default \code{"R_GlobalEnv"}.}
+The content of the namespace is not modified. Default \code{"R_GlobalEnv"}.}
 
 \item{...}{(\code{list})\cr
 Content of environments within which to place \code{fun}.}

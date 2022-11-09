@@ -244,11 +244,11 @@ repr.function = function(obj, ...) {
 #' @param fun (`function`)\cr
 #'   Function of which the environment should be set.
 #' @param namespace (`character(1)`)\cr
-#'   Name of namespace within which `fun` should be placed, as given by
-#'   [`environmentName()`][base::environmentName]. Special values
+#'   Name of the namespace, as given by [`environmentName()`][base::environmentName],
+#'   to be used as the (parent of the) environment of `fun`. Special values
 #'   `"R_GlobalEnv"` (global environment), `"R_BaseEnv"` (base environment;
 #'   note this one is non-standard within R), `"R_EmptyEnv"` (empty environment).
-#'   Default `"R_GlobalEnv"`.
+#'   The content of the namespace is not modified. Default `"R_GlobalEnv"`.
 #' @param ... (`list`)\cr
 #'   Content of environments within which to place `fun`.
 #' @param selfref (`character(1)` | named `integer` | `NULL`)\cr
