@@ -1,4 +1,4 @@
-#' @title Mixed Integer Evolutionary Strategies Optimizer
+#' @title Mixed Integer Evolution Strategies Optimizer
 #'
 #' @include Selector.R
 #' @include Mutator.R
@@ -6,7 +6,7 @@
 #' @include mies_methods.R
 #'
 #' @description
-#' Perform optimization using evolutionary strategies. `OptimizerMies` and `TunerMies` implement a standard ES optimization
+#' Perform optimization using evolution strategies. `OptimizerMies` and `TunerMies` implement a standard ES optimization
 #' algorithm, performing initialization first, followed by a loop of performance evaluation, survival selection, parent selection, mutation, and
 #' recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
 #' Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in `r cite_bib("fieldsend2014rolling")`, is supported.
@@ -14,7 +14,7 @@
 #' [`Optimizer`][bbotk::Optimizer] highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
 #' as presented in `r cite_bib("li2013mixed")` can easily be implemented.
 #'
-#' `OptimizerMies` implements a standard evolutionary strategies loop:
+#' `OptimizerMies` implements a standard evolution strategies loop:
 #' 1. Prime operators, using `mies_prime_operators()`
 #' 2. Initialize and evaluate population, using `mies_init_population()`
 #' 3. Generate offspring by selecting parents, recombining and mutating them, using `mies_generate_offspring()`
@@ -58,7 +58,7 @@
 #'
 #' @section Additional Components:
 #' The search space over which the optimization is performed is fundamentally tied to the [`Objective`][bbotk::Objective], and therefore
-#' to the [`OptimInstance`][bbotk::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolutionary Strategy based
+#' to the [`OptimInstance`][bbotk::OptimInstance] given to `OptimizerMies$optimize()`. However, some advanced Evolution Strategy based
 #' algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 #' self-adaption as implemented in [`OperatorCombination`], where one or several components can be used to adjust operator behaviour.
 #' These additional components are supplied to the optimizer through the `additional_component_sampler` configuration parameter, which takes

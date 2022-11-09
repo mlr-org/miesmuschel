@@ -9,7 +9,7 @@
 #'
 #' `miesmuschel` offers both an [`Optimizer`][bbotk::Optimizer] and a [`Tuner`][mlr3tuning::Tuner] for general
 #' MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
-#' is more flexible and can be used for research into novel evolutionary strategies.
+#' is more flexible and can be used for research into novel evolution strategies.
 #'
 #' The call-graph of the default algorithm in [`OptimizerMies`] / [`TunerMies`] is as follows, and is shown
 #' here as an overview over the `mies_*` functions, and how they are usually connected. (Note that only the

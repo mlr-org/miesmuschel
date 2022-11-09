@@ -3,9 +3,9 @@
 \name{OptimizerMies}
 \alias{OptimizerMies}
 \alias{TunerMies}
-\title{Mixed Integer Evolutionary Strategies Optimizer}
+\title{Mixed Integer Evolution Strategies Optimizer}
 \description{
-Perform optimization using evolutionary strategies. \code{OptimizerMies} and \code{TunerMies} implement a standard ES optimization
+Perform optimization using evolution strategies. \code{OptimizerMies} and \code{TunerMies} implement a standard ES optimization
 algorithm, performing initialization first, followed by a loop of performance evaluation, survival selection, parent selection, mutation, and
 recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
 Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in Fieldsend (2014), is supported.
@@ -13,7 +13,7 @@ The modular design and reliance on \code{\link{MiesOperator}} objects to perform
 \code{\link[bbotk:Optimizer]{Optimizer}} highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
 as presented in Li (2013) can easily be implemented.
 
-\code{OptimizerMies} implements a standard evolutionary strategies loop:
+\code{OptimizerMies} implements a standard evolution strategies loop:
 \enumerate{
 \item Prime operators, using \code{mies_prime_operators()}
 \item Initialize and evaluate population, using \code{mies_init_population()}
@@ -64,7 +64,7 @@ optimization started; it is recommended to leave this value at \code{TRUE} which
 \section{Additional Components}{
 
 The search space over which the optimization is performed is fundamentally tied to the \code{\link[bbotk:Objective]{Objective}}, and therefore
-to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolutionary Strategy based
+to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolution Strategy based
 algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 self-adaption as implemented in \code{\link{OperatorCombination}}, where one or several components can be used to adjust operator behaviour.
 These additional components are supplied to the optimizer through the \code{additional_component_sampler} configuration parameter, which takes

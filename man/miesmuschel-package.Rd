@@ -4,11 +4,11 @@
 \name{miesmuschel-package}
 \alias{miesmuschel}
 \alias{miesmuschel-package}
-\title{miesmuschel: Mixed Integer Evolutionary Strategies}
+\title{miesmuschel: Mixed Integer Evolution Strategies}
 \description{
 \code{miesmuschel} offers both an \code{\link[bbotk:Optimizer]{Optimizer}} and a \code{\link[mlr3tuning:Tuner]{Tuner}} for general
 MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
-is more flexible and can be used for research into novel evolutionary strategies.
+is more flexible and can be used for research into novel evolution strategies.
 
 The call-graph of the default algorithm in \code{\link{OptimizerMies}} / \code{\link{TunerMies}} is as follows, and is shown
 here as an overview over the \verb{mies_*} functions, and how they are usually connected. (Note that only the
@@ -46,6 +46,7 @@ Other contributors:
 \itemize{
   \item Lennart Schneider \email{lennart.sch@web.de} (\href{https://orcid.org/0000-0003-4152-5308}{ORCID}) [contributor]
   \item Susanne Dandl \email{dandl.susanne@googlemail.com} (\href{https://orcid.org/0000-0003-4324-4163}{ORCID}) [contributor]
+  \item Andreas Hofheinz \email{andreas.hofheinz@outlook.com} [contributor]
 }
 
 }

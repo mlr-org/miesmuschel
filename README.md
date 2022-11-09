@@ -1,5 +1,5 @@
 
-# miesmuschel: Mixed Integer Evolutionary Strategies
+# miesmuschel: Mixed Integer Evolution Strategies
 
 [![check](https://github.com/mlr-org/miesmuschel/actions/workflows/check.yml/badge.svg)](https://github.com/mlr-org/miesmuschel/actions/workflows/check.yml)
 [![Coverage](https://codecov.io/github/mlr-org/miesmuschel/branch/master/graphs/badge.svg)](https://codecov.io/github/mlr-org/miesmuschel)
