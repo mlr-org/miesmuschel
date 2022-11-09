@@ -248,12 +248,13 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "
   weight_lut = c(weight_lut, weight_lut)
 
   domhv_recurse = function(fitnesses_t, nadir, zenith, dimension) {
-  #  cat(sprintf("\nFrom %s to %s dim %s:\n", str_collapse(nadir), str_collapse(zenith), dimension))
-  #  print(t(fitnesses_t))
+    # cat(sprintf("\nFrom %s to %s dim %s:\n", str_collapse(round(nadir, 4)), str_collapse(round(zenith, 4)), dimension))
+    # print(round(t(fitnesses_t), 4))
 
     above = colSums(fitnesses_t >= zenith)
     if (any(above == dim)) {
       # one point completely dominates the current window --> no volume
+      # cat("completely dominated, returning 0\n")
       return(0)
     }
     cutting = above == dim - 1L
@@ -281,11 +282,15 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "
       if (any(below)) {
         fitnesses_t = fitnesses_t[, !below, drop = FALSE]
       }
-      if (!length(fitnesses_t)) return(prod(zenith - nadir))
+      if (!length(fitnesses_t)) {
+        # cat("nothing left, returning full\n")
+        return(prod(zenith - nadir))
+      }
     }
 
     # one point left: subtract its volume from entire volume
     if (ncol(fitnesses_t) == 1L) {
+      # cat("one point left, returning its volume\n")
       return(prod(zenith - nadir) - prod(pmin(zenith, fitnesses_t) - nadir))  # I don't like what this does to numerics
     }
 
@@ -335,13 +340,15 @@ domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "
     # pre-emptively drop lower part for upper half
     fitnesses_upper = fitnesses_t[, dimpoints > cutat, drop = FALSE]
     if (length(fitnesses_upper)) {
+      # cat("recursing upper\n")
       result_upper = domhv_recurse(fitnesses_upper, cutnadir, zenith, dimension)
     } else {
-      result_upper = 0
+      result_upper = prod(zenith - cutnadir)
     }
+    # cat("recursing lower\n")
     result_upper + domhv_recurse(fitnesses_t, nadir, cutzenith, dimension)
   }
-
+# problem seems to be upper of first lower: doesn't exist for clash.
   prod(zenith - nadir) - domhv_recurse(fitnesses_t, nadir, zenith, 1)
 }
 
