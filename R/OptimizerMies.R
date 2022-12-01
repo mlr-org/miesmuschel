@@ -421,6 +421,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       repeat {
         offspring = mies_generate_offspring(inst, lambda = params$lambda,
           parent_selector = self$parent_selector, mutator = self$mutator, recombinator = self$recombinator, budget_id = budget_id)
+        offspring = Design$new(inst$search_space, data = offspring, remove_dupl = FALSE)$data
         if (!is.null(params$fidelity_offspring)) {
           fidelity_offspring = params$fidelity_offspring(inst = inst, budget_id = budget_id, last_fidelity = fidelity, last_fidelity_offspring = fidelity_offspring)
         }
