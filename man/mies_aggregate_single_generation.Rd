@@ -120,7 +120,7 @@ mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
 
 # This adds two new alive individuals at generation 2.
 # Also the individuals from gen 1 are reevaluated with fidelity 0.8
-mies_evaluate_offspring(oi, offspring = data.table(x2 = c(-0.1, -0.2)),
+mies_evaluate_offspring(oi, offspring = data.frame(x2 = c(-0.1, -0.2)),
   budget_id = "x1", fidelity = 0.9, reevaluate_fidelity = 0.8)
 
 oi$archive$data
