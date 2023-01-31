@@ -922,6 +922,9 @@ check_fitness_aggregator = function(x) {
 #'   and `mies_aggregate_single_generation()` returns `NULL` instead.
 #' @family aggregation methods
 #' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
 #' objective <- ObjectiveRFun$new(
 #'   fun = function(xs) {
 #'     list(y1 = xs$x1, y2 = xs$x2)
@@ -1076,6 +1079,9 @@ mies_aggregate_single_generation = function(archive, fitness_aggregator, generat
 #' @family aggregation functions
 #' @examples
 #' set.seed(1)
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
 #' objective <- ObjectiveRFun$new(
 #'   fun = function(xs) {
 #'     list(y1 = xs$x1, y2 = xs$x2)

@@ -101,22 +101,57 @@
 #' * `min_delta` :: `numeric(1)`\cr
 #'   Minimum positive change of aggregated value to count as improvement.
 #'   This value may also be negative, resulting in termination only when aggregated value *decreases* by at least the given amount.
+#'   However, depending on the survival setup, or on `include_previous_generations`, it is possible that aggregate values never decrease; in this
+#'   case, setting `min_delta` to a negative value may never trigger termination.
 #'   Initialized to 0.
 #' * `patience` :: `integer(1)`\cr
 #'   Number of generations with no improvement better than `min_delta` after which to terminate.
 #'   Initialized to 1.
 #'
 #' @examples
+#' set.seed(1)
 #' library("bbotk")
+#' lgr::threshold("warn")
+#'
 #' # Terminate when hypervolume with nadir `c(0, 0, ...)`
 #' # does not improve for 3 generations by at least 0.1:
-#' trm("genstag",
+#' tg <- trm("genstag",
 #'   fitness_aggregator = function(fitnesses) domhv(fitnesses),
 #'   include_previous_generations = TRUE,
 #'   min_delta = 0.1,
 #'   patience = 3
 #' )
-#' @export
+#'
+#' set.seed(1)
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     list(y1 = xs$x1, y2 = xs$x2)
+#'   },
+#'   domain = ps(x1 = p_dbl(0, 1), x2 = p_dbl(-1, 0)),
+#'   codomain = ps(y1 = p_dbl(0, 1, tags = "maximize"),
+#'     y2 = p_dbl(-1, 0, tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceMultiCrit$new(objective, terminator = tg)
+#'
+#' op <- opt("mies",
+#'   lambda = 4, mu = 4,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("random"),
+#'   survival_selector = sel("best", scl("hypervolume"))
+#' )
+#'
+#' op$optimize(oi)
+#'
+#' # the observed aggregated values:
+#' oi$archive$data_extra$TerminatorGenerationStagnation
+#'
+#' # ... or as calculated by mies_generation_apply
+#' mies_generation_apply(oi$archive, function(fitnesses) {
+#'   domhv(fitnesses)
+#' }, include_previous_generations = TRUE)
+#' #' @export
 TerminatorGenerationStagnation = R6Class("TerminatorGenerationStagnation", inherit = Terminator,
   public = list(
     #' @description
@@ -162,12 +197,12 @@ TerminatorGenerationStagnation = R6Class("TerminatorGenerationStagnation", inher
       if (!as.character(compare_gen) %in% names(archive$data_extra[[extra_entry]])) {
         return(FALSE)
       }
-      compare_gen_value = archive$data_extra[[extra_entry]][[compare_gen]]
+      compare_gen_value = archive$data_extra[[extra_entry]][[as.character(compare_gen)]]
       later_value = archive$data_extra[[extra_entry]][as.character(seq.int(compare_gen + 1, current_gen))]
       later_value_max = max(later_value, na.rm = TRUE)
 
       # stagnation if
-      compare_gen_value >= later_value_max + pv$min_delta
+      compare_gen_value + pv$min_delta >= later_value_max
     }
   )
 )

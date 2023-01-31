@@ -386,3 +386,11 @@ op <- opt("mies",
 )
 
 op$optimize(oi)
+
+# the observed aggregated values:
+oi$archive$data_extra$TerminatorGenerationStagnation
+
+# ... or as calculated by mies_generation_apply
+mies_generation_apply(oi$archive, function(fitnesses) {
+  domhv(fitnesses)
+}, include_previous_generations = TRUE)

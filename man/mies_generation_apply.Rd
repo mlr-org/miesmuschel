@@ -47,6 +47,9 @@ if per-objective aggregates are desired.
 }
 \examples{
 set.seed(1)
+library("bbotk")
+lgr::threshold("warn")
+
 objective <- ObjectiveRFun$new(
   fun = function(xs) {
     list(y1 = xs$x1, y2 = xs$x2)

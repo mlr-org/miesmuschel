@@ -72,6 +72,9 @@ Not all of these arguments need to present, but at least one of \code{fitnesses}
 \code{fitness_aggregator} will never be called for an empty generation.
 }
 \examples{
+library("bbotk")
+lgr::threshold("warn")
+
 objective <- ObjectiveRFun$new(
   fun = function(xs) {
     list(y1 = xs$x1, y2 = xs$x2)
