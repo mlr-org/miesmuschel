@@ -39,6 +39,14 @@ bibentries = c(
     pages = "50--66",
     year = "2006",
     publisher = "IEEE"
+  ),
+  chan2013klee = bibentry("inproceedings",
+    title = "Klee's measure problem made easy",
+    author = "Chan, Timothy M",
+    booktitle = "2013 IEEE 54th annual symposium on foundations of computer science",
+    pages = "410--419",
+    year = "2013",
+    organization = "IEEE"
   )
 )
 

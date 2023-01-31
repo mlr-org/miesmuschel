@@ -1,52 +1,24 @@
-#' @title Terminator That Stops When a Generation-Wise Aggregated Value Stagnates
+#' @title Terminator That Stops When a Generation-Wise Aggregated Value Reaches a Target
 #'
-#' @name mlr_terminators_genstag
+#' @name mlr_terminators_genperfreached
 #'
 #' @description
-#' [`Terminator`][bbotk::Terminator] that terminates when a value, aggregated over generations, stagnates.
+#' [`Terminator`][bbotk::Terminator] that terminates when a value, aggregated over generations, reaches a target value.
 #'
 #' The user-supplied `fitness_aggregator` function is called whenever the archive of evaluated configurations contains a new generation.
 #' The function is supplied with the fitness values, and optionally other data, of all individuals that are alive at that point
 #' (`include_previous_generations = FALSE`) or at any point (`include_previous_generations = TRUE`).
 #' Its result is saved inside the `$data_extra` field of the [`Archive`][bbotk::Archive] object.
-#' Termination is then signaled when the aggregated value has stagnated, or not improved enough, for a given number of generations.
+#' Termination is then signaled when the aggregated value meets or exceeds `level`.
 #'
 #' The [`mies_aggregate_single_generation()`] function is used, see the documentation there for the functioning of `fitness_aggregator`.
 #' The `fitness_aggregator` functions used for termination must return a scalar value or `NULL`, if a generation should be ignored.
 #' The value returned by `fitness_aggregator` should be increasing for better performance, even if the underlying objective is being minimized.
 #'
-#' Termination is triggered in generation `i` when the aggregated value, returned by `fitness_aggregator`, of generation `i - patience`
-#' is not greater than the maximum of all later generations (`i - patience + 1` .. `i`) by at least `min_delta`.
-#'
-#' If the aggregated value for generation `i - patience` is not known, for example because fewer than `patience + 1` generations
-#' have been evaluated so far, because `fitness_aggregator` returned `NULL`, or because previous generations were evaluated
-#' when `TerminatorGenerationStagnation` was not used, then termination is not triggered, regardless of whether values are known
-#' for generations *before* generation `i - patience`.
-#'
 #' @section Multi-Fidelity Optimization:
 #'
-#' Multi-fidelity optimization can introduce a few edge-cases, for one because the individuals inside the generation(s) being aggregated may have
-#' been evaluated with different fidelity values, which can give biased results. Besides that, it may also be problematic that increase of
-#' fidelity could lead to "worse" aggregated results (e.g. because of reduced noise making max-aggregation worse), triggering an undesired termination.
-#'
-#' ## Termination from fidelity changes
-#'
-#' Higher fidelity values can sometimes lead to worse aggregated fitness values, which can trigger undesired termination.
-#' However, in many multi-fidelity-setups, terminating before the last fidelity increase, controlled e.g. by the `fidelity`
-#' configuration parameter of [`OptimizerMies`], may be undesirable to begin with.
-#'
-#' If the fidelity increase follows a fixed schedule based on evaluations or generations, one solution may be to use a
-#' [`TerminatorCombo`][bbotk::TerminatorCombo] together with a [`TerminatorEvals`][bbotk::TerminatorEvals] or [`TerminatorGenerations`]
-#' that prevents premature termination. Termination should happen at least `patience` generations after the last switch to the
-#' highest fidelity if termination from biased values because of fidelity changes should be avoided.
-#'
-#' Otherwise it may be necessary to check whether the `budget` value given to `fitness_aggregator` reached the desired level,
-#' and to prevent comparisons by letting `fitness_aggregator` return `NULL` if not.
-#'
-#' In both cases one may still have a problem with biased aggregations within an aggregated set of individuals if `include_previous_generations`
-#' is `TRUE`.
-#'
-#' ## Biases within aggregated generation(s)
+#' Multi-fidelity optimization can introduce a few edge-cases because the individuals inside the generation(s) being aggregated may have
+#' been evaluated with different fidelity values, which can give biased results.
 #'
 #' When [`OptimizerMies`] is constructed with `multi_fidelity` set to `TRUE`, it typically evaluates some configurations multiple times,
 #' at first with a lower fidelity, followed by an evaluation at "full" fidelity.
@@ -67,7 +39,7 @@
 #'   `include_previous_generations` of `TerminatorGenerationStagnation` is set to `TRUE`.
 #'
 #' (1) and (2) only need consideration in advanced scenarios, but (3) may be a common, e.g. when doing multi-fidelity optimization
-#' and stopping on overall dominated hypervolume stagnation. In this case, it may be necessary to inspect the `budget` value given to `fitness_aggregator`
+#' and stopping on reaching an overall dominated hypervolume target. In this case, it may be necessary to inspect the `budget` value given to `fitness_aggregator`
 #' and to remove all individuals evaluated with a different than the current fidelity.
 #'
 #' When using a custom-written optimization loop, case (1) relates to `fidelity_monotonic` argument of [`mies_step_fidelity()`] and [`mies_init_population()`],
@@ -81,11 +53,11 @@
 #'
 #' ```
 #' # preferred
-#' trm("genstag")
-#' trms("genstag")  # takes vector IDs, returns list of Terminators
+#' trm("genperfreached")
+#' trms("genperfreached")  # takes vector IDs, returns list of Terminators
 #'
 #' # long form
-#' mlr_terminators$get("genstag")
+#' mlr_terminators$get("genperfreached")
 #' ```
 #'
 #' @section Configuration Parameters:
@@ -100,15 +72,8 @@
 #'   the last fidelity-reevaluation will be given to `fitness_aggregator`. However, individuals from different generations may still have been evaluated
 #'   with different fidelity and it may be necessary to inspect the `budget` value given to `fitness_aggregator` if `include_previous_generations` is `TRUE` in a
 #'   multi-fidelity-setting. See the "Multi-Fidelity Optimization" section for more.
-#' * `min_delta` :: `numeric(1)`\cr
-#'   Minimum positive change of aggregated value to count as improvement.
-#'   This value may also be negative, resulting in termination only when aggregated value *decreases* by at least the given amount.
-#'   However, depending on the survival setup, or on `include_previous_generations`, it is possible that aggregate values never decrease; in this
-#'   case, setting `min_delta` to a negative value may never trigger termination.
-#'   Initialized to 0.
-#' * `patience` :: `integer(1)`\cr
-#'   Number of generations with no improvement better than `min_delta` after which to terminate.
-#'   Initialized to 1.
+#' * `level` :: `numeric(1)`\cr
+#'   Minimum aggregated value for which to terminate.
 #'
 #' @examples
 #' set.seed(1)
@@ -117,11 +82,10 @@
 #'
 #' # Terminate when hypervolume with nadir `c(0, 0, ...)`
 #' # does not improve for 3 generations by at least 0.1:
-#' tg <- trm("genstag",
+#' tg <- trm("genperfreached",
 #'   fitness_aggregator = function(fitnesses) domhv(fitnesses),
 #'   include_previous_generations = TRUE,
-#'   min_delta = 0.1,
-#'   patience = 3
+#'   level = 1
 #' )
 #'
 #' set.seed(1)
@@ -147,26 +111,24 @@
 #' op$optimize(oi)
 #'
 #' # the observed aggregated values:
-#' oi$archive$data_extra$TerminatorGenerationStagnation
+#' oi$archive$data_extra$TerminatorGenerationPerfReached
 #'
 #' # ... or as calculated by mies_generation_apply
 #' mies_generation_apply(oi$archive, function(fitnesses) {
 #'   domhv(fitnesses)
 #' }, include_previous_generations = TRUE)
 #' #' @export
-TerminatorGenerationStagnation = R6Class("TerminatorGenerationStagnation", inherit = Terminator,
+TerminatorGenerationPerfReached = R6Class("TerminatorGenerationPerfReached", inherit = Terminator,
   public = list(
     #' @description
-    #' Initialize the `TerminatorGenerationStagnation` object.
+    #' Initialize the `TerminatorGenerationPerfReached` object.
     initialize = function() {
       param_set = ps(
         fitness_aggregator = p_uty(tags = "required", custom_check = check_fitness_aggregator),
         include_previous_generations = p_lgl(tags = "required"),
-        min_delta = p_dbl(tags = "required"),
-        patience = p_int(1, tags = "required")
+        level = p_dbl(tags = "required")
       )
-      param_set$values = list(min_delta = 0, patience = 1)
-      super$initialize(id = "genstag", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "stagnation")
+      super$initialize(id = "genperfreached", param_set = param_set, properties = c("single-crit", "multi-crit"), unit = "stagnation")
     },
 
     #' @description
@@ -179,7 +141,6 @@ TerminatorGenerationStagnation = R6Class("TerminatorGenerationStagnation", inher
       pv = self$param_set$get_values()
       if (!nrow(archive$data)) return(FALSE)
       current_gen = max(archive$data$dob, 0)
-      compare_gen = current_gen - pv$patience
 
       extra_entry = class(self)[[1]]
       if (!extra_entry %in% names(archive$data_extra)) {
@@ -197,18 +158,13 @@ TerminatorGenerationStagnation = R6Class("TerminatorGenerationStagnation", inher
       }
 
       # do not terminate if generation 'i - patience' was not recorded.
-      if (!as.character(compare_gen) %in% names(archive$data_extra[[extra_entry]])) {
+      if (!as.character(current_gen) %in% names(archive$data_extra[[extra_entry]])) {
         return(FALSE)
       }
-      compare_gen_value = archive$data_extra[[extra_entry]][[as.character(compare_gen)]]
-      later_value = archive$data_extra[[extra_entry]][as.character(seq.int(compare_gen + 1, current_gen))]
+      value = archive$data_extra[[extra_entry]][[as.character(current_gen)]]
 
-      if (all(is.na(later_value))) return(FALSE)  # no stagnation if all other values unknown
-
-      later_value_max = max(later_value, na.rm = TRUE)
-
-      # stagnation if
-      compare_gen_value + pv$min_delta >= later_value_max
+      # stagnation if value meets or exceeds level
+      value >= pv$level
     }
   )
 )

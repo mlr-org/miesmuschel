@@ -936,7 +936,7 @@ check_fitness_aggregator = function(x) {
 #'
 #' oi <- OptimInstanceMultiCrit$new(objective, terminator = trm("none"))
 #'
-#' mies_aggregate_single_generation(oi$archive, identity)
+#' try(mies_aggregate_single_generation(oi$archive, identity), silent = TRUE)
 #'
 #' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses)
 #'
@@ -975,7 +975,7 @@ check_fitness_aggregator = function(x) {
 #'
 #' oi$archive$data
 #'
-#' mies_aggregate_single_generation(oi$archive, function(budget) budget)
+#' mies_aggregate_single_generation(oi$archive, function(budget, ...) budget)
 #'
 #' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
 #'   generation = 1)

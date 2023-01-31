@@ -86,7 +86,7 @@ objective <- ObjectiveRFun$new(
 
 oi <- OptimInstanceMultiCrit$new(objective, terminator = trm("none"))
 
-mies_aggregate_single_generation(oi$archive, identity)
+try(mies_aggregate_single_generation(oi$archive, identity), silent = TRUE)
 
 mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses)
 
@@ -125,7 +125,7 @@ mies_evaluate_offspring(oi, offspring = data.table(x2 = c(-0.1, -0.2)),
 
 oi$archive$data
 
-mies_aggregate_single_generation(oi$archive, function(budget) budget)
+mies_aggregate_single_generation(oi$archive, function(budget, ...) budget)
 
 mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
   generation = 1)
