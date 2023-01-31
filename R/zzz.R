@@ -42,6 +42,7 @@ reg_bbotk = function(...) {  # nocov start
 
   mlr_terminators = utils::getFromNamespace("mlr_terminators", ns = "bbotk")
   mlr_terminators$add("gens", TerminatorGenerations)
+  mlr_terminators$add("genstag", TerminatorGenerationStagnation)
   mlr_terminators$add("budget", TerminatorBudget)
 }  # nocov end
 

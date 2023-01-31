@@ -121,7 +121,7 @@
 #'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `FALSE`, the recommended value.
 #' * `fidelity_monotonic` :: `logical(1)`\cr
 #'   Only if the `multi_fidelity` construction argument is `TRUE`:
-#'   Whether to only do fidelity refinement in [`mies_step_fidelity()`] for individuals for which the when budget component value would *increase*.
+#'   Whether to only do fidelity refinement in [`mies_step_fidelity()`] for individuals for which the budget component value would *increase*.
 #'   This is equivalent to the `monotonic` parameter of [`mies_step_fidelity()`], see there for more information.\cr
 #'   When this configuration parameter is present (i.e. `multi_fidelity` is `TRUE`), then it is initialized to `TRUE`. When optimization is performed
 #'   on problems that have a categorical "budget" parameter, then this value should be set to `FALSE`.

@@ -92,6 +92,7 @@ Collate:
     'SelectorSequential.R'
     'SelectorTournament.R'
     'TerminatorBudget.R'
+    'TerminatorGenerationStagnation.R'
     'TerminatorGenerations.R'
     'TunerMies.R'
     'bibentries.R'
