@@ -849,12 +849,309 @@ mies_init_population = function(inst, mu, initializer = generate_design_random, 
 #' @export
 mies_get_fitnesses = function(inst, rows) {
   assert_optim_instance(inst)
+  get_archive_fitnesses(inst$archive, rows)
+}
 
-  multiplier = map_dbl(inst$archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
-  fitnesses = as.matrix(inst$archive$data[rows, inst$archive$codomain$ids()[multiplier != 0], with = FALSE])
+get_archive_fitnesses = function(archive, rows) {
+  multiplier = map_dbl(archive$codomain$tags, function(x) switch(x, minimize = -1, maximize = 1, 0))
+  fitnesses = as.matrix(archive$data[rows, archive$codomain$ids()[multiplier != 0], with = FALSE])
   multiplier = multiplier[multiplier != 0]
   sweep(fitnesses, 2L, multiplier, `*`)
+
 }
+
+check_fitness_aggregator = function(x) {
+  ret = check_function(x)
+  if (!isTRUE(ret)) return(ret)
+  args_to_construct = names(formals(args(x)))
+  desired_args = c("...", "fitnesses", "objectives_unscaled", "xdt")
+  if (!any(desired_args %in% args_to_construct)) {
+    return(sprintf("Must have at least one of these arguments: %s", str_collapse(desired_args)))
+  }
+  TRUE
+}
+
+#' @title Aggregate a Value for a given Generation
+#'
+#' @description
+#' Applies a `fitness_aggregator` function to the values that were alive in the archive at a given generation.
+#' The function is supplied with the fitness values, and optionally other data, of all individuals that are alive at that point.
+#'
+#' @details
+#' The `fitness_aggregator` function may have any of the following arguments, which will be given the following information when
+#' `fitness_aggregator` is called:
+#'
+#' * `fitnesses` :: `matrix`\cr
+#'   Will contain fitnesses for each alive individual. This value has one column when doing single-crit optimization and one column for
+#'   each "criterion" when doing multi-crit optimization.
+#'   Fitnesses are always being maximized, so if an objective is being minimized, the `fitness_aggregator` function is given the objective values * -1.
+#' * `objectives_unscaled` :: `matrix`\cr
+#'   The objective values as given to `fitnesses`, but not multiplied by -1 if they are being minimized. It is recommended that
+#'   the `codomain` argument is queried for `"maximize"` or `"minimize"` tags when `objectives_unscaled` is used.
+#' * `budget` :: `scalar`\cr
+#'   If multi-fidelity evaluation is being performed, then this is the "budget" value of each individual. Otherwise it is a vector containing the value
+#'   1 for each individual.
+#' * `xdt` :: `data.table`\cr
+#'   The configurations that were evaluated for the alive individuals. Rows are in the same order as the values given to `fitnesses`
+#'   or `objectives_unscaled`.
+#' * `search_space` :: [`ParamSet`][paradox::ParamSet]\cr
+#'   The search space of the [`Archive`][bbotk::Archive] under evaluation.
+#' * `codomain` :: [`ParamSet`][paradox::ParamSet]\cr
+#'   The codomain of the [`Archive`][bbotk::Archive] under evaluation.
+#'   This is particularly useful when using `objectives_unscaled` to determine minimization or maximization.
+#'
+#' Not all of these arguments need to present, but at least one of `fitnesses`, `objectives_unscaled`, or `xdt` must be.
+#'
+#' `fitness_aggregator` will never be called for an empty generation.
+#'
+#' @param archive ([`Archive`][bbotk::Archive])\cr
+#'   The archive over which to aggregate.
+#' @param fitness_aggregator (`function`)\cr
+#'   Aggregation function, called with information about alive individuals of each generation. See details.
+#' @param generation (`numeric(1)`)\cr
+#'   Generation for which to aggregate the value.
+#'   If `include_previous_generations` is `FALSE`, then an individual is considered to be alive at generation `i` if its `dob` is smaller or equal to `i`, and
+#'   if its `eol` is either `NA` or greater than `i`. If `include_previous_generations` is `TRUE`, then all individuals with `dob` smaller or equal to `i` are
+#'   considered.
+#'   If this is `NA`, the currently alive (`include_previous_generations` `FALSE`) or all (`include_previous_generations` `TRUE`) individuals are aggregated.
+#'   If multiple individuals considered "alive" with the same `x_id` are found, then only the last individual is used.
+#'   This excludes previous individuals that were re-evaluated with a different fidelity.
+#' @template param_include_previous_generations
+#' @return The value returned by `fitness_aggregator` when applied to individuals alive at generation `generation`. If no
+#'   individuals of the requested generation are present, `fitness_aggregator` is not called
+#'   and `mies_aggregate_single_generation()` returns `NULL` instead.
+#' @family aggregation methods
+#' @examples
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     list(y1 = xs$x1, y2 = xs$x2)
+#'   },
+#'   domain = ps(x1 = p_dbl(0, 1), x2 = p_dbl(-1, 0)),
+#'   codomain = ps(y1 = p_dbl(0, 1, tags = "maximize"),
+#'     y2 = p_dbl(-1, 0, tags = "minimize"))
+#' )
+#'
+#' oi <- OptimInstanceMultiCrit$new(objective, terminator = trm("none"))
+#'
+#' try(mies_aggregate_single_generation(oi$archive, identity), silent = TRUE)
+#'
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses)
+#'
+#'
+#' mies_init_population(oi, 2, budget_id = "x1", fidelity = .5)
+#'
+#' oi$archive$data
+#'
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses)
+#'
+#' # Notice how fitnesses are positive, since x2 is scaled with -1.
+#' # To get the original objective-values, use objectives_unscaled:
+#' mies_aggregate_single_generation(oi$archive,
+#'   function(objectives_unscaled) objectives_unscaled)
+#'
+#' # When `...` is used, all information is passed:
+#' mies_aggregate_single_generation(oi$archive, function(...) names(list(...)))
+#'
+#' # Generation 10 is not present, but individuals with eol `NA` are still
+#' # considered alive:
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
+#'   generation = 10)
+#'
+#' # Re-evaluating points with higher "fidelity" (x1)
+#' mies_step_fidelity(oi, budget_id = "x1", fidelity = 0.7)
+#'
+#' oi$archive$data
+#' # Lower-fidelity values are considered dead now, even for generation 1:
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
+#'   generation = 1)
+#'
+#' # This adds two new alive individuals at generation 2.
+#' # Also the individuals from gen 1 are reevaluated with fidelity 0.8
+#' mies_evaluate_offspring(oi, offspring = data.frame(x2 = c(-0.1, -0.2)),
+#'   budget_id = "x1", fidelity = 0.9, reevaluate_fidelity = 0.8)
+#'
+#' oi$archive$data
+#'
+#' mies_aggregate_single_generation(oi$archive, function(budget, ...) budget)
+#'
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
+#'   generation = 1)
+#'
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
+#'   generation = 2)
+#'
+#' # No individuals were killed, but some were fidelity-reevaluated.
+#' # These are not present with include_previous_generations:
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) fitnesses,
+#'   generation = 2, include_previous_generations = TRUE)
+#'
+#' # Typical use-case: get dominated hypervolume
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) domhv(fitnesses))
+#'
+#' # Get generation-wise mean fitness values
+#' mies_aggregate_single_generation(oi$archive, function(fitnesses) {
+#'   apply(fitnesses, 2, mean)
+#' })
+#' @export
+mies_aggregate_single_generation = function(archive, fitness_aggregator, generation = NA, include_previous_generations = FALSE) {
+  assert(check_fitness_aggregator(fitness_aggregator))
+  assert_number(generation, na.ok = TRUE)
+  assert_flag(include_previous_generations)
+  assert_r6(archive, "Archive")
+  if (!nrow(archive$data)) return(NULL)
+  assert_names(colnames(archive$data), must.include = c("dob", "eol", "x_id"))
+
+  # find rows for which we evaluate
+  if (is.na(generation)) {
+    generation = Inf
+  }
+  rows = archive$data$dob <= generation
+  if (!include_previous_generations) rows = rows & (is.na(archive$data$eol) | archive$data$eol > generation)
+
+  # throw out rows where x_id is duplicated: only the row that was evaluated last stays.
+  rows = which(rows)[!duplicated(archive$data$x_id[rows], fromLast = TRUE, incomparables = NA)]
+
+  if (!length(rows)) {
+    return(NULL)
+  }
+  args_to_construct = c("fitnesses", "objectives_unscaled", "xdt", "search_space", "codomain", "budget")
+  args_present = names(formals(args(fitness_aggregator)))
+  if (!"..." %in% args_present) args_to_construct = intersect(args_to_construct, args_present)
+  args = list()
+  if ("fitnesses" %in% args_to_construct) {
+    args$fitnesses = get_archive_fitnesses(archive, rows)
+  }
+  if ("objectives_unscaled" %in% args_to_construct) {
+    # not every codomain is an objective
+    true_objective = archive$codomain$ids()[archive$codomain$tags %in% c("minimize", "maximize")]
+    args$objectives_unscaled = as.matrix(archive$data[rows, true_objective, with = FALSE])
+  }
+  if ("xdt" %in% args_to_construct) {
+    args$xdt = archive$data[rows, archive$search_space$ids(), with = FALSE]
+  }
+  if ("search_space" %in% args_to_construct) {
+    args$search_space = archive$search_space
+  }
+  if ("codomain" %in% args_to_construct) {
+    args$codomain = archive$codomain
+  }
+  if ("budget" %in% args_to_construct) {
+    bid = args$search_space$ids(tags = "budget")
+    if (length(bid) != 1) {
+      # not valid multi-fidelity optimization, because there is not a single budget component
+      args$budget = rep.int(1, length(rows))
+    } else {
+      args$budget = archive$data[rows, bid, with = FALSE]
+    }
+  }
+  do.call(fitness_aggregator, args)
+}
+
+#' @title Aggregate Values for All Generations Present
+#'
+#' @description
+#' Applies a `fitness_aggregator` function to the values that were alive in the archive at at any generation.
+#' [`mies_aggregate_single_generation()`] is used, see there for more information about `fitness_aggregator`.
+#'
+#' Generations for which `fitness_aggregator` returns `NULL`, or which are not present in any `dob` in the archive,
+#' or which contain no alive individuals (e.g. because `eol` is smaller or equal `dob` for all of them) are ignored.
+#'
+#' `as.list()` is applied to the values returned by `fitness_aggregator`, and [`data.table::rbindlist()`] is called on
+#' the list of resulting values. If the first non-`NULL`-value returned by `fitness_aggregator`, then [`data.table::rbindlist()`]
+#' is called with `fill = TRUE` and `use.names = TRUE`.
+#'
+#' If no non-empty generations are present, or `fitness_aggregator` returns `NULL` on every call, then the return value
+#' is `data.table(dob = numeric(0))`.
+#'
+#' In contrast with [`mies_aggregate_generations()`], `mies_generate_apply()` can construct aggregated values for
+#' entire fitness matrices, not only individual objectives (see examples). However, [`mies_aggregate_generations()`] is simpler
+#' if per-objective aggregates are desired.
+#'
+#' @param archive ([`Archive`][bbotk::Archive])\cr
+#'   The archive over which to aggregate.
+#' @param fitness_aggregator (`function`)\cr
+#'   Aggregation function, called with information about alive individuals of each generation. See [`mies_aggregate_single_generation()`].
+#' @template param_include_previous_generations
+#' @return `data.table` with columns `dob`, next to the columns constructed from the return values of `fitness_aggregator`.
+#' @family aggregation functions
+#' @examples
+#' set.seed(1)
+#' library("bbotk")
+#' lgr::threshold("warn")
+#'
+#' objective <- ObjectiveRFun$new(
+#'   fun = function(xs) {
+#'     list(y1 = xs$x1, y2 = xs$x2)
+#'   },
+#'   domain = ps(x1 = p_dbl(0, 1), x2 = p_dbl(-1, 0)),
+#'   codomain = ps(y1 = p_dbl(0, 1, tags = "maximize"),
+#'     y2 = p_dbl(-1, 0, tags = "minimize"))
+#' )
+#' oi <- OptimInstanceMultiCrit$new(objective,
+#'   terminator = trm("evals", n_evals = 40))
+#'
+#' op <- opt("mies",
+#'   lambda = 4, mu = 4,
+#'   mutator = mut("gauss", sdev = 0.1),
+#'   recombinator = rec("xounif"),
+#'   parent_selector = sel("random"),
+#'   survival_selector = sel("best", scl("hypervolume"))
+#' )
+#'
+#' op$optimize(oi)
+#'
+#' # Aggregated hypervolume of individuals alive in each gen:
+#' mies_generation_apply(oi$archive, function(fitnesses) {
+#'   domhv(fitnesses)
+#' })
+#'
+#' # Aggregated hypervolume of all points evaluated up to each gen
+#' # (may be slightly more, since the domhv of more points is evaluated).
+#' # This would be the dominated hypervolume of the result set at each
+#' # generation:
+#' mies_generation_apply(oi$archive, function(fitnesses) {
+#'   domhv(fitnesses)
+#' }, include_previous_generations = TRUE)
+#'
+#' # The following are simpler with mies_aggregate_single_generations():
+#' mies_generation_apply(oi$archive, function(fitnesses) {
+#'   apply(fitnesses, 2, mean)
+#' })
+#' # Compare:
+#' mies_aggregate_generations(oi, aggregations = list(mean = mean))
+#'
+#' mies_generation_apply(oi$archive, function(objectives_unscaled) {
+#'   apply(objectives_unscaled, 2, mean)
+#' })
+#' # Compare:
+#' mies_aggregate_generations(oi, aggregations = list(mean = mean),
+#'   as_fitnesses = FALSE)
+#' @export
+mies_generation_apply = function(archive, fitness_aggregator, include_previous_generations = FALSE) {
+  assert_r6(archive, "Archive")
+  assert(check_fitness_aggregator(fitness_aggregator))
+
+  empty = data.table(dob = numeric(0))
+  if (!nrow(archive$data)) return(empty)
+
+  assert_names(colnames(archive$data), must.include = c("dob", "eol", "x_id"))
+
+  dobs = unique(archive$data$dob)
+  aggregated = lapply(dobs, mies_aggregate_single_generation, archive = archive, fitness_aggregator = fitness_aggregator, include_previous_generations = include_previous_generations)
+  aggregated = Filter(function(x) !is.null(x), aggregated)
+  aggregated = lapply(aggregated, as.list)
+
+  if (!length(aggregated)) return(empty)
+
+  has_names = test_names(aggregated[[1]])
+
+  result = rbindlist(aggregated, use.names = has_names, fill = has_names)
+  data.table(dob = dobs, result)
+}
+
 
 #' @title Select Individuals from an OptimInstance
 #'
@@ -1239,7 +1536,7 @@ mies_filter_offspring = function(inst, individuals, lambda, filtor = NULL, budge
 #' @template param_condition_on_budget_id
 #' @return a [`data.table`][data.table::data.table] with the column `"dob"`, indicating the generation, as well as further
 #'   columns named by the [`OptimInstance`][bbotk::OptimInstance]'s objectives.
-#'
+#' @family aggregation methods
 #' @examples
 #' library("bbotk")
 #' lgr::threshold("warn")
@@ -1346,6 +1643,8 @@ mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only
 #' The result is a single [`data.table`][data.table::data.table] object with a `dob` column indicating the
 #' generation, as well as one column for each `aggregations` entry crossed with each objective of `inst`.
 #'
+#' See [`mies_generation_apply()`] on how to apply functions to entire fitness-matrices, not only individual objectives.
+#'
 #' @template param_inst
 #' @param objectives (`character`)\cr
 #'   Objectives for which to calculate aggregates. Must be a subset of the codomain elements of `inst`, but when `as_fitnesses` is `TRUE`, elements
@@ -1361,6 +1660,7 @@ mies_get_generation_results = function(inst, as_fitnesses = TRUE, survivors_only
 #'   (or more than one element not being minimized/maximized when `as_fitnesses` is `TRUE`), then columns are named `<aggregations element name>.<objective name>`.
 #'   Otherwise, they are named by `<aggregations element name>` only. To get a guarantee that elements are only named after elements in `aggregations`, set `objectives`
 #'   to a length 1 `character`.
+#' @family aggregation methods
 #' @examples
 #' library("bbotk")
 #' lgr::threshold("warn")

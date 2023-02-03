@@ -192,3 +192,58 @@ sd$operate(data, fitnesses)
 
 
 sa = scl("aggregate")
+q
+
+
+
+
+
+library("bbotk")
+
+lgr::threshold("warn")
+
+op.m <- mut("gauss", sdev = 0.1)
+op.r <- rec("xounif", p = .3)
+op.parent <- sel("random")
+op.survival <- sel("best")
+
+
+# Define the objective to optimize
+objective <- ObjectiveRFun$new(
+  fun = function(xs) {
+    z <- exp(-xs$x^2 - xs$y^2) + 2 * exp(-(2 - xs$x)^2 - (2 - xs$y)^2) + rnorm(1, 0, sqrt(1 / xs$budget))
+    list(Obj = z)
+  },
+  domain = ps(x = p_dbl(-2, 4), y = p_dbl(-2, 4), budget = p_dbl(1, 20, tags = "budget")),
+  codomain = ps(Obj = p_dbl(tags = "maximize"))
+)
+
+# Get a new OptimInstance
+oi <- OptimInstanceSingleCrit$new(objective,
+  terminator = trm("evals", n_evals = 50)
+)
+
+# Create OptimizerMies object
+mies_opt <- opt("mies", mutator = op.m, recombinator = op.r,
+  parent_selector = op.parent, survival_selector = op.survival,
+  multi_fidelity = TRUE,
+  fidelity = function(inst, budget_id, last_fidelity, last_fidelity_offspring) if (max(inst$archive$data$dob) < 3) 10 else 20,
+  fidelity_offspring = function(inst, budget_id, last_fidelity, last_fidelity_offspring) last_fidelity,
+  mu = 10, lambda = 5)
+
+# mies_opt$optimize performs MIES optimization and returns the optimum
+mies_opt$optimize(oi)
+
+
+oi$archive
+
+
+
+
+
+
+
+
+
+
+

@@ -110,10 +110,7 @@ dist_crowding = function(fitnesses) {
 #' of 0.
 #'
 #' @template param_fitnesses
-#' @param nadir (`numeric`)\cr
-#'   Lowest fitness point up to which to calculate dominated hypervolume. May be a scalar, in which case
-#'   it is used for all dimensions, or a vector, in which case its length must match the number of dimensions.
-#'   Default 0.
+#' @template param_nadir
 #' @param epsilon (`numeric`)\cr
 #'   Added to each individual before calculating its particular hypervolume contribution. `epsilon` may
 #'   be a scalar, in which case it is used for all dimensions, or a vector, in which case its length must match
@@ -181,10 +178,7 @@ domhv_contribution = function(fitnesses, nadir = 0, epsilon = 0) {
 #' @param baseline (`matrix` | `NULL`)\cr
 #'   Fitness-matrix with one column per objective, giving a population over which the hypervolume improvement should be calculated.
 #'   If `NULL`, the hypervolume of each individual in `fitnesses` is calculated.
-#' @param nadir (`numeric`)\cr
-#'   Lowest fitness point up to which to calculate dominated hypervolume. May be a scalar, in which case
-#'   it is used for all dimensions, or a vector, in which case its length must match the number of dimensions.
-#'   Default 0.
+#' @template param_nadir
 #' @return `numeric`: The vector of dominated hypervolume contributions for each individual in `fitnesses`.
 #' @examples
 #' (fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
@@ -222,6 +216,28 @@ domhv_improvement = function(fitnesses, baseline = NULL, nadir = 0) {
   })
 }
 
+#' @title Calculate Dominated Hypervolume
+#'
+#' @description
+#' Use Chan's algorithm (`r format_bib("chan2013klee")`) to calculate dominated hypervolume.
+#'
+#' @template param_fitnesses
+#' @template param_nadir
+#' @param prefilter (`logical(1)`)\cr
+#'   Whether to make a first pass that filters out dominated individuals.
+#'   If it can be guaranteed that all individuals are non-dominated, setting this to `FALSE` improves performance a bit.
+#'   Otherwise the recommended value is the default `FALSE`.
+#' @param on_worse_than_nadir (`character(1)`)
+#'   Action when individuals that do not dominate the nadir are found. One of `"quiet"` (ignore), `"warn"` (give warning, default), or `"stop"` (throw error).
+#' @return `numeric(1)`: The dominated hypervolume of individuals in `fitnesses`.
+#' @examples
+#' (fitnesses = matrix(c(1, 5, 2, 3, 0, 3, 1, 0, 10, 8), ncol = 2))
+#'
+#' # to see the fitness matrix, use:
+#' ## plot(fitnesses, pch = as.character(1:5))
+#'
+#' domhv(fitnesses)
+#' @export
 domhv = function(fitnesses, nadir = 0, prefilter = TRUE, on_worse_than_nadir = "warn") {
   assert_matrix(fitnesses, mode = "numeric", any.missing = FALSE, min.cols = 1, min.rows = 1)
   dim = ncol(fitnesses)

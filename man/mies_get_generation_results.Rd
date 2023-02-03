@@ -80,3 +80,9 @@ mies_get_generation_results(oi, as_fitnesses = FALSE)
 # Individuals that died are included:
 mies_get_generation_results(oi, survivors_only = FALSE)
 }
+\seealso{
+Other aggregation methods: 
+\code{\link{mies_aggregate_generations}()},
+\code{\link{mies_aggregate_single_generation}()}
+}
+\concept{aggregation methods}

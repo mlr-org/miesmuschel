@@ -130,7 +130,7 @@ This is equivalent to the \code{current_gen_only} parameter of \code{\link[=mies
 When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{FALSE}, the recommended value.
 \item \code{fidelity_monotonic} :: \code{logical(1)}\cr
 Only if the \code{multi_fidelity} construction argument is \code{TRUE}:
-Whether to only do fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}} for individuals for which the when budget component value would \emph{increase}.
+Whether to only do fidelity refinement in \code{\link[=mies_step_fidelity]{mies_step_fidelity()}} for individuals for which the budget component value would \emph{increase}.
 This is equivalent to the \code{monotonic} parameter of \code{\link[=mies_step_fidelity]{mies_step_fidelity()}}, see there for more information.\cr
 When this configuration parameter is present (i.e. \code{multi_fidelity} is \code{TRUE}), then it is initialized to \code{TRUE}. When optimization is performed
 on problems that have a categorical "budget" parameter, then this value should be set to \code{FALSE}.

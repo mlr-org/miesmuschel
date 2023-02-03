@@ -57,6 +57,8 @@ or at any point during a generation (\code{survivors_only} \code{FALSE}).
 
 The result is a single \code{\link[data.table:data.table]{data.table}} object with a \code{dob} column indicating the
 generation, as well as one column for each \code{aggregations} entry crossed with each objective of \code{inst}.
+
+See \code{\link[=mies_generation_apply]{mies_generation_apply()}} on how to apply functions to entire fitness-matrices, not only individual objectives.
 }
 \examples{
 library("bbotk")
@@ -97,3 +99,9 @@ mies_aggregate_generations(oi, as_fitnesses = FALSE)
 # Individuals that died are included:
 mies_aggregate_generations(oi, survivors_only = FALSE)
 }
+\seealso{
+Other aggregation methods: 
+\code{\link{mies_aggregate_single_generation}()},
+\code{\link{mies_get_generation_results}()}
+}
+\concept{aggregation methods}
