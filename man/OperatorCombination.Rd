@@ -164,22 +164,22 @@ op$operate(data2)
 }
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other mutators: 
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},
 \code{\link{dict_mutators_gauss}},
@@ -196,8 +196,8 @@ Other mutator wrappers:
 \code{\link{dict_mutators_sequential}}
 
 Other recombinators: 
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{dict_recombinators_cmpmaybe}},
 \code{\link{dict_recombinators_convex}},
 \code{\link{dict_recombinators_cvxpair}},

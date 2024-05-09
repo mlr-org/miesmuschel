@@ -65,9 +65,9 @@ mm2$operate(data)
 }
 \seealso{
 Other mutators: 
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},

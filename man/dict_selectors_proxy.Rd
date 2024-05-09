@@ -58,8 +58,8 @@ sp$operate(data, fitnesses, 2)
 }
 \seealso{
 Other selectors: 
-\code{\link{SelectorScalar}},
 \code{\link{Selector}},
+\code{\link{SelectorScalar}},
 \code{\link{dict_selectors_best}},
 \code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_null}},

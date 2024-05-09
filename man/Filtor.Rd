@@ -51,15 +51,15 @@ Typically, the \verb{$initialize()} function should also be overloaded, and opti
 Other base classes: 
 \code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other filtors: 
 \code{\link{FiltorSurrogate}},

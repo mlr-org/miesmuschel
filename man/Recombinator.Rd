@@ -24,17 +24,17 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other recombinators: 
 \code{\link{OperatorCombination}},

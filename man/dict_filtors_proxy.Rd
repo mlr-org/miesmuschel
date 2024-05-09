@@ -58,8 +58,8 @@ fp$operate(new_data, known_data, fitnesses, 1)
 }
 \seealso{
 Other filtors: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{dict_filtors_maybe}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_surprog}},

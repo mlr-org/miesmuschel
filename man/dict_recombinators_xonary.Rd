@@ -69,8 +69,8 @@ rxon$operate(data)  # componentwise different operation
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{dict_recombinators_cmpmaybe}},
 \code{\link{dict_recombinators_convex}},
 \code{\link{dict_recombinators_cvxpair}},

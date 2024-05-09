@@ -86,8 +86,8 @@ fm$operate(new_data, known_data, fitnesses, 3)
 }
 \seealso{
 Other filtors: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}},

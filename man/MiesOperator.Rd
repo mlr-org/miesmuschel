@@ -30,17 +30,17 @@ In most cases, the \code{MiesOperator} class should not be inherited from, direc
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 }
 \concept{base classes}
 \section{Active bindings}{

@@ -20,17 +20,17 @@ Constructors of inheriting  classes should have a \code{keep_complement} argumen
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{Recombinator}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other recombinators: 
 \code{\link{OperatorCombination}},

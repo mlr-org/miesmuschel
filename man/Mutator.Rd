@@ -24,17 +24,17 @@ In many cases, it is advisable to inherit from one of the abstract subclasses, s
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other mutators: 
 \code{\link{MutatorDiscrete}},

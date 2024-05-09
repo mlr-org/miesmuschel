@@ -23,21 +23,21 @@ of integer components by 0.5, applying their operation, and rounding resulting v
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
-\code{\link{MutatorDiscrete}},
 \code{\link{Mutator}},
+\code{\link{MutatorDiscrete}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other mutators: 
-\code{\link{MutatorDiscrete}},
 \code{\link{Mutator}},
+\code{\link{MutatorDiscrete}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},

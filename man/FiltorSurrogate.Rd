@@ -31,15 +31,15 @@ by \code{surrogate_learner$feature_types}: \code{"ParamInt"} requires
 Other base classes: 
 \code{\link{Filtor}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other filtors: 
 \code{\link{Filtor}},
