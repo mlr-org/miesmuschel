@@ -83,7 +83,7 @@ jobs:
         run: | 
           remotes::install_deps(dependencies = TRUE)
       - name: install paradox devel
-        if: ${{ matrix.action == "paradox" }}
+        if: ${{ matrix.action == 'paradox' }}
         shell: Rscript {0}
         run: |
           remotes::install_github("mlr-org/paradox")
