@@ -58,8 +58,7 @@ jobs:
         if: ${{ matrix.r == 'release' && matrix.os == 'ubuntu-24.04' }}
         run: sudo apt-get install libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
       - uses: r-lib/actions/setup-pandoc@v2
-      - uses: r-lib/actions/setup-tinytex@v2
-      - run: tlmgr --version
+      - uses: r-lib/actions/setup-tinytex@v2-branch
       - name: Create Cache Key
         shell: Rscript {0}
         run: |
@@ -103,6 +102,7 @@ jobs:
       - if: runner.os == 'windows'
         name: Install tinytex packages
         run: |
+          tlmgr --version
           tlmgr update --self
           tlmgr install collection-latexrecommended
           tlmgr instal collection-fontsrecommended
