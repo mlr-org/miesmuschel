@@ -107,7 +107,7 @@ jobs:
           tlmgr_version()
           tlmgr_update()
           tlmgr_install('collection-latexrecommended')
-          tlmgr_instal('collection-fontsrecommended')
+          tlmgr_install('collection-fontsrecommended')
           tlmgr(c('list', '--only-installed'))
       - name: Build
         if: ${{ matrix.action != 'coverage' }}
