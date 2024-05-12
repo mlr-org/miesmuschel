@@ -26,21 +26,21 @@ jobs:
       fail-fast: false  # continue runs even when a parallel run failed
       matrix:
         # run on ubuntu, macos, windows. 20.04 is more recent than ubuntu-latest, currently.
-        os: [macos-latest, windows-latest, ubuntu-24.04]
+        os: [macos-latest, windows-latest, ubuntu-latest]
         action: [check]
         r: [release]
         include:
           # additionally run r-devel, but only on ubuntu, and an old R version on an old ubuntu
-          - os: ubuntu-24.04
+          - os: ubuntu-latest
             action: check
             r: devel
           - os: ubuntu-20.04
             action: check
             r: '4.1'
-          - os: ubuntu-24.04
+          - os: ubuntu-latest
             action: coverage
             r: release
-          - os: ubuntu-24.04
+          - os: ubuntu-latest
             action: paradox
             r: release
 
@@ -54,8 +54,8 @@ jobs:
         name: apt-get update
         run: sudo apt-get update
       - name: Install curl for Ubuntu  
-        # necessary for pkgdown & covr, so we do that on ubuntu 24.04 / R release only
-        if: ${{ matrix.r == 'release' && matrix.os == 'ubuntu-24.04' }}
+        # necessary for pkgdown & covr, so we do that on ubuntu-latest / R release only
+        if: ${{ matrix.r == 'release' && matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install libcurl4-openssl-dev libharfbuzz-dev libfribidi-dev
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-tinytex@v2-branch
@@ -99,7 +99,7 @@ jobs:
       - if: runner.os == 'windows'
         name: Remove hypertarget from Latex for Windows
         run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"
-      - if: runner.os == 'windows'
+      - if: runner.os == 'windowsignorethis'
         name: Install tinytex packages
         run: |
           tlmgr --version
