@@ -101,12 +101,14 @@ jobs:
         run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"
       - if: runner.os == 'windowsignorethis'
         name: Install tinytex packages
+        shell: Rscript {0}
         run: |
-          tlmgr --version
-          tlmgr update --self
-          tlmgr install collection-latexrecommended
-          tlmgr instal collection-fontsrecommended
-          tlmgr list --only-installed
+          library(tinytex)
+          tlmgr_version()
+          tlmgr_update()
+          tlmgr_install('collection-latexrecommended')
+          tlmgr_instal('collection-fontsrecommended')
+          tlmgr(c('list', '--only-installed'))
       - name: Build
         if: ${{ matrix.action != 'coverage' }}
         working-directory: ..
