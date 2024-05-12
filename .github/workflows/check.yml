@@ -99,7 +99,7 @@ jobs:
       - if: runner.os == 'windows'
         name: Remove hypertarget from Latex for Windows
         run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"
-      - if: runner.os == 'windowsignorethis'
+      - if: runner.os == 'windows'
         name: Install tinytex packages
         shell: Rscript {0}
         run: |
