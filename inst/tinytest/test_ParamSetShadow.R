@@ -92,7 +92,7 @@ expect_error(ParamSetShadow$new(p, "a"), "Params a have dependencies that reach 
 expect_error(ParamSetShadow$new(p, "b"), "Params a have dependencies that reach across shadow bounds")
 
 # but presence of dependencies does not prevent shadowing along bounds.
-if (miesmuschel:::params_s3) {
+if (miesmuschel:::paradox_s3) {
   # we don't do subset in-place any more, so original paramset still has 'c' parameter
   ps_compare = ps(x = p_dbl(-1, 1, tags = "test2"), y = p_lgl(),
     a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))
@@ -117,7 +117,7 @@ expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$params,
 
 expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$deps, pshadow$deps)
 
-if (miesmuschel:::params_s3) {
+if (miesmuschel:::paradox_s3) {
   pshadow$extra_trafo = function(x, param_set) {
     list(x = x$a + x$b)
   }
