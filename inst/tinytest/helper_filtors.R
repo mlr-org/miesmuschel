@@ -6,8 +6,9 @@ expect_filtor = function(ftr, filtor_name, is_primed = FALSE) {
   expect_r6(ftr, "Filtor", info = filtor_name)
 
   p = ps(ParamLgl. = p_lgl(), ParamDbl. = p_dbl(0, 1), ParamInt. = p_int(0, 1), ParamFct. = p_fct(c("a", "b", "c")))
-  pbig = p$clone(deep = TRUE)
-  lapply(p$params, function(x) { x = x$clone() ; x$id = paste0(x$id, "1") ; pbig$add(x) })
+  pbig = ps(ParamLgl. = p_lgl(), ParamDbl. = p_dbl(0, 1), ParamInt. = p_int(0, 1), ParamFct. = p_fct(c("a", "b", "c")),
+    ParamLgl.1 = p_lgl(), ParamDbl.1 = p_dbl(0, 1), ParamInt.1 = p_int(0, 1), ParamFct.1 = p_fct(c("a", "b", "c")))
+
 
   p_forbidden = p$clone(deep = TRUE)$subset(ids = setdiff(p$ids(), paste0(ftr$param_classes, ".")))
   if (length(p_forbidden$ids())) {
@@ -74,11 +75,18 @@ expect_filtor = function(ftr, filtor_name, is_primed = FALSE) {
   test_alloweds(pvals_allowed[, 1, with = FALSE], p_allowed_one)
   test_alloweds(pvals_allowed[1, 1, with = FALSE], p_allowed_one)
 
-  p_allowed_multicol = ParamSet$new(lapply(letters[1:3], function(x) {
-    par = p_allowed$params[[1]]$clone(deep = TRUE)
-    par$id = x
-    par
-  }))
+  if (paradox_s3) {
+    p_allowed_multicol = ParamSet$new(sapply(letters[1:3], function(x) {
+      p_allowed$get_domain(p_allowed$ids()[[1]])
+    }, simplify = FALSE))
+
+  } else {
+    p_allowed_multicol = ParamSet$new(lapply(letters[1:3], function(x) {
+      par = p_allowed$params[[1]]$clone(deep = TRUE)
+      par$id = x
+      par
+    }))
+  }
   pvals_allowed_multicol = generate_design_random(p_allowed_multicol, datasize)$data
 
   ftr$prime(p_allowed)

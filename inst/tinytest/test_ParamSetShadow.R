@@ -105,8 +105,14 @@ expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$params,
 
 expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$deps, pshadow$deps)
 
-pshadow$extra_trafo = function(x, param_set) {
-  list(x = x$a + x$b)
+if (paradox_s3) {
+  pshadow$extra_trafo = function(x, param_set) {
+    list(x = x$a + x$b)
+  }
+} else {
+  pshadow$trafo = function(x, param_set) {
+    list(x = x$a + x$b)
+  }
 }
 expect_true(pshadow$has_trafo)
 

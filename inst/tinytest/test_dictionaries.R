@@ -160,39 +160,42 @@ for (opinfo in dicts) {
   expand(fromdict)
   expect_equal(fromdict, test_obj, info = dictname)
 
-  # check that hyperparameters can be changed on construction
-  # We do this by automatically generating a hyperparameter value that deviates from the automatically constructed one
-  # We only skip this if there are no non-ParamUty parameters.
-  eligible_params = test_obj$param_set$params[test_obj$param_set$class != "ParamUty"]
-  eligible_params = discard(eligible_params, function(p) {
-    # filter out discrete params with only one level, or numeric params with $lower == $upper
-    # (Note numeric parameters have 0 levels, discrete parameters have lower == upper == NA)
-    length(p$levels) < 2 && isTRUE(all.equal(p$lower, p$upper))
-  })
-
   expect_equal(construct_from_repr(repr(test_obj)), test_obj, info = opinfo$operator)
   expect_equal(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), test_obj, info = opinfo$operator)
 
+  tops = test_obj$param_set
+  # check that hyperparameters can be changed on construction
+  # We do this by automatically generating a hyperparameter value that deviates from the automatically constructed one
+  # We only skip this if there are no non-ParamUty parameters.
+  eligible_params = which(
+    tops$class != "ParamUty" &
+    # filter out discrete params with only one level, or numeric params with $lower == $upper
+    # (Note numeric parameters have 0 levels, discrete parameters have lower == upper == NA)
+    (
+      (!is.na(tops$lower) & tops$lower != tops$upper) |
+      (is.finite(tops$nlevels) & tops$nlevels > 1)
+    )
+  )
   if (length(eligible_params)) {
-    testingparam = eligible_params[[1]]
-    origval = test_obj$param_set$values[[testingparam$id]]
-    if (testingparam$is_number) {
+    testingparam = tops$ids()[[eligible_params[[1]]]]
+    origval = test_obj$param_set$values[[testingparam]]
+    if (tops$is_number[[testingparam]]) {
       # we want to construct an object where the parameter value is different from the construction value
       # For this we take a few candidate values and filter for feasibility and inequality with original value
-      candidates = c(as.list(testingparam$levels), list(testingparam$lower, testingparam$upper,
-        testingparam$lower + 1, 0, testingparam$upper - 1, if (is.atomic(origval) && !is.null(origval)) origval + 1))
-      val = Filter(function(x) testingparam$test(x) && !is.na(x) && is.finite(x) && (!is.atomic(origval) || is.null(origval) || origval != x), candidates)[[1]]
+      candidates = c(as.list(tops$levels[[testingparam]]), list(tops$lower[[testingparam]], tops$upper[[testingparam]],
+        tops$lower[[testingparam]] + 1, 0, tops$upper[[testingparam]] - 1, if (is.atomic(origval) && !is.null(origval)) origval + 1))
+      val = Filter(function(x) !is.na(x) && is.finite(x) && (!is.atomic(origval) || is.null(origval) || origval != x), candidates)[[1]]
     } else {
-      val = setdiff(testingparam$levels, origval)[[1]]
+      val = setdiff(tops$levels[[testingparam]], origval)[[1]]
     }
 
 
-    constargs[[testingparam$id]] = val
+    constargs[[testingparam]] = val
 
     pv_obj = do.call(shortforms[[opinfo$base]], c(list(dictname), constargs))
     expand(pv_obj)
     expect_false(isTRUE(all.equal(test_obj, pv_obj)), info = opinfo$operator)
-    test_obj$param_set$values[[testingparam$id]] = val
+    test_obj$param_set$values[[testingparam]] = val
     expect_true(isTRUE(all.equal(test_obj, pv_obj)))
 
     expect_equal(construct_from_repr(repr(test_obj)), pv_obj, info = opinfo$operator)
