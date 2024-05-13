@@ -23,7 +23,7 @@ functions are executed for each individual before an operator is applied, and th
 \code{OperatorCombination} is the base class from which \code{MutatorCombination} and \code{RecombinatorCombination} inherit. The latter two are to be used for \code{\link{Mutator}} and
 \code{\link{Recombinator}} objects, respectively.
 
-Besides groups created with the \code{groups} construction argument, there are special groups that all unnamed operators fall into based on their \code{\link[paradox:Param]{Param}}
+Besides groups created with the \code{groups} construction argument, there are special groups that all unnamed operators fall into based on their \code{\link[paradox:Domain]{Domain}}
 class: \code{"ParamInt"}, \code{"ParamDbl"}, \code{"ParamFct"}, and \code{"ParamLgl"}. A component of an individual that is not named directly in \code{operators} or made part of a group
 in \code{groups} is automatically in one of these special groups. There is furthermore a special catch-all group \code{"ParamAny"}, which catches all components that are
 are not operated directly, not in a group, and not in another special group that is itself named directly or in a group. I.e., all components that would otherwise
@@ -38,11 +38,11 @@ respectively.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are calculated based on the supported classes of the wrapped operators.
+Supported \code{\link[paradox:Domain]{Domain}} classes are calculated based on the supported classes of the wrapped operators.
 They are frequently just the set union of supported classes, unless inference can be drawn from type-specific groups that an operator is assigned to.
-If e.g. an operator that supports \code{\link[paradox:ParamDbl]{ParamDbl}} and \code{\link[paradox:ParamInt]{ParamInt}} is assigned to group \code{"ParamInt"}, and
-an operator that supports \code{\link[paradox:ParamLgl]{ParamLgl}} is assigned to component \code{"a"}, then the result will support \code{\link[paradox:ParamLgl]{ParamLgl}} and
-\code{\link[paradox:ParamInt]{ParamInt}} only.
+If e.g. an operator that supports \code{\link[paradox:Domain]{p_dbl}} and \code{\link[paradox:Domain]{p_int}} is assigned to group \code{"ParamInt"}, and
+an operator that supports \code{\link[paradox:Domain]{p_lgl}} is assigned to component \code{"a"}, then the result will support \code{\link[paradox:Domain]{p_lgl}} and
+\code{\link[paradox:Domain]{p_int}} only.
 }
 
 \section{Configuration Parameters}{
@@ -237,7 +237,7 @@ List of groups that operators can act on, as set during construction. Read-only.
 List of functions used for self-adaption of operators, as set during construction. Read-only.}
 
 \item{\code{binary_fct_as_logical}}{(\code{logical(1)})\cr
-Whether to treat binary \code{\link[paradox:ParamFct]{ParamFct}} components of \code{\link[paradox:ParamSet]{ParamSet}}s as \code{\link[paradox:ParamLgl]{ParamLgl}} with respect
+Whether to treat binary \code{\link[paradox:Domain]{p_fct}} components of \code{\link[paradox:ParamSet]{ParamSet}}s as \code{\link[paradox:Domain]{p_lgl}} with respect
 to the special groups \code{"ParamLgl"} and \code{"ParamFct"}, as set during construction. Read-only.}
 
 \item{\code{on_type_not_present}}{(\code{character(1)})\cr
@@ -298,7 +298,7 @@ The \verb{$operators} field will reflect this value.}
 
 \item{\code{groups}}{(named \code{list} of \code{character})\cr
 List of groups that operators can act on. Names of this list define new groups. The content of each list element contains the names of
-components or special groups (a \code{\link[paradox:Param]{Param}} subclass name or \code{"ParamAny"}) to subsume under the group.
+components or special groups (a \code{\link[paradox:Domain]{Domain}} subclass name or \code{"ParamAny"}) to subsume under the group.
 Individual components can only be member of either a (non-special) group or named in \code{operators}, so a name
 that occurs in \code{operators} may not be a member of a group as defined in \code{groups}. The default is the empty list.\cr
 The \verb{$groups} field will reflect this value.}
@@ -314,10 +314,10 @@ In both cases, the return value must be a scalar. The default is the empty list.
 The \verb{$adaption} field will reflect this value.}
 
 \item{\code{binary_fct_as_logical}}{(\code{logical(1)})\cr
-Whether to treat binary \code{\link[paradox:ParamFct]{ParamFct}} components of \code{\link[paradox:ParamSet]{ParamSet}}s as \code{\link[paradox:ParamLgl]{ParamLgl}} with respect
+Whether to treat binary \code{\link[paradox:Domain]{p_fct}} components of \code{\link[paradox:ParamSet]{ParamSet}}s as \code{\link[paradox:Domain]{p_lgl}} with respect
 to the special groups \code{"ParamLgl"} and \code{"ParamFct"}. This does \emph{not} perform any conversion, so a \code{\link{MiesOperator}} assigned to the \code{"ParamLgl"} special
-group when \code{binary_fct_as_logical} is \code{TRUE} and there are binary \code{\link[paradox:ParamFct]{ParamFct}}s present will receive
-a factorial value and must also support \code{\link[paradox:ParamFct]{ParamFct}} in this case. This is checked during \verb{$prime()}, but not during construction.
+group when \code{binary_fct_as_logical} is \code{TRUE} and there are binary \code{\link[paradox:Domain]{p_fct}}s present will receive
+a factorial value and must also support \code{\link[paradox:Domain]{p_fct}} in this case. This is checked during \verb{$prime()}, but not during construction.
 Default is \code{FALSE}.\cr
 The \verb{$binary_fct_as_logical} field will reflect this value.}
 

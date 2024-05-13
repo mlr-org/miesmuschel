@@ -23,7 +23,7 @@
 #' @template autoinfo_prepare_mut
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `mutator` and `mutator_not`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of `mutator` and `mutator_not`.
 #'
 #' @template autoinfo_dict
 #'
@@ -71,11 +71,13 @@ MutatorCmpMaybe = R6Class("MutatorCmpMaybe",
       private$.wrapped = assert_r6(mutator, "Mutator")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(mutator_not, "Mutator")$clone(deep = TRUE)
 
-      private$.wrapped$param_set$set_id = "cmpmaybe"
-      private$.wrapped_not$param_set$set_id = "cmpmaybe_not"
+      if (!paradox_s3) {
+        private$.wrapped$param_set$set_id = "cmpmaybe"
+        private$.wrapped_not$param_set$set_id = "cmpmaybe_not"
+      }
       private$.maybe_param_set = ps(p = p_vct(lower = 0, upper = 1, tags = "required"))
       super$initialize(intersect(mutator$param_classes, mutator_not$param_classes),
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        alist(private$.maybe_param_set, cmpmaybe = private$.wrapped$param_set, cmpmaybe_not = private$.wrapped_not$param_set),
         packages = c("stats", mutator$packages, mutator_not$packages), dict_entry = "cmpmaybe",
         own_param_set = quote(private$.maybe_param_set))
     },

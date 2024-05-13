@@ -42,7 +42,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `filtor` and `filtor_not`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of `filtor` and `filtor_not`.
 #'
 #' @template autoinfo_dict
 #'
@@ -91,12 +91,14 @@ FiltorMaybe = R6Class("FiltorMaybe",
       private$.wrapped = assert_r6(filtor, "Filtor")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(filtor_not, "Filtor")$clone(deep = TRUE)
 
-      private$.wrapped$param_set$set_id = "maybe"
-      private$.wrapped_not$param_set$set_id = "maybe_not"
+      if (!paradox_s3) {
+        private$.wrapped$param_set$set_id = "maybe"
+        private$.wrapped_not$param_set$set_id = "maybe_not"
+      }
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"), random_choice = p_lgl(tags = "required"))
       private$.maybe_param_set$values = list(random_choice = FALSE)
       super$initialize(intersect(filtor$param_classes, filtor_not$param_classes),
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        alist(private$.maybe_param_set, maybe = private$.wrapped$param_set, maybe_not = private$.wrapped_not$param_set),
         supported = intersect(filtor$supported, filtor_not$supported),
         packages = c("stats", filtor$packages, filtor_not$packages), dict_entry = "maybe",
         own_param_set = quote(private$.maybe_param_set))

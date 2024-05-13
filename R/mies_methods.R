@@ -478,7 +478,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #' The `mies_prime_operators()` function uses the information that the user usually has readily at hand -- the [`Objective`][bbotk::Objective]`s search space,
 #' the budget parameter, and additional components -- and primes [`Mutator`], [`Recombinator`], and [`Selector`] objects in the right way:
 #' * [`Selector`]s are primed on a union of `search_space` and `additional_components`
-#' * [`Mutator`]s and [`Recombinator`]s are primed on the [`Selector`]'s space with the `budget_id` [`Param`][paradox::Param] removed.
+#' * [`Mutator`]s and [`Recombinator`]s are primed on the [`Selector`]'s space with the `budget_id` [`Domain`][paradox::Domain] removed.
 #'
 #' `mies_prime_operators()` is called with an arbitrary number of [`MiesOperator`] arguments; typically one [`Mutator`], one [`Recombinator`] and
 #' at least two [`Selector`]: one for survival selection, and one parent selection. Supplied [`MiesOperator`]s are primed by-reference, but
@@ -549,8 +549,10 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
     assert_names(additional_components$ids(), disjunct.from = reserved_component_names)
     search_space = search_space$clone(deep = FALSE)
     additional_components = additional_components$clone(deep = FALSE)
-    search_space$set_id = ""
-    additional_components$set_id = ""
+    if (!paradox_s3) {
+      search_space$set_id = ""
+      additional_components$set_id = ""
+    }
     full_search_space = ps_union(list(search_space, additional_components))
   }
 

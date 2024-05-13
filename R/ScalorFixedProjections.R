@@ -7,7 +7,7 @@
 #' @description
 #' [`Scalor`] that returns the maximum of a set of projections.
 #'
-#' Priming PS must contain a `"scalarization_weights"` tagged [`ParamUty`][paradox::ParamUty] that contains
+#' Priming PS must contain a `"scalarization_weights"` tagged [`p_uty`][paradox::Domain] that contains
 #' weight matrices (Nobjectives x Nweights) or vectors (if Nweights is 1).
 #'
 #' @section Configuration Parameters:
@@ -207,7 +207,7 @@ scalarizer_chebyshev = function(rho = 0.05) {
 #' @title Sampler for Projection Weights
 #'
 #' @description
-#' Sampler for a single [`ParamUty`][paradox::ParamUty] that samples weight-matrices
+#' Sampler for a single [`p_uty`][paradox::Domain] that samples weight-matrices
 #' as used by [`ScalorFixedProjection`].
 #'
 #' @param nobjectives (`numeric(1)`)\cr
@@ -215,7 +215,7 @@ scalarizer_chebyshev = function(rho = 0.05) {
 #' @param nweights (`numeric(1)`)\cr
 #'   Number of weight vectors generated for each configuration.
 #' @param weights_component_id (`character(1)`)\cr
-#'   Id of the [`ParamUty`][paradox::ParamUty]. Default is `"scalarization_weights"`.
+#'   Id of the [`p_uty`][paradox::Domain]. Default is `"scalarization_weights"`.
 #'   Can be changed arbitrarily but should match the [`ScalorFixedProjection`]'s `weights_component_id`.
 #' @examples
 #' set.seed(1)

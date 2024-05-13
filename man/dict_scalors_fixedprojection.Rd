@@ -7,7 +7,7 @@
 \description{
 \code{\link{Scalor}} that returns the maximum of a set of projections.
 
-Priming PS must contain a \code{"scalarization_weights"} tagged \code{\link[paradox:ParamUty]{ParamUty}} that contains
+Priming PS must contain a \code{"scalarization_weights"} tagged \code{\link[paradox:Domain]{p_uty}} that contains
 weight matrices (Nobjectives x Nweights) or vectors (if Nweights is 1).
 }
 \section{Configuration Parameters}{
@@ -25,7 +25,7 @@ While custom functions can be used, it is recommended to use a \code{\link{Scala
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
+Supported \code{\link[paradox:Domain]{Domain}} classes are: \code{\link[paradox:Domain]{p_lgl}} ('ParamLgl'), \code{\link[paradox:Domain]{p_int}} ('ParamInt'), \code{\link[paradox:Domain]{p_dbl}} ('ParamDbl'), \code{\link[paradox:Domain]{p_fct}} ('ParamFct')
 }
 
 \section{Dictionary}{

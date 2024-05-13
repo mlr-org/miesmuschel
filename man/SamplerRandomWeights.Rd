@@ -4,7 +4,7 @@
 \alias{SamplerRandomWeights}
 \title{Sampler for Projection Weights}
 \description{
-Sampler for a single \code{\link[paradox:ParamUty]{ParamUty}} that samples weight-matrices
+Sampler for a single \code{\link[paradox:Domain]{p_uty}} that samples weight-matrices
 as used by \code{\link{ScalorFixedProjection}}.
 }
 \examples{
@@ -66,7 +66,7 @@ Number of objectives for which weights are generated.}
 Number of weight vectors generated for each configuration.}
 
 \item{\code{weights_component_id}}{(\code{character(1)})\cr
-Id of the \code{\link[paradox:ParamUty]{ParamUty}}. Default is \code{"scalarization_weights"}.
+Id of the \code{\link[paradox:Domain]{p_uty}}. Default is \code{"scalarization_weights"}.
 Can be changed arbitrarily but should match the \code{\link{ScalorFixedProjection}}'s \code{weights_component_id}.}
 }
 \if{html}{\out{</div>}}

@@ -27,7 +27,7 @@ order in which they appear in the priming \code{\link[paradox:ParamSet]{ParamSet
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}
+Supported \code{\link[paradox:Domain]{Domain}} classes are: \code{\link[paradox:Domain]{p_int}} ('ParamInt'), \code{\link[paradox:Domain]{p_dbl}} ('ParamDbl')
 }
 
 \section{Dictionary}{

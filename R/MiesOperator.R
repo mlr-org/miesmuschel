@@ -89,8 +89,8 @@ MiesOperator = R6Class("MiesOperator",
       ownps = eval(private$.own_param_set_symbol)
       pnames = ownps$ids()
       pnamesrep = pnames
-      if (ownps$set_id != "" && !identical(ownps, self$param_set)) {
-        pnamesrep = sprintf("%s.%s", ownps$set_id, pnames)
+      if (private$.own_param_set_id != "") {
+        pnamesrep = sprintf("%s.%s", private$.own_param_set_id, pnames)
       }
       names(pnamesrep) = pnames
 
@@ -170,7 +170,7 @@ MiesOperator = R6Class("MiesOperator",
     #' the `MiesOperator` was last primed can be read from `$primed_ps`.
     #' @param param_set ([`ParamSet`][paradox::ParamSet])\cr
     #'   The [`ParamSet`][paradox::ParamSet] to which all `values` tables passed to `$operate()` will need to conform to.
-    #'   May only contiain [`Param`][paradox::ParamSet] objects that conform to the classes listed in `$param_classes`.
+    #'   May only contiain [`Domain`][paradox::Domain] objects that conform to the classes listed in `$param_classes`.
     #' @return [invisible] `self`.
     prime = function(param_set) {
       assert_subset(param_set$class, self$param_classes)
@@ -181,7 +181,7 @@ MiesOperator = R6Class("MiesOperator",
     #' Operate on the given individuals. This calls private `$.operate()`, which must be overloaded by an inheriting class,
     #' passing through all function arguments after performing some checks.
     #' @param values (`data.frame`)\cr
-    #'   Individuals to operate on. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+    #'   Individuals to operate on. Must pass the check of the [`ParamSet`][paradox::ParamSet] given in the last `$prime()` call
     #'   and may not have any missing components.
     #' @param ... (any)\cr
     #'   Depending on the concrete class, passed on to `$.operate()`.
@@ -233,7 +233,7 @@ MiesOperator = R6Class("MiesOperator",
         }
 
 
-        if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
+        if (!paradox_s3 && !is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
       }
       if (!missing(val) && !identical(val, private$.param_set)) {
         stop("param_set is read-only.")
@@ -299,7 +299,7 @@ MiesOperator = R6Class("MiesOperator",
     deep_clone = function(name, value) {
       if (!is.null(private$.param_set_source)) {
         if (!is.null(private$.param_set)) {
-          private$.param_set_id = private$.param_set$set_id
+          if (!paradox_s3) private$.param_set_id = private$.param_set$set_id
           private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
         }
         if (name == ".param_set_source") {
@@ -314,7 +314,7 @@ MiesOperator = R6Class("MiesOperator",
       value
     },
     .param_set = NULL,
-    .param_set_id = NULL,
+    .param_set_id = NULL,  # obsolete with s3 paradox
     .primed_ps = NULL,
     .param_classes = NULL,
     .param_set_source = NULL,
@@ -323,6 +323,7 @@ MiesOperator = R6Class("MiesOperator",
     .dict_entry = NULL,
     .dict_shortaccess = NULL,
     .own_param_set_symbol = NULL,
+    .own_param_set_id = "",
     .own_defaults = NULL,
     .endomorphism = NULL
   )

@@ -4,10 +4,10 @@
 \alias{ParamSetShadow}
 \title{ParamSetShadow}
 \description{
-Wraps another \code{\link[paradox:ParamSet]{ParamSet}} and shadows out a subset of its \code{\link[paradox:Param]{Param}}s.
+Wraps another \code{\link[paradox:ParamSet]{ParamSet}} and shadows out a subset of its \code{\link[paradox:Domain]{Domain}}s.
 The original \code{\link[paradox:ParamSet]{ParamSet}} can still be accessed through the \verb{$origin} field;
 otherwise, the \code{ParamSetShadow} behaves like a \code{\link[paradox:ParamSet]{ParamSet}} where the shadowed
-\code{\link[paradox:Param]{Param}}s are not present.
+\code{\link[paradox:Domain]{Domain}}s are not present.
 }
 \examples{
 p1 = ps(x = p_dbl(0, 1), y = p_lgl())
@@ -28,14 +28,14 @@ print(p2$origin$values)
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{params}}{(named \code{list} of \code{\link[paradox:Param]{Param}})
-List of \code{\link[paradox:Param]{Param}} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the
-shadowed \code{\link[paradox:Param]{Param}}s removed.}
+\item{\code{params}}{(named \code{list()})\cr
+Table of rows identifying the contained \code{\link{Domain}}s}
 
-\item{\code{params_unid}}{(named \code{list} of \code{\link[paradox:Param]{Param}})
-List of \code{\link[paradox:Param]{Param}} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the
-shadowed \code{\link[paradox:Param]{Param}}s removed. This is a field mostly for internal usage that has the
-\verb{$id}s set to invalid values but avoids cloning overhead.}
+\item{\code{params_unid}}{(named \code{list} of \code{Param})
+List of \code{Param} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the
+shadowed \code{Param}s removed. This is a field mostly for internal usage that has the
+\verb{$id}s set to invalid values but avoids cloning overhead.\cr
+Deprecated by the upcoming \code{paradox} package update and will be removed in the future.}
 
 \item{\code{deps}}{(\code{\link[data.table:data.table]{data.table}})\cr
 Table of dependencies, as in \code{\link[paradox:ParamSet]{ParamSet}}. The dependencies that are related to shadowed
@@ -57,8 +57,7 @@ Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value 
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ParamSetShadow-new}{\code{ParamSetShadow$new()}}
-\item \href{#method-ParamSetShadow-add}{\code{ParamSetShadow$add()}}
-\item \href{#method-ParamSetShadow-subset}{\code{ParamSetShadow$subset()}}
+\item \href{#method-ParamSetShadow-test_constraint}{\code{ParamSetShadow$test_constraint()}}
 \item \href{#method-ParamSetShadow-add_dep}{\code{ParamSetShadow$add_dep()}}
 \item \href{#method-ParamSetShadow-clone}{\code{ParamSetShadow$clone()}}
 }
@@ -69,15 +68,23 @@ Id of the wrapped \code{\link[paradox:ParamSet]{ParamSet}}. Changing this value 
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert"><a href='../../paradox/html/ParamSet.html#method-ParamSet-assert'><code>paradox::ParamSet$assert()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="assert_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-assert_dt'><code>paradox::ParamSet$assert_dt()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check"><a href='../../paradox/html/ParamSet.html#method-ParamSet-check'><code>paradox::ParamSet$check()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check_dependencies"><a href='../../paradox/html/ParamSet.html#method-ParamSet-check_dependencies'><code>paradox::ParamSet$check_dependencies()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="check_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-check_dt'><code>paradox::ParamSet$check_dt()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="flatten"><a href='../../paradox/html/ParamSet.html#method-ParamSet-flatten'><code>paradox::ParamSet$flatten()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="format"><a href='../../paradox/html/ParamSet.html#method-ParamSet-format'><code>paradox::ParamSet$format()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="get_domain"><a href='../../paradox/html/ParamSet.html#method-ParamSet-get_domain'><code>paradox::ParamSet$get_domain()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="get_values"><a href='../../paradox/html/ParamSet.html#method-ParamSet-get_values'><code>paradox::ParamSet$get_values()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="ids"><a href='../../paradox/html/ParamSet.html#method-ParamSet-ids'><code>paradox::ParamSet$ids()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="print"><a href='../../paradox/html/ParamSet.html#method-ParamSet-print'><code>paradox::ParamSet$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="qunif"><a href='../../paradox/html/ParamSet.html#method-ParamSet-qunif'><code>paradox::ParamSet$qunif()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="search_space"><a href='../../paradox/html/ParamSet.html#method-ParamSet-search_space'><code>paradox::ParamSet$search_space()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="set_values"><a href='../../paradox/html/ParamSet.html#method-ParamSet-set_values'><code>paradox::ParamSet$set_values()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="subset"><a href='../../paradox/html/ParamSet.html#method-ParamSet-subset'><code>paradox::ParamSet$subset()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="subspaces"><a href='../../paradox/html/ParamSet.html#method-ParamSet-subspaces'><code>paradox::ParamSet$subspaces()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test"><a href='../../paradox/html/ParamSet.html#method-ParamSet-test'><code>paradox::ParamSet$test()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test_constraint_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-test_constraint_dt'><code>paradox::ParamSet$test_constraint_dt()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="test_dt"><a href='../../paradox/html/ParamSet.html#method-ParamSet-test_dt'><code>paradox::ParamSet$test_dt()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="paradox" data-topic="ParamSet" data-id="trafo"><a href='../../paradox/html/ParamSet.html#method-ParamSet-trafo'><code>paradox::ParamSet$trafo()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -97,56 +104,32 @@ Initialize the \code{ParamSetShadow} object.
 \code{\link[paradox:ParamSet]{ParamSet}} to wrap.}
 
 \item{\code{shadowed}}{(\code{character})\cr
-Ids of \code{\link[paradox:Param]{Param}}s to shadow from \code{sets}, must be a subset of \code{set$ids()}.}
+Ids of \code{\link[paradox:Domain]{Domain}}s to shadow from \code{sets}, must be a subset of \code{set$ids()}.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ParamSetShadow-add"></a>}}
-\if{latex}{\out{\hypertarget{method-ParamSetShadow-add}{}}}
-\subsection{Method \code{add()}}{
-Adds a single param or another set to this set, all params are cloned.
-
-This calls the underlying \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$add()} function.
-
-\code{\link[paradox:Param]{Param}} with ids that also occur in the underlying  \code{\link[paradox:ParamSet]{ParamSet}}
-but are shadowed can \emph{not} be added and instead will result in an error.
+\if{html}{\out{<a id="method-ParamSetShadow-test_constraint"></a>}}
+\if{latex}{\out{\hypertarget{method-ParamSetShadow-test_constraint}{}}}
+\subsection{Method \code{test_constraint()}}{
+Checks underlying \code{\link[paradox:ParamSet]{ParamSet}}'s constraint.
+It uses the underlying \verb{$values} for shadowed values.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$add(p)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$test_constraint(x, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{p}}{(\code{\link[paradox:Param]{Param}} | \code{\link[paradox:ParamSet]{ParamSet}})}
+\item{\code{x}}{(named \code{list}) values to test}
+
+\item{\code{...}}{Further arguments passed to \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$test_constraint()} function.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{invisible(self)}.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ParamSetShadow-subset"></a>}}
-\if{latex}{\out{\hypertarget{method-ParamSetShadow-subset}{}}}
-\subsection{Method \code{subset()}}{
-Reduces the parameters to the ones of passed ids.
-
-This calls the underlying \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$subset()} function.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$subset(ids)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{ids}}{(\code{character})}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-\code{invisible(self)}.
+\code{logical(1)}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -155,7 +138,7 @@ This calls the underlying \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$subs
 \subsection{Method \code{add_dep()}}{
 Adds a dependency to the unterlying \code{\link[paradox:ParamSet]{ParamSet}}.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$add_dep(id, on, cond)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ParamSetShadow$add_dep(id, on, cond, allow_dangling_dependencies = FALSE, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -166,6 +149,10 @@ Adds a dependency to the unterlying \code{\link[paradox:ParamSet]{ParamSet}}.
 \item{\code{on}}{(\code{character(1)})}
 
 \item{\code{cond}}{(\code{\link[paradox:Condition]{Condition}})}
+
+\item{\code{allow_dangling_dependencies}}{(\code{logical(1)}): Whether to allow dependencies on parameters that are not present.}
+
+\item{\code{...}}{Further arguments passed to \code{\link[paradox:ParamSet]{ParamSet}}'s \verb{$add_dep()} function.}
 }
 \if{html}{\out{</div>}}
 }

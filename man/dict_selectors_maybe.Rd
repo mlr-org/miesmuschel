@@ -88,7 +88,7 @@ generates an error. Initialized to \code{TRUE}.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of \code{selector} and \code{selector_not}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of \code{selector} and \code{selector_not}.
 }
 
 \section{Dictionary}{

@@ -27,7 +27,7 @@ Initialized to 0.5.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamDbl]{ParamDbl}}
+Supported \code{\link[paradox:Domain]{Domain}} classes are: \code{\link[paradox:Domain]{p_dbl}} ('ParamDbl')
 }
 
 \section{Dictionary}{

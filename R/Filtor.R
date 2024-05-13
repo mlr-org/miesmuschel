@@ -17,10 +17,10 @@
 #'
 #' Unlike most other operator types inheriting from [`MiesOperator`], the `$operate()` function has four arguments, which are passed on to `$.filter()`
 #' * `values` :: `data.frame`\cr
-#'   Individuals to filter. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   Individuals to filter. Must pass the check of the [`ParamSet`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components.
 #' * `known_values` :: `data.frame`\cr
-#'   Individuals to use for filtering. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   Individuals to use for filtering. Must pass the check of the [`ParamSet`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components. Note that `known_values` may be empty.
 #' * `fitnesses` :: `numeric` | `matrix`\cr
 #'   Fitnesses for each individual given in `known_values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If

@@ -49,7 +49,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of the [`Selector`]s given in `selectors`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of the [`Selector`]s given in `selectors`.
 #'
 #' @template autoinfo_dict
 #'
@@ -67,7 +67,9 @@ SelectorSequential = R6Class("SelectorSequential",
     initialize = function(selectors) {
       private$.wrapped = imap(unname(assert_list(selectors, types = "Selector", min.len = 1)), function(x, i) {
         x = x$clone(deep = TRUE)
-        x$param_set$set_id = sprintf("selector_%s", i)
+        if (!paradox_s3) {
+          x$param_set$set_id = sprintf("selector_%s", i)
+        }
         x
       })
 
@@ -82,6 +84,7 @@ SelectorSequential = R6Class("SelectorSequential",
       ps_alist = c(alist(private$.own_param_set),
         lapply(seq_along(selectors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
       )
+      names(ps_alist) = sprintf("selector_%s", seq_along(ps_alist))
 
       private$.own_param_set$values = list()
       super$initialize(param_classes = Reduce(intersect, map(private$.wrapped, "param_classes")), param_set = ps_alist,

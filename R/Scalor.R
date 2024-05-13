@@ -15,7 +15,7 @@
 #'
 #' Unlike most other operator types inheriting from [`MiesOperator`], the `$operate()` function has two arguments, which are passed on to `$.scale()`
 #' * `values` :: `data.frame`\cr
-#'   Individuals to operate on. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   Individuals to operate on. Must pass the check of the [`ParamSet`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components.
 #' * `fitnesses` :: `numeric` | `matrix`\cr
 #'   Fitnesses for each individual given in `values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If

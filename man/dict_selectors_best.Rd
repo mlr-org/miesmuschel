@@ -25,7 +25,7 @@ batch of \code{n_indivs_in} returned individuals first, then the second batch et
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamInt]{ParamInt}}, \code{\link[paradox:ParamDbl]{ParamDbl}}, \code{\link[paradox:ParamFct]{ParamFct}}
+Supported \code{\link[paradox:Domain]{Domain}} classes are: \code{\link[paradox:Domain]{p_lgl}} ('ParamLgl'), \code{\link[paradox:Domain]{p_int}} ('ParamInt'), \code{\link[paradox:Domain]{p_dbl}} ('ParamDbl'), \code{\link[paradox:Domain]{p_fct}} ('ParamFct')
 }
 
 \section{Dictionary}{

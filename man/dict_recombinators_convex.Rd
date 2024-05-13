@@ -28,7 +28,7 @@ Initialized to \code{rep(1, n_indivs_in)}, i.e. equal weights to all individuals
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamDbl]{ParamDbl}}
+Supported \code{\link[paradox:Domain]{Domain}} classes are: \code{\link[paradox:Domain]{p_dbl}} ('ParamDbl')
 }
 
 \section{Dictionary}{

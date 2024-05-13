@@ -1,15 +1,15 @@
 #' @title ParamSetShadow
 #'
 #' @description
-#' Wraps another [`ParamSet`][paradox::ParamSet] and shadows out a subset of its [`Param`][paradox::Param]s.
+#' Wraps another [`ParamSet`][paradox::ParamSet] and shadows out a subset of its [`Domain`][paradox::Domain]s.
 #' The original [`ParamSet`][paradox::ParamSet] can still be accessed through the `$origin` field;
 #' otherwise, the `ParamSetShadow` behaves like a [`ParamSet`][paradox::ParamSet] where the shadowed
-#' [`Param`][paradox::Param]s are not present.
+#' [`Domain`][paradox::Domain]s are not present.
 #'
 #' @param set ([`ParamSet`][paradox::ParamSet])\cr
 #'   [`ParamSet`][paradox::ParamSet] to wrap.
 #' @param shadowed (`character`)\cr
-#'   Ids of [`Param`][paradox::Param]s to shadow from `sets`, must be a subset of `set$ids()`.
+#'   Ids of [`Domain`][paradox::Domain]s to shadow from `sets`, must be a subset of `set$ids()`.
 #' @examples
 #' p1 = ps(x = p_dbl(0, 1), y = p_lgl())
 #' p1$values = list(x = 0.5, y = TRUE)
@@ -35,32 +35,30 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       if (length(baddeps)) {
         stopf("Params %s have dependencies that reach across shadow bounds", str_collapse(baddeps))
       }
+      if (paradox_s3) {
+        paramtbl = set$params[!shadowed, on = "id"]
+        private$.tags = paramtbl[, .(tag = unlist(.tags)), keyby = "id"]
+        private$.trafos = setkeyv(paramtbl[!map_lgl(.trafo, is.null), .(id, trafo = .trafo)], "id")
+        set(paramtbl, , setdiff(colnames(paramtbl), colnames(set$.__enclos_env__$private$.params)), NULL)
+        setindexv(paramtbl, c("id", "cls", "grouping"))
+        private$.params = paramtbl
+        private$.extra_trafo = set$extra_trafo
+      }
     },
+
     #' @description
-    #' Adds a single param or another set to this set, all params are cloned.
+    #' Checks underlying [`ParamSet`][paradox::ParamSet]'s constraint.
+    #' It uses the underlying `$values` for shadowed values.
     #'
-    #' This calls the underlying [`ParamSet`][paradox::ParamSet]'s `$add()` function.
-    #'
-    #' [`Param`][paradox::Param] with ids that also occur in the underlying  [`ParamSet`][paradox::ParamSet]
-    #' but are shadowed can *not* be added and instead will result in an error.
-    #'
-    #' @param p ([`Param`][paradox::Param] | [`ParamSet`][paradox::ParamSet])
-    #' @return `invisible(self)`.
-    add = function(p) {
-      private$.set$add(p)
-      invisible(self)
-    },
-    #' @description
-    #' Reduces the parameters to the ones of passed ids.
-    #'
-    #' This calls the underlying [`ParamSet`][paradox::ParamSet]'s `$subset()` function.
-    #'
-    #' @param ids (`character`)
-    #' @return `invisible(self)`.
-    subset = function(ids) {
-      assert_subset(ids, names(self$params_unid))
-      private$.set$subset(c(ids, private$.shadowed))
-      invisible(self)
+    #' @param x (named `list`) values to test
+    #' @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$test_constraint()` function.
+    #' @return `logical(1)`.
+    test_constraint = function(x, ...) {
+      assert_list(x, names = "unique")
+      if (length(x)) assert_names(names(x), disjunct.from = private$.shadowed)
+      values_underlying = private$.set$values
+      values_underlying = values_underlying[intersect(names(values_underlying), private$.shadowed)]
+      private$.set$test_constraint(c(x, values_underlying), ...)
     },
     #' @description
     #' Adds a dependency to the unterlying [`ParamSet`][paradox::ParamSet].
@@ -68,35 +66,59 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' @param id (`character(1)`)
     #' @param on (`character(1)`)
     #' @param cond ([`Condition`][paradox::Condition])
+    #' @param allow_dangling_dependencies (`logical(1)`): Whether to allow dependencies on parameters that are not present.
+    #' @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$add_dep()` function.
     #' @return `invisible(self)`.
-    add_dep = function(id, on, cond) {
-      ids = names(self$params_unid)
+    add_dep = function(id, on, cond,  allow_dangling_dependencies = FALSE, ...) {
+      ids = self$ids()
       assert_choice(id, ids)
-      assert_choice(on, ids)
-      private$.set$add_dep(id, on, cond)
+      if (!allow_dangling_dependencies) assert_choice(on, ids) else assert_string(on)
+      private$.set$add_dep(id = id, on = on, cond = cond, allow_dangling_dependencies = allow_dangling_dependencies, ...)
       invisible(self)
     }
   ),
   active = list(
-    #' @field params (named `list` of [`Param`][paradox::Param])
-    #' List of [`Param`][paradox::Param] that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
-    #' shadowed [`Param`][paradox::Param]s removed.
+    constraint = function(f) {
+      if (!missing(f)) {
+        stop("ParamSetShadow does not allow setting constraint.")
+      } else {
+        constraint = private$.set$constraint
+        if (is.null(constraint)) return(NULL)
+        # we give constraint() the underlying ParamSet and construct 'values_underlying' on the fly
+        # this is so that changing values gets the correct result even when the underlying PS's values change.
+        set = private$.set
+        shadowed = private$.shadowed
+        crate(function(x) {
+          assert_list(x, names = "unique")
+          values_underlying = set$values
+          values_underlying = values_underlying[intersect(names(values_underlying), shadowed)]
+          x[names(values_underlying)] = values_underlying
+          constraint(x)
+        }, constraint, set, shadowed)
+      }
+    },
+    #' @field params (named `list()`)\cr
+    #' Table of rows identifying the contained [`Domain`]s
     params = function(rhs) {
       if (!missing(rhs)) {
         stop("params is read-only.")
       }
+      if (paradox_s3) return(super$params)  # TODO this function can go altogether with new paradox
       params = private$.set$params
       params[private$.shadowed] = NULL
       params
     },
-    #' @field params_unid (named `list` of [`Param`][paradox::Param])
-    #' List of [`Param`][paradox::Param] that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
-    #' shadowed [`Param`][paradox::Param]s removed. This is a field mostly for internal usage that has the
-    #' `$id`s set to invalid values but avoids cloning overhead.
+
+    #' @field params_unid (named `list` of `Param`)
+    #' List of `Param` that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
+    #' shadowed `Param`s removed. This is a field mostly for internal usage that has the
+    #' `$id`s set to invalid values but avoids cloning overhead.\cr
+    #' Deprecated by the upcoming `paradox` package update and will be removed in the future.
     params_unid = function(rhs) {
       if (!missing(rhs)) {
         stop("params_unid is read-only.")
       }
+      if (paradox_s3) return(super$params())  # TODO this function can go altogether with new paradox
       params = private$.set$params_unid
       params[private$.shadowed] = NULL
       params
@@ -130,6 +152,11 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' @field set_id ([`data.table`][data.table::data.table])\cr
     #' Id of the wrapped [`ParamSet`][paradox::ParamSet]. Changing this value will also change the wrapped [`ParamSet`][paradox::ParamSet]'s `$set_id` accordingly.
     set_id = function(v) {
+      if (paradox_s3) {
+        if (!missing(v)) stop("setting $set_id no longer supported!")
+        warning("$set_id is deprecated!")
+        return(NULL)
+      }
       if (!missing(v)) {
         private$.set$set_id = v
       }
@@ -146,7 +173,8 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
   ),
   private = list(
     .set = NULL,
-    .shadowed = NULL
+    .shadowed = NULL,
+    .extra_trafo = NULL
   )
 )
 

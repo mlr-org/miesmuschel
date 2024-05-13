@@ -73,7 +73,9 @@ ScalorAggregate = R6Class("ScalorAggregate",
     initialize = function(scalors) {
       private$.wrapped = imap(unname(assert_list(scalors, types = "Scalor", min.len = 1)), function(x, i) {
         x$clone(deep = TRUE)
-        x$param_set$set_id = sprintf("scalor_%s", i)
+        if (!paradox_s3) {
+          x$param_set$set_id = sprintf("scalor_%s", i)
+        }
         x
       })
 
@@ -88,6 +90,7 @@ ScalorAggregate = R6Class("ScalorAggregate",
       ps_alist = c(alist(private$.own_param_set),
         lapply(seq_along(scalors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
       )
+      names(ps_alist) = sprintf("scalor_%s", seq_along(ps_alist))
 
       super$initialize(Reduce(intersect, map(private$.wrapped, "param_classes")), ps_alist,
         supported = Reduce(intersect, map(private$.wrapped, "supported")),

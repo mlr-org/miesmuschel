@@ -18,7 +18,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes depend on the supported feature types of the `surrogate_learner`, as reported
+#' Supported [`Domain`][paradox::Domain] classes depend on the supported feature types of the `surrogate_learner`, as reported
 #' by `surrogate_learner$feature_types`: `"ParamInt"` requires
 #' `"integer"`, `"ParamDbl"` requires `"numeric"`, `"ParamLgl"` requires `"logical"`, and `"ParamFct"` requires `"factor"`.
 #'
@@ -49,16 +49,19 @@ FiltorSurrogate = R6Class("FiltorSurrogate",
       assert_true(private$.surrogate_learner$task_type == "regr", .var.name = 'surrogate_learner$task_type == "regr"')
 
       private$.surrogate_selector = assert_r6(surrogate_selector, "Selector")$clone(deep = TRUE)
-      private$.surrogate_selector$param_set$set_id = "select"
       private$.own_param_set = param_set
-      private$.own_param_set$set_id = "filter"
+      if (!paradox_s3) {
+        private$.surrogate_selector$param_set$set_id = "select"
+        private$.own_param_set$set_id = "filter"
+      }
+      private$.own_param_set_id = "filter"
 
       param_classes = c("ParamInt", "ParamDbl", "ParamLgl", "ParamFct")
       param_classes = param_classes[c("integer", "numeric", "logical", "factor") %in% surrogate_learner$feature_types]
       param_classes = intersect(param_classes, surrogate_selector$param_classes)
 
-      super$initialize(param_classes, alist(private$.own_param_set,
-        private$.surrogate_selector$param_set, private$.surrogate_learner$param_set),
+      super$initialize(param_classes, alist(filter = private$.own_param_set,
+          select = private$.surrogate_selector$param_set, private$.surrogate_learner$param_set),
         supported = surrogate_selector$supported,
         packages = c("mlr3", surrogate_selector$packages, surrogate_learner$packages, packages),
         dict_entry = dict_entry, own_param_set = quote(private$.own_param_set)

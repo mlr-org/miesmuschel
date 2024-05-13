@@ -322,7 +322,7 @@ The \verb{$init_selector} field will reflect this value.}
 
 \item{\code{multi_fidelity}}{(\code{logical(1)})\cr
 Whether to enable multi-fidelity optimization. When this is \code{TRUE}, then the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized must
-contain a \code{\link[paradox:Param]{Param}} tagged \code{"budget"}, which is then used as the "budget" search space component, determined by
+contain a \code{\link[paradox:Domain]{Domain}} tagged \code{"budget"}, which is then used as the "budget" search space component, determined by
 \code{fidelity} and \code{fidelity_offspring} instead of by the \code{\link{MiesOperator}}s themselves. For multi-fidelity optimization, the \code{fidelity},
 \code{fidelity_offspring}, \code{fidelity_current_gen_only}, and \code{fidelity_monotonic} configuration parameters must be given to determine
 multi-fidelity behaviour. (While the initial values for most of these are probably good for most cases in which more budget implies

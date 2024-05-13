@@ -33,7 +33,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of the [`Recombinator`]s given in `recombinators`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of the [`Recombinator`]s given in `recombinators`.
 #'
 #' @template autoinfo_dict
 #'
@@ -73,7 +73,9 @@ RecombinatorSequential = R6Class("RecombinatorSequential",
     initialize = function(recombinators, allow_lcm_packing = FALSE) {
       private$.wrapped = imap(unname(assert_list(recombinators, types = "Recombinator", min.len = 1)), function(x, i) {
         x = x$clone(deep = TRUE)
-        x$param_set$set_id = sprintf("recombinator_%s", i)
+        if (!paradox_s3) {
+          x$param_set$set_id = sprintf("recombinator_%s", i)
+        }
         x
       })
       private$.allow_lcm_packing = assert_flag(allow_lcm_packing)  # only for repr()
@@ -82,6 +84,7 @@ RecombinatorSequential = R6Class("RecombinatorSequential",
       ps_alist = c(alist(private$.own_param_set),
         lapply(seq_along(recombinators), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
       )
+      names(ps_alist) = sprintf("recombinator_%s", seq_along(ps_alist))
 
       # how often is each recombinator called?
       private$.multiplicities = numeric(length(recombinators))

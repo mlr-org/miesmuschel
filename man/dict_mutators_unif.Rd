@@ -22,7 +22,7 @@ current value (\code{FALSE}). Initialized to \code{TRUE}.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are: \code{\link[paradox:ParamLgl]{ParamLgl}}, \code{\link[paradox:ParamFct]{ParamFct}}
+Supported \code{\link[paradox:Domain]{Domain}} classes are: \code{\link[paradox:Domain]{p_lgl}} ('ParamLgl'), \code{\link[paradox:Domain]{p_fct}} ('ParamFct')
 }
 
 \section{Dictionary}{

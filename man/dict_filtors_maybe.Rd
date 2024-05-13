@@ -43,7 +43,7 @@ Initialized to \code{FALSE}.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of \code{filtor} and \code{filtor_not}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of \code{filtor} and \code{filtor_not}.
 }
 
 \section{Dictionary}{

@@ -22,7 +22,7 @@ the configuration parameters of the \code{surrogate_selector} \code{\link{Select
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes depend on the supported feature types of the \code{surrogate_learner}, as reported
+Supported \code{\link[paradox:Domain]{Domain}} classes depend on the supported feature types of the \code{surrogate_learner}, as reported
 by \code{surrogate_learner$feature_types}: \code{"ParamInt"} requires
 \code{"integer"}, \code{"ParamDbl"} requires \code{"numeric"}, \code{"ParamLgl"} requires \code{"logical"}, and \code{"ParamFct"} requires \code{"factor"}.
 }
