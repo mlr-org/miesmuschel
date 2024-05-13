@@ -62,7 +62,7 @@ expect_recombinator = function(rec, recombinator_name, is_primed = FALSE) {
   test_alloweds(pvals_allowed[, 1, with = FALSE], p_allowed_one)
   test_alloweds(pvals_allowed[seq_len(rec$n_indivs_in), 1, with = FALSE], p_allowed_one)
 
-  if (paradox_s3) {
+  if (miesmuschel:::paradox_s3) {
     p_allowed_multicol = ParamSet$new(sapply(letters[1:3], function(x) {
       p_allowed$get_domain(p_allowed$ids()[[1]])
     }, simplify = FALSE))

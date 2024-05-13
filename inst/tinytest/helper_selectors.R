@@ -59,7 +59,7 @@ expect_selector = function(sel, selector_name, can_oversample = TRUE, is_primed 
   test_alloweds(pvals_allowed[, 1, with = FALSE], p_allowed_one)
   test_alloweds(pvals_allowed[1, 1, with = FALSE], p_allowed_one)
 
-  if (paradox_s3) {
+  if (miesmuschel:::paradox_s3) {
     p_allowed_multicol = ParamSet$new(sapply(letters[1:3], function(x) {
       p_allowed$get_domain(p_allowed$ids()[[1]])
     }, simplify = FALSE))

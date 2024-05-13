@@ -105,7 +105,7 @@ expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$params,
 
 expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$deps, pshadow$deps)
 
-if (paradox_s3) {
+if (miesmuschel:::paradox_s3) {
   pshadow$extra_trafo = function(x, param_set) {
     list(x = x$a + x$b)
   }
