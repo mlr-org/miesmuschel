@@ -205,3 +205,8 @@ vectorize_group_size = function(group_size, n_select) {
   gs_remainder = n_select %% group_size
   c(rep(group_size, n_select / group_size), if (gs_remainder) gs_remainder)
 }
+
+# asserts subset, but also character
+assert_subset_character = function(x, choices, ...) {
+  assert_subset(x = assert_character(x, any.missing = FALSE), choices = choices, ...)
+}

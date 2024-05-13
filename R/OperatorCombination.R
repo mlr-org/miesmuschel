@@ -346,7 +346,7 @@ OperatorCombination = R6Class("OperatorCombination",
         sapply(self$groups, function(g) intersect(c(setdiff(g, types), unlist(type_mapping[g], use.names = FALSE)), ids), simplify = FALSE),  # group capture
         sapply(intersect(names(self$operators), ids), identity, simplify = FALSE)  # direct capture. No groups remain here because ids and groupnames are disjoint (checked above)
       )
-      subsettable = ParamSet$new(param_set$params)
+      subsettable = ps_flatten(param_set)  # ParamSet$new(param_set$params)
       imap(mapping, function(pars, op) {
         self$operators[[op]]$prime(subsettable$clone()$subset(pars))
       })

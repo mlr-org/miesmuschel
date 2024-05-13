@@ -29,7 +29,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     #' Initialize the `ParamSetShadow` object.
     initialize = function(set, shadowed) {
       private$.set = assert_r6(set, "ParamSet")
-      private$.shadowed = assert_subset(shadowed, set$ids())
+      private$.shadowed = assert_subset_character(shadowed, set$ids())
       id = on = NULL
       baddeps = set$deps[(id %in% private$.shadowed) != (on %in% private$.shadowed), id]
       if (length(baddeps)) {

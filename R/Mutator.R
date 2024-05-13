@@ -83,7 +83,7 @@ MutatorNumeric = R6Class("MutatorNumeric",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(param_classes = c("ParamInt", "ParamDbl"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-      assert_subset(param_classes, c("ParamInt", "ParamDbl"))
+      assert_subset_character(param_classes, c("ParamInt", "ParamDbl"))
       if (identical(param_classes, "ParamDbl")) {
         param_classes = c("ParamInt", "ParamDbl")
         private$.integer_native = FALSE
@@ -157,7 +157,7 @@ MutatorDiscrete = R6Class("MutatorDiscrete",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(param_classes = c("ParamLgl", "ParamFct"), param_set = ps(), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-      assert_subset(param_classes, c("ParamLgl", "ParamFct"))
+      assert_subset_character(param_classes, c("ParamLgl", "ParamFct"))
       super$initialize(param_classes, param_set, packages = packages, dict_entry = dict_entry, own_param_set = own_param_set)
     }
   ),

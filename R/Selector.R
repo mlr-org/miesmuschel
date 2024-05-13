@@ -62,7 +62,7 @@ Selector = R6Class("Selector",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(is_deterministic = FALSE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-      assert_subset(supported, c("single-crit", "multi-crit"))
+      assert_subset_character(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
       if (is_deterministic) {

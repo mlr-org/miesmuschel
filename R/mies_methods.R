@@ -1268,8 +1268,8 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
   if (!missing(rows)) assert_integerish(rows, lower = 1, upper =  nrow(inst$archive$data), tol = 1e-100)
 
   selector_params <- selector$primed_ps$ids()
-  assert_subset(inst$search_space$ids(), selector_params)
-  assert_subset(selector_params, colnames(inst$archive$data))
+  assert_subset_character(inst$search_space$ids(), selector_params)
+  assert_subset_character(selector_params, colnames(inst$archive$data))
 
   if (n_select == 0) if (get_indivs) return(inst$archive$data[0, selector_params, with = FALSE]) else return(integer(0))
   indivs = inst$archive$data[rows, selector_params, with = FALSE]
@@ -1420,15 +1420,19 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
       ps_ps = inst$search_space
     }
     if (!is.null(budget_id) && budget_id %nin% ps_ps$ids()) {
-      ps_ps = ps_ps$clone()$add(inst$search_space$params[[budget_id]])
+      if (paradox_s3) {
+        ps_ps = c(ps_ps, inst$search_space$subset(budget_id))
+      } else {
+        ps_ps = ps_ps$clone()$add(inst$search_space$params[[budget_id]])
+      }
     }
     parent_selector = SelectorBest$new()$prime(ps_ps)
   }
 
   ps_ids = parent_selector$primed_ps$ids()
 
-  assert_subset(ss_ids, ps_ids)
-  assert_subset(ps_ids, colnames(data))
+  assert_subset_character(ss_ids, ps_ids)
+  assert_subset_character(ps_ids, colnames(data))
   if (is.null(mutator) || is.null(recombinator)) {
     selector_space = parent_selector$primed_ps
     if (!is.null(budget_id)) {
@@ -1706,7 +1710,7 @@ mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$i
     as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
   assert_optim_instance(inst)
   assert_character(objectives, any.missing = FALSE, unique = TRUE)
-  assert_subset(objectives, inst$archive$codomain$ids())
+  assert_subset_character(objectives, inst$archive$codomain$ids())
 
   generationed = mies_get_generation_results(inst, as_fitnesses = as_fitnesses, survivors_only = survivors_only, condition_on_budget_id = condition_on_budget_id)
 

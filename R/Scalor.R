@@ -51,7 +51,7 @@ Scalor = R6Class("Scalor",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-      assert_subset(supported, c("single-crit", "multi-crit"))
+      assert_subset_character(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
       super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "scl", own_param_set = own_param_set)

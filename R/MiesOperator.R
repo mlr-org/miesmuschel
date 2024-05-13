@@ -42,7 +42,7 @@ MiesOperator = R6Class("MiesOperator",
     #'   The `$endomorphsim` field will reflect this value.
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(),
         packages = character(0), dict_entry = NULL, dict_shortaccess = NULL, own_param_set = quote(self$param_set), endomorphism = TRUE) {
-      assert_subset(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
+      assert_subset_character(param_classes, c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), empty.ok = FALSE)
       if (inherits(param_set, "ParamSet")) {
         private$.param_set = assert_param_set(param_set)
         if (paradox_context_available) {
@@ -173,7 +173,7 @@ MiesOperator = R6Class("MiesOperator",
     #'   May only contiain [`Domain`][paradox::Domain] objects that conform to the classes listed in `$param_classes`.
     #' @return [invisible] `self`.
     prime = function(param_set) {
-      assert_subset(param_set$class, self$param_classes)
+      assert_subset_character(param_set$class, self$param_classes)
       private$.primed_ps = ps_flatten(param_set)
       invisible(self)
     },
