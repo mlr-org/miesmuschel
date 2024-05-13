@@ -87,24 +87,16 @@ expect_identical(pshadow$origin, p)  # but they still refer to each other.
 expect_error(ParamSetShadow$new(p, "a"), "Params a have dependencies that reach across shadow bounds")
 expect_error(ParamSetShadow$new(p, "b"), "Params a have dependencies that reach across shadow bounds")
 
-# but presence of dependencies does not prevent shadowing along bounds.
-## if (miesmuschel:::paradox_s3) {
-  # we don't do subset in-place any more, so original paramset still has 'c' parameter
-  ps_compare = ps(x = p_dbl(-1, 1, tags = "test2"), y = p_lgl(),
-    a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))
-  ps_compare_2 = ps(a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))
-  ps_compare$values = list(x = 1, a = -0.5)
-  ps_compare_2$values = list(a = -0.5)
-  ps_compare$add_dep("x", "y", cond_equal_true)
-  ps_compare$add_dep("a", "b", cond_equal_true)
-  ps_compare_2$add_dep("a", "b", cond_equal_true)
-## } else {
-##   ps_compare = ps(a = p_dbl(-2, 2, tags = "test"), b = p_lgl(),
-##       x = p_dbl(-1, 1, tags = "test2"), y = p_lgl())
-##   ps_compare_2 = ps(a = p_dbl(-2, 2, tags = "test"), b = p_lgl())
-##   ps_compare$values = list(x = 1, a = -0.5)
-##   ps_compare_2$values = list(a = -0.5)
-## }
+ps_compare = ps(x = p_dbl(-1, 1, tags = "test2"), y = p_lgl(),
+  a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))
+ps_compare$values = list(x = 1, a = -0.5)
+# add deps after setting values...
+ps_compare$add_dep("x", "y", cond_equal_true)
+ps_compare$add_dep("a", "b", cond_equal_true)
+
+ps_compare_2 = ps(a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))
+ps_compare_2$values = list(a = -0.5)
+ps_compare_2$add_dep("a", "b", cond_equal_true)
 
 expect_equal(ParamSetShadow$new(p, "z")$params, ps_compare$params)
 
@@ -113,20 +105,9 @@ expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$params,
 
 expect_equal(ParamSetShadow$new(p, c("x", "y", "z"))$deps, pshadow$deps)
 
-if (miesmuschel:::paradox_s3) {
-  pshadow$extra_trafo = function(x, param_set) {
-    list(x = x$a + x$b)
-  }
-  expect_true(pshadow$has_trafo)
-
-  expect_equal(generate_design_grid(pshadow, 2)$transpose(), rep(list(list(x = 0.5), list(x = integer(0))), each = 3))
-
-} else {
-  pshadow$trafo = function(x, param_set) {
-    list(x = x$a + x$b)
-  }
-  expect_true(pshadow$has_trafo)
-
-  expect_equal(generate_design_grid(pshadow, 2)$transpose(), list(list(x = 0.5), list(x = integer(0))))
-
+pshadow$extra_trafo = function(x, param_set) {
+  list(x = x$a + x$b)
 }
+expect_true(pshadow$has_trafo)
+
+expect_equal(generate_design_grid(pshadow, 2)$transpose(), rep(list(list(x = 0.5), list(x = integer(0))), each = 3))
