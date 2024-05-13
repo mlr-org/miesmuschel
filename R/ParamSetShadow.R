@@ -36,6 +36,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
         stopf("Params %s have dependencies that reach across shadow bounds", str_collapse(baddeps))
       }
       if (paradox_s3) {
+        .tags = .trafo = NULL  # for static checks
         paramtbl = set$params[!shadowed, on = "id"]
         private$.tags = paramtbl[, .(tag = unlist(.tags)), keyby = "id"]
         private$.trafos = setkeyv(paramtbl[!map_lgl(.trafo, is.null), .(id, trafo = .trafo)], "id")
