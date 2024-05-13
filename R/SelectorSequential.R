@@ -82,9 +82,11 @@ SelectorSequential = R6Class("SelectorSequential",
       private$.own_param_set$values = c(named_list(pnames, 1), list(reduction_by_factor = TRUE))
 
       ps_alist = c(alist(private$.own_param_set),
-        lapply(seq_along(selectors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
+        structure(
+          lapply(seq_along(selectors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i))),
+          names = sprintf("selector_%s", seq_along(selectors))
+        )
       )
-      names(ps_alist) = sprintf("selector_%s", seq_along(ps_alist))
 
       private$.own_param_set$values = list()
       super$initialize(param_classes = Reduce(intersect, map(private$.wrapped, "param_classes")), param_set = ps_alist,

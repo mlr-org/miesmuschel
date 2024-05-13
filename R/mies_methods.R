@@ -560,7 +560,8 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
   selectors = lapply(selectors, function(x) x$prime(full_search_space))
   filtors = lapply(filtors, function(x) x$prime(full_search_space))
 
-  nobudget_search_space = ParamSetShadow$new(full_search_space, budget_id)
+  nobudget_search_space = full_search_space
+  if (!is.null(budget_id)) nobudget_search_space = ParamSetShadow$new(nobudget_search_space, budget_id)
 
   # mutators, recombinators are primed with search space minus budget_id
   mutators = lapply(mutators, function(x) x$prime(nobudget_search_space))
@@ -649,7 +650,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'
 #' mies_init_population(inst = oi, mu = 3, budget_id = "y", fidelity = 2,
 #'   additional_component_sampler = Sampler1DRfun$new(
-#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
+#'     param = ps(additional = p_dbl(-1, 1)), rfun = function(n) rep(-1, n)
 #'   )
 #' )
 #'
@@ -1243,7 +1244,7 @@ mies_generation_apply = function(archive, fitness_aggregator, include_previous_g
 #'
 #' mies_init_population(inst = oi, mu = 6,
 #'   additional_component_sampler = Sampler1DRfun$new(
-#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+#'     param = ps(additional = p_dbl(-1, 1)), rfun = function(n) -1
 #'   )
 #' )
 #'

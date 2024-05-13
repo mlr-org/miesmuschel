@@ -270,11 +270,13 @@ OperatorCombination = R6Class("OperatorCombination",
 
       super$initialize(
         param_classes = unique(unlist(param_classes_list, use.names = FALSE)),
-        param_set = alist(
+        param_set = if (length(self$adaptions)) alist(
           ParamSetShadow$new(
             ParamSetCollection$new(map(self$operators, "param_set")),
             names(self$adaptions)
           )
+        ) else alist(
+          ParamSetCollection$new(map(self$operators, "param_set"))
         ),
         packages = unlist(map(self$operators, "packages")),
         dict_entry = dict_entry,
@@ -419,8 +421,10 @@ OperatorCombination = R6Class("OperatorCombination",
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
         lapply(split(values, rep(seq_len(nrow(values) / granularity), each = granularity)), function(vs) {
-          adaption_values = lapply(private$.adaptions, function(f) f(vs))
-          self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
+          if (length(private$.adaptions)) {
+            adaption_values = lapply(private$.adaptions, function(f) f(vs))
+            self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
+          }
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
             self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE])
           })))

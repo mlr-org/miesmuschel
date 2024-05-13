@@ -73,7 +73,11 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       ids = self$ids()
       assert_choice(id, ids)
       if (!allow_dangling_dependencies) assert_choice(on, ids) else assert_string(on)
-      private$.set$add_dep(id = id, on = on, cond = cond, allow_dangling_dependencies = allow_dangling_dependencies, ...)
+      if (paradox_s3) {
+        private$.set$add_dep(id = id, on = on, cond = cond, allow_dangling_dependencies = allow_dangling_dependencies, ...)
+      } else {
+        private$.set$add_dep(id = id, on = on, cond = cond, ...)
+      }
       invisible(self)
     }
   ),

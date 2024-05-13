@@ -88,9 +88,11 @@ ScalorAggregate = R6Class("ScalorAggregate",
       private$.own_param_set$values = c(named_list(pnames, 1), list(scaling = "linear", scale_output = FALSE))
 
       ps_alist = c(alist(private$.own_param_set),
-        lapply(seq_along(scalors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
+        structure(
+          lapply(seq_along(scalors), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i))),
+          names = sprintf("scalor_%s", seq_along(scalors))
+        )
       )
-      names(ps_alist) = sprintf("scalor_%s", seq_along(ps_alist))
 
       super$initialize(Reduce(intersect, map(private$.wrapped, "param_classes")), ps_alist,
         supported = Reduce(intersect, map(private$.wrapped, "supported")),
