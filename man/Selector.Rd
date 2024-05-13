@@ -17,7 +17,7 @@ Fitness values are always \emph{maximized}, both in single- and multi-criterion 
 Unlike most other operator types inheriting from \code{\link{MiesOperator}}, the \verb{$operate()} function has three arguments, which are passed on to \verb{$.select()}
 \itemize{
 \item \code{values} :: \code{data.frame}\cr
-Individuals to operate on. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
+Individuals to operate on. Must pass the check of the \code{\link[paradox:Domain]{Domain}} given in the last \verb{$prime()} call
 and may not have any missing components.
 \item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
 Fitnesses for each individual given in \code{values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
@@ -49,15 +49,15 @@ should also be overloaded, and optionally the \verb{$prime()} function; they sho
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
 \code{\link{SelectorScalar}}
 

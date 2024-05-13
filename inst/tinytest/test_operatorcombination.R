@@ -149,10 +149,13 @@ expect_error(RecombinatorCombination$new(list(ParamDbl = raddergen(2, 1), ParamF
 
 ###################
 # Mutator: various error conditions
-psnum = ParamDbl$new("x", 0, 1)$rep(4)
-pslgl = ParamLgl$new("b")$rep(4)
-psfct2 = ParamFct$new("c", c("a", "b"))$rep(4)
-psfct3 = ParamFct$new("d", c("a", "b", "c"))$rep(4)
+
+
+
+psnum = do.call(paradox::ps, structure(rep(list(p_dbl(0, 1)), 4), names = sprintf("x_rep_%s", 1:4)))
+pslgl = do.call(paradox::ps, structure(rep(list(p_lgl()), 4), names = sprintf("b_rep_%s", 1:4)))
+psfct2 = do.call(paradox::ps, structure(rep(list(p_fct(c("a", "b"))), 4), names = sprintf("c_rep_%s", 1:4)))
+psfct3 = do.call(paradox::ps, structure(rep(list(p_fct(c("a", "b", "c"))), 4), names = sprintf("d_rep_%s", 1:4)))
 
 MutatorClass = R6::R6Class("MutatorNull",
   inherit = Mutator,
@@ -264,7 +267,7 @@ expect_warning(MutatorCombination$new(list(ParamLgl = mut_lf, ParamFct = mut_fct
 
 anynull = MutatorCombination$new(list(ParamAny = MutatorNull$new()))
 for (badgroup in c("ParamInt", "ParamDbl", "ParamFct", "ParamLgl", "ParamAny")) {
-  expect_error(anynull$prime(ParamSet$new(list(ParamInt$new(badgroup)))), sprintf("components must not have names.*%s", badgroup))
+  expect_error(anynull$prime(do.call(paradox::ps, structure(list(p_int()), names = badgroup))), sprintf("components must not have names.*%s", badgroup))
 }
 
 
@@ -424,10 +427,12 @@ transformed = mut_adapt$operate(data.table(a = c(0, 1, 0, 1), b = c(0, 0, 1, 1))
 expect_equal(transformed, data.table(a = c(1, 3, 1, 3), b = c(1, 2, 2, 3)))
 
 madder2c = madder2$clone(deep = TRUE)
-madder2c$param_set$set_id = "ParamDbl"
+if (!miesmuschel:::paradox_s3) madder2c$param_set$set_id = "ParamDbl"
 madder2c$param_set$values$x = 2
 madder2c$prime(ps(a = p_r, b = p_r))
 
+
+setindexv(madder2c$primed_ps$.__enclos_env__$private$.tags, NULL)
 expect_equal(mut_adapt$operators, list(ParamDbl = madder2c))
 expect_equal(mut_adapt$adaptions, list(ParamDbl.x = function(x) if (x$a < 1) 1 else 2))
 

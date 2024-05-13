@@ -35,6 +35,7 @@
 
 lg = NULL
 paradox_context_available = FALSE
+paradox_s3 = FALSE
 
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
@@ -63,7 +64,9 @@ reg_mlr3tuning = function(...) {  # nocov start
     # packageStartupMessage("Using context sensitive configuration parameters")
     assign("paradox_context_available", TRUE, envir = parent.env(environment()))
   }
-
+  if (!"set_id" %in% names(ps())) {
+    assign("paradox_s3", TRUE, envir = parent.env(environment()))
+  }
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
@@ -82,7 +85,7 @@ reg_mlr3tuning = function(...) {  # nocov start
 
 
 # static code checks should not complain about commonly used data.table columns
-utils::globalVariables(c("dob", "eol"))
+utils::globalVariables(c("dob", "eol", "."))
 
 if (!Sys.getenv("DEVTOOLS_LOAD") == "true") {
   leanify_package()

@@ -1,3 +1,7 @@
+# miesmuschel 0.0.4
+
+* Compatibility with upgoming new `paradox` release
+
 # miesmuschel 0.0.3
 
 * New Terminators: `TerminatorGenerationPerfReached` ("genperfreached"), `TerminatorGenerationStagnation` ("genstag").

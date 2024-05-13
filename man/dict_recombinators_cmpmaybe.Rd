@@ -29,7 +29,7 @@ Probability per component with which to use the result of applying the operator 
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of \code{recombinator} and \code{recombinator_not}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of \code{recombinator} and \code{recombinator_not}.
 }
 
 \section{Dictionary}{
@@ -72,8 +72,8 @@ rm2$operate(data)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{dict_recombinators_convex}},
 \code{\link{dict_recombinators_cvxpair}},
 \code{\link{dict_recombinators_maybe}},

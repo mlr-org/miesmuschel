@@ -6,8 +6,8 @@ design = cbind(generate_design_random(oibig$search_space, 9)$data[, p1 := c(1, 1
   data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
 )
 oibig$eval_batch(design)
-p = oibig$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9)))
-p_nobudget = as_oi(get_objective_passthrough("maximize"))$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9)))
+p = miesmuschel:::ps_union(list(oibig$search_space$clone(deep = TRUE), ps(additional = p_int(1, 9))))
+p_nobudget = miesmuschel:::ps_union(list(as_oi(get_objective_passthrough("maximize"))$search_space$clone(deep = TRUE), ps(additional = p_int(1, 9))))
 
 # no operator all: doesn't recognize additional component
 expect_equal(mies_generate_offspring(oibig, 1), design[8, -c("dob", "eol", "additional")])

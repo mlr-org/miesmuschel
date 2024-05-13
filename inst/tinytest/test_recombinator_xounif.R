@@ -29,7 +29,7 @@ expect_identical(vals, rxounif$operate(vals))
 rxounif$param_set$values$p = 1
 expect_identical(vals[rep((0:4) * 2, each = 2) + c(2, 1)], rxounif$operate(vals))
 
-p = ParamInt$new("x", 0, 1)$rep(100)
+p = do.call(paradox::ps, structure(rep(list(p_int(0, 1)), 100), names = sprintf("x_rep_%s", 1:100)))
 rxounif$prime(p)
 rxounif$param_set$values$p = 0.5
 

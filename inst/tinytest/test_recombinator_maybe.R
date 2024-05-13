@@ -21,7 +21,7 @@ raddergen = function(nin, nout) {
 
 # maybe is raddergen, maybe_not is NULL
 rmaybe = RecombinatorMaybe$new(raddergen(2, 2))
-p = ParamInt$new("x", 0, 10)$rep(3)
+p = do.call(paradox::ps, structure(rep(list(p_int(0, 10)), 3), names = sprintf("x_rep_%s", 1:3)))
 rmaybe$prime(p)
 
 data = as.data.table(matrix(c(0, 1), nrow = 40, ncol = 3))

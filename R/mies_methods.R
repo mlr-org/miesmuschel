@@ -478,7 +478,7 @@ mies_survival_comma = function(inst, mu, survival_selector, n_elite, elite_selec
 #' The `mies_prime_operators()` function uses the information that the user usually has readily at hand -- the [`Objective`][bbotk::Objective]`s search space,
 #' the budget parameter, and additional components -- and primes [`Mutator`], [`Recombinator`], and [`Selector`] objects in the right way:
 #' * [`Selector`]s are primed on a union of `search_space` and `additional_components`
-#' * [`Mutator`]s and [`Recombinator`]s are primed on the [`Selector`]'s space with the `budget_id` [`Param`][paradox::Param] removed.
+#' * [`Mutator`]s and [`Recombinator`]s are primed on the [`Selector`]'s space with the `budget_id` [`Domain`][paradox::Domain] removed.
 #'
 #' `mies_prime_operators()` is called with an arbitrary number of [`MiesOperator`] arguments; typically one [`Mutator`], one [`Recombinator`] and
 #' at least two [`Selector`]: one for survival selection, and one parent selection. Supplied [`MiesOperator`]s are primed by-reference, but
@@ -549,8 +549,10 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
     assert_names(additional_components$ids(), disjunct.from = reserved_component_names)
     search_space = search_space$clone(deep = FALSE)
     additional_components = additional_components$clone(deep = FALSE)
-    search_space$set_id = ""
-    additional_components$set_id = ""
+    if (!paradox_s3) {
+      search_space$set_id = ""
+      additional_components$set_id = ""
+    }
     full_search_space = ps_union(list(search_space, additional_components))
   }
 
@@ -558,7 +560,8 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
   selectors = lapply(selectors, function(x) x$prime(full_search_space))
   filtors = lapply(filtors, function(x) x$prime(full_search_space))
 
-  nobudget_search_space = ParamSetShadow$new(full_search_space, budget_id)
+  nobudget_search_space = full_search_space
+  if (!is.null(budget_id)) nobudget_search_space = ParamSetShadow$new(nobudget_search_space, budget_id)
 
   # mutators, recombinators are primed with search space minus budget_id
   mutators = lapply(mutators, function(x) x$prime(nobudget_search_space))
@@ -647,7 +650,7 @@ mies_prime_operators = function(search_space, mutators = list(), recombinators =
 #'
 #' mies_init_population(inst = oi, mu = 3, budget_id = "y", fidelity = 2,
 #'   additional_component_sampler = Sampler1DRfun$new(
-#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
+#'     param = ps(additional = p_dbl(-1, 1)), rfun = function(n) rep(-1, n)
 #'   )
 #' )
 #'
@@ -1241,7 +1244,7 @@ mies_generation_apply = function(archive, fitness_aggregator, include_previous_g
 #'
 #' mies_init_population(inst = oi, mu = 6,
 #'   additional_component_sampler = Sampler1DRfun$new(
-#'     param = ParamDbl$new("additional", -1, 1), rfun = function(n) -1
+#'     param = ps(additional = p_dbl(-1, 1)), rfun = function(n) -1
 #'   )
 #' )
 #'
@@ -1266,8 +1269,8 @@ mies_select_from_archive = function(inst, n_select, rows, selector = SelectorBes
   if (!missing(rows)) assert_integerish(rows, lower = 1, upper =  nrow(inst$archive$data), tol = 1e-100)
 
   selector_params <- selector$primed_ps$ids()
-  assert_subset(inst$search_space$ids(), selector_params)
-  assert_subset(selector_params, colnames(inst$archive$data))
+  assert_subset_character(inst$search_space$ids(), selector_params)
+  assert_subset_character(selector_params, colnames(inst$archive$data))
 
   if (n_select == 0) if (get_indivs) return(inst$archive$data[0, selector_params, with = FALSE]) else return(integer(0))
   indivs = inst$archive$data[rows, selector_params, with = FALSE]
@@ -1418,15 +1421,19 @@ mies_generate_offspring = function(inst, lambda, parent_selector = NULL, mutator
       ps_ps = inst$search_space
     }
     if (!is.null(budget_id) && budget_id %nin% ps_ps$ids()) {
-      ps_ps = ps_ps$clone()$add(inst$search_space$params[[budget_id]])
+      if (paradox_s3) {
+        ps_ps = c(ps_ps, inst$search_space$subset(budget_id))
+      } else {
+        ps_ps = ps_ps$clone()$add(inst$search_space$params[[budget_id]])
+      }
     }
     parent_selector = SelectorBest$new()$prime(ps_ps)
   }
 
   ps_ids = parent_selector$primed_ps$ids()
 
-  assert_subset(ss_ids, ps_ids)
-  assert_subset(ps_ids, colnames(data))
+  assert_subset_character(ss_ids, ps_ids)
+  assert_subset_character(ps_ids, colnames(data))
   if (is.null(mutator) || is.null(recombinator)) {
     selector_space = parent_selector$primed_ps
     if (!is.null(budget_id)) {
@@ -1704,7 +1711,7 @@ mies_aggregate_generations = function(inst, objectives = inst$archive$codomain$i
     as_fitnesses = TRUE, survivors_only = TRUE, condition_on_budget_id = NULL) {
   assert_optim_instance(inst)
   assert_character(objectives, any.missing = FALSE, unique = TRUE)
-  assert_subset(objectives, inst$archive$codomain$ids())
+  assert_subset_character(objectives, inst$archive$codomain$ids())
 
   generationed = mies_get_generation_results(inst, as_fitnesses = as_fitnesses, survivors_only = survivors_only, condition_on_budget_id = condition_on_budget_id)
 

@@ -17,10 +17,10 @@
 #'
 #' Unlike most other operator types inheriting from [`MiesOperator`], the `$operate()` function has four arguments, which are passed on to `$.filter()`
 #' * `values` :: `data.frame`\cr
-#'   Individuals to filter. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   Individuals to filter. Must pass the check of the [`ParamSet`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components.
 #' * `known_values` :: `data.frame`\cr
-#'   Individuals to use for filtering. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   Individuals to use for filtering. Must pass the check of the [`ParamSet`][paradox::ParamSet] given in the last `$prime()` call
 #'   and may not have any missing components. Note that `known_values` may be empty.
 #' * `fitnesses` :: `numeric` | `matrix`\cr
 #'   Fitnesses for each individual given in `known_values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
@@ -61,7 +61,7 @@ Filtor = R6Class("Filtor",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-      assert_subset(supported, c("single-crit", "multi-crit"))
+      assert_subset_character(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
       super$initialize(param_classes, param_set, endomorphism = FALSE, packages = packages, dict_entry = dict_entry, dict_shortaccess = "ftr", own_param_set = own_param_set)

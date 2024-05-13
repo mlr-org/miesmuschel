@@ -12,8 +12,8 @@ oibig$eval_batch(generate_design_random(oibig$search_space, 100)$data[, `:=`(add
 oibigmin$eval_batch(generate_design_random(oibig$search_space, 100)$data[, `:=`(dob = rep(1:4, each = 25), eol = rep(c(4, NA, NA, NA), 25))])
 oibigmulti$eval_batch(generate_design_random(oibigmulti$search_space, 100)$data[, `:=`(dob = rep(1:4, each = 25), eol = rep(c(4, NA, NA, NA), 25))])
 
-p = oibig$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 100)))
-p_nobudget = as_oi(get_objective_passthrough("maximize"))$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 100)))
+p = miesmuschel:::ps_union(list(oibig$search_space$clone(deep = TRUE), ps(additional = p_int(1, 100))))
+p_nobudget = miesmuschel:::ps_union(list(as_oi(get_objective_passthrough("maximize"))$search_space$clone(deep = TRUE), ps(additional = p_int(1, 100))))
 
 
 individuals = generate_design_random(oibig$search_space, 21)$data[, `:=`(additional = 1:21, p1 = c(1:10, 1:10, 1))]

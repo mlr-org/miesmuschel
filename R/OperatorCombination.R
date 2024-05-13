@@ -21,7 +21,7 @@
 #' `OperatorCombination` is the base class from which `MutatorCombination` and `RecombinatorCombination` inherit. The latter two are to be used for [`Mutator`] and
 #' [`Recombinator`] objects, respectively.
 #'
-#' Besides groups created with the `groups` construction argument, there are special groups that all unnamed operators fall into based on their [`Param`][paradox::Param]
+#' Besides groups created with the `groups` construction argument, there are special groups that all unnamed operators fall into based on their [`Domain`][paradox::Domain]
 #' class: `"ParamInt"`, `"ParamDbl"`, `"ParamFct"`, and `"ParamLgl"`. A component of an individual that is not named directly in `operators` or made part of a group
 #' in `groups` is automatically in one of these special groups. There is furthermore a special catch-all group `"ParamAny"`, which catches all components that are
 #' are not operated directly, not in a group, and not in another special group that is itself named directly or in a group. I.e., all components that would otherwise
@@ -35,11 +35,11 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are calculated based on the supported classes of the wrapped operators.
+#' Supported [`Domain`][paradox::Domain] classes are calculated based on the supported classes of the wrapped operators.
 #' They are frequently just the set union of supported classes, unless inference can be drawn from type-specific groups that an operator is assigned to.
-#' If e.g. an operator that supports [`ParamDbl`][paradox::ParamDbl] and [`ParamInt`][paradox::ParamInt] is assigned to group `"ParamInt"`, and
-#' an operator that supports [`ParamLgl`][paradox::ParamLgl] is assigned to component `"a"`, then the result will support [`ParamLgl`][paradox::ParamLgl] and
-#' [`ParamInt`][paradox::ParamInt] only.
+#' If e.g. an operator that supports [`p_dbl`][paradox::Domain] and [`p_int`][paradox::Domain] is assigned to group `"ParamInt"`, and
+#' an operator that supports [`p_lgl`][paradox::Domain] is assigned to component `"a"`, then the result will support [`p_lgl`][paradox::Domain] and
+#' [`p_int`][paradox::Domain] only.
 #'
 #' @section Configuration Parameters:
 #'
@@ -60,7 +60,7 @@
 #'   The `$operators` field will reflect this value.
 #' @param groups (named `list` of `character`)\cr
 #'   List of groups that operators can act on. Names of this list define new groups. The content of each list element contains the names of
-#'   components or special groups (a [`Param`][paradox::Param] subclass name or `"ParamAny"`) to subsume under the group.
+#'   components or special groups (a [`Domain`][paradox::Domain] subclass name or `"ParamAny"`) to subsume under the group.
 #'   Individual components can only be member of either a (non-special) group or named in `operators`, so a name
 #'   that occurs in `operators` may not be a member of a group as defined in `groups`. The default is the empty list.\cr
 #'   The `$groups` field will reflect this value.
@@ -74,10 +74,10 @@
 #'   In both cases, the return value must be a scalar. The default is the empty list.\cr
 #'   The `$adaption` field will reflect this value.
 #' @param binary_fct_as_logical (`logical(1)`)\cr
-#'   Whether to treat binary [`ParamFct`][paradox::ParamFct] components of [`ParamSet`][paradox::ParamSet]s as [`ParamLgl`][paradox::ParamLgl] with respect
+#'   Whether to treat binary [`p_fct`][paradox::Domain] components of [`ParamSet`][paradox::ParamSet]s as [`p_lgl`][paradox::Domain] with respect
 #'   to the special groups `"ParamLgl"` and `"ParamFct"`. This does *not* perform any conversion, so a [`MiesOperator`] assigned to the `"ParamLgl"` special
-#'   group when `binary_fct_as_logical` is `TRUE` and there are binary [`ParamFct`][paradox::ParamFct]s present will receive
-#'   a factorial value and must also support [`ParamFct`][paradox::ParamFct] in this case. This is checked during `$prime()`, but not during construction.
+#'   group when `binary_fct_as_logical` is `TRUE` and there are binary [`p_fct`][paradox::Domain]s present will receive
+#'   a factorial value and must also support [`p_fct`][paradox::Domain] in this case. This is checked during `$prime()`, but not during construction.
 #'   Default is `FALSE`.\cr
 #'   The `$binary_fct_as_logical` field will reflect this value.
 #' @param on_type_not_present (`character(1)`)\cr
@@ -223,7 +223,9 @@ OperatorCombination = R6Class("OperatorCombination",
       for (on in names(operators)) {
         private$.operators[[on]] = private$.operators[[on]]$clone(deep = TRUE)
         op = private$.operators[[on]]
-        op$param_set$set_id = on
+        if (!paradox_s3) {
+          op$param_set$set_id = on
+        }
 
         if (on %in% types) {
           if (on == "ParamAny") {
@@ -268,11 +270,13 @@ OperatorCombination = R6Class("OperatorCombination",
 
       super$initialize(
         param_classes = unique(unlist(param_classes_list, use.names = FALSE)),
-        param_set = alist(
+        param_set = if (length(self$adaptions)) alist(
           ParamSetShadow$new(
             ParamSetCollection$new(map(self$operators, "param_set")),
             names(self$adaptions)
           )
+        ) else alist(
+          ParamSetCollection$new(map(self$operators, "param_set"))
         ),
         packages = unlist(map(self$operators, "packages")),
         dict_entry = dict_entry,
@@ -344,7 +348,7 @@ OperatorCombination = R6Class("OperatorCombination",
         sapply(self$groups, function(g) intersect(c(setdiff(g, types), unlist(type_mapping[g], use.names = FALSE)), ids), simplify = FALSE),  # group capture
         sapply(intersect(names(self$operators), ids), identity, simplify = FALSE)  # direct capture. No groups remain here because ids and groupnames are disjoint (checked above)
       )
-      subsettable = ParamSet$new(param_set$params)
+      subsettable = ps_flatten(param_set)  # ParamSet$new(param_set$params)
       imap(mapping, function(pars, op) {
         self$operators[[op]]$prime(subsettable$clone()$subset(pars))
       })
@@ -372,7 +376,7 @@ OperatorCombination = R6Class("OperatorCombination",
       private$.adaptions
     },
     #' @field binary_fct_as_logical (`logical(1)`)\cr
-    #' Whether to treat binary [`ParamFct`][paradox::ParamFct] components of [`ParamSet`][paradox::ParamSet]s as [`ParamLgl`][paradox::ParamLgl] with respect
+    #' Whether to treat binary [`p_fct`][paradox::Domain] components of [`ParamSet`][paradox::ParamSet]s as [`p_lgl`][paradox::Domain] with respect
     #' to the special groups `"ParamLgl"` and `"ParamFct"`, as set during construction. Read-only.
     binary_fct_as_logical = function(val) {
       if (!missing(val)) stop("binary_fct_as_logical is read-only.")
@@ -417,8 +421,10 @@ OperatorCombination = R6Class("OperatorCombination",
       assert_true(nrow(values) %% granularity == 0)
       rbindlist(
         lapply(split(values, rep(seq_len(nrow(values) / granularity), each = granularity)), function(vs) {
-          adaption_values = lapply(private$.adaptions, function(f) f(vs))
-          self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
+          if (length(private$.adaptions)) {
+            adaption_values = lapply(private$.adaptions, function(f) f(vs))
+            self$param_set$origin$values = insert_named(self$param_set$origin$values, adaption_values)
+          }
           do.call(cbind, unname(imap(private$.mapping, function(pars, op) {
             self$operators[[op]]$operate(vs[, match(pars, names(vs), 0), with = FALSE])
           })))

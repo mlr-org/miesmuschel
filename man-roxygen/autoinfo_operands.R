@@ -1,4 +1,4 @@
 #' @section Supported Operand Types:
 #'
-#'  Supported [`Param`][paradox::Param] classes are: <%= { cls <- get(dictname)$get(id)$param_classes ; paste(sprintf("[`%s`][paradox::%s]", cls, cls), collapse = ", ") } %>
+#'  Supported [`Domain`][paradox::Domain] classes are: <%= { cls <- get(dictname)$get(id)$param_classes ; paste(sprintf("[`p_%s`][paradox::Domain] ('%s')", tolower(sub("Param", "", cls)), cls), collapse = ", ") } %>
 #'

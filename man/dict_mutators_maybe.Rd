@@ -24,7 +24,7 @@ Probability per individual with which to apply the operator given to the \code{m
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of \code{mutator} and \code{mutator_not}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of \code{mutator} and \code{mutator_not}.
 }
 
 \section{Dictionary}{
@@ -65,9 +65,9 @@ mm2$operate(data)
 }
 \seealso{
 Other mutators: 
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},

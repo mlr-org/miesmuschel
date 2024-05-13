@@ -37,18 +37,25 @@ objective_budget = ObjectiveRFun$new(
 
 get_objective_passthrough = function(directions, small = FALSE, extra = character(0)) {
   assert_subset(directions, c("minimize", "maximize"))
+  plist <- list(
+    do.call(paradox::ps, sapply(paste0("p", seq_along(directions), recycle0 = TRUE), function(x) p_dbl(-10, 10), simplify = FALSE)),
+    if (!small) adversarial_space,
+    do.call(paradox::ps, sapply(extra, function(x) p_dbl(-10, 10), simplify = FALSE))
+  )
+  plist <- Filter(function(x) !is.null(x), plist)
   ObjectiveRFun$new(
     fun = function(xs) {
       x = xs[paste0("p", seq_along(directions))]
       names(x) = paste0("pout", seq_along(directions))
       x
     },
-    domain = ParamSet$new(c(
-      lapply(seq_along(directions), function(x) ParamDbl$new(paste0("p", x), -10, 10)),
-      if (!small) adversarial_space$params,
-      lapply(extra, function(x) ParamDbl$new(x, -10, 10))
-    )),
-    codomain = ParamSet$new(lapply(seq_along(directions), function(x) ParamDbl$new(paste0("pout", x), -10, 10, tags = directions[[x]])))
+    domain = miesmuschel:::ps_union(plist),
+    codomain = do.call(paradox::ps,
+      structure(
+        lapply(seq_along(directions), function(x) p_dbl(-10, 10, tags = directions[[x]])),
+        names = paste0("pout", seq_along(directions), recycle0 = TRUE)
+      )
+    )
   )
 }
 
@@ -62,7 +69,11 @@ as_oi = function(objective, search_space = NULL, terminator = trm("none")) {
 
 generate_increasing_sampler = function(param_set) {
   SamplerHierarchical$new(param_set,
-    lapply(param_set$params, function(p) Sampler1DRfun$new(param = p, rfun = function(n) seq_len(n)))
+    if (miesmuschel:::paradox_s3) {
+      lapply(param_set$subspaces(), function(p) Sampler1DRfun$new(param = p, rfun = function(n) seq_len(n)))
+    } else {
+      lapply(param_set$params, function(p) Sampler1DRfun$new(param = p, rfun = function(n) seq_len(n)))
+    }
   )
 }
 
@@ -72,7 +83,7 @@ generate_design_increasing = function(param_set, n) {
 
 generate_design_random_increasing = function(param_set, n) {
   SamplerJointIndep$new(list(
-    generate_increasing_sampler(ps(p1 = param_set$params$p1)),
+    generate_increasing_sampler(if (miesmuschel:::paradox_s3) param_set$subset("p1") else ps(p1 = param_set$params$p1)),
     SamplerUnif$new(ParamSetShadow$new(param_set, "p1"))
   ))$sample(n)
 }

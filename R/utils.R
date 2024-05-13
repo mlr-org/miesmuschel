@@ -3,6 +3,8 @@ ps_flatten = function(param_set, clone = TRUE) {
   assert_r6(param_set, "ParamSet")
   if (class(param_set)[[1]] == "ParamSet") {
     if (clone) param_set$clone(deep = TRUE) else param_set
+  } else if (paradox_s3) {
+    param_set$flatten()
   } else {
     ret = ParamSet$new()$add(param_set)
     ret$deps = param_set$deps
@@ -11,7 +13,7 @@ ps_flatten = function(param_set, clone = TRUE) {
   }
 }
 
-# TODO this is from paradox, probably it should just be exported from there
+# TODO this is from paradox, and exported from there with the s3 update.
 # Create a ParamSet from a list of ParamSets
 # This emulates `ParamSetCollection$new(sets)`, except that
 # - The result is a `ParamSet`, not a `ParamSetCollection`
@@ -21,6 +23,7 @@ ps_flatten = function(param_set, clone = TRUE) {
 # have their <id> changed to <set_id>.<id>. This is also reflected in deps and in `$trafo`.
 # @param sets: list of ParamSet
 ps_union = function(sets) {  # nocov start
+  if (paradox_s3) return(paradox::ps_union(sets))
   assert_list(sets, types = "ParamSet")
   assert_names(discard(map_chr(sets, "set_id"), `==`, ""), type = "unique")
 
@@ -201,4 +204,9 @@ vectorize_group_size = function(group_size, n_select) {
   }
   gs_remainder = n_select %% group_size
   c(rep(group_size, n_select / group_size), if (gs_remainder) gs_remainder)
+}
+
+# asserts subset, but also character
+assert_subset_character = function(x, choices, ...) {
+  assert_subset(x = assert_character(x, any.missing = FALSE), choices = choices, ...)
 }

@@ -155,7 +155,7 @@
 #'   The `$init_selector` field will reflect this value.
 #' @param multi_fidelity (`logical(1)`)\cr
 #'   Whether to enable multi-fidelity optimization. When this is `TRUE`, then the [`OptimInstance`][bbotk::OptimInstance] being optimized must
-#'   contain a [`Param`][paradox::Param] tagged `"budget"`, which is then used as the "budget" search space component, determined by
+#'   contain a [`Domain`][paradox::Domain] tagged `"budget"`, which is then used as the "budget" search space component, determined by
 #'   `fidelity` and `fidelity_offspring` instead of by the [`MiesOperator`]s themselves. For multi-fidelity optimization, the `fidelity`,
 #'   `fidelity_offspring`, `fidelity_current_gen_only`, and `fidelity_monotonic` configuration parameters must be given to determine
 #'   multi-fidelity behaviour. (While the initial values for most of these are probably good for most cases in which more budget implies
@@ -273,13 +273,17 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
           fidelity_monotonic = p_lgl(tags = "required"))
       ))
 
-      self$mutator$param_set$set_id = "mutator"
-      self$recombinator$param_set$set_id = "recombinator"
-      self$parent_selector$param_set$set_id = "parent_selector"
-      self$survival_selector$param_set$set_id = "survival_selector"
-      if (!is.null(elite_selector)) self$elite_selector$param_set$set_id = "elite_selector"
-      private$.param_set_source = c(alist(private$.own_param_set, self$mutator$param_set, self$recombinator$param_set,
-        self$parent_selector$param_set, self$survival_selector$param_set), if (!is.null(elite_selector)) alist(self$elite_selector$param_set))
+      if (!paradox_s3) {
+        self$mutator$param_set$set_id = "mutator"
+        self$recombinator$param_set$set_id = "recombinator"
+        self$parent_selector$param_set$set_id = "parent_selector"
+        self$survival_selector$param_set$set_id = "survival_selector"
+        if (!is.null(elite_selector)) self$elite_selector$param_set$set_id = "elite_selector"
+      }
+
+      private$.param_set_source = c(alist(private$.own_param_set, mutator = self$mutator$param_set, recombinator = self$recombinator$param_set,
+        parent_selector = self$parent_selector$param_set, survival_selector = self$survival_selector$param_set),
+        if (!is.null(elite_selector)) alist(elite_selector = self$elite_selector$param_set))
 
       self$param_set$values = insert_named(self$param_set$values, c(
         list(initializer = generate_design_random, survival_strategy = "plus"),
@@ -363,7 +367,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
       if (is.null(private$.param_set)) {
         sourcelist = lapply(private$.param_set_source, function(x) eval(x))
         private$.param_set = ParamSetCollection$new(sourcelist)
-        if (!is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
+        if (!paradox_s3 && !is.null(private$.param_set_id)) private$.param_set$set_id = private$.param_set_id
       }
       if (!missing(rhs) && !identical(rhs, private$.param_set)) {
         stop("param_set is read-only.")
@@ -375,7 +379,9 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     deep_clone = function(name, value) {
       if (!is.null(private$.param_set_source)) {
         if (!is.null(private$.param_set)) {
-          private$.param_set_id = private$.param_set$set_id
+          if (!paradox_s3) {
+            private$.param_set_id = private$.param_set$set_id
+          }
           private$.param_set = NULL  # required to keep clone identical to original, otherwise tests get really ugly
         }
         if (name == ".param_set_source") {
@@ -440,7 +446,7 @@ OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
     .elite_selector = NULL,
     .init_selector = NULL,
     .own_param_set = NULL,
-    .param_set_id = NULL,
+    .param_set_id = NULL,  # obsolete with s3 paradox
     .param_set_source = NULL
   )
 )

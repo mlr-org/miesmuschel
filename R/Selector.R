@@ -16,7 +16,7 @@
 #'
 #' Unlike most other operator types inheriting from [`MiesOperator`], the `$operate()` function has three arguments, which are passed on to `$.select()`
 #' * `values` :: `data.frame`\cr
-#'   Individuals to operate on. Must pass the check of the [`Param`][paradox::ParamSet] given in the last `$prime()` call
+#'   Individuals to operate on. Must pass the check of the [`Domain`][paradox::Domain] given in the last `$prime()` call
 #'   and may not have any missing components.
 #' * `fitnesses` :: `numeric` | `matrix`\cr
 #'   Fitnesses for each individual given in `values`. If this is a `numeric`, then its length must be equal to the number of rows in `values`. If
@@ -62,7 +62,7 @@ Selector = R6Class("Selector",
     #' @template param_dict_entry
     #' @template param_own_param_set
     initialize = function(is_deterministic = FALSE, param_classes = c("ParamLgl", "ParamInt", "ParamDbl", "ParamFct"), param_set = ps(), supported = c("single-crit", "multi-crit"), packages = character(0), dict_entry = NULL, own_param_set = quote(self$param_set)) {
-      assert_subset(supported, c("single-crit", "multi-crit"))
+      assert_subset_character(supported, c("single-crit", "multi-crit"))
       assert_character(supported, any.missing = FALSE, unique = TRUE, min.len = 1)
       private$.supported = supported
       if (is_deterministic) {
@@ -155,8 +155,10 @@ SelectorScalar = R6Class("SelectorScalar",
       } else {
         private$.own_param_set = param_set
       }
-      private$.scalor$param_set$set_id = "scale"
-      super$initialize(is_deterministic = FALSE, param_classes = param_classes, param_set = alist(private$.own_param_set, private$.scalor$param_set), supported = supported,
+      if (!paradox_s3) {
+        private$.scalor$param_set$set_id = "scale"
+      }
+      super$initialize(is_deterministic = FALSE, param_classes = param_classes, param_set = alist(private$.own_param_set, scale = private$.scalor$param_set), supported = supported,
         packages = c(packages, scalor$packages), dict_entry = dict_entry,
         own_param_set = quote(private$.own_param_set))
     },

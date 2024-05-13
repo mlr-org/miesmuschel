@@ -20,21 +20,21 @@ individual as a single \code{character} vector), and \code{levels} (a list of \c
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
-\code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
+\code{\link{MutatorNumeric}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other mutators: 
-\code{\link{MutatorNumeric}},
 \code{\link{Mutator}},
+\code{\link{MutatorNumeric}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},

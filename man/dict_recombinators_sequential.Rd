@@ -34,7 +34,7 @@ Whether to reorder \code{values} between invocations of recombinators. Initializ
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of the \code{\link{Recombinator}}s given in \code{recombinators}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of the \code{\link{Recombinator}}s given in \code{recombinators}.
 }
 
 \section{Dictionary}{
@@ -75,8 +75,8 @@ convex_then_swap$prime(p)$operate(ds)
 \seealso{
 Other recombinators: 
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{dict_recombinators_cmpmaybe}},
 \code{\link{dict_recombinators_convex}},
 \code{\link{dict_recombinators_cvxpair}},

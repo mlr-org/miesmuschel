@@ -56,7 +56,7 @@ not evaluated by the objective function, but that are used for self-adaption by 
 The \code{mies_prime_operators()} function uses the information that the user usually has readily at hand -- the \code{\link[bbotk:Objective]{Objective}}\verb{s search space, the budget parameter, and additional components -- and primes [}Mutator\verb{], [}Recombinator\verb{], and [}Selector`] objects in the right way:
 \itemize{
 \item \code{\link{Selector}}s are primed on a union of \code{search_space} and \code{additional_components}
-\item \code{\link{Mutator}}s and \code{\link{Recombinator}}s are primed on the \code{\link{Selector}}'s space with the \code{budget_id} \code{\link[paradox:Param]{Param}} removed.
+\item \code{\link{Mutator}}s and \code{\link{Recombinator}}s are primed on the \code{\link{Selector}}'s space with the \code{budget_id} \code{\link[paradox:Domain]{Domain}} removed.
 }
 
 \code{mies_prime_operators()} is called with an arbitrary number of \code{\link{MiesOperator}} arguments; typically one \code{\link{Mutator}}, one \code{\link{Recombinator}} and

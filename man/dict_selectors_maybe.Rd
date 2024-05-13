@@ -88,7 +88,7 @@ generates an error. Initialized to \code{TRUE}.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of \code{selector} and \code{selector_not}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of \code{selector} and \code{selector_not}.
 }
 
 \section{Dictionary}{
@@ -108,8 +108,8 @@ dict_filtors$get("maybe", <selector> [, <selector_not>])
 
 \seealso{
 Other selectors: 
-\code{\link{SelectorScalar}},
 \code{\link{Selector}},
+\code{\link{SelectorScalar}},
 \code{\link{dict_selectors_best}},
 \code{\link{dict_selectors_null}},
 \code{\link{dict_selectors_proxy}},

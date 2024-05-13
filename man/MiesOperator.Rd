@@ -30,17 +30,17 @@ In most cases, the \code{MiesOperator} class should not be inherited from, direc
 
 \seealso{
 Other base classes: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 }
 \concept{base classes}
 \section{Active bindings}{
@@ -228,7 +228,7 @@ the \code{MiesOperator} was last primed can be read from \verb{$primed_ps}.
 \describe{
 \item{\code{param_set}}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
 The \code{\link[paradox:ParamSet]{ParamSet}} to which all \code{values} tables passed to \verb{$operate()} will need to conform to.
-May only contiain \code{\link[paradox:ParamSet]{Param}} objects that conform to the classes listed in \verb{$param_classes}.}
+May only contiain \code{\link[paradox:Domain]{Domain}} objects that conform to the classes listed in \verb{$param_classes}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -250,7 +250,7 @@ passing through all function arguments after performing some checks.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{values}}{(\code{data.frame})\cr
-Individuals to operate on. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
+Individuals to operate on. Must pass the check of the \code{\link[paradox:ParamSet]{ParamSet}} given in the last \verb{$prime()} call
 and may not have any missing components.}
 
 \item{\code{...}}{(any)\cr

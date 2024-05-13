@@ -110,7 +110,7 @@ oi <- OptimInstanceSingleCrit$new(objective,
 
 mies_init_population(inst = oi, mu = 3, budget_id = "y", fidelity = 2,
   additional_component_sampler = Sampler1DRfun$new(
-    param = ParamDbl$new("additional", -1, 1), rfun = function(n) rep(-1, n)
+    param = ps(additional = p_dbl(-1, 1)), rfun = function(n) rep(-1, n)
   )
 )
 

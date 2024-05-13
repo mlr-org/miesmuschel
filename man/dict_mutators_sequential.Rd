@@ -16,7 +16,7 @@ argument are prefixed with \code{"mutator_1"}, \code{"mutator_2"}, ... up to \co
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of the \code{\link{Mutator}}s given in \code{mutators}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of the \code{\link{Mutator}}s given in \code{mutators}.
 }
 
 \section{Dictionary}{
@@ -96,9 +96,9 @@ gauss_x2_then_x1$operate(ds)
 }
 \seealso{
 Other mutators: 
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
 \code{\link{dict_mutators_cmpmaybe}},
 \code{\link{dict_mutators_erase}},

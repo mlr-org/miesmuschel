@@ -17,7 +17,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of the [`Mutator`]s given in `mutators`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of the [`Mutator`]s given in `mutators`.
 #'
 #' @template autoinfo_dict
 #'
@@ -94,11 +94,14 @@ MutatorSequential = R6Class("MutatorSequential",
     initialize = function(mutators) {
       private$.wrapped = imap(unname(assert_list(mutators, types = "Mutator", min.len = 1)), function(x, i) {
         x = x$clone(deep = TRUE)
-        x$param_set$set_id = sprintf("mutator_%s", i)
+        if (!paradox_s3) {
+          x$param_set$set_id = sprintf("mutator_%s", i)
+        }
         x
       })
 
       ps_alist = lapply(seq_along(mutators), function(i) substitute(private$.wrapped[[i]]$param_set, list(i = i)))
+      names(ps_alist) = sprintf("mutator_%s", seq_along(ps_alist))
 
       super$initialize(Reduce(intersect, map(private$.wrapped, "param_classes")), ps_alist,
         packages = unique(unlist(map(private$.wrapped, "packages"), use.names = FALSE, recursive = FALSE)),

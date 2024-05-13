@@ -85,7 +85,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `selector` and `selector_not`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of `selector` and `selector_not`.
 #'
 #' @template autoinfo_dict
 #'
@@ -110,8 +110,10 @@ SelectorMaybe = R6Class("SelectorMaybe",
       private$.wrapped = assert_r6(selector, "Selector")$clone(deep = TRUE)
       private$.wrapped_not = assert_r6(selector_not, "Selector")$clone(deep = TRUE)
 
-      private$.wrapped$param_set$set_id = "maybe"
-      private$.wrapped_not$param_set$set_id = "maybe_not"
+      if (!paradox_s3) {
+        private$.wrapped$param_set$set_id = "maybe"
+        private$.wrapped_not$param_set$set_id = "maybe_not"
+      }
       private$.maybe_param_set = ps(
         p_in = p_dbl(0, 1, tags = "required"),
         p_out = p_dbl(0, 1),
@@ -124,7 +126,7 @@ SelectorMaybe = R6Class("SelectorMaybe",
       private$.maybe_param_set$values = list(shuffle_input = TRUE,
         proportion_in = "exact", proportion_out = "exact", try_unique = TRUE)
       super$initialize(param_classes = intersect(selector$param_classes, selector_not$param_classes),
-        param_set = alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        param_set = alist(private$.maybe_param_set, maybe = private$.wrapped$param_set, maybe_not = private$.wrapped_not$param_set),
         supported = intersect(selector$supported, selector_not$supported),
         packages = c("stats", selector$packages, selector_not$packages), dict_entry = "maybe",
         own_param_set = quote(private$.maybe_param_set))

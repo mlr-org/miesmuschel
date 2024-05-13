@@ -162,7 +162,11 @@ expect_equal(sort(sort(gen2px) - sort(gen1px[order(abs(gen1 - 4))[1:6]])), rep(c
 # Multifidelity
 
 oib = as_oi(get_objective_passthrough("minimize", FALSE, "bud"))
-oib$search_space$params$bud$tags = "budget"
+if (miesmuschel:::paradox_s3) {
+  oib$search_space$tags$bud = "budget"
+} else {
+  oib$search_space$params$bud$tags = "budget"
+}
 oib$terminator = trm("evals", n_evals = 10)
 
 opt = OptimizerMies$new(mutator = MutatorNull$new(), recombinator = RecombinatorCrossoverUniform(),
@@ -210,7 +214,7 @@ expect_names(colnames(oib$archive$data), permutation.of = c(oib$search_space$ids
 # cloning, paramsets handled properly
 
 opt = OptimizerMies$new(mutator = mplus, recombinator = rminus, parent_selector = seltop, survival_selector = seltop)
-opt$param_set$set_id = "test"
+if (!miesmuschel:::paradox_s3) opt$param_set$set_id = "test"
 
 opt$param_set$values$mutator.plus = 0
 expect_equal(opt$mutator$param_set$values$plus, 0)
@@ -228,8 +232,8 @@ opt2$param_set$values$mutator.plus = -1
 expect_equal(opt$mutator$param_set$values$plus, 0)
 expect_equal(opt2$param_set$values$mutator.plus, -1)
 
-expect_equal(opt2$param_set$set_id, "test")
-expect_equal(opt$param_set$set_id, "test")
+if (!miesmuschel:::paradox_s3) expect_equal(opt2$param_set$set_id, "test")
+if (!miesmuschel:::paradox_s3) expect_equal(opt$param_set$set_id, "test")
 
 # ParamClasses
 

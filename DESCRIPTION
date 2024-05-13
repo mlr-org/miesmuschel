@@ -19,7 +19,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 ByteCompile: yes
-Version: 0.0.3
+Version: 0.0.4
 Depends:
   paradox (>= 0.7.1)
 Imports:
@@ -38,7 +38,7 @@ Suggests:
   ranger,
   xgboost,
   rpart
-RoxygenNote: 7.2.2
+RoxygenNote: 7.3.1
 Collate: 
     'dictionaries.R'
     'MiesOperator.R'

@@ -52,7 +52,7 @@ Whether to do reduction by factor (\code{TRUE}) or absolute number (\code{FALSE}
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of the \code{\link{Selector}}s given in \code{selectors}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of the \code{\link{Selector}}s given in \code{selectors}.
 }
 
 \section{Dictionary}{
@@ -72,8 +72,8 @@ dict_selectors$get("sequential", <selectors>)
 
 \seealso{
 Other selectors: 
-\code{\link{SelectorScalar}},
 \code{\link{Selector}},
+\code{\link{SelectorScalar}},
 \code{\link{dict_selectors_best}},
 \code{\link{dict_selectors_maybe}},
 \code{\link{dict_selectors_null}},

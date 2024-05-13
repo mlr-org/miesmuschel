@@ -43,7 +43,7 @@ Initialized to \code{FALSE}.
 \section{Supported Operand Types}{
 
 
-Supported \code{\link[paradox:Param]{Param}} classes are the set intersection of supported classes of \code{filtor} and \code{filtor_not}.
+Supported \code{\link[paradox:Domain]{Domain}} classes are the set intersection of supported classes of \code{filtor} and \code{filtor_not}.
 }
 
 \section{Dictionary}{
@@ -86,8 +86,8 @@ fm$operate(new_data, known_data, fitnesses, 3)
 }
 \seealso{
 Other filtors: 
-\code{\link{FiltorSurrogate}},
 \code{\link{Filtor}},
+\code{\link{FiltorSurrogate}},
 \code{\link{dict_filtors_null}},
 \code{\link{dict_filtors_proxy}},
 \code{\link{dict_filtors_surprog}},

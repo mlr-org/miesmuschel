@@ -26,7 +26,7 @@
 #'
 #' @section Supported Operand Types:
 #'
-#' Supported [`Param`][paradox::Param] classes are the set intersection of supported classes of `recombinator` and `recombinator_not`.
+#' Supported [`Domain`][paradox::Domain] classes are the set intersection of supported classes of `recombinator` and `recombinator_not`.
 #'
 #' @template autoinfo_dict
 #'
@@ -83,12 +83,14 @@ RecombinatorMaybe = R6Class("RecombinatorMaybe",
         stop("recombinator and recombinator_not must have the same number of in / out individuals.")
       }
 
-      private$.wrapped$param_set$set_id = "maybe"
-      private$.wrapped_not$param_set$set_id = "maybe_not"
+      if (!paradox_s3) {
+        private$.wrapped$param_set$set_id = "maybe"
+        private$.wrapped_not$param_set$set_id = "maybe_not"
+      }
 
       private$.maybe_param_set = ps(p = p_dbl(0, 1, tags = "required"))
       super$initialize(recombinator$param_classes,
-        alist(private$.maybe_param_set, private$.wrapped$param_set, private$.wrapped_not$param_set),
+        alist(private$.maybe_param_set, maybe = private$.wrapped$param_set, maybe_not = private$.wrapped_not$param_set),
         recombinator$n_indivs_in, recombinator$n_indivs_out,
         packages = c("stats", recombinator$packages, recombinator_not$packages), dict_entry = "maybe",
         own_param_set = quote(private$.maybe_param_set))

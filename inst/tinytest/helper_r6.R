@@ -7,6 +7,7 @@ expect_read_only = function(object, components) {
 }
 
 expect_equal_without_id = function(a, b) {
+  if (miesmuschel:::paradox_s3) return(expect_equal(a, b))
   a = a$clone(deep = TRUE)
   a$param_set$set_id = ""
   b = b$clone(deep = TRUE)

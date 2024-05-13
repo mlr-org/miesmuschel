@@ -18,10 +18,10 @@ Fitness values are always \emph{maximized}, both in single- and multi-criterion 
 Unlike most other operator types inheriting from \code{\link{MiesOperator}}, the \verb{$operate()} function has four arguments, which are passed on to \verb{$.filter()}
 \itemize{
 \item \code{values} :: \code{data.frame}\cr
-Individuals to filter. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
+Individuals to filter. Must pass the check of the \code{\link[paradox:ParamSet]{ParamSet}} given in the last \verb{$prime()} call
 and may not have any missing components.
 \item \code{known_values} :: \code{data.frame}\cr
-Individuals to use for filtering. Must pass the check of the \code{\link[paradox:ParamSet]{Param}} given in the last \verb{$prime()} call
+Individuals to use for filtering. Must pass the check of the \code{\link[paradox:ParamSet]{ParamSet}} given in the last \verb{$prime()} call
 and may not have any missing components. Note that \code{known_values} may be empty.
 \item \code{fitnesses} :: \code{numeric} | \code{matrix}\cr
 Fitnesses for each individual given in \code{known_values}. If this is a \code{numeric}, then its length must be equal to the number of rows in \code{values}. If
@@ -51,15 +51,15 @@ Typically, the \verb{$initialize()} function should also be overloaded, and opti
 Other base classes: 
 \code{\link{FiltorSurrogate}},
 \code{\link{MiesOperator}},
+\code{\link{Mutator}},
 \code{\link{MutatorDiscrete}},
 \code{\link{MutatorNumeric}},
-\code{\link{Mutator}},
 \code{\link{OperatorCombination}},
-\code{\link{RecombinatorPair}},
 \code{\link{Recombinator}},
+\code{\link{RecombinatorPair}},
 \code{\link{Scalor}},
-\code{\link{SelectorScalar}},
-\code{\link{Selector}}
+\code{\link{Selector}},
+\code{\link{SelectorScalar}}
 
 Other filtors: 
 \code{\link{FiltorSurrogate}},
