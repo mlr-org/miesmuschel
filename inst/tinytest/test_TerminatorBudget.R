@@ -11,7 +11,9 @@ expect_error(tb$is_terminated(oibig$archive), "Missing required parameter.*budge
 
 tb$param_set$values$budget = Inf
 
-expect_equal(tb$param_set$values, list(aggregate = sum, budget = Inf))
+expect_list(tb$param_set$values, names = "unique")
+expect_names(names(tb$param_set$values), permutation.of = c("aggregate", "budget"))
+expect_equal(tb$param_set$values[c("aggregate", "budget")], list(aggregate = sum, budget = Inf))
 
 
 
@@ -20,7 +22,11 @@ expect_error(tb$is_terminated(oibig), "Must inherit from class 'Archive'")
 expect_error(tb$is_terminated(oibig$archive), "Need exactly one budget parameter")
 expect_error(tb$status(oibig$archive), "Need exactly one budget parameter")
 
-oibig$search_space$params$bud$tags = "budget"
+if (miesmuschel:::paradox_s3) {
+  oibig$search_space$tags[["bud"]] = "budget"
+} else {
+  oibig$search_space$params$bud$tags = "budget"
+}
 
 expect_false(tb$is_terminated(oibig$archive))
 
@@ -66,7 +72,11 @@ expect_equal(tb$status(oibig$archive), c(max_steps = 100, current_steps = 100))
 
 # multi objective
 oim = as_oi(get_objective_passthrough(c("minimize", "maximize"), FALSE, "bud"))
-oim$search_space$params$bud$tags = "budget"
+if (miesmuschel:::paradox_s3) {
+  oim$search_space$tags[["bud"]] = "budget"
+} else {
+  oim$search_space$params$bud$tags = "budget"
+}
 expect_false(tb$is_terminated(oim$archive))
 oibig$eval_batch(design[, p2 := 1:9][9, bud := 10])
 expect_true(tb$is_terminated(oibig$archive))

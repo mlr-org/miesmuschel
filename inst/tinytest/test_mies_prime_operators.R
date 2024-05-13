@@ -33,7 +33,7 @@ lapply(c(ms, rs), function(x) expect_equal(x$primed_ps$params, p_wo_y$params))
 p_ad = ps(z = p_dbl(-1, 0), z2 = p_dbl(-2, 2))
 
 expect_error(mies_prime_operators(p, mutators = ms, recombinators = rs, selectors = ss, filtors = fs, additional_components = ps(x = p_dbl(0, 1))),
-  "Must have unique names")
+  "Must have unique names|would contain duplicated parameter names")
 
 expect_equal(mies_prime_operators(p, mutators = ms, recombinators = rs, selectors = ss, filtors = fs, additional_components = p_ad),
   list(mutators = ms, recombinators = rs, selectors = ss, filtors = fs))

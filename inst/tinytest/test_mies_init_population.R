@@ -8,15 +8,15 @@ oismall = as_oi(get_objective_passthrough("minimize", TRUE))
 expect_error(mies_init_population(as_oi(get_objective_passthrough("minimize", TRUE, "dob")), mu = 2), "search_space.*disjunct from.*dob")
 expect_error(mies_init_population(as_oi(get_objective_passthrough("minimize", TRUE, "eol")), mu = 2), "search_space.*disjunct from.*eol")
 expect_error(mies_init_population(oismall, mu = 2,
-  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("dob", 0, 1), rfun = function(n) rep(0, n))), "dob.*may not be additional component")
+  additional_component_sampler = Sampler1DRfun$new(param = ps(dob = p_dbl(0, 1)), rfun = function(n) rep(0, n))), "dob.*may not be additional component")
 expect_error(mies_init_population(oismall, mu = 2,
-  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("eol", 0, 1), rfun = function(n) rep(0, n))), "eol.*may not be additional component")
+  additional_component_sampler = Sampler1DRfun$new(param = ps(eol = p_dbl(0, 1)), rfun = function(n) rep(0, n))), "eol.*may not be additional component")
 
 expect_error(mies_init_population(oismall, mu = 2,
-  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("p1", 0, 1), rfun = function(n) rep(0, n))), "Search space and additional components name clash: p1")
+  additional_component_sampler = Sampler1DRfun$new(param = ps(p1 = p_dbl(0, 1)), rfun = function(n) rep(0, n))), "Search space and additional components name clash: p1")
 
 expect_error(mies_init_population(oismall, mu = 2,
-  additional_component_sampler = Sampler1DRfun$new(param = ParamDbl$new("pout1", 0, 1), rfun = function(n) rep(0, n))), "codomain and additional components name clash: pout1")
+  additional_component_sampler = Sampler1DRfun$new(param = ps(pout1 = p_dbl(0, 1)), rfun = function(n) rep(0, n))), "codomain and additional components name clash: pout1")
 
 oilarge = as_oi(get_objective_passthrough("minimize", FALSE))
 mies_init_population(oilarge, mu = 3)

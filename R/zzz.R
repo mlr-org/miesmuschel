@@ -85,7 +85,7 @@ reg_mlr3tuning = function(...) {  # nocov start
 
 
 # static code checks should not complain about commonly used data.table columns
-utils::globalVariables(c("dob", "eol"))
+utils::globalVariables(c("dob", "eol", "."))
 
 if (!Sys.getenv("DEVTOOLS_LOAD") == "true") {
   leanify_package()

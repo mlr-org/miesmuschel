@@ -12,10 +12,10 @@ designmultiobj = cbind(generate_design_random(oibigmultiboth$search_space, 9)$da
   data.table(additional = 1:9, dob = rep(1:3, each = 3), eol = rep(c(3, NA, NA), 3))
 )
 
-p = oibigmax$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9)))
+p = miesmuschel:::ps_union(list(oibigmax$search_space$clone(deep = TRUE), ps(additional = p_int(1, 9))))
 
 sb = sel("best")$prime(p)
-sr = sel("random")$prime(oibigmultiboth$search_space$clone(deep = TRUE)$add(ps(additional = p_int(1, 9))))
+sr = sel("random")$prime(miesmuschel:::ps_union(list(oibigmultiboth$search_space$clone(deep = TRUE), ps(additional = p_int(1, 9)))))
 
 oibigmax$eval_batch(copy(design))
 
