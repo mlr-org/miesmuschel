@@ -2,7 +2,7 @@
 # miesmuschel: Mixed Integer Evolution Strategies
 
 [![check](https://github.com/mlr-org/miesmuschel/actions/workflows/check.yml/badge.svg)](https://github.com/mlr-org/miesmuschel/actions/workflows/check.yml)
-[![Coverage](https://codecov.io/github/mlr-org/miesmuschel/branch/master/graphs/badge.svg)](https://codecov.io/github/mlr-org/miesmuschel)
+[![Coverage](https://codecov.io/github/mlr-org/miesmuschel/branch/master/graphs/badge.svg)](https://app.codecov.io/github/mlr-org/miesmuschel)
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version/miesmuschel)](https://CRAN.R-project.org/package=miesmuschel)
 [![CRAN Downloads](https://cranlogs.r-pkg.org/badges/miesmuschel)](https://CRAN.R-project.org/package=miesmuschel)
 
