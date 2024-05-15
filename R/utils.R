@@ -23,7 +23,7 @@ ps_flatten = function(param_set, clone = TRUE) {
 # have their <id> changed to <set_id>.<id>. This is also reflected in deps and in `$trafo`.
 # @param sets: list of ParamSet
 ps_union = function(sets) {  # nocov start
-  if (paradox_s3) return(paradox::ps_union(sets))
+  if (paradox_s3) return(get("ps_union", asNamespace("paradox"))(sets))  # will be in upcoming paradox
   assert_list(sets, types = "ParamSet")
   assert_names(discard(map_chr(sets, "set_id"), `==`, ""), type = "unique")
 
