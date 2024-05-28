@@ -221,8 +221,8 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \emph{Evolutionary computation}, \bold{21}(1), 29--64.
 }
 \concept{optimizers}
-\section{Super class}{
-\code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerMies}
+\section{Super classes}{
+\code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{\link[bbotk:OptimizerBatch]{bbotk::OptimizerBatch}} -> \code{OptimizerMies}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -262,8 +262,8 @@ Configuration parameters of the optimization algorithm.}
 <ul>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="format"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-format'><code>bbotk::Optimizer$format()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="help"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-help'><code>bbotk::Optimizer$help()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="optimize"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-optimize'><code>bbotk::Optimizer$optimize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="print"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-print'><code>bbotk::Optimizer$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimizerBatch" data-id="optimize"><a href='../../bbotk/html/OptimizerBatch.html#method-OptimizerBatch-optimize'><code>bbotk::OptimizerBatch$optimize()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -350,7 +350,7 @@ The objects of this class are cloneable with this method.
 }
 }
 \section{Super classes}{
-\code{\link[mlr3tuning:Tuner]{mlr3tuning::Tuner}} -> \code{\link[mlr3tuning:TunerFromOptimizer]{mlr3tuning::TunerFromOptimizer}} -> \code{TunerMies}
+\code{\link[mlr3tuning:Tuner]{mlr3tuning::Tuner}} -> \code{\link[mlr3tuning:TunerBatch]{mlr3tuning::TunerBatch}} -> \code{\link[mlr3tuning:TunerBatchFromOptimizerBatch]{mlr3tuning::TunerBatchFromOptimizerBatch}} -> \code{TunerMies}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -365,7 +365,7 @@ The objects of this class are cloneable with this method.
 <li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="format"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-format'><code>mlr3tuning::Tuner$format()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="help"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-help'><code>mlr3tuning::Tuner$help()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="print"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-print'><code>mlr3tuning::Tuner$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerFromOptimizer" data-id="optimize"><a href='../../mlr3tuning/html/TunerFromOptimizer.html#method-TunerFromOptimizer-optimize'><code>mlr3tuning::TunerFromOptimizer$optimize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerBatchFromOptimizerBatch" data-id="optimize"><a href='../../mlr3tuning/html/TunerBatchFromOptimizerBatch.html#method-TunerBatchFromOptimizerBatch-optimize'><code>mlr3tuning::TunerBatchFromOptimizerBatch$optimize()</code></a></span></li>
 </ul>
 </details>
 }}

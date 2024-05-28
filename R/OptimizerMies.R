@@ -240,7 +240,7 @@
 #' mies_tune$optimize(ti)
 #' }
 #' @export
-OptimizerMies = R6Class("OptimizerMies", inherit = Optimizer,
+OptimizerMies = R6Class("OptimizerMies", inherit = OptimizerBatch,
   public = list(
     #' @description
     #' Initialize the `OptimizerMies` object.
