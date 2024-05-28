@@ -38,6 +38,9 @@ Suggests:
   ranger,
   xgboost,
   rpart
+Remotes:
+  mlr-org/bbotk,
+  mlr-org/mlr3tuning
 RoxygenNote: 7.3.1
 Collate: 
     'dictionaries.R'
