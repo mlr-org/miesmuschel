@@ -146,7 +146,7 @@ jobs:
       - name: Install Log
         if: ${{ failure() }}
         working-directory: ..
-        run: 'cat *.Rcheck/00install.log'
+        run: 'cat *.Rcheck/00install.out'
       - name: Check Log
         if: ${{ failure() }}
         working-directory: ..
