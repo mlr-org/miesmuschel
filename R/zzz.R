@@ -39,7 +39,9 @@ paradox_s3 = FALSE
 
 # make these point to whatever bbotk happens to name its classes today
 Optimizer = NULL
-TunerFromOptimizer = NULL
+# the following actually becomes an active binding, so the mlr3tuning
+# package does not get loaded prematurely.
+## TunerFromOptimizer = NULL
 
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
@@ -77,7 +79,8 @@ reg_mlr3tuning = function(...) {  # nocov start
     assign("Optimizer", get("Optimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
   }
   makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = function() {
-    if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("bbotk"))) {
+    require_namespaces("mlr3tuning")
+    if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))) {
       get("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))
     } else {
       get("TunerFromOptimizer", envir = asNamespace("mlr3tuning"))
