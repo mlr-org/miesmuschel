@@ -47,7 +47,7 @@ of configurations as part of a MIES operation. The \code{dob} extra-info in the 
 is also set properly to indicate a progressed generation.
 
 This function can be used directly, but it is easier to use it within the \code{\link{OptimizerMies}}
-\code{\link[bbotk:Optimizer]{Optimizer}} if standard GA operation is desired.
+class if standard GA operation is desired.
 
 Multifidelity evaluation is supported as described in \code{vignette("mies-multifid")}. For this,
 an extra component named after \code{budget_id} is appended to each individual, chosen from

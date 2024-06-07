@@ -10,7 +10,7 @@ algorithm, performing initialization first, followed by a loop of performance ev
 recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
 Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in Fieldsend (2014), is supported.
 The modular design and reliance on \code{\link{MiesOperator}} objects to perform central parts of the optimization algorithm makes this
-\code{\link[bbotk:Optimizer]{Optimizer}} highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
+\code{Optimizer} highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
 as presented in Li (2013) can easily be implemented.
 
 \code{OptimizerMies} implements a standard evolution strategies loop:
