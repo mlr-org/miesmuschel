@@ -1,6 +1,10 @@
+# miesmuschel 0.0.4-1
+
+* Compatibility with upcoming `bbotk` release
+
 # miesmuschel 0.0.4
 
-* Compatibility with upgoming new `paradox` release
+* Compatibility with upcoming new `paradox` release
 
 # miesmuschel 0.0.3
 
