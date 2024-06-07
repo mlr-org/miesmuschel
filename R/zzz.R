@@ -39,9 +39,34 @@ paradox_s3 = FALSE
 
 # make these point to whatever bbotk happens to name its classes today
 
-Optimizer = NULL
-OptimInstanceSingleCrit = NULL
-OptimInstanceMultiCrit = NULL
+Optimizer_internal = NULL
+OptimInstanceSingleCrit_internal = NULL
+OptimInstanceMultiCrit_internal = NULL
+
+#' @export
+#' @title Optimizer Class
+#'
+#' @description
+#' `bbotk`'s `Optimizer` class.
+#' Re-exported since `bbotk` will change the name.
+Optimizer = R6::R6Class("Optimizer", inherit = Optimizer_internal)
+
+#' @export
+#' @title OptimInstanceSingleCrit Class
+#'
+#' @description
+#' `bbotk`'s `OptimInstanceSingleCrit` class.
+#' Re-exported since `bbotk` will change the name.
+OptimInstanceSingleCrit = R6::R6Class("OptimInstanceSingleCrit", inherit = OptimInstanceSingleCrit_internal)
+
+#' @export
+#' @title OptimInstanceMultiCrit Class
+#'
+#' @description
+#' `bbotk`'s `OptimInstanceMultiCrit` class.
+#' Re-exported since `bbotk` will change the name.
+OptimInstanceMultiCrit = R6::R6Class("OptimInstanceMultiCrit", inherit = OptimInstanceMultiCrit_internal)
+
 
 # the following actually becomes an active binding, so the mlr3tuning
 # package does not get loaded prematurely.
@@ -80,7 +105,7 @@ reg_mlr3tuning = function(...) {  # nocov start
   }
   ## backward compatibility with bbotk
   replacing = c("Optimizer%s", "OptimInstance%sSingleCrit", "OptimInstance%sMultiCrit")
-  localnames = sprintf(replacing, "")
+  localnames = paste0(sprintf(replacing, ""), "_internal")
   if (exists("OptimizerBatch", envir = asNamespace("bbotk"))) {
     bbotknames = sprintf(replacing, "Batch")
   } else {
@@ -93,17 +118,19 @@ reg_mlr3tuning = function(...) {  # nocov start
   replacing = c("TunerFromOptimizer%s", "TuningInstance%sSingleCrit", "TuningInstance%sMultiCrit")
   localnames = sprintf(replacing, "") 
   newnames = sprintf(replacing, "Batch")
+  fni = list()
   for (i in seq_along(replacing)) {
     lname = localnames[[i]]
     newname = newnames[[i]]
-    makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = crate(function() {
+    fni[[i]] = crate(function() {
       if (!requireNamespace("mlr3tuning", quietly = TRUE)) return(NULL)
       if (exists(newname, envir = asNamespace("mlr3tuning"))) {
         get(newname, envir = asNamespace("mlr3tuning"))
       } else {
         get(lname, envir = asNamespace("mlr3tuning"))
       }
-    }, lname, newname))
+    }, lname, newname)
+    makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = fni[[i]])
   }
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
