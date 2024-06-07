@@ -350,7 +350,7 @@ The objects of this class are cloneable with this method.
 }
 }
 \section{Super classes}{
-\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceMultiCrit]{bbotk::OptimInstanceMultiCrit}} -> \code{\link[mlr3tuning:TuningInstanceMultiCrit]{mlr3tuning::TuningInstanceMultiCrit}} -> \code{TunerMies}
+\code{\link[mlr3tuning:Tuner]{mlr3tuning::Tuner}} -> \code{\link[mlr3tuning:TunerFromOptimizer]{mlr3tuning::TunerFromOptimizer}} -> \code{TunerMies}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -360,14 +360,12 @@ The objects of this class are cloneable with this method.
 }
 }
 \if{html}{\out{
-<details><summary>Inherited methods</summary>
+<details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="clear"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-clear'><code>bbotk::OptimInstance$clear()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="eval_batch"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-eval_batch'><code>bbotk::OptimInstance$eval_batch()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="format"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-format'><code>bbotk::OptimInstance$format()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="objective_function"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-objective_function'><code>bbotk::OptimInstance$objective_function()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="print"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-print'><code>bbotk::OptimInstance$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TuningInstanceMultiCrit" data-id="assign_result"><a href='../../mlr3tuning/html/TuningInstanceMultiCrit.html#method-TuningInstanceMultiCrit-assign_result'><code>mlr3tuning::TuningInstanceMultiCrit$assign_result()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="format"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-format'><code>mlr3tuning::Tuner$format()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="help"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-help'><code>mlr3tuning::Tuner$help()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="print"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-print'><code>mlr3tuning::Tuner$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerFromOptimizer" data-id="optimize"><a href='../../mlr3tuning/html/TunerFromOptimizer.html#method-TunerFromOptimizer-optimize'><code>mlr3tuning::TunerFromOptimizer$optimize()</code></a></span></li>
 </ul>
 </details>
 }}

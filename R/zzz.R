@@ -67,6 +67,22 @@ OptimInstanceSingleCrit = R6::R6Class("OptimInstanceSingleCrit", inherit = Optim
 #' Re-exported since `bbotk` will change the name.
 OptimInstanceMultiCrit = R6::R6Class("OptimInstanceMultiCrit", inherit = OptimInstanceMultiCrit_internal)
 
+#' @export
+#' @title TuningInstanceSingleCrit Class
+#'
+#' @description
+#' `mlr3tuning`'s `TuningInstanceSingleCrit` class.
+#' Re-exported since `mlr3tuning` will change the name.
+TuningInstanceSingleCrit = R6::R6Class("TuningInstanceSingleCrit", inherit = TuningInstanceSingleCrit_internal)
+
+#' @export
+#' @title TuningInstanceMultiCrit Class
+#'
+#' @description
+#' `mlr3tuning`'s `TuningInstanceMultiCrit` class.
+#' Re-exported since `mlr3tuning` will change the name.
+TuningInstanceMultiCrit = R6::R6Class("TuningInstanceMultiCrit", inherit = TuningInstanceMultiCrit_internal)
+
 
 # the following actually becomes an active binding, so the mlr3tuning
 # package does not get loaded prematurely.
@@ -116,19 +132,21 @@ reg_mlr3tuning = function(...) {  # nocov start
   }
 
   replacing = c("TunerFromOptimizer%s", "TuningInstance%sSingleCrit", "TuningInstance%sMultiCrit")
-  localnames = sprintf(replacing, "") 
+  oldnames = sprintf(replacing, "") 
   newnames = sprintf(replacing, "Batch")
+  localnames = paste0(oldnames, c("", "_internal", "_internal"))
   for (i in seq_along(replacing)) {
-    lname = localnames[[i]]
+    oldname = oldnames[[i]]
     newname = newnames[[i]]
+    lname = localnames[[i]]
     makeActiveBinding(lname, env = parent.env(environment()), fun = crate(function() {
       if (!requireNamespace("mlr3tuning", quietly = TRUE)) return(NULL)
       if (exists(newname, envir = asNamespace("mlr3tuning"))) {
         get(newname, envir = asNamespace("mlr3tuning"))
       } else {
-        get(lname, envir = asNamespace("mlr3tuning"))
+        get(oldname, envir = asNamespace("mlr3tuning"))
       }
-    }, lname, newname))
+    }, oldname, newname))
   }
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
