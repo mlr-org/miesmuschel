@@ -5,7 +5,7 @@ learner = mlr3::lrn("classif.rpart")
 
 learner$param_set$values[c("cp", "maxdepth")] = list(to_tune())
 
-ti = mlr3tuning::TuningInstanceSingleCrit$new(
+ti = TuningInstanceSingleCrit$new(
   task = mlr3::tsk("iris"),
   learner = learner,
   resampling = mlr3::rsmp("holdout"),
