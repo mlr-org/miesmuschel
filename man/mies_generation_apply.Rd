@@ -11,7 +11,7 @@ mies_generation_apply(
 )
 }
 \arguments{
-\item{archive}{(\code{Archive})\cr
+\item{archive}{(\code{\link[bbotk:Archive]{Archive}})\cr
 The archive over which to aggregate.}
 
 \item{fitness_aggregator}{(\code{function})\cr

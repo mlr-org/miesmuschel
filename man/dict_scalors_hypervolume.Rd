@@ -13,7 +13,7 @@ The returned scalar value is the measure of all points that have fitnesses that 
 \item greater than all points in \code{baseline} in at least one dimension.
 }
 
-\code{baseline} should probably be a \code{paradox::ContextPV} and generate fitness values from the \code{Archive}
+\code{baseline} should probably be a \code{paradox::ContextPV} and generate fitness values from the \code{\link[bbotk:Archive]{Archive}}
 in the context using \code{\link{mies_get_fitnesses}}.
 }
 \section{Configuration Parameters}{

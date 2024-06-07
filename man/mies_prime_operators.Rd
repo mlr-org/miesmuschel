@@ -17,7 +17,7 @@ mies_prime_operators(
 }
 \arguments{
 \item{search_space}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
-Search space of the \code{Objective} or \code{OptimInstance} to be optimized.}
+Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{OptimInstance} to be optimized.}
 
 \item{mutators}{(\code{list} of \code{\link{Mutator}})\cr
 \code{\link{Mutator}} objects to prime. May be empty (default).}
@@ -48,12 +48,12 @@ and \verb{$selectors} (\code{list} of \code{\link{Selector}}, primed \code{selec
 \description{
 Prime the given \code{\link{MiesOperator}}s for an optimization run with the given search space.
 
-In its simplest form, MIES optimization only optimizes the search space of the \code{Objective} to be optimized. However,
+In its simplest form, MIES optimization only optimizes the search space of the \code{\link[bbotk:Objective]{Objective}} to be optimized. However,
 more advanced optimization may handle a "budget" parameter for multi-fidelity optimization differently: It is still selected by \code{\link{Selector}}s,
 but not mutated or recombined and instead handled separately. It is also possible to add additional components to the search space that are
 not evaluated by the objective function, but that are used for self-adaption by other operators.
 
-The \code{mies_prime_operators()} function uses the information that the user usually has readily at hand -- the \code{Objective}\verb{s search space, the budget parameter, and additional components -- and primes [}Mutator\verb{], [}Recombinator\verb{], and [}Selector`] objects in the right way:
+The \code{mies_prime_operators()} function uses the information that the user usually has readily at hand -- the \code{\link[bbotk:Objective]{Objective}}\verb{s search space, the budget parameter, and additional components -- and primes [}Mutator\verb{], [}Recombinator\verb{], and [}Selector`] objects in the right way:
 \itemize{
 \item \code{\link{Selector}}s are primed on a union of \code{search_space} and \code{additional_components}
 \item \code{\link{Mutator}}s and \code{\link{Recombinator}}s are primed on the \code{\link{Selector}}'s space with the \code{budget_id} \code{\link[paradox:Domain]{Domain}} removed.

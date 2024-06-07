@@ -26,7 +26,7 @@ as presented in Li (2013) can easily be implemented.
 }
 \section{Terminating}{
 
-As with all optimizers, \code{Terminator}s are used to end optimization after a specific number of evaluations were performed,
+As with all optimizers, \code{\link[bbotk:Terminator]{Terminator}}s are used to end optimization after a specific number of evaluations were performed,
 time elapsed, or other conditions are satisfied. Of particular interest is \code{\link{TerminatorGenerations}}, which terminates after a number
 of generations were evaluated in \code{OptimizerMies}. The initial population counts as generation 1, its offspring as generation 2 etc.;
 fidelity refinements (step 6. in the algorithm description above) are always included in their generation, \code{\link{TerminatorGenerations}}
@@ -63,7 +63,7 @@ optimization started; it is recommended to leave this value at \code{TRUE} which
 
 \section{Additional Components}{
 
-The search space over which the optimization is performed is fundamentally tied to the \code{Objective}, and therefore
+The search space over which the optimization is performed is fundamentally tied to the \code{\link[bbotk:Objective]{Objective}}, and therefore
 to the \code{OptimInstance} given to \code{OptimizerMies$optimize()}. However, some advanced Evolution Strategy based
 algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 self-adaption as implemented in \code{\link{OperatorCombination}}, where one or several components can be used to adjust operator behaviour.

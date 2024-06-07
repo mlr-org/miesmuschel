@@ -12,7 +12,7 @@ mies_aggregate_single_generation(
 )
 }
 \arguments{
-\item{archive}{(\code{Archive})\cr
+\item{archive}{(\code{\link[bbotk:Archive]{Archive}})\cr
 The archive over which to aggregate.}
 
 \item{fitness_aggregator}{(\code{function})\cr
@@ -61,9 +61,9 @@ If multi-fidelity evaluation is being performed, then this is the "budget" value
 The configurations that were evaluated for the alive individuals. Rows are in the same order as the values given to \code{fitnesses}
 or \code{objectives_unscaled}.
 \item \code{search_space} :: \code{\link[paradox:ParamSet]{ParamSet}}\cr
-The search space of the \code{Archive} under evaluation.
+The search space of the \code{\link[bbotk:Archive]{Archive}} under evaluation.
 \item \code{codomain} :: \code{\link[paradox:ParamSet]{ParamSet}}\cr
-The codomain of the \code{Archive} under evaluation.
+The codomain of the \code{\link[bbotk:Archive]{Archive}} under evaluation.
 This is particularly useful when using \code{objectives_unscaled} to determine minimization or maximization.
 }
 

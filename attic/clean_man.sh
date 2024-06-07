@@ -1,2 +1,2 @@
 #!/bin/bash
-sed -i 's_\\link\[\(bbotk\|mlr3tuning\):[^]]*\]{\([^}]*\)}_\2_g' man/*.Rd
+sed -i 's_\\link\[\(bbotk\|mlr3tuning\):\(Optim\|Tun\)[^]]*\]{\([^}]*\)}_\3_g' man/*.Rd
