@@ -80,7 +80,7 @@ reg_mlr3tuning = function(...) {  # nocov start
     assign("Optimizer", get("Optimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
   }
   makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = function() {
-    if (!requireNamespace("mlr3tuning")) return(NULL)
+    if (!requireNamespace("mlr3tuning", quiet = TRUE)) return(NULL)
     if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))) {
       get("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))
     } else {
