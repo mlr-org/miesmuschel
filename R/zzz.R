@@ -82,7 +82,7 @@ reg_mlr3tuning = function(...) {  # nocov start
     } else {
       get("TunerFromOptimizer", envir = asNamespace("mlr3tuning"))
     }
-  }
+  })
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
