@@ -11,7 +11,7 @@
 #' recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
 #' Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in `r cite_bib("fieldsend2014rolling")`, is supported.
 #' The modular design and reliance on [`MiesOperator`] objects to perform central parts of the optimization algorithm makes this
-#' [`Optimizer`][bbotk::Optimizer] highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
+#' `Optimizer` highly flexible and configurable. In combination with [`OperatorCombination`] mutators and recombinators, an algorithm
 #' as presented in `r cite_bib("li2013mixed")` can easily be implemented.
 #'
 #' `OptimizerMies` implements a standard evolution strategies loop:

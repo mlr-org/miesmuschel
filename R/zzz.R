@@ -7,7 +7,7 @@
 #'
 #' @description
 #'
-#' `miesmuschel` offers both an [`Optimizer`][bbotk::Optimizer] and a [`Tuner`][mlr3tuning::Tuner] for general
+#' `miesmuschel` offers both an `Optimizer` and a `Tuner` for general
 #' MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
 #' is more flexible and can be used for research into novel evolution strategies.
 #'
