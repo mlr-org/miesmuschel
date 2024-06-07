@@ -41,7 +41,7 @@ jobs:
             action: coverage
             r: release
           - os: ubuntu-latest
-            action: paradox
+            action: githubversions
             r: release
 
     steps:
@@ -82,11 +82,14 @@ jobs:
         name: install package dependencies
         run: | 
           remotes::install_deps(dependencies = TRUE)
-      - name: install paradox devel
-        if: ${{ matrix.action == 'paradox' }}
+      - name: install github versions
+        if: ${{ matrix.action == 'githubversions' }}
         shell: Rscript {0}
         run: |
+          system("sudo apt-get install libhiredis-dev")
           remotes::install_github("mlr-org/paradox")
+          remotes::install_github("mlr-org/bbotk")
+          remotes::install_github("mlr-org/mlr3tuning")
       - name: Session Info
         shell: Rscript {0}
         run: |
@@ -95,7 +98,9 @@ jobs:
           sessionInfo() 
       - name: Document
         shell: Rscript {0}
-        run: roxygen2::roxygenise()
+        run: |
+          roxygen2::roxygenise()
+          system("attic/clean_man.sh")
       - if: runner.os == 'windows'
         name: Remove hypertarget from Latex for Windows
         run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"
@@ -141,7 +146,11 @@ jobs:
           git --work-tree=docs add --all
           git --work-tree=docs commit -m "gh-pages"
           git push origin HEAD:gh-pages --force
-      - name: Log
+      - name: Install Log
+        if: ${{ failure() }}
+        working-directory: ..
+        run: 'cat *.Rcheck/00install.out'
+      - name: Check Log
         if: ${{ failure() }}
         working-directory: ..
         run: 'cat *.Rcheck/00check.log'

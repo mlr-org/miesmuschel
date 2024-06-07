@@ -6,7 +6,7 @@
 #' is also set properly to indicate a progressed generation.
 #'
 #' This function can be used directly, but it is easier to use it within the [`OptimizerMies`]
-#' [`Optimizer`][bbotk::Optimizer] if standard GA operation is desired.
+#' class if standard GA operation is desired.
 #'
 #' Multifidelity evaluation is supported as described in `vignette("mies-multifid")`. For this,
 #' an extra component named after `budget_id` is appended to each individual, chosen from

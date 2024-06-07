@@ -6,7 +6,7 @@
 \alias{miesmuschel-package}
 \title{miesmuschel: Mixed Integer Evolution Strategies}
 \description{
-\code{miesmuschel} offers both an \code{\link[bbotk:Optimizer]{Optimizer}} and a \code{\link[mlr3tuning:Tuner]{Tuner}} for general
+\code{miesmuschel} offers both an \code{Optimizer} and a \code{Tuner} for general
 MIES-optimization, as well as all the building blocks for building a custom optimization algorithm that
 is more flexible and can be used for research into novel evolution strategies.
 

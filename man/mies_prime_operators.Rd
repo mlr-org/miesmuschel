@@ -17,7 +17,7 @@ mies_prime_operators(
 }
 \arguments{
 \item{search_space}{(\code{\link[paradox:ParamSet]{ParamSet}})\cr
-Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{\link[bbotk:OptimInstance]{OptimInstance}} to be optimized.}
+Search space of the \code{\link[bbotk:Objective]{Objective}} or \code{OptimInstance} to be optimized.}
 
 \item{mutators}{(\code{list} of \code{\link{Mutator}})\cr
 \code{\link{Mutator}} objects to prime. May be empty (default).}

@@ -14,7 +14,7 @@ mies_evaluate_offspring(
 )
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
+\item{inst}{(\code{OptimInstance})\cr
 Optimization instance to evaluate.}
 
 \item{offspring}{(\code{data.frame})\cr
@@ -42,12 +42,12 @@ Default \code{TRUE}. Ignored when \code{reevaluate_fidelity} is \code{NULL}}
 through \code{eval_batch}.
 }
 \description{
-Calls \verb{$eval_batch} of a given \code{\link[bbotk:OptimInstance]{OptimInstance}} on a set
+Calls \verb{$eval_batch} of a given \code{OptimInstance} on a set
 of configurations as part of a MIES operation. The \code{dob} extra-info in the archive
 is also set properly to indicate a progressed generation.
 
 This function can be used directly, but it is easier to use it within the \code{\link{OptimizerMies}}
-\code{\link[bbotk:Optimizer]{Optimizer}} if standard GA operation is desired.
+class if standard GA operation is desired.
 
 Multifidelity evaluation is supported as described in \code{vignette("mies-multifid")}. For this,
 an extra component named after \code{budget_id} is appended to each individual, chosen from

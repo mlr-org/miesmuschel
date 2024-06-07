@@ -10,7 +10,7 @@ algorithm, performing initialization first, followed by a loop of performance ev
 recombination to generate new individuals to be evaluated. Currently, two different survival modes ("comma" and "plus") are supported.
 Multi-fidelity optimization, similar to the "rolling-tide" algorithm described in Fieldsend (2014), is supported.
 The modular design and reliance on \code{\link{MiesOperator}} objects to perform central parts of the optimization algorithm makes this
-\code{\link[bbotk:Optimizer]{Optimizer}} highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
+\code{Optimizer} highly flexible and configurable. In combination with \code{\link{OperatorCombination}} mutators and recombinators, an algorithm
 as presented in Li (2013) can easily be implemented.
 
 \code{OptimizerMies} implements a standard evolution strategies loop:
@@ -37,7 +37,7 @@ avoids terminating right before they are evaluated. Other terminators may, howev
 
 \code{miesmuschel} provides a simple multi-fidelity optimization mechanism that allows both the refinement of fidelity as the optimization progresses,
 as well as fidelity refinement within each generation. When \code{multi_fidelity} is \code{TRUE}, then one search space component of the
-\code{\link[bbotk:OptimInstance]{OptimInstance}} must have the \code{"budget"} tag, which is then optimized as the "budget" component. This means that the value of this component is
+\code{OptimInstance} must have the \code{"budget"} tag, which is then optimized as the "budget" component. This means that the value of this component is
 determined by the \code{fidelity}/\code{fidelity_offspring} parameters, which are functions that get called whenever individuals get evaluated.
 The \code{fidelity} function is evaluated before step 2 and before every occurrence of step 6 in the algorithm, it returns the value of the budget search space component that all individuals
 that survive the current generation should be evaluated with. \code{fidelity_offspring} is called before step 4 and determines the fidelity that newly
@@ -47,7 +47,7 @@ Individuals that survive the generation and are not removed in step 5 will be re
 iteration.
 
 \code{fidelity} and \code{fidelity_offspring} must have arguments \code{inst}, \code{budget_id}, \code{last_fidelity} and \code{last_fidelity_offspring}. \code{inst} is the
-\code{\link[bbotk:OptimInstance]{OptimInstance}} bein optimized, the functions can use it to determine the progress of the optimization, e.g. query
+\code{OptimInstance} bein optimized, the functions can use it to determine the progress of the optimization, e.g. query
 the current generation with \code{\link{mies_generation}}. \code{budget_id} identifies the search space component being used as budget parameter. \code{last_fidelity}
 and \code{last_fidelity_offspring} contain the last values given by \code{fidelity} / \code{fidelity_offspring}. Should the offspring-fidelity (as returned
 by \code{fidelity_offspring} always be the same as the parent generation fidelity (as returned by \code{fidelity}), for example, then \code{fidelity_offspring}
@@ -57,14 +57,14 @@ can be set to a function that just returns \code{last_fidelity}; this is actuall
 to the same value avoids re-evaluating individuals in step 6. When \code{fidelity_monotonic} is \code{TRUE}, re-evaluation is also avoided should the
 desired fidelity parameter value decrease. When \code{fidelity_current_gen_only} is \code{TRUE}, then step 6 only re-evaluates individuals that were
 created in the current generation (in the previous step 4) and sets the fidelity for individuals that are created in step 6, but it does not
-re-evaluate individuals that survived from earlier generations or were already in the \code{\link[bbotk:OptimInstance]{OptimInstance}} when
+re-evaluate individuals that survived from earlier generations or were already in the \code{OptimInstance} when
 optimization started; it is recommended to leave this value at \code{TRUE} which it is initialized with.
 }
 
 \section{Additional Components}{
 
 The search space over which the optimization is performed is fundamentally tied to the \code{\link[bbotk:Objective]{Objective}}, and therefore
-to the \code{\link[bbotk:OptimInstance]{OptimInstance}} given to \code{OptimizerMies$optimize()}. However, some advanced Evolution Strategy based
+to the \code{OptimInstance} given to \code{OptimizerMies$optimize()}. However, some advanced Evolution Strategy based
 algorithms may need to make use of additional search space components that are independent of the particular objective. An example is
 self-adaption as implemented in \code{\link{OperatorCombination}}, where one or several components can be used to adjust operator behaviour.
 These additional components are supplied to the optimizer through the \code{additional_component_sampler} configuration parameter, which takes
@@ -104,7 +104,7 @@ This is equivalent to the \code{initializer} parameter of \code{\link[=mies_init
 \code{\link[paradox:generate_design_random]{generate_design_random()}}.
 \item \code{additional_component_sampler} :: \code{\link[paradox:Sampler]{Sampler}} | \code{NULL}\cr
 Additional components that may be part of individuals as seen by mutation, recombination, and selection \code{\link{MiesOperator}}s, but
-that are not part of the search space of the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized.
+that are not part of the search space of the \code{OptimInstance} being optimized.
 This is equivalent to the \code{additional_component_sampler} parameter of \code{\link[=mies_init_population]{mies_init_population()}}, see there for more information.
 Initialized to \code{NULL} (no additional components).
 \item \code{fidelity} :: \code{function}\cr
@@ -221,8 +221,8 @@ Li, Rui, Emmerich, TM M, Eggermont, Jeroen, B"ack, Thomas, Sch"utz, Martin, Dijk
 \emph{Evolutionary computation}, \bold{21}(1), 29--64.
 }
 \concept{optimizers}
-\section{Super class}{
-\code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{OptimizerMies}
+\section{Super classes}{
+\code{bbotk::OptimizerBatch} -> \code{\link[miesmuschel:Optimizer]{miesmuschel::Optimizer}} -> \code{OptimizerMies}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -262,8 +262,8 @@ Configuration parameters of the optimization algorithm.}
 <ul>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="format"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-format'><code>bbotk::Optimizer$format()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="help"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-help'><code>bbotk::Optimizer$help()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="optimize"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-optimize'><code>bbotk::Optimizer$optimize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="Optimizer" data-id="print"><a href='../../bbotk/html/Optimizer.html#method-Optimizer-print'><code>bbotk::Optimizer$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimizerBatch" data-id="optimize"><a href='../../bbotk/html/OptimizerBatch.html#method-OptimizerBatch-optimize'><code>bbotk::OptimizerBatch$optimize()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -316,12 +316,12 @@ The \verb{$elite_selector} field will reflect this value.}
 
 \item{\code{init_selector}}{(\code{\link{Selector}})\cr
 Survival selection operation to give to the \code{survival_selector} argument of \code{\link[=mies_init_population]{mies_init_population()}}; it is used if
-the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized already
+the \code{OptimInstance} being optimized already
 contains more (alive) individuals than \code{mu}. Default is the value given to \code{survival_selector}.
 The \verb{$init_selector} field will reflect this value.}
 
 \item{\code{multi_fidelity}}{(\code{logical(1)})\cr
-Whether to enable multi-fidelity optimization. When this is \code{TRUE}, then the \code{\link[bbotk:OptimInstance]{OptimInstance}} being optimized must
+Whether to enable multi-fidelity optimization. When this is \code{TRUE}, then the \code{OptimInstance} being optimized must
 contain a \code{\link[paradox:Domain]{Domain}} tagged \code{"budget"}, which is then used as the "budget" search space component, determined by
 \code{fidelity} and \code{fidelity_offspring} instead of by the \code{\link{MiesOperator}}s themselves. For multi-fidelity optimization, the \code{fidelity},
 \code{fidelity_offspring}, \code{fidelity_current_gen_only}, and \code{fidelity_monotonic} configuration parameters must be given to determine
@@ -350,7 +350,7 @@ The objects of this class are cloneable with this method.
 }
 }
 \section{Super classes}{
-\code{\link[mlr3tuning:Tuner]{mlr3tuning::Tuner}} -> \code{\link[mlr3tuning:TunerFromOptimizer]{mlr3tuning::TunerFromOptimizer}} -> \code{TunerMies}
+\code{mlr3tuning::Tuner} -> \code{mlr3tuning::TunerBatch} -> \code{mlr3tuning::TunerBatchFromOptimizerBatch} -> \code{TunerMies}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -365,7 +365,7 @@ The objects of this class are cloneable with this method.
 <li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="format"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-format'><code>mlr3tuning::Tuner$format()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="help"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-help'><code>mlr3tuning::Tuner$help()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="Tuner" data-id="print"><a href='../../mlr3tuning/html/Tuner.html#method-Tuner-print'><code>mlr3tuning::Tuner$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerFromOptimizer" data-id="optimize"><a href='../../mlr3tuning/html/TunerFromOptimizer.html#method-TunerFromOptimizer-optimize'><code>mlr3tuning::TunerFromOptimizer$optimize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TunerBatchFromOptimizerBatch" data-id="optimize"><a href='../../mlr3tuning/html/TunerBatchFromOptimizerBatch.html#method-TunerBatchFromOptimizerBatch-optimize'><code>mlr3tuning::TunerBatchFromOptimizerBatch$optimize()</code></a></span></li>
 </ul>
 </details>
 }}
