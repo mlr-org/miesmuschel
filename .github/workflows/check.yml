@@ -143,7 +143,11 @@ jobs:
           git --work-tree=docs add --all
           git --work-tree=docs commit -m "gh-pages"
           git push origin HEAD:gh-pages --force
-      - name: Log
+      - name: Install Log
+        if: ${{ failure() }}
+        working-directory: ..
+        run: 'cat *.Rcheck/00install.log'
+      - name: Check Log
         if: ${{ failure() }}
         working-directory: ..
         run: 'cat *.Rcheck/00check.log'
