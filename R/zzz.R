@@ -131,9 +131,10 @@ reg_mlr3tuning = function(...) {  # nocov start
     assign(localnames[[i]], get(bbotknames[[i]], envir = asNamespace("bbotk")), envir = parent.env(environment()))
   }
 
-  replacing = c("TunerFromOptimizer%s", "TuningInstance%sSingleCrit", "TuningInstance%sMultiCrit")
+  replacing = c("Tuner%sFromOptimizer", "TuningInstance%sSingleCrit", "TuningInstance%sMultiCrit")
   oldnames = sprintf(replacing, "") 
   newnames = sprintf(replacing, "Batch")
+  newnames[[1]] = paste0(newnames[[1]], "Batch")
   localnames = paste0(oldnames, c("", "_internal", "_internal"))
   for (i in seq_along(replacing)) {
     oldname = oldnames[[i]]

@@ -8,7 +8,7 @@
 Re-exported since \code{bbotk} will change the name.
 }
 \section{Super classes}{
-\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceSingleCrit]{bbotk::OptimInstanceSingleCrit}} -> \code{OptimInstanceSingleCrit}
+\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceBatch]{bbotk::OptimInstanceBatch}} -> \code{\link[bbotk:OptimInstanceBatchSingleCrit]{bbotk::OptimInstanceBatchSingleCrit}} -> \code{OptimInstanceSingleCrit}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -20,12 +20,12 @@ Re-exported since \code{bbotk} will change the name.
 <details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="clear"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-clear'><code>bbotk::OptimInstance$clear()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="eval_batch"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-eval_batch'><code>bbotk::OptimInstance$eval_batch()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="format"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-format'><code>bbotk::OptimInstance$format()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="objective_function"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-objective_function'><code>bbotk::OptimInstance$objective_function()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="print"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-print'><code>bbotk::OptimInstance$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceSingleCrit" data-id="assign_result"><a href='../../bbotk/html/OptimInstanceSingleCrit.html#method-OptimInstanceSingleCrit-assign_result'><code>bbotk::OptimInstanceSingleCrit$assign_result()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceSingleCrit" data-id="initialize"><a href='../../bbotk/html/OptimInstanceSingleCrit.html#method-OptimInstanceSingleCrit-initialize'><code>bbotk::OptimInstanceSingleCrit$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceBatch" data-id="eval_batch"><a href='../../bbotk/html/OptimInstanceBatch.html#method-OptimInstanceBatch-eval_batch'><code>bbotk::OptimInstanceBatch$eval_batch()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceBatch" data-id="objective_function"><a href='../../bbotk/html/OptimInstanceBatch.html#method-OptimInstanceBatch-objective_function'><code>bbotk::OptimInstanceBatch$objective_function()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceBatchSingleCrit" data-id="assign_result"><a href='../../bbotk/html/OptimInstanceBatchSingleCrit.html#method-OptimInstanceBatchSingleCrit-assign_result'><code>bbotk::OptimInstanceBatchSingleCrit$assign_result()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceBatchSingleCrit" data-id="initialize"><a href='../../bbotk/html/OptimInstanceBatchSingleCrit.html#method-OptimInstanceBatchSingleCrit-initialize'><code>bbotk::OptimInstanceBatchSingleCrit$initialize()</code></a></span></li>
 </ul>
 </details>
 }}

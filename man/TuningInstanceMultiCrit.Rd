@@ -8,7 +8,7 @@
 Re-exported since \code{mlr3tuning} will change the name.
 }
 \section{Super classes}{
-\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceMultiCrit]{bbotk::OptimInstanceMultiCrit}} -> \code{\link[mlr3tuning:TuningInstanceMultiCrit]{mlr3tuning::TuningInstanceMultiCrit}} -> \code{TuningInstanceMultiCrit}
+\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceBatch]{bbotk::OptimInstanceBatch}} -> \code{\link[bbotk:OptimInstanceBatchMultiCrit]{bbotk::OptimInstanceBatchMultiCrit}} -> \code{\link[mlr3tuning:TuningInstanceBatchMultiCrit]{mlr3tuning::TuningInstanceBatchMultiCrit}} -> \code{TuningInstanceMultiCrit}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -20,12 +20,12 @@ Re-exported since \code{mlr3tuning} will change the name.
 <details><summary>Inherited methods</summary>
 <ul>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="clear"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-clear'><code>bbotk::OptimInstance$clear()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="eval_batch"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-eval_batch'><code>bbotk::OptimInstance$eval_batch()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="format"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-format'><code>bbotk::OptimInstance$format()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="objective_function"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-objective_function'><code>bbotk::OptimInstance$objective_function()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstance" data-id="print"><a href='../../bbotk/html/OptimInstance.html#method-OptimInstance-print'><code>bbotk::OptimInstance$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TuningInstanceMultiCrit" data-id="assign_result"><a href='../../mlr3tuning/html/TuningInstanceMultiCrit.html#method-TuningInstanceMultiCrit-assign_result'><code>mlr3tuning::TuningInstanceMultiCrit$assign_result()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TuningInstanceMultiCrit" data-id="initialize"><a href='../../mlr3tuning/html/TuningInstanceMultiCrit.html#method-TuningInstanceMultiCrit-initialize'><code>mlr3tuning::TuningInstanceMultiCrit$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceBatch" data-id="eval_batch"><a href='../../bbotk/html/OptimInstanceBatch.html#method-OptimInstanceBatch-eval_batch'><code>bbotk::OptimInstanceBatch$eval_batch()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="bbotk" data-topic="OptimInstanceBatch" data-id="objective_function"><a href='../../bbotk/html/OptimInstanceBatch.html#method-OptimInstanceBatch-objective_function'><code>bbotk::OptimInstanceBatch$objective_function()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TuningInstanceBatchMultiCrit" data-id="assign_result"><a href='../../mlr3tuning/html/TuningInstanceBatchMultiCrit.html#method-TuningInstanceBatchMultiCrit-assign_result'><code>mlr3tuning::TuningInstanceBatchMultiCrit$assign_result()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="mlr3tuning" data-topic="TuningInstanceBatchMultiCrit" data-id="initialize"><a href='../../mlr3tuning/html/TuningInstanceBatchMultiCrit.html#method-TuningInstanceBatchMultiCrit-initialize'><code>mlr3tuning::TuningInstanceBatchMultiCrit$initialize()</code></a></span></li>
 </ul>
 </details>
 }}
