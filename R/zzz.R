@@ -37,6 +37,10 @@ lg = NULL
 paradox_context_available = FALSE
 paradox_s3 = FALSE
 
+# make these point to whatever bbotk happens to name its classes today
+Optimizer = NULL
+TunerFromOptimizer = NULL
+
 reg_bbotk = function(...) {  # nocov start
   mlr_optimizers = utils::getFromNamespace("mlr_optimizers", ns = "bbotk")
   mlr_optimizers$add("mies", OptimizerMies)
@@ -67,6 +71,17 @@ reg_mlr3tuning = function(...) {  # nocov start
   if (!"set_id" %in% names(ps())) {
     assign("paradox_s3", TRUE, envir = parent.env(environment()))
   }
+  if (exists("OptimizerBatch", envir = asNamespace("bbotk"))) {
+    assign("Optimizer", get("OptimizerBatch", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+  } else {
+    assign("Optimizer", get("Optimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+  }
+  if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("bbotk"))) {
+    assign("TunerFromOptimizer", get("TunerBatchFromOptimizerBatch", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+  } else {
+    assign("TunerFromOptimizer", get("TunerFromOptimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+  }
+
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
   setHook(packageEvent("mlr3tuning", "onLoad"), reg_mlr3tuning, action = "append")
