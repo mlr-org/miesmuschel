@@ -38,7 +38,11 @@ paradox_context_available = FALSE
 paradox_s3 = FALSE
 
 # make these point to whatever bbotk happens to name its classes today
+
 Optimizer = NULL
+OptimInstanceSingleCrit = NULL
+OptimInstanceMultiCrit = NULL
+
 # the following actually becomes an active binding, so the mlr3tuning
 # package does not get loaded prematurely.
 ## TunerFromOptimizer = NULL
@@ -74,19 +78,33 @@ reg_mlr3tuning = function(...) {  # nocov start
   if (!"set_id" %in% names(ps())) {
     assign("paradox_s3", TRUE, envir = parent.env(environment()))
   }
+  ## backward compatibility with bbotk
+  replacing = c("Optimizer%s", "OptimInstance%sSingleCrit", "OptimInstance%sMultiCrit")
+  localnames = sprintf(replacing, "")
   if (exists("OptimizerBatch", envir = asNamespace("bbotk"))) {
-    assign("Optimizer", get("OptimizerBatch", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+    bbotknames = sprintf(replacing, "Batch")
   } else {
-    assign("Optimizer", get("Optimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+    bbotknames = sprintf(replacing, "")
   }
-  makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = function() {
-    if (!requireNamespace("mlr3tuning", quiet = TRUE)) return(NULL)
-    if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))) {
-      get("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))
-    } else {
-      get("TunerFromOptimizer", envir = asNamespace("mlr3tuning"))
-    }
-  })
+  for (i in seq_along(replacing)) {
+    assign(localnames[[i]], get(bbotknames[[i]], envir = asNamespace("bbotk")), envir = parent.env(environment()))
+  }
+
+  replacing = c("TunerFromOptimizer%s", "TuningInstance%sSingleCrit", "TuningInstance%sMultiCrit")
+  localnames = sprintf(replacing, "") 
+  newnames = sprintf(replacing, "Batch")
+  for (i in seq_along(replacing)) {
+    lname = localnames[[i]]
+    newname = newnames[[i]]
+    makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = crate(function() {
+      if (!requireNamespace("mlr3tuning", quiet = TRUE)) return(NULL)
+      if (exists(newname, envir = asNamespace("mlr3tuning"))) {
+        get(newname, envir = asNamespace("mlr3tuning"))
+      } else {
+        get(lname, envir = asNamespace("mlr3tuning"))
+      }
+    }, lname, newname))
+  }
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
   setHook(packageEvent("bbotk", "onLoad"), reg_bbotk, action = "append")
