@@ -76,10 +76,12 @@ reg_mlr3tuning = function(...) {  # nocov start
   } else {
     assign("Optimizer", get("Optimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
   }
-  if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("bbotk"))) {
-    assign("TunerFromOptimizer", get("TunerBatchFromOptimizerBatch", envir = asNamespace("bbotk")), envir = parent.env(environment()))
-  } else {
-    assign("TunerFromOptimizer", get("TunerFromOptimizer", envir = asNamespace("bbotk")), envir = parent.env(environment()))
+  makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = function() {
+    if (exists("TunerBatchFromOptimizerBatch", envir = asNamespace("bbotk"))) {
+      get("TunerBatchFromOptimizerBatch", envir = asNamespace("mlr3tuning"))
+    } else {
+      get("TunerFromOptimizer", envir = asNamespace("mlr3tuning"))
+    }
   }
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))

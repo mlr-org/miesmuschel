@@ -1,7 +1,7 @@
 #' @include OptimizerMies.R
 #' @rdname OptimizerMies
 #' @export
-TunerMies = R6Class("TunerMies", inherit = mlr3tuning::TunerFromOptimizer,
+TunerMies = R6Class("TunerMies", inherit = TunerFromOptimizer,
   public = list(
     #' @description
     #' Initialize the `TunerMies` object.
