@@ -97,7 +97,7 @@ reg_mlr3tuning = function(...) {  # nocov start
     lname = localnames[[i]]
     newname = newnames[[i]]
     makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = crate(function() {
-      if (!requireNamespace("mlr3tuning", quiet = TRUE)) return(NULL)
+      if (!requireNamespace("mlr3tuning", quietly = TRUE)) return(NULL)
       if (exists(newname, envir = asNamespace("mlr3tuning"))) {
         get(newname, envir = asNamespace("mlr3tuning"))
       } else {
