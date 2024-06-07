@@ -63,8 +63,9 @@ reg_mlr3tuning = function(...) {  # nocov start
 
 .onLoad = function(libname, pkgname) {  # nocov start
   reg_bbotk()
-  reg_mlr3tuning()
-
+  if ("mlr3tuning" %in% loadedNamespaces()) {
+    reg_mlr3tuning()
+  }
 
   if (!is.null(paradox::ps()$context_available)) { # use paradox context if variable
     # packageStartupMessage("Using context sensitive configuration parameters")
