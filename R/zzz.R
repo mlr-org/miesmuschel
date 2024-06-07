@@ -118,19 +118,17 @@ reg_mlr3tuning = function(...) {  # nocov start
   replacing = c("TunerFromOptimizer%s", "TuningInstance%sSingleCrit", "TuningInstance%sMultiCrit")
   localnames = sprintf(replacing, "") 
   newnames = sprintf(replacing, "Batch")
-  fni = list()
   for (i in seq_along(replacing)) {
     lname = localnames[[i]]
     newname = newnames[[i]]
-    fni[[i]] = crate(function() {
+    makeActiveBinding(lname, env = parent.env(environment()), fun = crate(function() {
       if (!requireNamespace("mlr3tuning", quietly = TRUE)) return(NULL)
       if (exists(newname, envir = asNamespace("mlr3tuning"))) {
         get(newname, envir = asNamespace("mlr3tuning"))
       } else {
         get(lname, envir = asNamespace("mlr3tuning"))
       }
-    }, lname, newname)
-    makeActiveBinding("TunerFromOptimizer", env = parent.env(environment()), fun = fni[[i]])
+    }, lname, newname))
   }
 
   assign("lg", lgr::get_logger(pkgname), envir = parent.env(environment()))
