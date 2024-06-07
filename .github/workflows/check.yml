@@ -41,7 +41,7 @@ jobs:
             action: coverage
             r: release
           - os: ubuntu-latest
-            action: paradox
+            action: githubversions
             r: release
 
     steps:
@@ -82,11 +82,13 @@ jobs:
         name: install package dependencies
         run: | 
           remotes::install_deps(dependencies = TRUE)
-      - name: install paradox devel
-        if: ${{ matrix.action == 'paradox' }}
+      - name: install github versions
+        if: ${{ matrix.action == 'githubversions' }}
         shell: Rscript {0}
         run: |
           remotes::install_github("mlr-org/paradox")
+          remotes::install_github("mlr-org/bbotk")
+          remotes::install_github("mlr-org/mlr3tuning")
       - name: Session Info
         shell: Rscript {0}
         run: |
