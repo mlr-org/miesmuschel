@@ -5,12 +5,12 @@
 \alias{TerminatorGenerationPerfReached}
 \title{Terminator That Stops When a Generation-Wise Aggregated Value Reaches a Target}
 \description{
-\code{\link[bbotk:Terminator]{Terminator}} that terminates when a value, aggregated over generations, reaches a target value.
+\code{Terminator} that terminates when a value, aggregated over generations, reaches a target value.
 
 The user-supplied \code{fitness_aggregator} function is called whenever the archive of evaluated configurations contains a new generation.
 The function is supplied with the fitness values, and optionally other data, of all individuals that are alive at that point
 (\code{include_previous_generations = FALSE}) or at any point (\code{include_previous_generations = TRUE}).
-Its result is saved inside the \verb{$data_extra} field of the \code{\link[bbotk:Archive]{Archive}} object.
+Its result is saved inside the \verb{$data_extra} field of the \code{Archive} object.
 Termination is then signaled when the aggregated value meets or exceeds \code{level}.
 
 The \code{\link[=mies_aggregate_single_generation]{mies_aggregate_single_generation()}} function is used, see the documentation there for the functioning of \code{fitness_aggregator}.
@@ -27,7 +27,7 @@ When \code{\link{OptimizerMies}} is constructed with \code{multi_fidelity} set t
 at first with a lower fidelity, followed by an evaluation at "full" fidelity.
 \code{fitness_aggregator} will only be called for generations containing entirely full-fidelity-evaluations will be aggregated.
 
-This is achieved by caching aggregated fitness values in the \verb{$data_extra} field of the \code{\link[bbotk:Archive]{Archive}} and only ever calling
+This is achieved by caching aggregated fitness values in the \verb{$data_extra} field of the \code{Archive} and only ever calling
 \code{fitness_aggregator} for a generation that does not have a cached value. Since \code{\link[=mies_step_fidelity]{mies_step_fidelity()}} will
 count low-fidelity evaluations as part of the "previous" generation, \code{fitness_aggregator} will not see them.
 Note, however that if \code{fitness_aggregator} returns \code{NULL}, it will be called again should a second evaluation occur in the same generation,
@@ -54,8 +54,8 @@ Case (3) relates to changing the fidelity given to \code{\link[=mies_step_fideli
 
 \section{Dictionary}{
 
-This \code{\link[bbotk:Terminator]{Terminator}} can be created with the short access form \code{\link[bbotk:trm]{trm()}} (\code{\link[bbotk:trm]{trms()}} to get a list),
-or through the \link[mlr3misc:Dictionary]{dictionary} \code{\link[bbotk:mlr_terminators]{mlr_terminators}} in the following way:
+This \code{Terminator} can be created with the short access form \code{trm()} (\code{trms()} to get a list),
+or through the \link[mlr3misc:Dictionary]{dictionary} \code{mlr_terminators} in the following way:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred
 trm("genperfreached")
@@ -130,7 +130,7 @@ mies_generation_apply(oi$archive, function(fitnesses) {
 #' @export
 }
 \section{Super class}{
-\code{\link[bbotk:Terminator]{bbotk::Terminator}} -> \code{TerminatorGenerationPerfReached}
+\code{bbotk::Terminator} -> \code{TerminatorGenerationPerfReached}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -172,7 +172,7 @@ Is \code{TRUE} if when the termination criterion is matched, \code{FALSE} otherw
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{archive}}{\code{\link[bbotk:Archive]{Archive}}
+\item{\code{archive}}{\code{Archive}
 Archive to check.}
 }
 \if{html}{\out{</div>}}

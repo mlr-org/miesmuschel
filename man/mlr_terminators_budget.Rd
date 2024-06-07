@@ -5,12 +5,12 @@
 \alias{TerminatorBudget}
 \title{Terminator that Limits Total Budget Component Evaluation}
 \description{
-\code{\link[bbotk:Terminator]{Terminator}} that terminates after the sum (or similar aggregate) of a given "budget" search space component croses a threshold.
+\code{Terminator} that terminates after the sum (or similar aggregate) of a given "budget" search space component croses a threshold.
 }
 \section{Dictionary}{
 
-This \code{\link[bbotk:Terminator]{Terminator}} can be created with the short access form \code{\link[bbotk:trm]{trm()}} (\code{\link[bbotk:trm]{trms()}} to get a list),
-or through the \link[mlr3misc:Dictionary]{dictionary} \code{\link[bbotk:mlr_terminators]{mlr_terminators}} in the following way:
+This \code{Terminator} can be created with the short access form \code{trm()} (\code{trms()} to get a list),
+or through the \link[mlr3misc:Dictionary]{dictionary} \code{mlr_terminators} in the following way:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# preferred
 trm("budget")
@@ -43,7 +43,7 @@ trm("budget", budget = 100)
 trm("budget", budget = 1024, aggregate = function(x) sum(2 ^ x))
 }
 \section{Super class}{
-\code{\link[bbotk:Terminator]{bbotk::Terminator}} -> \code{TerminatorBudget}
+\code{bbotk::Terminator} -> \code{TerminatorBudget}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -85,7 +85,7 @@ Is \code{TRUE} if when the termination criterion is matched, \code{FALSE} otherw
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{archive}}{\code{\link[bbotk:Archive]{Archive}}
+\item{\code{archive}}{\code{Archive}
 Archive to check.}
 }
 \if{html}{\out{</div>}}

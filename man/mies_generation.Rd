@@ -7,7 +7,7 @@
 mies_generation(inst)
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
+\item{inst}{(\code{OptimInstance})\cr
 Optimization instance to evaluate.}
 }
 \value{
@@ -16,9 +16,9 @@ in \code{inst} so far were performed outside of \code{miesmuschel}. Every call o
 \code{\link{mies_evaluate_offspring}} with non-empty \code{offspring}, increases the generation by 1.
 }
 \description{
-Gets the last generation that was evaluated as counted by the \code{"dob"} column in the \code{\link[bbotk:OptimInstance]{OptimInstance}}'s \code{\link[bbotk:Archive]{Archive}}.
+Gets the last generation that was evaluated as counted by the \code{"dob"} column in the \code{OptimInstance}'s \code{Archive}.
 
-This accepts \code{\link[bbotk:OptimInstance]{OptimInstance}}s that were not evaluated with \code{miesmuschel} and are therefore missing the \code{"dob"} column, returning
+This accepts \code{OptimInstance}s that were not evaluated with \code{miesmuschel} and are therefore missing the \code{"dob"} column, returning
 a value of 0. However, if the \code{"dob"} column is invalid (the inferred generation is not integer numeric or not non-negative), an error is thrown.
 }
 \examples{

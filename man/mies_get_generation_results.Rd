@@ -12,7 +12,7 @@ mies_get_generation_results(
 )
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
+\item{inst}{(\code{OptimInstance})\cr
 Optimization instance to evaluate.}
 
 \item{as_fitnesses}{(\code{logical(1)})\cr
@@ -34,10 +34,10 @@ This is inparticular necessary when fidelity is not monotonically increasing (e.
 }
 \value{
 a \code{\link[data.table:data.table]{data.table}} with the column \code{"dob"}, indicating the generation, as well as further
-columns named by the \code{\link[bbotk:OptimInstance]{OptimInstance}}'s objectives.
+columns named by the \code{OptimInstance}'s objectives.
 }
 \description{
-Get evaluated performance values from an \code{\link[bbotk:OptimInstance]{OptimInstance}} for all individuals that were alive
+Get evaluated performance values from an \code{OptimInstance} for all individuals that were alive
 at a given generation. Depending on \code{survivors_only}, all individuals alive at the \emph{end} of a generation are returned,
 or all individuals alive at any point during a generation.
 

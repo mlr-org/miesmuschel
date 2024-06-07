@@ -98,7 +98,9 @@ jobs:
           sessionInfo() 
       - name: Document
         shell: Rscript {0}
-        run: roxygen2::roxygenise()
+        run: |
+          roxygen2::roxygenise()
+          system("attic/clean_man.sh")
       - if: runner.os == 'windows'
         name: Remove hypertarget from Latex for Windows
         run: "sed -i 's/\\\\hypertarget{[^}]*}//g' man/*"

@@ -7,7 +7,7 @@
 mies_get_fitnesses(inst, rows)
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
+\item{inst}{(\code{OptimInstance})\cr
 Optimization instance to evaluate.}
 
 \item{rows}{optional (\code{integer})\cr
@@ -19,7 +19,7 @@ and one column for each objective: fitnesses to be maximized.
 }
 \description{
 Get fitness values in the correct form as used by \code{\link{Selector}} operators from an
-\code{\link[bbotk:OptimInstance]{OptimInstance}}.
+\code{OptimInstance}.
 This works for both single-criterion and multi-criterion optimization, and entails multiplying
 objectives with -1 if they are being minimized, since \code{\link{Selector}} tries to maximize fitness.
 }

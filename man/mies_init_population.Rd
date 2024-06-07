@@ -17,7 +17,7 @@ mies_init_population(
 )
 }
 \arguments{
-\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
+\item{inst}{(\code{OptimInstance})\cr
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr
@@ -30,7 +30,7 @@ a custom function that ensures that only \code{n} individuals are produced. The 
 components that are not in the objective's search space, the \code{additional_component_sampler} is used.}
 
 \item{survival_selector}{(\code{\link{Selector}})\cr
-Used when the given \code{\link[bbotk:OptimInstance]{OptimInstance}} already contains more individuals than \code{mu}.\cr
+Used when the given \code{OptimInstance} already contains more individuals than \code{mu}.\cr
 \code{\link{Selector}} operator that selects surviving individuals depending on configuration values
 and objective results,  When \code{survival_selector$operate()} is called, then objectives that
 are being minimized are multiplied with -1 (through \code{\link{mies_get_fitnesses}}), since \code{\link{Selector}}s always try to maximize fitness.\cr
@@ -65,11 +65,11 @@ are present but there are rows that are only \code{NA} valued for some columns, 
 Default is \code{NULL}: no additional components.}
 }
 \value{
-\link{invisible} \code{\link[bbotk:OptimInstance]{OptimInstance}}: the input
+\link{invisible} \code{OptimInstance}: the input
 instance, modified by-reference.
 }
 \description{
-Set up an \code{\link[bbotk:OptimInstance]{OptimInstance}} for MIES optimization.
+Set up an \code{OptimInstance} for MIES optimization.
 This adds the \code{dob} and \code{eol} columns to the instance's archive, and makes sure there are at least \code{mu} survivors
 (i.e. entries with \code{eol} set to \code{NA}) present. If there are already \verb{>= mu} prior evaluations present, then the last
 \code{mu} of these remain alive (the other's \code{eol} set to 0); otherwise, up to \code{mu} new randomly sampled configurations
