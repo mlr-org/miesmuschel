@@ -50,6 +50,8 @@ des <- generate_design_random(pp, 10)$data
 rec("xounif")$prime(pp)$operate(des)
 
 
+tinytest::run_test_file("inst/tinytest/test_mies_filter_offspring.R")
+
 tinytest::test_all()
 
 tinytest::run_test_file("inst/tinytest/test_dictionaries.R")

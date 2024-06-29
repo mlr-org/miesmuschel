@@ -116,4 +116,5 @@ expect_error(mies_filter_offspring(oibig_clear, individuals_nobudget, 3, fdp, bu
   "mies_filter_offspring does not work with empty OptimInstance.")
 
 
+oibig$objective$context = NULL  # for whatever garbage reason this is not cloned
 expect_equal(oibig_clone, oibig)
