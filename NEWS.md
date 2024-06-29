@@ -1,3 +1,7 @@
+# miesmuschel 0.0.4-2
+
+* Compatibility with `bbotk` changes that were made last minute before being pushed to cran.
+
 # miesmuschel 0.0.4-1
 
 * Compatibility with upcoming `bbotk` release

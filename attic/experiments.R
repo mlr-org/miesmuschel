@@ -4,11 +4,10 @@ library("checkmate")
 library("data.table")
 
 
-
 devtools::document()
 devtools::load_all()
 
-devtools::run_examples(run_donttest = TRUE)
+devtools::run_examples(run_donttest = TRUE, document = FALSE)
 
 options(miesmuschel.testing = TRUE)
 
@@ -49,6 +48,8 @@ pp = ps(a = p_lgl(), b = p_fct(letters[1:4]), c = p_dbl(0, 10))
 des <- generate_design_random(pp, 10)$data
 rec("xounif")$prime(pp)$operate(des)
 
+
+tinytest::run_test_file("inst/tinytest/test_mies_filter_offspring.R")
 
 tinytest::test_all()
 
