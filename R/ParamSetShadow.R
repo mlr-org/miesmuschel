@@ -103,7 +103,7 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       }
     },
     #' @field params (named `list()`)\cr
-    #' Table of rows identifying the contained [`Domain`]s
+    #' Table of rows identifying the contained [`Domain`][paradox::Domain]s
     params = function(rhs) {
       if (!missing(rhs)) {
         stop("params is read-only.")

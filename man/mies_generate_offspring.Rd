@@ -14,7 +14,7 @@ mies_generate_offspring(
 )
 }
 \arguments{
-\item{inst}{(\code{OptimInstance})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{lambda}{(\code{integer(1)})\cr

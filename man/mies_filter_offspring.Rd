@@ -15,7 +15,7 @@ mies_filter_offspring(
 )
 }
 \arguments{
-\item{inst}{(\code{OptimInstance})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{individuals}{(\code{data.frame} | \code{\link[data.table:data.table]{data.table}})\cr

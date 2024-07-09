@@ -14,7 +14,7 @@ mies_step_fidelity(
 )
 }
 \arguments{
-\item{inst}{(\code{OptimInstance})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{budget_id}{(\code{character(1)})\cr

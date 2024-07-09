@@ -8,7 +8,7 @@
 Re-exported since \code{mlr3tuning} will change the name.
 }
 \section{Super classes}{
-\code{bbotk::OptimInstance} -> \code{bbotk::OptimInstanceBatch} -> \code{bbotk::OptimInstanceBatchMultiCrit} -> \code{mlr3tuning::TuningInstanceBatchMultiCrit} -> \code{TuningInstanceMultiCrit}
+\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceBatch]{bbotk::OptimInstanceBatch}} -> \code{\link[bbotk:OptimInstanceBatchMultiCrit]{bbotk::OptimInstanceBatchMultiCrit}} -> \code{\link[mlr3tuning:TuningInstanceBatchMultiCrit]{mlr3tuning::TuningInstanceBatchMultiCrit}} -> \code{TuningInstanceMultiCrit}
 }
 \section{Methods}{
 \subsection{Public methods}{

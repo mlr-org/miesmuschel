@@ -8,7 +8,7 @@
 Re-exported since \code{bbotk} will change the name.
 }
 \section{Super classes}{
-\code{bbotk::OptimInstance} -> \code{bbotk::OptimInstanceBatch} -> \code{bbotk::OptimInstanceBatchSingleCrit} -> \code{OptimInstanceSingleCrit}
+\code{\link[bbotk:OptimInstance]{bbotk::OptimInstance}} -> \code{\link[bbotk:OptimInstanceBatch]{bbotk::OptimInstanceBatch}} -> \code{\link[bbotk:OptimInstanceBatchSingleCrit]{bbotk::OptimInstanceBatchSingleCrit}} -> \code{OptimInstanceSingleCrit}
 }
 \section{Methods}{
 \subsection{Public methods}{

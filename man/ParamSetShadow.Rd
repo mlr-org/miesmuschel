@@ -29,7 +29,7 @@ print(p2$origin$values)
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{params}}{(named \code{list()})\cr
-Table of rows identifying the contained \code{\link{Domain}}s}
+Table of rows identifying the contained \code{\link[paradox:Domain]{Domain}}s}
 
 \item{\code{params_unid}}{(named \code{list} of \code{Param})
 List of \code{Param} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the

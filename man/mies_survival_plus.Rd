@@ -7,7 +7,7 @@
 mies_survival_plus(inst, mu, survival_selector, ...)
 }
 \arguments{
-\item{inst}{(\code{OptimInstance})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{mu}{(\code{integer(1)})\cr

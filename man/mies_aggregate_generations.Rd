@@ -15,7 +15,7 @@ mies_aggregate_generations(
 )
 }
 \arguments{
-\item{inst}{(\code{OptimInstance})\cr
+\item{inst}{(\code{\link[bbotk:OptimInstance]{OptimInstance}})\cr
 Optimization instance to evaluate.}
 
 \item{objectives}{(\code{character})\cr
@@ -51,7 +51,7 @@ Otherwise, they are named by \verb{<aggregations element name>} only. To get a g
 to a length 1 \code{character}.
 }
 \description{
-Get evaluated performance values from an \code{OptimInstance} aggregated for each generation.
+Get evaluated performance values from an \code{\link[bbotk:OptimInstance]{OptimInstance}} aggregated for each generation.
 This may either concern all individuals that were alive at the end of a given generation (\code{survivors_only} \code{TRUE})
 or at any point during a generation (\code{survivors_only} \code{FALSE}).
 

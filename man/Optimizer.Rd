@@ -8,7 +8,7 @@
 Re-exported since \code{bbotk} will change the name.
 }
 \section{Super classes}{
-\code{bbotk::Optimizer} -> \code{bbotk::OptimizerBatch} -> \code{Optimizer}
+\code{\link[bbotk:Optimizer]{bbotk::Optimizer}} -> \code{\link[bbotk:OptimizerBatch]{bbotk::OptimizerBatch}} -> \code{Optimizer}
 }
 \section{Methods}{
 \subsection{Public methods}{

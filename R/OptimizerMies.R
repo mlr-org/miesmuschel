@@ -64,7 +64,7 @@
 #' These additional components are supplied to the optimizer through the `additional_component_sampler` configuration parameter, which takes
 #' a [`Sampler`][paradox::Sampler] object. This object both has an associated [`ParamSet`][paradox::ParamSet] which represents the
 #' additional components that are present, and it provides a method for generating the initial values of these components. The search space
-#' that is seen by the [`MiesOperator`]s is then the union of the [`OptimInstance`]'s [`ParamSet`][paradox::ParamSet], and the
+#' that is seen by the [`MiesOperator`]s is then the union of the [`OptimInstance`][bbotk::OptimInstance]'s [`ParamSet`][paradox::ParamSet], and the
 #' [`Sampler`][paradox::Sampler]'s [`ParamSet`][paradox::ParamSet].
 #'
 #' @section Configuration Parameters:
