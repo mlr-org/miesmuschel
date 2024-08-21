@@ -350,7 +350,7 @@ OperatorCombination = R6Class("OperatorCombination",
       )
       subsettable = ps_flatten(param_set)  # ParamSet$new(param_set$params)
       imap(mapping, function(pars, op) {
-        self$operators[[op]]$prime(subsettable$clone()$subset(pars))
+        self$operators[[op]]$prime(subsettable$clone()$subset(pars, allow_dangling_dependencies = TRUE, keep_constraint = FALSE))
       })
       private$.mapping = mapping
       invisible(self)
