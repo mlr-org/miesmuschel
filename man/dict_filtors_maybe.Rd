@@ -67,7 +67,7 @@ library("mlr3learners")
 
 fm = ftr("maybe", ftr("surprog", lrn("regr.lm"), filter.pool_factor = 2), p = 0.5)
 p = ps(x = p_dbl(-5, 5))
-known_data = data.frame(x = 1:5)
+known_data = data.frame(x = as.numeric(1:5))
 fitnesses = 1:5
 new_data = data.frame(x = c(0.5, 1.5, 2.5, 3.5, 4.5))
 
