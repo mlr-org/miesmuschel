@@ -4,6 +4,17 @@ library("data.table")
 # mut: mutator to check
 # mutator_name: name to print in info
 # is_primed: whether the mutator is already primed. if so, the expectation that unprimed mutator gives an error will not be checked.
+#
+# Note for testing clones:
+# When testing a cloned mutator that was cloned from a primed mutator:
+# 1. The clone preserves the primed state (clone$is_primed will be TRUE)
+# 2. When calling expect_mutator on a clone, set is_primed=TRUE
+# 3. Alternatively, test clone operation directly without using expect_mutator:
+#    Example: clone_result = clone$operate(data)
+#             expect_equal(clone_result, expected_result)
+#
+# Testing cloned operators without setting is_primed=TRUE may result in
+# failures because expect_mutator tests unprimed behavior by default.
 expect_mutator = function(mut, mutator_name, is_primed = FALSE) {
 
   expect_r6(mut, "Mutator", info = mutator_name)
