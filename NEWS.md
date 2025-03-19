@@ -1,14 +1,18 @@
+# miesmuschel 0.0.4-3
+
+* Compatibility fix with stricter data handling in `mlr3`.
+
 # miesmuschel 0.0.4-2
 
-* Compatibility with `bbotk` changes that were made last minute before being pushed to cran.
+* Compatibility with `bbotk` changes that were made last minute before `bbotk` was pushed to cran.
 
 # miesmuschel 0.0.4-1
 
-* Compatibility with upcoming `bbotk` release
+* Compatibility with upcoming `bbotk` release.
 
 # miesmuschel 0.0.4
 
-* Compatibility with upcoming new `paradox` release
+* Compatibility with upcoming new `paradox` release.
 
 # miesmuschel 0.0.3
 
