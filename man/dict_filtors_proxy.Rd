@@ -45,8 +45,8 @@ library("mlr3")
 library("mlr3learners")
 fp = ftr("proxy")
 p = ps(x = p_dbl(-5, 5))
-known_data = data.frame(x = 1:5)
-fitnesses = 1:5
+known_data = data.frame(x = as.numeric(1:5))
+fitnesses = as.numeric(1:5)
 new_data = data.frame(x = c(2.5, 4.5))
 
 fp$param_set$values$operation = ftr("null")
