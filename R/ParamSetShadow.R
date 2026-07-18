@@ -1,16 +1,27 @@
+.paradox_has_owned_shadow = function(
+    paradox_version = utils::packageVersion("paradox"),
+    paradox_exports = getNamespaceExports("paradox")) {
+  isTRUE(paradox_version >= numeric_version("2.0.0")) &&
+    "ParamSetShadow" %in% paradox_exports
+}
+
 .resolve_param_set_shadow = function(legacy,
+    paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox"),
     get_exported_value = getExportedValue) {
-  if ("ParamSetShadow" %in% paradox_exports) {
+  if (.paradox_has_owned_shadow(paradox_version, paradox_exports)) {
     return(get_exported_value("paradox", "ParamSetShadow"))
   }
   legacy
 }
 
 .install_param_set_shadow_bridge = function(namespace,
+    paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox"),
     get_exported_value = getExportedValue) {
-  if ("ParamSetShadow" %nin% paradox_exports) return(invisible(FALSE))
+  if (!.paradox_has_owned_shadow(paradox_version, paradox_exports)) {
+    return(invisible(FALSE))
+  }
 
   was_locked = bindingIsLocked("ParamSetShadow", namespace)
   if (was_locked) unlockBinding("ParamSetShadow", namespace)
@@ -51,7 +62,7 @@
 # Construct the legacy generator only when Paradox does not export its owned
 # implementation. Merely constructing two portable R6 generators with this
 # class name would make them compete for the same namespace wrapper bindings.
-ParamSetShadow = if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
+ParamSetShadow = if (.paradox_has_owned_shadow()) {
   # Replaced with the exact Paradox generator by .onLoad(). Keeping the native
   # generator out of the lazy-load database avoids relocating and colliding
   # with its package-owned portable R6 wrapper bindings.

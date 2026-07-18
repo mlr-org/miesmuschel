@@ -6,9 +6,23 @@ source("setup.R", local = TRUE)
 legacy_generator = new.env(parent = emptyenv())
 native_generator = new.env(parent = emptyenv())
 
+expect_false(miesmuschel:::.paradox_has_owned_shadow(
+  numeric_version("1.1.0"),
+  "ParamSetShadow"
+))
+expect_false(miesmuschel:::.paradox_has_owned_shadow(
+  numeric_version("2.0.0"),
+  character()
+))
+expect_true(miesmuschel:::.paradox_has_owned_shadow(
+  numeric_version("2.0.0"),
+  "ParamSetShadow"
+))
+
 expect_identical(
   miesmuschel:::.resolve_param_set_shadow(
     legacy_generator,
+    paradox_version = numeric_version("1.1.0"),
     paradox_exports = character()
   ),
   legacy_generator
@@ -16,6 +30,7 @@ expect_identical(
 expect_identical(
   miesmuschel:::.resolve_param_set_shadow(
     stop("legacy generator was forced"),
+    paradox_version = numeric_version("2.0.0"),
     paradox_exports = "ParamSetShadow",
     get_exported_value = function(package, name) {
       expect_identical(package, "paradox")
@@ -31,6 +46,7 @@ bridge_namespace$ParamSetShadow = legacy_generator
 lockBinding("ParamSetShadow", bridge_namespace)
 expect_true(miesmuschel:::.install_param_set_shadow_bridge(
   bridge_namespace,
+  paradox_version = numeric_version("2.0.0"),
   paradox_exports = "ParamSetShadow",
   get_exported_value = function(package, name) native_generator
 ))
@@ -41,6 +57,7 @@ legacy_namespace = new.env(parent = emptyenv())
 legacy_namespace$ParamSetShadow = legacy_generator
 expect_false(miesmuschel:::.install_param_set_shadow_bridge(
   legacy_namespace,
+  paradox_version = numeric_version("1.1.0"),
   paradox_exports = character()
 ))
 expect_identical(legacy_namespace$ParamSetShadow, legacy_generator)
