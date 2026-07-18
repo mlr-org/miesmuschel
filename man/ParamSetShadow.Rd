@@ -8,6 +8,11 @@ Wraps another \code{\link[paradox:ParamSet]{ParamSet}} and shadows out a subset 
 The original \code{\link[paradox:ParamSet]{ParamSet}} can still be accessed through the \verb{$origin} field;
 otherwise, the \code{ParamSetShadow} behaves like a \code{\link[paradox:ParamSet]{ParamSet}} where the shadowed
 \code{\link[paradox:Domain]{Domain}}s are not present.
+
+With paradox 2.0.0 or newer, this export is the exact
+\code{\link[paradox:ParamSetShadow]{paradox::ParamSetShadow}} generator. The local
+implementation documented below is retained only so an installed miesmuschel
+artifact can still be loaded with paradox 1.x.
 }
 \examples{
 p1 = ps(x = p_dbl(0, 1), y = p_lgl())
@@ -35,7 +40,7 @@ Table of rows identifying the contained \code{\link[paradox:Domain]{Domain}}s}
 List of \code{Param} that are members of the wrapped \code{\link[paradox:ParamSet]{ParamSet}} with the
 shadowed \code{Param}s removed. This is a field mostly for internal usage that has the
 \verb{$id}s set to invalid values but avoids cloning overhead.\cr
-Deprecated by the upcoming \code{paradox} package update and will be removed in the future.}
+Available only in the paradox 1.x compatibility implementation.}
 
 \item{\code{deps}}{(\code{\link[data.table:data.table]{data.table}})\cr
 Table of dependencies, as in \code{\link[paradox:ParamSet]{ParamSet}}. The dependencies that are related to shadowed

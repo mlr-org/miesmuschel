@@ -5,33 +5,27 @@
     "ParamSetShadow" %in% paradox_exports
 }
 
-.resolve_param_set_shadow = function(legacy,
-    paradox_version = utils::packageVersion("paradox"),
-    paradox_exports = getNamespaceExports("paradox"),
-    get_exported_value = getExportedValue) {
-  if (.paradox_has_owned_shadow(paradox_version, paradox_exports)) {
-    return(get_exported_value("paradox", "ParamSetShadow"))
-  }
-  legacy
-}
-
 .install_param_set_shadow_bridge = function(namespace,
     paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox"),
-    get_exported_value = getExportedValue) {
-  if (!.paradox_has_owned_shadow(paradox_version, paradox_exports)) {
-    return(invisible(FALSE))
+    get_exported_value = getExportedValue,
+    legacy_factory = .make_legacy_param_set_shadow) {
+  if (isTRUE(paradox_version >= numeric_version("2.0.0")) &&
+      !"ParamSetShadow" %in% paradox_exports) {
+    stop("paradox >= 2.0.0 does not export ParamSetShadow")
+  }
+  use_paradox = .paradox_has_owned_shadow(paradox_version, paradox_exports)
+  generator = if (use_paradox) {
+    get_exported_value("paradox", "ParamSetShadow")
+  } else {
+    legacy_factory()
   }
 
   was_locked = bindingIsLocked("ParamSetShadow", namespace)
   if (was_locked) unlockBinding("ParamSetShadow", namespace)
   on.exit(if (was_locked) lockBinding("ParamSetShadow", namespace), add = TRUE)
-  assign(
-    "ParamSetShadow",
-    get_exported_value("paradox", "ParamSetShadow"),
-    envir = namespace
-  )
-  invisible(TRUE)
+  assign("ParamSetShadow", generator, envir = namespace)
+  invisible(use_paradox)
 }
 
 #' @title ParamSetShadow
@@ -41,6 +35,11 @@
 #' The original [`ParamSet`][paradox::ParamSet] can still be accessed through the `$origin` field;
 #' otherwise, the `ParamSetShadow` behaves like a [`ParamSet`][paradox::ParamSet] where the shadowed
 #' [`Domain`][paradox::Domain]s are not present.
+#'
+#' With paradox 2.0.0 or newer, this export is the exact
+#' [`paradox::ParamSetShadow`][paradox::ParamSetShadow] generator. The local
+#' implementation below is retained only so an installed miesmuschel artifact
+#' can still be loaded with paradox 1.x.
 #'
 #' @param set ([`ParamSet`][paradox::ParamSet])\cr
 #'   [`ParamSet`][paradox::ParamSet] to wrap.
@@ -59,15 +58,11 @@
 #'
 #' print(p2$origin$values)
 #' @export
-# Construct the legacy generator only when Paradox does not export its owned
-# implementation. Merely constructing two portable R6 generators with this
-# class name would make them compete for the same namespace wrapper bindings.
-ParamSetShadow = if (.paradox_has_owned_shadow()) {
-  # Replaced with the exact Paradox generator by .onLoad(). Keeping the native
-  # generator out of the lazy-load database avoids relocating and colliding
-  # with its package-owned portable R6 wrapper bindings.
-  NULL
-} else {
+# Populated by .onLoad(). Do not serialize Paradox's generator in this
+# namespace: leanification would otherwise rewrite its package-owned methods.
+ParamSetShadow = NULL
+
+.make_legacy_param_set_shadow = function() {
   R6Class("ParamSetShadow", inherit = ParamSet,
   public = list(
     #' @description
@@ -85,7 +80,7 @@ ParamSetShadow = if (.paradox_has_owned_shadow()) {
         paramtbl = set$params[!shadowed, on = "id"]
         private$.tags = paramtbl[, .(tag = unlist(.tags)), keyby = "id"]
         private$.trafos = setkeyv(paramtbl[!map_lgl(.trafo, is.null), .(id, trafo = .trafo)], "id")
-        set(paramtbl, , setdiff(colnames(paramtbl), colnames(set$.__enclos_env__$private$.params)), NULL)
+        set(paramtbl, , grep("^\\.", colnames(paramtbl), value = TRUE), NULL)
         setindexv(paramtbl, c("id", "cls", "grouping"))
         private$.params = paramtbl
         private$.extra_trafo = set$extra_trafo
@@ -163,7 +158,7 @@ ParamSetShadow = if (.paradox_has_owned_shadow()) {
     #' List of `Param` that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
     #' shadowed `Param`s removed. This is a field mostly for internal usage that has the
     #' `$id`s set to invalid values but avoids cloning overhead.\cr
-    #' Deprecated by the upcoming `paradox` package update and will be removed in the future.
+    #' Available only in the paradox 1.x compatibility implementation.
     params_unid = function(rhs) {
       if (!missing(rhs)) {
         stop("params_unid is read-only.")

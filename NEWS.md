@@ -1,6 +1,8 @@
 # miesmuschel 0.0.4-3
 
 * Compatibility fix with stricter data handling in `mlr3`.
+* Use the Paradox-owned `ParamSetShadow` with paradox 2.0.0 and newer while
+  retaining the local implementation for paradox 1.x.
 
 # miesmuschel 0.0.4-2
 
