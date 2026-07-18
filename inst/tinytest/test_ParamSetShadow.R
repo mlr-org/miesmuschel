@@ -25,6 +25,25 @@ expect_identical(
   ),
   native_generator
 )
+
+bridge_namespace = new.env(parent = emptyenv())
+bridge_namespace$ParamSetShadow = legacy_generator
+lockBinding("ParamSetShadow", bridge_namespace)
+expect_true(miesmuschel:::.install_param_set_shadow_bridge(
+  bridge_namespace,
+  paradox_exports = "ParamSetShadow",
+  get_exported_value = function(package, name) native_generator
+))
+expect_identical(bridge_namespace$ParamSetShadow, native_generator)
+expect_true(bindingIsLocked("ParamSetShadow", bridge_namespace))
+
+legacy_namespace = new.env(parent = emptyenv())
+legacy_namespace$ParamSetShadow = legacy_generator
+expect_false(miesmuschel:::.install_param_set_shadow_bridge(
+  legacy_namespace,
+  paradox_exports = character()
+))
+expect_identical(legacy_namespace$ParamSetShadow, legacy_generator)
 expect_true("ParamSetShadow" %in% getNamespaceExports("miesmuschel"))
 if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
   expect_identical(

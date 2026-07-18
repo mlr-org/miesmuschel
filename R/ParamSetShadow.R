@@ -1,3 +1,28 @@
+.resolve_param_set_shadow = function(legacy,
+    paradox_exports = getNamespaceExports("paradox"),
+    get_exported_value = getExportedValue) {
+  if ("ParamSetShadow" %in% paradox_exports) {
+    return(get_exported_value("paradox", "ParamSetShadow"))
+  }
+  legacy
+}
+
+.install_param_set_shadow_bridge = function(namespace,
+    paradox_exports = getNamespaceExports("paradox"),
+    get_exported_value = getExportedValue) {
+  if ("ParamSetShadow" %nin% paradox_exports) return(invisible(FALSE))
+
+  was_locked = bindingIsLocked("ParamSetShadow", namespace)
+  if (was_locked) unlockBinding("ParamSetShadow", namespace)
+  on.exit(if (was_locked) lockBinding("ParamSetShadow", namespace), add = TRUE)
+  assign(
+    "ParamSetShadow",
+    get_exported_value("paradox", "ParamSetShadow"),
+    envir = namespace
+  )
+  invisible(TRUE)
+}
+
 #' @title ParamSetShadow
 #'
 #' @description
@@ -23,7 +48,16 @@
 #'
 #' print(p2$origin$values)
 #' @export
-ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
+# Construct the legacy generator only when Paradox does not export its owned
+# implementation. Merely constructing two portable R6 generators with this
+# class name would make them compete for the same namespace wrapper bindings.
+ParamSetShadow = if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
+  # Replaced with the exact Paradox generator by .onLoad(). Keeping the native
+  # generator out of the lazy-load database avoids relocating and colliding
+  # with its package-owned portable R6 wrapper bindings.
+  NULL
+} else {
+  R6Class("ParamSetShadow", inherit = ParamSet,
   public = list(
     #' @description
     #' Initialize the `ParamSetShadow` object.
@@ -180,19 +214,6 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     .set = NULL,
     .shadowed = NULL,
     .extra_trafo = NULL
+    )
   )
-)
-
-.resolve_param_set_shadow = function(legacy,
-    paradox_exports = getNamespaceExports("paradox"),
-    get_exported_value = getExportedValue) {
-  if ("ParamSetShadow" %in% paradox_exports) {
-    return(get_exported_value("paradox", "ParamSetShadow"))
-  }
-  legacy
 }
-
-# Paradox 2 owns the optimized implementation. Keep the local generator as a
-# load-time compatibility fallback for Paradox 1.x so this bridge can be
-# released before the corresponding Paradox release reaches CRAN.
-ParamSetShadow = .resolve_param_set_shadow(ParamSetShadow)
