@@ -432,7 +432,6 @@ madder2c$param_set$values$x = 2
 madder2c$prime(ps(a = p_r, b = p_r))
 
 
-setindexv(madder2c$primed_ps$.__enclos_env__$private$.tags, NULL)
 expect_equal(mut_adapt$operators, list(ParamDbl = madder2c))
 expect_equal(mut_adapt$adaptions, list(ParamDbl.x = function(x) if (x$a < 1) 1 else 2))
 
@@ -455,7 +454,6 @@ rec_adapt_c$param_set$values$ParamFct.x = "b"
 expect_equal(rec_adapt$param_set$values$ParamFct.x, "a")
 
 expect_equal(rec_adapt_c$operate(rdata), data.table(x1 = c(2, 2, 2, 4), x2 = c(1, 1, 0, 0), y1 = c("b", "b", "b", "b")))
-
 
 
 
