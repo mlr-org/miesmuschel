@@ -82,7 +82,11 @@ ps_compare$values = list(b = FALSE)
 
 expect_equal(pshadow$params, ps_compare$params)
 
-expect_read_only(pshadow, c("params", "params_unid", "deps", "origin"))
+read_only_fields = c("params", "deps", "origin")
+if (!miesmuschel:::.paradox_has_owned_shadow()) {
+  read_only_fields = c(read_only_fields, "params_unid")
+}
+expect_read_only(pshadow, read_only_fields)
 
 # object properties
 expect_equal(pshadow$values, list(b = FALSE))
