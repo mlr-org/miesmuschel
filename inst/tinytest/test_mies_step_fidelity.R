@@ -22,7 +22,7 @@ expect_reevald = function(rows, budget, oi, additional = TRUE, multiobj = FALSE)
     cbind(copy(design), batch_nr = 2, pout1 = design$p1)[, dob := 3][, bud := budget][rows]
   )
   if (multiobj) expected_archive[, pout2 := p2]
-  expected_archive$x_domain = transpose_list(expected_archive[, oi$search_space$ids(), with = FALSE])
+  expected_archive$x_domain = mlr3misc::transpose_list(expected_archive[, oi$search_space$ids(), with = FALSE])
   if (!additional) expected_archive[, additional := NULL]
   expect_equal(copy(oi$archive$data)[, timestamp := NULL], expected_archive, ignore.col.order = TRUE)
 #  print(copy(oi$archive$data)[, timestamp := NULL][])
