@@ -1,6 +1,38 @@
 
 source("setup.R", local = TRUE)
 
+# package bridge
+
+legacy_generator = new.env(parent = emptyenv())
+native_generator = new.env(parent = emptyenv())
+
+expect_identical(
+  miesmuschel:::.resolve_param_set_shadow(
+    legacy_generator,
+    paradox_exports = character()
+  ),
+  legacy_generator
+)
+expect_identical(
+  miesmuschel:::.resolve_param_set_shadow(
+    stop("legacy generator was forced"),
+    paradox_exports = "ParamSetShadow",
+    get_exported_value = function(package, name) {
+      expect_identical(package, "paradox")
+      expect_identical(name, "ParamSetShadow")
+      native_generator
+    }
+  ),
+  native_generator
+)
+expect_true("ParamSetShadow" %in% getNamespaceExports("miesmuschel"))
+if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
+  expect_identical(
+    miesmuschel::ParamSetShadow,
+    getExportedValue("paradox", "ParamSetShadow")
+  )
+}
+
 # basics
 
 p = ps(x = p_dbl(-1, 1, tags = "test2"), y = p_lgl(), z = p_fct(c("a", "b", "c")),

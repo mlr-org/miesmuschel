@@ -183,3 +183,16 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
   )
 )
 
+.resolve_param_set_shadow = function(legacy,
+    paradox_exports = getNamespaceExports("paradox"),
+    get_exported_value = getExportedValue) {
+  if ("ParamSetShadow" %in% paradox_exports) {
+    return(get_exported_value("paradox", "ParamSetShadow"))
+  }
+  legacy
+}
+
+# Paradox 2 owns the optimized implementation. Keep the local generator as a
+# load-time compatibility fallback for Paradox 1.x so this bridge can be
+# released before the corresponding Paradox release reaches CRAN.
+ParamSetShadow = .resolve_param_set_shadow(ParamSetShadow)
