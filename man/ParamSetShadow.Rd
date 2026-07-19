@@ -10,9 +10,9 @@ otherwise, the \code{ParamSetShadow} behaves like a \code{\link[paradox:ParamSet
 \code{\link[paradox:Domain]{Domain}}s are not present.
 
 With paradox 2.0.0 or newer, this export is the exact
-\code{\link[paradox:ParamSetShadow]{paradox::ParamSetShadow}} generator. The local
-implementation documented below is retained only so an installed miesmuschel
-artifact can still be loaded with paradox 1.x.
+\code{paradox::ParamSetShadow} generator. The local implementation below is
+retained only so an installed miesmuschel artifact can still be loaded with
+paradox 1.x.
 }
 \examples{
 p1 = ps(x = p_dbl(0, 1), y = p_lgl())

@@ -37,9 +37,9 @@
 #' [`Domain`][paradox::Domain]s are not present.
 #'
 #' With paradox 2.0.0 or newer, this export is the exact
-#' [`paradox::ParamSetShadow`][paradox::ParamSetShadow] generator. The local
-#' implementation below is retained only so an installed miesmuschel artifact
-#' can still be loaded with paradox 1.x.
+#' `paradox::ParamSetShadow` generator. The local implementation below is
+#' retained only so an installed miesmuschel artifact can still be loaded with
+#' paradox 1.x.
 #'
 #' @param set ([`ParamSet`][paradox::ParamSet])\cr
 #'   [`ParamSet`][paradox::ParamSet] to wrap.
