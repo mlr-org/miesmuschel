@@ -138,8 +138,17 @@ expect_equal(pshadow$deps$cond, list(cond_equal_true))
 
 expect_equal(pshadow$deps, p$deps)
 
-expect_error(pshadow$add_dep("a", "y", cond_equal_true), "Must be element of .* but is 'y'")
-expect_error(pshadow$add_dep("x", "b", cond_equal_true), "Must be element of .* but is 'x'")
+shadow_dependency_error = function(legacy) {
+  if (miesmuschel:::.paradox_has_owned_shadow()) {
+    "Shadow dependencies must stay inside the visible schema"
+  } else {
+    legacy
+  }
+}
+expect_error(pshadow$add_dep("a", "y", cond_equal_true),
+  shadow_dependency_error("Must be element of .* but is 'y'"))
+expect_error(pshadow$add_dep("x", "b", cond_equal_true),
+  shadow_dependency_error("Must be element of .* but is 'x'"))
 
 # adding dep to origin doesn't change pshadow
 p$add_dep("x", "y", cond_equal_true)
