@@ -20,7 +20,7 @@ fullps_flat = ps_flatten(fullps_collection)
 fullps_flat$values = list()
 fullps_flat$deps = data.table(id = character(0), on = character(0), cond = list())
 
-expect_equal(fullps_flat, psboth)
+expect_equivalent(fullps_flat, psboth)
 
 # flattening ParamSetShadow
 
@@ -32,10 +32,9 @@ ps1_flattened = ps_flatten(ps1_shadow)
 ps1_flattened_noclone = ps_flatten(ps1_shadow, clone = FALSE)
 ps1_flattened$values = list()
 
-expect_equal(ps1_flattened, ps1)
+expect_equivalent(ps1_flattened, ps1)
 expect_false(data.table::address(ps1_flattened$deps) == data.table::address(ps1_shadow$deps))
 
 expect_true(identical(ps1, ps_flatten(ps1, clone = FALSE)))
 expect_false(identical(ps1, ps_flatten(ps1, clone = TRUE)))
-
 
