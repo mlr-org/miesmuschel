@@ -69,6 +69,79 @@ if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
   )
 }
 
+# serialized-object migration bridge
+
+legacy_origin = ps(x = p_dbl(0, 1), hidden = p_lgl())
+legacy_private = new.env(parent = emptyenv())
+legacy_private$.set = legacy_origin
+legacy_private$.shadowed = "hidden"
+legacy_enclosure = new.env(parent = asNamespace("miesmuschel"))
+legacy_shell = new.env(parent = emptyenv())
+class(legacy_shell) = c("ParamSetShadow", "ParamSet", "R6")
+legacy_enclosure$self = legacy_shell
+legacy_enclosure$private = legacy_private
+legacy_shell$.__enclos_env__ = legacy_enclosure
+
+inspected = miesmuschel:::.inspect_legacy_param_set_shadow(legacy_shell)
+expect_identical(inspected$state, list(shadowed = "hidden"))
+expect_identical(inspected$dependencies, list(origin = legacy_origin))
+
+forced = new.env(parent = emptyenv())
+forced$value = FALSE
+delayed_private = new.env(parent = emptyenv())
+delayedAssign(".set", {
+  forced$value = TRUE
+  legacy_origin
+}, assign.env = delayed_private)
+delayed_private$.shadowed = "hidden"
+delayed_enclosure = new.env(parent = asNamespace("miesmuschel"))
+delayed_enclosure$self = legacy_shell
+delayed_enclosure$private = delayed_private
+legacy_shell$.__enclos_env__ = delayed_enclosure
+expect_error(
+  miesmuschel:::.inspect_legacy_param_set_shadow(legacy_shell),
+  "Delayed legacy ParamSetShadow binding"
+)
+expect_false(forced$value)
+legacy_shell$.__enclos_env__ = legacy_enclosure
+
+if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
+  rebuilt = miesmuschel:::.rebuild_legacy_param_set_shadow(
+    ps(x = p_dbl(0, 1)),
+    inspected$state,
+    inspected$dependencies
+  )
+  expect_identical(rebuilt$origin, legacy_origin)
+  expect_identical(rebuilt$ids(), "x")
+
+  old_action = options(paradox.legacy_object_action = "error")
+  on.exit(options(old_action), add = TRUE)
+  expect_error(
+    miesmuschel:::.__ParamSetShadow__values(
+      legacy_shell, legacy_private, NULL
+    ),
+    "upgrade_paradox_object_graph"
+  )
+} else {
+  legacy_instance = ParamSetShadow$new(legacy_origin, "hidden")
+  private = legacy_instance$.__enclos_env__$private
+  expect_true(isNamespace(parent.env(legacy_instance$.__enclos_env__)))
+  expect_true(grepl(
+    ".__ParamSetShadow__values",
+    paste(
+      deparse(body(activeBindingFunction("values", legacy_instance))),
+      collapse = ""
+    ),
+    fixed = TRUE
+  ))
+  expect_identical(
+    miesmuschel:::.__ParamSetShadow__values(
+      legacy_instance, private, NULL
+    ),
+    legacy_instance$values
+  )
+}
+
 # basics
 
 p = ps(x = p_dbl(-1, 1, tags = "test2"), y = p_lgl(), z = p_fct(c("a", "b", "c")),

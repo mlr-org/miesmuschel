@@ -20,6 +20,9 @@
   } else {
     legacy_factory()
   }
+  if (!use_paradox) {
+    .leanify_legacy_param_set_shadow(generator, namespace)
+  }
 
   was_locked = bindingIsLocked("ParamSetShadow", namespace)
   if (was_locked) unlockBinding("ParamSetShadow", namespace)
@@ -64,6 +67,7 @@ ParamSetShadow = NULL
 
 .make_legacy_param_set_shadow = function() {
   R6Class("ParamSetShadow", inherit = ParamSet,
+  parent_env = asNamespace("miesmuschel"),
   public = list(
     #' @description
     #' Initialize the `ParamSetShadow` object.
@@ -222,4 +226,263 @@ ParamSetShadow = NULL
     .extra_trafo = NULL
     )
   )
+}
+
+.legacy_shadow_binding = function(owner, name) {
+  if (!is.environment(owner) ||
+      !exists(name, envir = owner, inherits = FALSE) ||
+      bindingIsActive(name, owner)) {
+    stop(sprintf("Malformed legacy ParamSetShadow binding `%s`", name))
+  }
+  value = eval(call("substitute", as.name(name), owner), envir = baseenv())
+  if (is.language(value) || is.symbol(value)) {
+    stop(sprintf("Delayed legacy ParamSetShadow binding `%s` is unsupported", name))
+  }
+  value
+}
+
+.inspect_legacy_param_set_shadow = function(x) {
+  if (!is.environment(x) ||
+      !identical(attr(x, "class", exact = TRUE),
+        c("ParamSetShadow", "ParamSet", "R6"))) {
+    stop("Malformed legacy miesmuschel ParamSetShadow")
+  }
+  enclosure = .legacy_shadow_binding(x, ".__enclos_env__")
+  private = .legacy_shadow_binding(enclosure, "private")
+  origin = .legacy_shadow_binding(private, ".set")
+  shadowed = .legacy_shadow_binding(private, ".shadowed")
+  if (!is.environment(enclosure) || !is.environment(private) ||
+      !is.environment(origin) || !inherits(origin, "ParamSet") ||
+      !is.character(shadowed) || anyNA(shadowed)) {
+    stop("Malformed legacy miesmuschel ParamSetShadow state")
+  }
+  list(
+    state = list(shadowed = shadowed),
+    dependencies = list(origin = origin)
+  )
+}
+
+.rebuild_legacy_param_set_shadow = function(base, state, dependencies) {
+  paradox::ParamSetShadow$new(dependencies$origin, state$shadowed)
+}
+
+.register_paradox_shadow_upgrader = function() {
+  if (!"register_paradox_object_upgrader" %in%
+      getNamespaceExports("paradox")) {
+    return(invisible(FALSE))
+  }
+  getExportedValue("paradox", "register_paradox_object_upgrader")(
+    owner_package = "miesmuschel",
+    legacy_class = c("ParamSetShadow", "ParamSet", "R6"),
+    migration_kind = "replacement",
+    inspector = ".inspect_legacy_param_set_shadow",
+    rebuilder = ".rebuild_legacy_param_set_shadow",
+    retired_bindings = c("params_unid", "set_id")
+  )
+  invisible(TRUE)
+}
+
+.legacy_shadow_target_names = paste0(
+  ".__ParamSetShadow__",
+  c(
+    "add_dep", "clone", "constraint", "deps", "initialize", "origin",
+    "params", "params_unid", "set_id", "test_constraint", "values"
+  )
+)
+
+.leanify_legacy_param_set_shadow = function(generator, namespace) {
+  if (!R6::is.R6Class(generator)) return(invisible(FALSE))
+  locked = vapply(
+    .legacy_shadow_target_names,
+    bindingIsLocked,
+    logical(1L),
+    env = namespace
+  )
+  for (name in .legacy_shadow_target_names[locked]) {
+    unlockBinding(name, namespace)
+  }
+  on.exit({
+    for (name in .legacy_shadow_target_names[locked]) {
+      lockBinding(name, namespace)
+    }
+  }, add = TRUE)
+  mlr3misc::leanify_r6(generator, namespace)
+  invisible(TRUE)
+}
+
+.legacy_shadow_graph_api = function() {
+  "upgrade_paradox_object_graph" %in% getNamespaceExports("paradox")
+}
+
+.upgrade_legacy_shadow_first_use = function(self, target) {
+  if (!.legacy_shadow_graph_api()) return(FALSE)
+  action = getOption("paradox.legacy_object_action", "error")
+  if (!identical(action, "upgrade")) {
+    stop(
+      sprintf(
+        paste0(
+          "A serialized Paradox 1 object tried to call ",
+          "`miesmuschel::%s`. Upgrade the containing object with ",
+          "`upgrade_paradox_object_graph(x)`. To perform this migration ",
+          "silently on first use, set ",
+          "`options(paradox.legacy_object_action = \"upgrade\")`."
+        ),
+        target
+      ),
+      call. = FALSE
+    )
+  }
+  getExportedValue("paradox", "upgrade_paradox_object_graph")(self)
+  TRUE
+}
+
+.legacy_shadow_function = function(member, kind, frame) {
+  generator = .make_legacy_param_set_shadow()
+  method = switch(
+    kind,
+    public = generator$public_methods[[member]],
+    active = generator$active[[member]]
+  )
+  if (!is.function(method)) {
+    stop(sprintf("Missing legacy ParamSetShadow member `%s`", member))
+  }
+  environment(method) = frame
+  method
+}
+
+.replay_shadow_active = function(self, member, supplied, value = NULL) {
+  if (!exists(member, envir = self, inherits = FALSE) ||
+      !bindingIsActive(member, self)) {
+    stop(sprintf(
+      "The legacy ParamSetShadow binding `%s` was retired by Paradox 2",
+      member
+    ))
+  }
+  binding = activeBindingFunction(member, self)
+  if (supplied) binding(value) else binding()
+}
+
+# Historical miesmuschel releases leanified their local ParamSetShadow at
+# package load. Serialized stubs therefore resolve these exact namespace names
+# before any inherited Paradox method can notice the old shell. On Paradox 2
+# they are cold migration gateways; on Paradox 1 they retain the old behavior.
+.__ParamSetShadow__initialize = function(
+    self, private, super, set, shadowed) {
+  if (!.upgrade_legacy_shadow_first_use(
+      self, ".__ParamSetShadow__initialize")) {
+    legacy = .legacy_shadow_function("initialize", "public", environment())
+    return(legacy(set, shadowed))
+  }
+  self$initialize(set, shadowed)
+}
+
+.__ParamSetShadow__test_constraint = function(
+    self, private, super, x, ...) {
+  if (!.upgrade_legacy_shadow_first_use(
+      self, ".__ParamSetShadow__test_constraint")) {
+    legacy = .legacy_shadow_function(
+      "test_constraint", "public", environment()
+    )
+    return(legacy(x, ...))
+  }
+  self$test_constraint(x, ...)
+}
+
+.__ParamSetShadow__add_dep = function(
+    self, private, super, id, on, cond,
+    allow_dangling_dependencies = FALSE, ...) {
+  if (!.upgrade_legacy_shadow_first_use(
+      self, ".__ParamSetShadow__add_dep")) {
+    legacy = .legacy_shadow_function("add_dep", "public", environment())
+    return(legacy(
+      id, on, cond,
+      allow_dangling_dependencies = allow_dangling_dependencies,
+      ...
+    ))
+  }
+  self$add_dep(
+    id, on, cond,
+    allow_dangling_dependencies = allow_dangling_dependencies,
+    ...
+  )
+}
+
+.__ParamSetShadow__clone = function(self, private, super, deep = FALSE) {
+  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__clone")) {
+    legacy = .legacy_shadow_function("clone", "public", environment())
+    return(legacy(deep = deep))
+  }
+  self$clone(deep = deep)
+}
+
+.__ParamSetShadow__constraint = function(self, private, super, f) {
+  if (!.upgrade_legacy_shadow_first_use(
+      self, ".__ParamSetShadow__constraint")) {
+    legacy = .legacy_shadow_function("constraint", "active", environment())
+    if (missing(f)) return(legacy())
+    return(legacy(f))
+  }
+  .replay_shadow_active(self, "constraint", !missing(f),
+    if (!missing(f)) f)
+}
+
+.__ParamSetShadow__deps = function(self, private, super, rhs) {
+  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__deps")) {
+    legacy = .legacy_shadow_function("deps", "active", environment())
+    if (missing(rhs)) return(legacy())
+    return(legacy(rhs))
+  }
+  .replay_shadow_active(self, "deps", !missing(rhs),
+    if (!missing(rhs)) rhs)
+}
+
+.__ParamSetShadow__origin = function(self, private, super, rhs) {
+  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__origin")) {
+    legacy = .legacy_shadow_function("origin", "active", environment())
+    if (missing(rhs)) return(legacy())
+    return(legacy(rhs))
+  }
+  .replay_shadow_active(self, "origin", !missing(rhs),
+    if (!missing(rhs)) rhs)
+}
+
+.__ParamSetShadow__params = function(self, private, super, rhs) {
+  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__params")) {
+    legacy = .legacy_shadow_function("params", "active", environment())
+    if (missing(rhs)) return(legacy())
+    return(legacy(rhs))
+  }
+  .replay_shadow_active(self, "params", !missing(rhs),
+    if (!missing(rhs)) rhs)
+}
+
+.__ParamSetShadow__params_unid = function(self, private, super, rhs) {
+  if (!.upgrade_legacy_shadow_first_use(
+      self, ".__ParamSetShadow__params_unid")) {
+    legacy = .legacy_shadow_function("params_unid", "active", environment())
+    if (missing(rhs)) return(legacy())
+    return(legacy(rhs))
+  }
+  .replay_shadow_active(self, "params_unid", !missing(rhs),
+    if (!missing(rhs)) rhs)
+}
+
+.__ParamSetShadow__set_id = function(self, private, super, v) {
+  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__set_id")) {
+    legacy = .legacy_shadow_function("set_id", "active", environment())
+    if (missing(v)) return(legacy())
+    return(legacy(v))
+  }
+  .replay_shadow_active(self, "set_id", !missing(v),
+    if (!missing(v)) v)
+}
+
+.__ParamSetShadow__values = function(self, private, super, rhs) {
+  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__values")) {
+    legacy = .legacy_shadow_function("values", "active", environment())
+    if (missing(rhs)) return(legacy())
+    return(legacy(rhs))
+  }
+  .replay_shadow_active(self, "values", !missing(rhs),
+    if (!missing(rhs)) rhs)
 }
