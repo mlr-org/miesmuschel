@@ -35,6 +35,13 @@ expect_true(miesmuschel:::.install_param_set_shadow_bridge(
 ))
 expect_identical(bridge_namespace$ParamSetShadow, native_generator)
 expect_true(bindingIsLocked("ParamSetShadow", bridge_namespace))
+expect_error(
+  miesmuschel:::.unlock_param_set_shadow_binding(
+    "unrelated",
+    bridge_namespace
+  ),
+  "Refusing to unlock unrelated binding"
+)
 
 legacy_namespace = new.env(parent = emptyenv())
 legacy_namespace$ParamSetShadow = NULL

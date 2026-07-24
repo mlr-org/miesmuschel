@@ -5,6 +5,21 @@
     "ParamSetShadow" %in% paradox_exports
 }
 
+.legacy_shadow_target_names = paste0(
+  ".__ParamSetShadow__",
+  c(
+    "add_dep", "clone", "constraint", "deps", "initialize", "origin",
+    "params", "params_unid", "set_id", "test_constraint", "values"
+  )
+)
+
+.unlock_param_set_shadow_binding = function(name, namespace) {
+  if (!name %in% c("ParamSetShadow", .legacy_shadow_target_names)) {
+    stop(sprintf("Refusing to unlock unrelated binding `%s`", name))
+  }
+  get("unlockBinding", envir = baseenv())(name, namespace)
+}
+
 .install_param_set_shadow_bridge = function(namespace,
     paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox"),
@@ -25,7 +40,9 @@
   }
 
   was_locked = bindingIsLocked("ParamSetShadow", namespace)
-  if (was_locked) unlockBinding("ParamSetShadow", namespace)
+  if (was_locked) {
+    .unlock_param_set_shadow_binding("ParamSetShadow", namespace)
+  }
   on.exit(if (was_locked) lockBinding("ParamSetShadow", namespace), add = TRUE)
   assign("ParamSetShadow", generator, envir = namespace)
   invisible(use_paradox)
@@ -66,6 +83,10 @@
 ParamSetShadow = NULL
 
 .make_legacy_param_set_shadow = function() {
+  # R6 installs these bindings in each method's enclosing environment.
+  # Declaring them here also makes that generated lexical contract explicit to
+  # codetools without suppressing unrelated undefined globals package-wide.
+  private = self = super = NULL
   R6Class("ParamSetShadow", inherit = ParamSet,
   parent_env = asNamespace("miesmuschel"),
   public = list(
@@ -263,7 +284,10 @@ ParamSetShadow = NULL
 }
 
 .rebuild_legacy_param_set_shadow = function(base, state, dependencies) {
-  paradox::ParamSetShadow$new(dependencies$origin, state$shadowed)
+  getExportedValue("paradox", "ParamSetShadow")$new(
+    dependencies$origin,
+    state$shadowed
+  )
 }
 
 .register_paradox_shadow_upgrader = function() {
@@ -282,14 +306,6 @@ ParamSetShadow = NULL
   invisible(TRUE)
 }
 
-.legacy_shadow_target_names = paste0(
-  ".__ParamSetShadow__",
-  c(
-    "add_dep", "clone", "constraint", "deps", "initialize", "origin",
-    "params", "params_unid", "set_id", "test_constraint", "values"
-  )
-)
-
 .leanify_legacy_param_set_shadow = function(generator, namespace) {
   if (!R6::is.R6Class(generator)) return(invisible(FALSE))
   locked = vapply(
@@ -299,7 +315,7 @@ ParamSetShadow = NULL
     env = namespace
   )
   for (name in .legacy_shadow_target_names[locked]) {
-    unlockBinding(name, namespace)
+    .unlock_param_set_shadow_binding(name, namespace)
   }
   on.exit({
     for (name in .legacy_shadow_target_names[locked]) {
