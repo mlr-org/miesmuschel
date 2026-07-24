@@ -314,14 +314,17 @@ ParamSetShadow = NULL
     logical(1L),
     env = namespace
   )
-  for (name in .legacy_shadow_target_names[locked]) {
-    .unlock_param_set_shadow_binding(name, namespace)
-  }
+  # Historical leanification targets are package-owned namespace bindings.
+  # Register cleanup before changing the first one so even an exceptional
+  # partial unlock cannot leave the namespace surface mutable.
   on.exit({
     for (name in .legacy_shadow_target_names[locked]) {
       lockBinding(name, namespace)
     }
   }, add = TRUE)
+  for (name in .legacy_shadow_target_names[locked]) {
+    .unlock_param_set_shadow_binding(name, namespace)
+  }
   mlr3misc::leanify_r6(generator, namespace)
   invisible(TRUE)
 }
