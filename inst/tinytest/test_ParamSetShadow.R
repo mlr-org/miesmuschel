@@ -208,6 +208,50 @@ if (miesmuschel:::paradox_s3) {
   cond_equal_true = CondEqual$new(TRUE)
 }
 
+# dormant dependent values
+
+dormant_origin = ps(
+  gate = p_lgl(),
+  child = p_int(),
+  hidden = p_int()
+)
+dormant_origin$add_dep("child", "gate", cond_equal_true)
+dormant_origin$values = list(hidden = 9L)
+dormant_shadow = ParamSetShadow$new(dormant_origin, "hidden")
+
+if (miesmuschel:::.paradox_has_owned_shadow()) {
+  dormant_shadow$values = list(gate = FALSE, child = 1L)
+  expect_identical(
+    dormant_shadow$values,
+    list(gate = FALSE, child = 1L)
+  )
+  expect_identical(dormant_shadow$get_values(), list(gate = FALSE))
+
+  dormant_shadow$values$gate = TRUE
+  expect_identical(
+    dormant_shadow$get_values(),
+    list(gate = TRUE, child = 1L)
+  )
+
+  dormant_shadow$values$gate = FALSE
+  expect_identical(
+    dormant_shadow$values,
+    list(gate = FALSE, child = 1L)
+  )
+  expect_identical(dormant_shadow$get_values(), list(gate = FALSE))
+  expect_identical(dormant_shadow$origin$values$hidden, 9L)
+} else {
+  before = dormant_shadow$origin$values
+  expect_error(
+    {
+      dormant_shadow$values = list(gate = FALSE, child = 1L)
+    },
+    "child.*can only be set"
+  )
+  expect_identical(dormant_shadow$origin$values, before)
+  expect_identical(length(dormant_shadow$values), 0L)
+}
+
 # deps
 pshadow$add_dep("a", "b", cond_equal_true)
 expect_data_table(pshadow$deps, any.missing = FALSE, nrows = 1, ncols = 3)
