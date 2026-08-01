@@ -262,17 +262,23 @@ expect_equal(pshadow$deps$cond, list(cond_equal_true))
 
 expect_equal(pshadow$deps, p$deps)
 
-shadow_dependency_error = function(legacy) {
+shadow_dependency_error = function(legacy, owned) {
   if (miesmuschel:::.paradox_has_owned_shadow()) {
-    "Shadow dependencies must stay inside the visible schema"
+    owned
   } else {
     legacy
   }
 }
 expect_error(pshadow$add_dep("a", "y", cond_equal_true),
-  shadow_dependency_error("Must be element of .* but is 'y'"))
+  shadow_dependency_error(
+    "Must be element of .* but is 'y'",
+    "Dependency of visible 'a' on hidden 'y' crosses the ParamSetShadow boundary"
+  ))
 expect_error(pshadow$add_dep("x", "b", cond_equal_true),
-  shadow_dependency_error("Must be element of .* but is 'x'"))
+  shadow_dependency_error(
+    "Must be element of .* but is 'x'",
+    "'x' is hidden by this ParamSetShadow"
+  ))
 
 # adding dep to origin doesn't change pshadow
 p$add_dep("x", "y", cond_equal_true)
@@ -289,8 +295,14 @@ expect_identical(pshadow$origin, p)  # but they still refer to each other.
 
 # creating PSS across dependency bounds is prohibited
 
-expect_error(ParamSetShadow$new(p, "a"), "Params a have dependencies that reach across shadow bounds")
-expect_error(ParamSetShadow$new(p, "b"), "Params a have dependencies that reach across shadow bounds")
+expect_error(ParamSetShadow$new(p, "a"), shadow_dependency_error(
+  "Params a have dependencies that reach across shadow bounds",
+  "Dependency of hidden 'a' on visible 'b' crosses the ParamSetShadow boundary"
+))
+expect_error(ParamSetShadow$new(p, "b"), shadow_dependency_error(
+  "Params a have dependencies that reach across shadow bounds",
+  "Dependency of visible 'a' on hidden 'b' crosses the ParamSetShadow boundary"
+))
 
 ps_compare = ps(x = p_dbl(-1, 1, tags = "test2"), y = p_lgl(),
   a = p_dbl(-2, 2, tags = "test"), b = p_lgl(), c = p_fct(c("x", "y", "z")))
