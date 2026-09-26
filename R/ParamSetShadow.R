@@ -54,17 +54,35 @@
 #' Wraps another [`ParamSet`][paradox::ParamSet] and shadows out a subset of its [`Domain`][paradox::Domain]s.
 #' The original [`ParamSet`][paradox::ParamSet] can still be accessed through the `$origin` field;
 #' otherwise, the `ParamSetShadow` behaves like a [`ParamSet`][paradox::ParamSet] where the shadowed
-#' [`Domain`][paradox::Domain]s are not present.
+#' [`Domain`][paradox::Domain]s are not present: they are hidden from `$values`, `$params` and `$deps`,
+#' and values assigned through the `ParamSetShadow` are written through to the wrapped
+#' [`ParamSet`][paradox::ParamSet] while the shadowed values are kept.
 #'
-#' With paradox 2.0.0 or newer, this export is the exact
-#' `paradox::ParamSetShadow` generator. The local implementation below is
-#' retained only so an installed miesmuschel artifact can still be loaded with
-#' paradox 1.x.
+#' Which implementation is used depends on the installed version of `paradox`:
+#' * With `paradox` 2.0.0 or newer, `miesmuschel::ParamSetShadow` is the very same class as the
+#'   `ParamSetShadow` exported by `paradox`. See the help page of that name in `paradox` for the
+#'   complete list of methods and fields.
+#' * With `paradox` 1.x, `miesmuschel` uses its own compatibility implementation of the class,
+#'   which provides the constructor and the `$origin` field described here. Its `$params_unid` and
+#'   `$set_id` fields only exist for backward compatibility and are not available with `paradox` 2.
 #'
-#' @param set ([`ParamSet`][paradox::ParamSet])\cr
+#' The exported object is bound when the package is loaded, which is why this help page does not
+#' list the methods of the class.
+#'
+#' @section Construction:
+#' ```
+#' ParamSetShadow$new(set, shadowed)
+#' ```
+#' * `set` :: [`ParamSet`][paradox::ParamSet]\cr
 #'   [`ParamSet`][paradox::ParamSet] to wrap.
-#' @param shadowed (`character`)\cr
-#'   Ids of [`Domain`][paradox::Domain]s to shadow from `sets`, must be a subset of `set$ids()`.
+#' * `shadowed` :: `character`\cr
+#'   Ids of [`Domain`][paradox::Domain]s to shadow from `set`, must be a subset of `set$ids()`.
+#'
+#' @section Fields:
+#' * `origin` :: [`ParamSet`][paradox::ParamSet]\cr
+#'   The wrapped [`ParamSet`][paradox::ParamSet]. This field is read-only, but the object it refers to
+#'   can be modified by reference to influence the `ParamSetShadow` object itself.
+#'
 #' @examples
 #' p1 = ps(x = p_dbl(0, 1), y = p_lgl())
 #' p1$values = list(x = 0.5, y = TRUE)
@@ -77,7 +95,10 @@
 #' print(p2)
 #'
 #' print(p2$origin$values)
+#' @name ParamSetShadow
 #' @export
+NULL
+
 # Populated by .onLoad(). Do not serialize Paradox's generator in this
 # namespace: leanification would otherwise rewrite its package-owned methods.
 ParamSetShadow = NULL
@@ -90,8 +111,8 @@ ParamSetShadow = NULL
   R6Class("ParamSetShadow", inherit = ParamSet,
   parent_env = asNamespace("miesmuschel"),
   public = list(
-    #' @description
-    #' Initialize the `ParamSetShadow` object.
+    # @description
+    # Initialize the `ParamSetShadow` object.
     initialize = function(set, shadowed) {
       private$.set = assert_r6(set, "ParamSet")
       private$.shadowed = assert_subset_character(shadowed, set$ids())
@@ -112,13 +133,13 @@ ParamSetShadow = NULL
       }
     },
 
-    #' @description
-    #' Checks underlying [`ParamSet`][paradox::ParamSet]'s constraint.
-    #' It uses the underlying `$values` for shadowed values.
-    #'
-    #' @param x (named `list`) values to test
-    #' @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$test_constraint()` function.
-    #' @return `logical(1)`.
+    # @description
+    # Checks underlying [`ParamSet`][paradox::ParamSet]'s constraint.
+    # It uses the underlying `$values` for shadowed values.
+    #
+    # @param x (named `list`) values to test
+    # @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$test_constraint()` function.
+    # @return `logical(1)`.
     test_constraint = function(x, ...) {
       assert_list(x, names = "unique")
       if (length(x)) assert_names(names(x), disjunct.from = private$.shadowed)
@@ -126,15 +147,15 @@ ParamSetShadow = NULL
       values_underlying = values_underlying[intersect(names(values_underlying), private$.shadowed)]
       private$.set$test_constraint(c(x, values_underlying), ...)
     },
-    #' @description
-    #' Adds a dependency to the unterlying [`ParamSet`][paradox::ParamSet].
-    #'
-    #' @param id (`character(1)`)
-    #' @param on (`character(1)`)
-    #' @param cond ([`Condition`][paradox::Condition])
-    #' @param allow_dangling_dependencies (`logical(1)`): Whether to allow dependencies on parameters that are not present.
-    #' @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$add_dep()` function.
-    #' @return `invisible(self)`.
+    # @description
+    # Adds a dependency to the unterlying [`ParamSet`][paradox::ParamSet].
+    #
+    # @param id (`character(1)`)
+    # @param on (`character(1)`)
+    # @param cond ([`Condition`][paradox::Condition])
+    # @param allow_dangling_dependencies (`logical(1)`): Whether to allow dependencies on parameters that are not present.
+    # @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$add_dep()` function.
+    # @return `invisible(self)`.
     add_dep = function(id, on, cond,  allow_dangling_dependencies = FALSE, ...) {
       ids = self$ids()
       assert_choice(id, ids)
@@ -167,8 +188,8 @@ ParamSetShadow = NULL
         }, constraint, set, shadowed)
       }
     },
-    #' @field params (named `list()`)\cr
-    #' Table of rows identifying the contained [`Domain`][paradox::Domain]s
+    # @field params (named `list()`)\cr
+    # Table of rows identifying the contained [`Domain`][paradox::Domain]s
     params = function(rhs) {
       if (!missing(rhs)) {
         stop("params is read-only.")
@@ -179,11 +200,11 @@ ParamSetShadow = NULL
       params
     },
 
-    #' @field params_unid (named `list` of `Param`)
-    #' List of `Param` that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
-    #' shadowed `Param`s removed. This is a field mostly for internal usage that has the
-    #' `$id`s set to invalid values but avoids cloning overhead.\cr
-    #' Available only in the paradox 1.x compatibility implementation.
+    # @field params_unid (named `list` of `Param`)
+    # List of `Param` that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
+    # shadowed `Param`s removed. This is a field mostly for internal usage that has the
+    # `$id`s set to invalid values but avoids cloning overhead.\cr
+    # Available only in the paradox 1.x compatibility implementation.
     params_unid = function(rhs) {
       if (!missing(rhs)) {
         stop("params_unid is read-only.")
@@ -193,10 +214,10 @@ ParamSetShadow = NULL
       params[private$.shadowed] = NULL
       params
     },
-    #' @field deps ([`data.table`][data.table::data.table])\cr
-    #' Table of dependencies, as in [`ParamSet`][paradox::ParamSet]. The dependencies that are related to shadowed
-    #' parameters are not exposed. This [`data.table`][data.table::data.table] should be seen as read-only and not
-    #' modified in-place; instead, the `$origin`'s `$deps` should be modified.
+    # @field deps ([`data.table`][data.table::data.table])\cr
+    # Table of dependencies, as in [`ParamSet`][paradox::ParamSet]. The dependencies that are related to shadowed
+    # parameters are not exposed. This [`data.table`][data.table::data.table] should be seen as read-only and not
+    # modified in-place; instead, the `$origin`'s `$deps` should be modified.
     deps = function(rhs) {
       if (!missing(rhs)) {
         stop("deps is read-only.")
@@ -204,8 +225,8 @@ ParamSetShadow = NULL
       id = on = NULL
       private$.set$deps[!id %in% private$.shadowed & !on %in% private$.shadowed, ]
     },
-    #' @field values (named `list`)\cr
-    #' List of values, as in [`ParamSet`][paradox::ParamSet], with the shadowed values removed.
+    # @field values (named `list`)\cr
+    # List of values, as in [`ParamSet`][paradox::ParamSet], with the shadowed values removed.
     values = function(rhs) {
       if (!missing(rhs)) {
         assert_list(rhs)
@@ -219,8 +240,8 @@ ParamSetShadow = NULL
       values[private$.shadowed] = NULL
       values
     },
-    #' @field set_id ([`data.table`][data.table::data.table])\cr
-    #' Id of the wrapped [`ParamSet`][paradox::ParamSet]. Changing this value will also change the wrapped [`ParamSet`][paradox::ParamSet]'s `$set_id` accordingly.
+    # @field set_id ([`data.table`][data.table::data.table])\cr
+    # Id of the wrapped [`ParamSet`][paradox::ParamSet]. Changing this value will also change the wrapped [`ParamSet`][paradox::ParamSet]'s `$set_id` accordingly.
     set_id = function(v) {
       if (paradox_s3) {
         if (!missing(v)) stop("setting $set_id no longer supported!")
@@ -232,8 +253,8 @@ ParamSetShadow = NULL
       }
       private$.set$set_id
     },
-    #' @field origin ([`ParamSet`][paradox::ParamSet])\cr
-    #' [`ParamSet`][paradox::ParamSet] being wrapped. This object can be modified by reference to influence the `ParamSetShadow` object itself.
+    # @field origin ([`ParamSet`][paradox::ParamSet])\cr
+    # [`ParamSet`][paradox::ParamSet] being wrapped. This object can be modified by reference to influence the `ParamSetShadow` object itself.
     origin = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.set)) {
         stop("origin is read-only.")
