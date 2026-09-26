@@ -8,25 +8,14 @@ legacy_generator = R6::R6Class("ParamSetShadow",
   public = list(initialize = function(...) NULL)
 )
 
-expect_false(miesmuschel:::.paradox_has_owned_shadow(
-  numeric_version("1.1.0"),
-  "ParamSetShadow"
-))
-expect_false(miesmuschel:::.paradox_has_owned_shadow(
-  numeric_version("2.0.0"),
-  character()
-))
-expect_true(miesmuschel:::.paradox_has_owned_shadow(
-  numeric_version("2.0.0"),
-  "ParamSetShadow"
-))
+expect_false(miesmuschel:::.paradox_has_owned_shadow(character()))
+expect_true(miesmuschel:::.paradox_has_owned_shadow("ParamSetShadow"))
 
-# with paradox 2 the bridge binds paradox's generator
+# when paradox exports ParamSetShadow, the bridge binds paradox's generator
 bridge_namespace = new.env(parent = emptyenv())
 bridge_namespace$ParamSetShadow = NULL
 expect_true(miesmuschel:::.install_param_set_shadow_bridge(
   bridge_namespace,
-  paradox_version = numeric_version("2.0.0"),
   paradox_exports = "ParamSetShadow",
   get_exported_value = function(package, name) {
     expect_identical(package, "paradox")
@@ -37,32 +26,19 @@ expect_true(miesmuschel:::.install_param_set_shadow_bridge(
 ))
 expect_identical(bridge_namespace$ParamSetShadow, native_generator)
 
-# with paradox 1 it binds the local implementation and leanifies it, which
+# otherwise it binds the local implementation and leanifies it, which
 # populates the historical .__ParamSetShadow__* names with the
 # implementation's own method bodies
 legacy_namespace = new.env(parent = emptyenv())
 legacy_namespace$ParamSetShadow = NULL
 expect_false(miesmuschel:::.install_param_set_shadow_bridge(
   legacy_namespace,
-  paradox_version = numeric_version("1.1.0"),
   paradox_exports = character(),
   get_exported_value = function(package, name) stop("native generator was requested"),
   legacy_factory = function() legacy_generator
 ))
 expect_identical(legacy_namespace$ParamSetShadow, legacy_generator)
 expect_true(is.function(legacy_namespace$.__ParamSetShadow__initialize))
-
-# The load-time decision must not depend on the paradox version under which a
-# source or binary package happened to be built.
-missing_export_namespace = new.env(parent = emptyenv())
-missing_export_namespace$ParamSetShadow = NULL
-expect_error(miesmuschel:::.install_param_set_shadow_bridge(
-  missing_export_namespace,
-  paradox_version = numeric_version("2.0.0"),
-  paradox_exports = character(),
-  legacy_factory = function() legacy_generator
-), "does not export ParamSetShadow")
-expect_null(missing_export_namespace$ParamSetShadow)
 
 expect_true("ParamSetShadow" %in% getNamespaceExports("miesmuschel"))
 if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {

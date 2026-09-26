@@ -1,22 +1,16 @@
+# paradox exports its own ParamSetShadow since version 2.0.0.
 .paradox_has_owned_shadow = function(
-    paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox")) {
-  isTRUE(paradox_version >= numeric_version("2.0.0")) &&
-    "ParamSetShadow" %in% paradox_exports
+  "ParamSetShadow" %in% paradox_exports
 }
 
 # Called from .onLoad(), which runs before the namespace is sealed, so plain
 # assignment into the namespace is all that is needed.
 .install_param_set_shadow_bridge = function(namespace,
-    paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox"),
     get_exported_value = getExportedValue,
     legacy_factory = .make_legacy_param_set_shadow) {
-  if (isTRUE(paradox_version >= numeric_version("2.0.0")) &&
-      !"ParamSetShadow" %in% paradox_exports) {
-    stop("paradox >= 2.0.0 does not export ParamSetShadow")
-  }
-  use_paradox = .paradox_has_owned_shadow(paradox_version, paradox_exports)
+  use_paradox = .paradox_has_owned_shadow(paradox_exports)
   generator = if (use_paradox) {
     get_exported_value("paradox", "ParamSetShadow")
   } else {
@@ -253,13 +247,17 @@ ParamSetShadow = NULL
   )
 }
 
+# Reads a binding of a serialized object without running any code stored in
+# that object: an active binding is refused, and a delayed binding is detected
+# without forcing it, because `substitute()` returns the unevaluated
+# expression of a promise instead of its value.
 .legacy_shadow_binding = function(owner, name) {
   if (!is.environment(owner) ||
       !exists(name, envir = owner, inherits = FALSE) ||
       bindingIsActive(name, owner)) {
     stop(sprintf("Malformed legacy ParamSetShadow binding `%s`", name))
   }
-  value = eval(call("substitute", as.name(name), owner), envir = baseenv())
+  value = do.call(substitute, list(as.name(name), owner))
   if (is.language(value) || is.symbol(value)) {
     stop(sprintf("Delayed legacy ParamSetShadow binding `%s` is unsupported", name))
   }
