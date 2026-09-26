@@ -3,6 +3,9 @@
 * Compatibility fix with stricter data handling in `mlr3`.
 * Use the Paradox-owned `ParamSetShadow` with paradox 2.0.0 and newer while
   retaining the local implementation for paradox 1.x.
+* Upgrading a `ParamSetShadow` serialized with paradox 1 keeps tags that were set
+  on the shadow itself and refuses to upgrade a shadow whose `extra_trafo`
+  differs from its origin's, instead of silently dropping both.
 
 # miesmuschel 0.0.4-2
 

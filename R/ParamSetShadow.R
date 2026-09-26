@@ -283,6 +283,60 @@ ParamSetShadow = NULL
   value
 }
 
+# Paradox 1 stored tags as a table with columns `id` and `tag` and reported
+# them through `$tags` as a named list with one character vector per
+# parameter. Produce that shape for `ids`, with sorted unique tags, so that two
+# tag assignments compare equal whenever they describe the same tags.
+.legacy_shadow_tag_list = function(tags, ids) {
+  if (!is.data.frame(tags) || !all(c("id", "tag") %in% names(tags)) ||
+      !is.character(tags[["id"]]) || !is.character(tags[["tag"]]) ||
+      anyNA(tags[["id"]]) || anyNA(tags[["tag"]])) {
+    stop("Malformed legacy ParamSetShadow tag table")
+  }
+  result = stats::setNames(vector("list", length(ids)), ids)
+  for (id in ids) {
+    result[[id]] = sort(unique(tags[["tag"]][tags[["id"]] == id]))
+  }
+  result
+}
+
+# The extra transformation the origin reported when the legacy shadow copied
+# it at construction, read without calling anything on a legacy object. A
+# Paradox 1 collection reported its composed private method, or NULL when no
+# contained set had a transformation. An origin that was already upgraded in
+# place is a current object and can be asked directly.
+.legacy_shadow_origin_extra_trafo = function(origin) {
+  enclosure = .legacy_shadow_binding(origin, ".__enclos_env__")
+  private = .legacy_shadow_binding(enclosure, "private")
+  if (!is.environment(private)) {
+    stop("Malformed legacy ParamSetShadow origin")
+  }
+  if (exists(".core", envir = private, inherits = FALSE)) {
+    return(origin$extra_trafo)
+  }
+  if (inherits(origin, "ParamSetCollection")) {
+    children = .legacy_shadow_binding(private, ".children_with_trafos")
+    if (!length(children)) return(NULL)
+    return(.legacy_shadow_binding(private, ".extra_trafo_explicit"))
+  }
+  .legacy_shadow_binding(private, ".extra_trafo")
+}
+
+.legacy_shadow_extra_trafo_matches = function(shadow_trafo, origin) {
+  origin_trafo = .legacy_shadow_origin_extra_trafo(origin)
+  if (is.null(shadow_trafo) && is.null(origin_trafo)) return(TRUE)
+  if (identical(shadow_trafo, origin_trafo)) return(TRUE)
+  if (!is.function(shadow_trafo)) return(FALSE)
+  # A Paradox 1 collection's composed transformation is a method of the
+  # origin. It still belongs to the origin after the origin was upgraded in
+  # place, even though the origin then reports a rebuilt callback.
+  owner = tryCatch(
+    .legacy_shadow_binding(environment(shadow_trafo), "self"),
+    error = function(e) NULL
+  )
+  identical(owner, origin)
+}
+
 .inspect_legacy_param_set_shadow = function(x) {
   if (!is.environment(x) ||
       !identical(attr(x, "class", exact = TRUE),
@@ -298,17 +352,62 @@ ParamSetShadow = NULL
       !is.character(shadowed) || anyNA(shadowed)) {
     stop("Malformed legacy miesmuschel ParamSetShadow state")
   }
+  # The Paradox 1 implementation copied the visible schema into the shadow at
+  # construction, so a serialized shadow may report tags and an extra
+  # transformation that differ from its origin's. Tags are carried along and
+  # become the rebuilt view's own answer. A differing transformation cannot be
+  # represented: a Paradox 2 ParamSetShadow always applies the origin's, so
+  # refuse the upgrade instead of silently dropping it.
+  params = .legacy_shadow_binding(private, ".params")
+  if (!is.data.frame(params) || !is.character(params[["id"]])) {
+    stop("Malformed legacy miesmuschel ParamSetShadow parameter table")
+  }
+  extra_trafo = .legacy_shadow_binding(private, ".extra_trafo")
+  if (!.legacy_shadow_extra_trafo_matches(extra_trafo, origin)) {
+    stop(paste0(
+      "The legacy ParamSetShadow has an `extra_trafo` that differs from its ",
+      "origin's. A Paradox 2 ParamSetShadow always applies the origin's ",
+      "`extra_trafo`, so this object cannot be upgraded automatically. ",
+      "Upgrade the origin, construct a new ParamSetShadow on it, and set the ",
+      "transformation where it should live."
+    ))
+  }
+  tags = .legacy_shadow_tag_list(
+    .legacy_shadow_binding(private, ".tags"),
+    params[["id"]]
+  )
   list(
-    state = list(shadowed = shadowed),
+    state = list(shadowed = shadowed, tags = tags),
     dependencies = list(origin = origin)
   )
 }
 
 .rebuild_legacy_param_set_shadow = function(base, state, dependencies) {
-  getExportedValue("paradox", "ParamSetShadow")$new(
+  shadow = getExportedValue("paradox", "ParamSetShadow")$new(
     dependencies$origin,
     state$shadowed
   )
+  legacy_tags = state$tags
+  current_tags = shadow$tags
+  unknown = setdiff(names(legacy_tags), names(current_tags))
+  if (length(unknown)) {
+    stop(sprintf(
+      "The legacy ParamSetShadow tagged parameters its origin does not have: %s",
+      paste(unknown, collapse = ", ")
+    ))
+  }
+  unchanged = vapply(names(legacy_tags), function(id) {
+    identical(sort(unique(current_tags[[id]])), legacy_tags[[id]])
+  }, logical(1L))
+  # Paradox 1 froze a shadow's tags at construction. Paradox 2 reads the
+  # origin's tags live but lets a view pin its own answer, so when the
+  # serialized tags differ from the origin's, pin the serialized ones. The
+  # upgraded view then keeps reporting what the serialized object did. A tag
+  # assignment must name every visible parameter, so all of them are pinned.
+  if (!all(unchanged)) {
+    shadow$tags = legacy_tags
+  }
+  shadow
 }
 
 .register_paradox_shadow_upgrader = function() {

@@ -82,6 +82,9 @@ legacy_origin = ps(x = p_dbl(0, 1), hidden = p_lgl())
 legacy_private = new.env(parent = emptyenv())
 legacy_private$.set = legacy_origin
 legacy_private$.shadowed = "hidden"
+legacy_private$.params = data.table(id = "x")
+legacy_private$.tags = data.table(id = character(0), tag = character(0))
+legacy_private$.extra_trafo = NULL
 legacy_enclosure = new.env(parent = asNamespace("miesmuschel"))
 legacy_shell = new.env(parent = emptyenv())
 class(legacy_shell) = c("ParamSetShadow", "ParamSet", "R6")
@@ -90,8 +93,31 @@ legacy_enclosure$private = legacy_private
 legacy_shell$.__enclos_env__ = legacy_enclosure
 
 inspected = miesmuschel:::.inspect_legacy_param_set_shadow(legacy_shell)
-expect_identical(inspected$state, list(shadowed = "hidden"))
+expect_identical(inspected$state, list(shadowed = "hidden", tags = list(x = character(0))))
 expect_identical(inspected$dependencies, list(origin = legacy_origin))
+
+# tags set on the legacy shadow itself are carried along; an extra_trafo that
+# differs from the origin's refuses the upgrade instead of being dropped
+tagged_private = new.env(parent = emptyenv())
+tagged_private$.set = legacy_origin
+tagged_private$.shadowed = "hidden"
+tagged_private$.params = data.table(id = "x")
+tagged_private$.tags = data.table(id = c("x", "x"), tag = c("custom", "another"))
+tagged_private$.extra_trafo = NULL
+tagged_enclosure = new.env(parent = asNamespace("miesmuschel"))
+tagged_enclosure$self = legacy_shell
+tagged_enclosure$private = tagged_private
+legacy_shell$.__enclos_env__ = tagged_enclosure
+tagged = miesmuschel:::.inspect_legacy_param_set_shadow(legacy_shell)
+expect_identical(tagged$state$tags, list(x = c("another", "custom")))
+
+tagged_private$.extra_trafo = function(x, param_set) x
+expect_error(
+  miesmuschel:::.inspect_legacy_param_set_shadow(legacy_shell),
+  "extra_trafo.*differs from its origin"
+)
+tagged_private$.extra_trafo = NULL
+legacy_shell$.__enclos_env__ = legacy_enclosure
 
 forced = new.env(parent = emptyenv())
 forced$value = FALSE
@@ -120,6 +146,17 @@ if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
   )
   expect_identical(rebuilt$origin, legacy_origin)
   expect_identical(rebuilt$ids(), "x")
+  expect_identical(rebuilt$tags, list(x = character(0)))
+
+  # legacy shadow-local tags become the rebuilt view's own answer and leave
+  # the origin untouched
+  rebuilt_tagged = miesmuschel:::.rebuild_legacy_param_set_shadow(
+    NULL,
+    tagged$state,
+    tagged$dependencies
+  )
+  expect_identical(rebuilt_tagged$tags, list(x = c("another", "custom")))
+  expect_identical(legacy_origin$tags$x, character(0))
 
   old_action = options(paradox.legacy_object_action = "error")
   on.exit(options(old_action), add = TRUE)
