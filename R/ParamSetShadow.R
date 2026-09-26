@@ -5,21 +5,8 @@
     "ParamSetShadow" %in% paradox_exports
 }
 
-.legacy_shadow_target_names = paste0(
-  ".__ParamSetShadow__",
-  c(
-    "add_dep", "clone", "constraint", "deps", "initialize", "origin",
-    "params", "params_unid", "set_id", "test_constraint", "values"
-  )
-)
-
-.unlock_param_set_shadow_binding = function(name, namespace) {
-  if (!name %in% c("ParamSetShadow", .legacy_shadow_target_names)) {
-    stop(sprintf("Refusing to unlock unrelated binding `%s`", name))
-  }
-  get("unlockBinding", envir = baseenv())(name, namespace)
-}
-
+# Called from .onLoad(), which runs before the namespace is sealed, so plain
+# assignment into the namespace is all that is needed.
 .install_param_set_shadow_bridge = function(namespace,
     paradox_version = utils::packageVersion("paradox"),
     paradox_exports = getNamespaceExports("paradox"),
@@ -36,14 +23,10 @@
     legacy_factory()
   }
   if (!use_paradox) {
-    .leanify_legacy_param_set_shadow(generator, namespace)
+    # Overwrites the .__ParamSetShadow__* gateways defined at the end of this
+    # file with the implementation's own method bodies.
+    mlr3misc::leanify_r6(generator, namespace)
   }
-
-  was_locked = bindingIsLocked("ParamSetShadow", namespace)
-  if (was_locked) {
-    .unlock_param_set_shadow_binding("ParamSetShadow", namespace)
-  }
-  on.exit(if (was_locked) lockBinding("ParamSetShadow", namespace), add = TRUE)
   assign("ParamSetShadow", generator, envir = namespace)
   invisible(use_paradox)
 }
@@ -426,35 +409,28 @@ ParamSetShadow = NULL
   invisible(TRUE)
 }
 
-.leanify_legacy_param_set_shadow = function(generator, namespace) {
-  if (!R6::is.R6Class(generator)) return(invisible(FALSE))
-  locked = vapply(
-    .legacy_shadow_target_names,
-    bindingIsLocked,
-    logical(1L),
-    env = namespace
+# Whether `self` is backed by a current Paradox 2 capsule, which current shells
+# keep in the private field `.core`. A serialized Paradox 1 shell has no such
+# field.
+.legacy_shadow_is_current = function(self) {
+  enclosure = tryCatch(
+    .legacy_shadow_binding(self, ".__enclos_env__"),
+    error = function(e) NULL
   )
-  # Historical leanification targets are package-owned namespace bindings.
-  # Register cleanup before changing the first one so even an exceptional
-  # partial unlock cannot leave the namespace surface mutable.
-  on.exit({
-    for (name in .legacy_shadow_target_names[locked]) {
-      lockBinding(name, namespace)
-    }
-  }, add = TRUE)
-  for (name in .legacy_shadow_target_names[locked]) {
-    .unlock_param_set_shadow_binding(name, namespace)
+  private = if (is.environment(enclosure)) {
+    tryCatch(
+      .legacy_shadow_binding(enclosure, "private"),
+      error = function(e) NULL
+    )
   }
-  mlr3misc::leanify_r6(generator, namespace)
-  invisible(TRUE)
+  is.environment(private) && exists(".core", envir = private, inherits = FALSE)
 }
 
-.legacy_shadow_graph_api = function() {
-  "upgrade_paradox_object_graph" %in% getNamespaceExports("paradox")
-}
-
-.upgrade_legacy_shadow_first_use = function(self, target) {
-  if (!.legacy_shadow_graph_api()) return(FALSE)
+# Migration entry shared by the gateways below. A current object passes
+# through; a serialized Paradox 1 object is upgraded in place when the user
+# opted in and reported otherwise.
+.legacy_shadow_require_current = function(self, target) {
+  if (.legacy_shadow_is_current(self)) return(invisible(TRUE))
   action = getOption("paradox.legacy_object_action", "error")
   if (!identical(action, "upgrade")) {
     stop(
@@ -472,73 +448,62 @@ ParamSetShadow = NULL
     )
   }
   getExportedValue("paradox", "upgrade_paradox_object_graph")(self)
-  TRUE
+  invisible(TRUE)
 }
 
-.legacy_shadow_function = function(member, kind, frame) {
-  generator = .make_legacy_param_set_shadow()
-  method = switch(
-    kind,
-    public = generator$public_methods[[member]],
-    active = generator$active[[member]]
-  )
-  if (!is.function(method)) {
-    stop(sprintf("Missing legacy ParamSetShadow member `%s`", member))
-  }
-  environment(method) = frame
-  method
-}
-
-.replay_shadow_active = function(self, member, supplied, value = NULL) {
+# The current active binding `member` of `self`, after migration if needed.
+# Paradox installs the retired bindings `params_unid` and `set_id` as
+# informative errors on an upgraded shell; a binding that is absent altogether
+# is reported here.
+.legacy_shadow_active_binding = function(self, member, target) {
+  .legacy_shadow_require_current(self, target)
   if (!exists(member, envir = self, inherits = FALSE) ||
       !bindingIsActive(member, self)) {
-    stop(sprintf(
-      "The legacy ParamSetShadow binding `%s` was retired by Paradox 2",
-      member
-    ))
-  }
-  binding = activeBindingFunction(member, self)
-  if (supplied) binding(value) else binding()
-}
-
-# Historical miesmuschel releases leanified their local ParamSetShadow at
-# package load. Serialized stubs therefore resolve these exact namespace names
-# before any inherited Paradox method can notice the old shell. On Paradox 2
-# they are cold migration gateways; on Paradox 1 they retain the old behavior.
-.__ParamSetShadow__initialize = function(
-    self, private, super, set, shadowed) {
-  if (!.upgrade_legacy_shadow_first_use(
-      self, ".__ParamSetShadow__initialize")) {
-    legacy = .legacy_shadow_function("initialize", "public", environment())
-    return(legacy(set, shadowed))
-  }
-  self$initialize(set, shadowed)
-}
-
-.__ParamSetShadow__test_constraint = function(
-    self, private, super, x, ...) {
-  if (!.upgrade_legacy_shadow_first_use(
-      self, ".__ParamSetShadow__test_constraint")) {
-    legacy = .legacy_shadow_function(
-      "test_constraint", "public", environment()
+    stop(
+      sprintf(
+        "The legacy ParamSetShadow binding `%s` was retired by Paradox 2",
+        member
+      ),
+      call. = FALSE
     )
-    return(legacy(x, ...))
   }
+  activeBindingFunction(member, self)
+}
+
+# Historical miesmuschel releases leanified their own ParamSetShadow at package
+# load, so the method stubs of a serialized object call these exact namespace
+# names with `self`, `private` and `super` prepended. On Paradox 2 they are
+# gateways: they upgrade the serialized object on first use, or report it, and
+# replay the requested operation on the upgraded shell; a current object
+# passes straight through. The stub's `private` and `super` belong to the
+# retired shell and are never used. On Paradox 1, leanification of the local
+# implementation overwrites these definitions with its own method bodies at
+# package load.
+#
+# The public methods keep their argument names in Paradox 2, so their
+# arguments are forwarded as they are. The active bindings named their
+# argument differently from the current ones, so they replay by position.
+.__ParamSetShadow__initialize = function(self, private, super, set, shadowed) {
+  stop(
+    paste0(
+      "A serialized Paradox 1 ParamSetShadow cannot be initialized again ",
+      "through `miesmuschel::.__ParamSetShadow__initialize`. Upgrade it with ",
+      "`upgrade_paradox_object_graph(x)`; new objects are created with ",
+      "`ParamSetShadow$new()`."
+    ),
+    call. = FALSE
+  )
+}
+
+.__ParamSetShadow__test_constraint = function(self, private, super, x, ...) {
+  .legacy_shadow_require_current(self, ".__ParamSetShadow__test_constraint")
   self$test_constraint(x, ...)
 }
 
 .__ParamSetShadow__add_dep = function(
     self, private, super, id, on, cond,
     allow_dangling_dependencies = FALSE, ...) {
-  if (!.upgrade_legacy_shadow_first_use(
-      self, ".__ParamSetShadow__add_dep")) {
-    legacy = .legacy_shadow_function("add_dep", "public", environment())
-    return(legacy(
-      id, on, cond,
-      allow_dangling_dependencies = allow_dangling_dependencies,
-      ...
-    ))
-  }
+  .legacy_shadow_require_current(self, ".__ParamSetShadow__add_dep")
   self$add_dep(
     id, on, cond,
     allow_dangling_dependencies = allow_dangling_dependencies,
@@ -547,81 +512,55 @@ ParamSetShadow = NULL
 }
 
 .__ParamSetShadow__clone = function(self, private, super, deep = FALSE) {
-  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__clone")) {
-    legacy = .legacy_shadow_function("clone", "public", environment())
-    return(legacy(deep = deep))
-  }
+  .legacy_shadow_require_current(self, ".__ParamSetShadow__clone")
   self$clone(deep = deep)
 }
 
 .__ParamSetShadow__constraint = function(self, private, super, f) {
-  if (!.upgrade_legacy_shadow_first_use(
-      self, ".__ParamSetShadow__constraint")) {
-    legacy = .legacy_shadow_function("constraint", "active", environment())
-    if (missing(f)) return(legacy())
-    return(legacy(f))
-  }
-  .replay_shadow_active(self, "constraint", !missing(f),
-    if (!missing(f)) f)
+  binding = .legacy_shadow_active_binding(
+    self, "constraint", ".__ParamSetShadow__constraint"
+  )
+  if (missing(f)) binding() else binding(f)
 }
 
 .__ParamSetShadow__deps = function(self, private, super, rhs) {
-  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__deps")) {
-    legacy = .legacy_shadow_function("deps", "active", environment())
-    if (missing(rhs)) return(legacy())
-    return(legacy(rhs))
-  }
-  .replay_shadow_active(self, "deps", !missing(rhs),
-    if (!missing(rhs)) rhs)
+  binding = .legacy_shadow_active_binding(
+    self, "deps", ".__ParamSetShadow__deps"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
 }
 
 .__ParamSetShadow__origin = function(self, private, super, rhs) {
-  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__origin")) {
-    legacy = .legacy_shadow_function("origin", "active", environment())
-    if (missing(rhs)) return(legacy())
-    return(legacy(rhs))
-  }
-  .replay_shadow_active(self, "origin", !missing(rhs),
-    if (!missing(rhs)) rhs)
+  binding = .legacy_shadow_active_binding(
+    self, "origin", ".__ParamSetShadow__origin"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
 }
 
 .__ParamSetShadow__params = function(self, private, super, rhs) {
-  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__params")) {
-    legacy = .legacy_shadow_function("params", "active", environment())
-    if (missing(rhs)) return(legacy())
-    return(legacy(rhs))
-  }
-  .replay_shadow_active(self, "params", !missing(rhs),
-    if (!missing(rhs)) rhs)
+  binding = .legacy_shadow_active_binding(
+    self, "params", ".__ParamSetShadow__params"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
 }
 
 .__ParamSetShadow__params_unid = function(self, private, super, rhs) {
-  if (!.upgrade_legacy_shadow_first_use(
-      self, ".__ParamSetShadow__params_unid")) {
-    legacy = .legacy_shadow_function("params_unid", "active", environment())
-    if (missing(rhs)) return(legacy())
-    return(legacy(rhs))
-  }
-  .replay_shadow_active(self, "params_unid", !missing(rhs),
-    if (!missing(rhs)) rhs)
+  binding = .legacy_shadow_active_binding(
+    self, "params_unid", ".__ParamSetShadow__params_unid"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
 }
 
 .__ParamSetShadow__set_id = function(self, private, super, v) {
-  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__set_id")) {
-    legacy = .legacy_shadow_function("set_id", "active", environment())
-    if (missing(v)) return(legacy())
-    return(legacy(v))
-  }
-  .replay_shadow_active(self, "set_id", !missing(v),
-    if (!missing(v)) v)
+  binding = .legacy_shadow_active_binding(
+    self, "set_id", ".__ParamSetShadow__set_id"
+  )
+  if (missing(v)) binding() else binding(v)
 }
 
 .__ParamSetShadow__values = function(self, private, super, rhs) {
-  if (!.upgrade_legacy_shadow_first_use(self, ".__ParamSetShadow__values")) {
-    legacy = .legacy_shadow_function("values", "active", environment())
-    if (missing(rhs)) return(legacy())
-    return(legacy(rhs))
-  }
-  .replay_shadow_active(self, "values", !missing(rhs),
-    if (!missing(rhs)) rhs)
+  binding = .legacy_shadow_active_binding(
+    self, "values", ".__ParamSetShadow__values"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
 }

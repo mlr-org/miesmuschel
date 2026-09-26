@@ -3,8 +3,10 @@ source("setup.R", local = TRUE)
 
 # package bridge
 
-legacy_generator = new.env(parent = emptyenv())
 native_generator = new.env(parent = emptyenv())
+legacy_generator = R6::R6Class("ParamSetShadow",
+  public = list(initialize = function(...) NULL)
+)
 
 expect_false(miesmuschel:::.paradox_has_owned_shadow(
   numeric_version("1.1.0"),
@@ -19,9 +21,9 @@ expect_true(miesmuschel:::.paradox_has_owned_shadow(
   "ParamSetShadow"
 ))
 
+# with paradox 2 the bridge binds paradox's generator
 bridge_namespace = new.env(parent = emptyenv())
 bridge_namespace$ParamSetShadow = NULL
-lockBinding("ParamSetShadow", bridge_namespace)
 expect_true(miesmuschel:::.install_param_set_shadow_bridge(
   bridge_namespace,
   paradox_version = numeric_version("2.0.0"),
@@ -34,18 +36,12 @@ expect_true(miesmuschel:::.install_param_set_shadow_bridge(
   legacy_factory = function() stop("legacy generator was constructed")
 ))
 expect_identical(bridge_namespace$ParamSetShadow, native_generator)
-expect_true(bindingIsLocked("ParamSetShadow", bridge_namespace))
-expect_error(
-  miesmuschel:::.unlock_param_set_shadow_binding(
-    "unrelated",
-    bridge_namespace
-  ),
-  "Refusing to unlock unrelated binding"
-)
 
+# with paradox 1 it binds the local implementation and leanifies it, which
+# populates the historical .__ParamSetShadow__* names with the
+# implementation's own method bodies
 legacy_namespace = new.env(parent = emptyenv())
 legacy_namespace$ParamSetShadow = NULL
-lockBinding("ParamSetShadow", legacy_namespace)
 expect_false(miesmuschel:::.install_param_set_shadow_bridge(
   legacy_namespace,
   paradox_version = numeric_version("1.1.0"),
@@ -54,7 +50,7 @@ expect_false(miesmuschel:::.install_param_set_shadow_bridge(
   legacy_factory = function() legacy_generator
 ))
 expect_identical(legacy_namespace$ParamSetShadow, legacy_generator)
-expect_true(bindingIsLocked("ParamSetShadow", legacy_namespace))
+expect_true(is.function(legacy_namespace$.__ParamSetShadow__initialize))
 
 # The load-time decision must not depend on the paradox version under which a
 # source or binary package happened to be built.
@@ -165,6 +161,37 @@ if ("ParamSetShadow" %in% getNamespaceExports("paradox")) {
       legacy_shell, legacy_private, NULL
     ),
     "upgrade_paradox_object_graph"
+  )
+
+  # a current object passes straight through the gateways, so a stub taken
+  # from an object before it was upgraded keeps working afterwards
+  current = ParamSetShadow$new(ps(x = p_dbl(0, 1), hidden = p_lgl()), "hidden")
+  stub = function(rhs) {
+    miesmuschel:::.__ParamSetShadow__values(
+      self = current, private = NULL, super = NULL, rhs = rhs
+    )
+  }
+  expect_identical(stub(), current$values)
+  stub(list(x = 0.25))
+  expect_identical(current$values, list(x = 0.25))
+  expect_identical(
+    miesmuschel:::.__ParamSetShadow__origin(current, NULL, NULL),
+    current$origin
+  )
+  expect_true(miesmuschel:::.__ParamSetShadow__test_constraint(
+    current, NULL, NULL, x = list(x = 0.5)
+  ))
+  cloned = miesmuschel:::.__ParamSetShadow__clone(current, NULL, NULL, deep = TRUE)
+  expect_identical(cloned$values, list(x = 0.25))
+  expect_error(
+    miesmuschel:::.__ParamSetShadow__params_unid(current, NULL, NULL),
+    "retired"
+  )
+  expect_error(
+    miesmuschel:::.__ParamSetShadow__initialize(
+      current, NULL, NULL, current$origin, "hidden"
+    ),
+    "cannot be initialized again"
   )
 } else {
   legacy_instance = ParamSetShadow$new(legacy_origin, "hidden")
