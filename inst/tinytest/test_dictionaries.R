@@ -158,10 +158,10 @@ for (opinfo in dicts) {
   # check that dict_***$get()  gives the same object as **$new() does
   fromdict = do.call(dict$get, c(list(dictname), constargs))
   expand(fromdict)
-  expect_equal_operator_public(fromdict, test_obj, info = dictname)
+  expect_equal(fromdict, test_obj, info = dictname)
 
-  expect_equal_operator_public(construct_from_repr(repr(test_obj)), test_obj, info = opinfo$operator)
-  expect_equal_operator_public(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), test_obj, info = opinfo$operator)
+  expect_equal(construct_from_repr(repr(test_obj)), test_obj, info = opinfo$operator)
+  expect_equal(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), test_obj, info = opinfo$operator)
 
   tops = test_obj$param_set
   # check that hyperparameters can be changed on construction
@@ -194,15 +194,12 @@ for (opinfo in dicts) {
 
     pv_obj = do.call(shortforms[[opinfo$base]], c(list(dictname), constargs))
     expand(pv_obj)
-    expect_false(isTRUE(all.equal(
-      operator_public_state(test_obj),
-      operator_public_state(pv_obj)
-    )), info = opinfo$operator)
+    expect_false(isTRUE(all.equal(test_obj, pv_obj)), info = opinfo$operator)
     test_obj$param_set$values[[testingparam]] = val
-    expect_equal_operator_public(test_obj, pv_obj, info = opinfo$operator)
+    expect_true(isTRUE(all.equal(test_obj, pv_obj)))
 
-    expect_equal_operator_public(construct_from_repr(repr(test_obj)), pv_obj, info = opinfo$operator)
-    expect_equal_operator_public(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), pv_obj, info = opinfo$operator)
+    expect_equal(construct_from_repr(repr(test_obj)), pv_obj, info = opinfo$operator)
+    expect_equal(construct_from_repr(repr(test_obj, skip_defaults = FALSE)), pv_obj, info = opinfo$operator)
 
   }
 
@@ -234,3 +231,4 @@ for (opinfo in dicts) {
     expect_equal(helpobj, helpobj_2, info = paste("help for", opinfo$operator, "III"))
   }
 }
+
