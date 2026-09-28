@@ -107,6 +107,8 @@ reg_mlr3tuning = function(...) {  # nocov start
 }  # nocov end
 
 .onLoad = function(libname, pkgname) {  # nocov start
+  .install_param_set_shadow_bridge(asNamespace(pkgname))
+  .register_paradox_shadow_upgrader()
   reg_bbotk()
   if ("mlr3tuning" %in% loadedNamespaces()) {
     reg_mlr3tuning()
@@ -173,4 +175,3 @@ utils::globalVariables(c("dob", "eol", "."))
 if (!Sys.getenv("DEVTOOLS_LOAD") == "true") {
   leanify_package()
 }
-

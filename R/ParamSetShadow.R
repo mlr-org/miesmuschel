@@ -1,15 +1,65 @@
+# paradox exports its own ParamSetShadow since version 2.0.0.
+.paradox_has_owned_shadow = function(
+    paradox_exports = getNamespaceExports("paradox")) {
+  "ParamSetShadow" %in% paradox_exports
+}
+
+# Called from .onLoad(), which runs before the namespace is sealed, so plain
+# assignment into the namespace is all that is needed.
+.install_param_set_shadow_bridge = function(namespace,
+    paradox_exports = getNamespaceExports("paradox"),
+    get_exported_value = getExportedValue,
+    legacy_factory = .make_legacy_param_set_shadow) {
+  use_paradox = .paradox_has_owned_shadow(paradox_exports)
+  generator = if (use_paradox) {
+    get_exported_value("paradox", "ParamSetShadow")
+  } else {
+    legacy_factory()
+  }
+  if (!use_paradox) {
+    # Overwrites the .__ParamSetShadow__* gateways defined at the end of this
+    # file with the implementation's own method bodies.
+    mlr3misc::leanify_r6(generator, namespace)
+  }
+  assign("ParamSetShadow", generator, envir = namespace)
+  invisible(use_paradox)
+}
+
 #' @title ParamSetShadow
 #'
 #' @description
 #' Wraps another [`ParamSet`][paradox::ParamSet] and shadows out a subset of its [`Domain`][paradox::Domain]s.
 #' The original [`ParamSet`][paradox::ParamSet] can still be accessed through the `$origin` field;
 #' otherwise, the `ParamSetShadow` behaves like a [`ParamSet`][paradox::ParamSet] where the shadowed
-#' [`Domain`][paradox::Domain]s are not present.
+#' [`Domain`][paradox::Domain]s are not present: they are hidden from `$values`, `$params` and `$deps`,
+#' and values assigned through the `ParamSetShadow` are written through to the wrapped
+#' [`ParamSet`][paradox::ParamSet] while the shadowed values are kept.
 #'
-#' @param set ([`ParamSet`][paradox::ParamSet])\cr
+#' Which implementation is used depends on the installed version of `paradox`:
+#' * With `paradox` 2.0.0 or newer, `miesmuschel::ParamSetShadow` is the very same class as the
+#'   `ParamSetShadow` exported by `paradox`. See the help page of that name in `paradox` for the
+#'   complete list of methods and fields.
+#' * With `paradox` 1.x, `miesmuschel` uses its own compatibility implementation of the class,
+#'   which provides the constructor and the `$origin` field described here. Its `$params_unid` and
+#'   `$set_id` fields only exist for backward compatibility and are not available with `paradox` 2.
+#'
+#' The exported object is bound when the package is loaded, which is why this help page does not
+#' list the methods of the class.
+#'
+#' @section Construction:
+#' ```
+#' ParamSetShadow$new(set, shadowed)
+#' ```
+#' * `set` :: [`ParamSet`][paradox::ParamSet]\cr
 #'   [`ParamSet`][paradox::ParamSet] to wrap.
-#' @param shadowed (`character`)\cr
-#'   Ids of [`Domain`][paradox::Domain]s to shadow from `sets`, must be a subset of `set$ids()`.
+#' * `shadowed` :: `character`\cr
+#'   Ids of [`Domain`][paradox::Domain]s to shadow from `set`, must be a subset of `set$ids()`.
+#'
+#' @section Fields:
+#' * `origin` :: [`ParamSet`][paradox::ParamSet]\cr
+#'   The wrapped [`ParamSet`][paradox::ParamSet]. This field is read-only, but the object it refers to
+#'   can be modified by reference to influence the `ParamSetShadow` object itself.
+#'
 #' @examples
 #' p1 = ps(x = p_dbl(0, 1), y = p_lgl())
 #' p1$values = list(x = 0.5, y = TRUE)
@@ -22,11 +72,24 @@
 #' print(p2)
 #'
 #' print(p2$origin$values)
+#' @name ParamSetShadow
 #' @export
-ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
+NULL
+
+# Populated by .onLoad(). Do not serialize Paradox's generator in this
+# namespace: leanification would otherwise rewrite its package-owned methods.
+ParamSetShadow = NULL
+
+.make_legacy_param_set_shadow = function() {
+  # R6 installs these bindings in each method's enclosing environment.
+  # Declaring them here also makes that generated lexical contract explicit to
+  # codetools without suppressing unrelated undefined globals package-wide.
+  private = self = super = NULL
+  R6Class("ParamSetShadow", inherit = ParamSet,
+  parent_env = asNamespace("miesmuschel"),
   public = list(
-    #' @description
-    #' Initialize the `ParamSetShadow` object.
+    # @description
+    # Initialize the `ParamSetShadow` object.
     initialize = function(set, shadowed) {
       private$.set = assert_r6(set, "ParamSet")
       private$.shadowed = assert_subset_character(shadowed, set$ids())
@@ -40,20 +103,20 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
         paramtbl = set$params[!shadowed, on = "id"]
         private$.tags = paramtbl[, .(tag = unlist(.tags)), keyby = "id"]
         private$.trafos = setkeyv(paramtbl[!map_lgl(.trafo, is.null), .(id, trafo = .trafo)], "id")
-        set(paramtbl, , setdiff(colnames(paramtbl), colnames(set$.__enclos_env__$private$.params)), NULL)
+        set(paramtbl, , grep("^\\.", colnames(paramtbl), value = TRUE), NULL)
         setindexv(paramtbl, c("id", "cls", "grouping"))
         private$.params = paramtbl
         private$.extra_trafo = set$extra_trafo
       }
     },
 
-    #' @description
-    #' Checks underlying [`ParamSet`][paradox::ParamSet]'s constraint.
-    #' It uses the underlying `$values` for shadowed values.
-    #'
-    #' @param x (named `list`) values to test
-    #' @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$test_constraint()` function.
-    #' @return `logical(1)`.
+    # @description
+    # Checks underlying [`ParamSet`][paradox::ParamSet]'s constraint.
+    # It uses the underlying `$values` for shadowed values.
+    #
+    # @param x (named `list`) values to test
+    # @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$test_constraint()` function.
+    # @return `logical(1)`.
     test_constraint = function(x, ...) {
       assert_list(x, names = "unique")
       if (length(x)) assert_names(names(x), disjunct.from = private$.shadowed)
@@ -61,15 +124,15 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       values_underlying = values_underlying[intersect(names(values_underlying), private$.shadowed)]
       private$.set$test_constraint(c(x, values_underlying), ...)
     },
-    #' @description
-    #' Adds a dependency to the unterlying [`ParamSet`][paradox::ParamSet].
-    #'
-    #' @param id (`character(1)`)
-    #' @param on (`character(1)`)
-    #' @param cond ([`Condition`][paradox::Condition])
-    #' @param allow_dangling_dependencies (`logical(1)`): Whether to allow dependencies on parameters that are not present.
-    #' @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$add_dep()` function.
-    #' @return `invisible(self)`.
+    # @description
+    # Adds a dependency to the unterlying [`ParamSet`][paradox::ParamSet].
+    #
+    # @param id (`character(1)`)
+    # @param on (`character(1)`)
+    # @param cond ([`Condition`][paradox::Condition])
+    # @param allow_dangling_dependencies (`logical(1)`): Whether to allow dependencies on parameters that are not present.
+    # @param ... Further arguments passed to [`ParamSet`][paradox::ParamSet]'s `$add_dep()` function.
+    # @return `invisible(self)`.
     add_dep = function(id, on, cond,  allow_dangling_dependencies = FALSE, ...) {
       ids = self$ids()
       assert_choice(id, ids)
@@ -102,8 +165,8 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
         }, constraint, set, shadowed)
       }
     },
-    #' @field params (named `list()`)\cr
-    #' Table of rows identifying the contained [`Domain`][paradox::Domain]s
+    # @field params (named `list()`)\cr
+    # Table of rows identifying the contained [`Domain`][paradox::Domain]s
     params = function(rhs) {
       if (!missing(rhs)) {
         stop("params is read-only.")
@@ -114,11 +177,11 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       params
     },
 
-    #' @field params_unid (named `list` of `Param`)
-    #' List of `Param` that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
-    #' shadowed `Param`s removed. This is a field mostly for internal usage that has the
-    #' `$id`s set to invalid values but avoids cloning overhead.\cr
-    #' Deprecated by the upcoming `paradox` package update and will be removed in the future.
+    # @field params_unid (named `list` of `Param`)
+    # List of `Param` that are members of the wrapped [`ParamSet`][paradox::ParamSet] with the
+    # shadowed `Param`s removed. This is a field mostly for internal usage that has the
+    # `$id`s set to invalid values but avoids cloning overhead.\cr
+    # Available only in the paradox 1.x compatibility implementation.
     params_unid = function(rhs) {
       if (!missing(rhs)) {
         stop("params_unid is read-only.")
@@ -128,10 +191,10 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       params[private$.shadowed] = NULL
       params
     },
-    #' @field deps ([`data.table`][data.table::data.table])\cr
-    #' Table of dependencies, as in [`ParamSet`][paradox::ParamSet]. The dependencies that are related to shadowed
-    #' parameters are not exposed. This [`data.table`][data.table::data.table] should be seen as read-only and not
-    #' modified in-place; instead, the `$origin`'s `$deps` should be modified.
+    # @field deps ([`data.table`][data.table::data.table])\cr
+    # Table of dependencies, as in [`ParamSet`][paradox::ParamSet]. The dependencies that are related to shadowed
+    # parameters are not exposed. This [`data.table`][data.table::data.table] should be seen as read-only and not
+    # modified in-place; instead, the `$origin`'s `$deps` should be modified.
     deps = function(rhs) {
       if (!missing(rhs)) {
         stop("deps is read-only.")
@@ -139,8 +202,8 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       id = on = NULL
       private$.set$deps[!id %in% private$.shadowed & !on %in% private$.shadowed, ]
     },
-    #' @field values (named `list`)\cr
-    #' List of values, as in [`ParamSet`][paradox::ParamSet], with the shadowed values removed.
+    # @field values (named `list`)\cr
+    # List of values, as in [`ParamSet`][paradox::ParamSet], with the shadowed values removed.
     values = function(rhs) {
       if (!missing(rhs)) {
         assert_list(rhs)
@@ -154,8 +217,8 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       values[private$.shadowed] = NULL
       values
     },
-    #' @field set_id ([`data.table`][data.table::data.table])\cr
-    #' Id of the wrapped [`ParamSet`][paradox::ParamSet]. Changing this value will also change the wrapped [`ParamSet`][paradox::ParamSet]'s `$set_id` accordingly.
+    # @field set_id ([`data.table`][data.table::data.table])\cr
+    # Id of the wrapped [`ParamSet`][paradox::ParamSet]. Changing this value will also change the wrapped [`ParamSet`][paradox::ParamSet]'s `$set_id` accordingly.
     set_id = function(v) {
       if (paradox_s3) {
         if (!missing(v)) stop("setting $set_id no longer supported!")
@@ -167,8 +230,8 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
       }
       private$.set$set_id
     },
-    #' @field origin ([`ParamSet`][paradox::ParamSet])\cr
-    #' [`ParamSet`][paradox::ParamSet] being wrapped. This object can be modified by reference to influence the `ParamSetShadow` object itself.
+    # @field origin ([`ParamSet`][paradox::ParamSet])\cr
+    # [`ParamSet`][paradox::ParamSet] being wrapped. This object can be modified by reference to influence the `ParamSetShadow` object itself.
     origin = function(rhs) {
       if (!missing(rhs) && !identical(rhs, private$.set)) {
         stop("origin is read-only.")
@@ -180,6 +243,322 @@ ParamSetShadow = R6Class("ParamSetShadow", inherit = ParamSet,
     .set = NULL,
     .shadowed = NULL,
     .extra_trafo = NULL
+    )
   )
-)
+}
 
+# Reads a binding of a serialized object without running any code stored in
+# that object: an active binding is refused, and a delayed binding is detected
+# without forcing it, because `substitute()` returns the unevaluated
+# expression of a promise instead of its value.
+.legacy_shadow_binding = function(owner, name) {
+  if (!is.environment(owner) ||
+      !exists(name, envir = owner, inherits = FALSE) ||
+      bindingIsActive(name, owner)) {
+    stop(sprintf("Malformed legacy ParamSetShadow binding `%s`", name))
+  }
+  value = do.call(substitute, list(as.name(name), owner))
+  if (is.language(value) || is.symbol(value)) {
+    stop(sprintf("Delayed legacy ParamSetShadow binding `%s` is unsupported", name))
+  }
+  value
+}
+
+# Paradox 1 stored tags as a table with columns `id` and `tag` and reported
+# them through `$tags` as a named list with one character vector per
+# parameter. Produce that shape for `ids`, with sorted unique tags, so that two
+# tag assignments compare equal whenever they describe the same tags.
+.legacy_shadow_tag_list = function(tags, ids) {
+  if (!is.data.frame(tags) || !all(c("id", "tag") %in% names(tags)) ||
+      !is.character(tags[["id"]]) || !is.character(tags[["tag"]]) ||
+      anyNA(tags[["id"]]) || anyNA(tags[["tag"]])) {
+    stop("Malformed legacy ParamSetShadow tag table")
+  }
+  result = stats::setNames(vector("list", length(ids)), ids)
+  for (id in ids) {
+    result[[id]] = sort(unique(tags[["tag"]][tags[["id"]] == id]))
+  }
+  result
+}
+
+# The extra transformation the origin reported when the legacy shadow copied
+# it at construction, read without calling anything on a legacy object. A
+# Paradox 1 collection reported its composed private method, or NULL when no
+# contained set had a transformation. An origin that was already upgraded in
+# place is a current object and can be asked directly.
+.legacy_shadow_origin_extra_trafo = function(origin) {
+  enclosure = .legacy_shadow_binding(origin, ".__enclos_env__")
+  private = .legacy_shadow_binding(enclosure, "private")
+  if (!is.environment(private)) {
+    stop("Malformed legacy ParamSetShadow origin")
+  }
+  if (exists(".core", envir = private, inherits = FALSE)) {
+    return(origin$extra_trafo)
+  }
+  if (inherits(origin, "ParamSetCollection")) {
+    children = .legacy_shadow_binding(private, ".children_with_trafos")
+    if (!length(children)) return(NULL)
+    return(.legacy_shadow_binding(private, ".extra_trafo_explicit"))
+  }
+  .legacy_shadow_binding(private, ".extra_trafo")
+}
+
+.legacy_shadow_extra_trafo_matches = function(shadow_trafo, origin) {
+  origin_trafo = .legacy_shadow_origin_extra_trafo(origin)
+  if (is.null(shadow_trafo) && is.null(origin_trafo)) return(TRUE)
+  if (identical(shadow_trafo, origin_trafo)) return(TRUE)
+  if (!is.function(shadow_trafo)) return(FALSE)
+  # A Paradox 1 collection's composed transformation is a method of the
+  # origin. It still belongs to the origin after the origin was upgraded in
+  # place, even though the origin then reports a rebuilt callback.
+  owner = tryCatch(
+    .legacy_shadow_binding(environment(shadow_trafo), "self"),
+    error = function(e) NULL
+  )
+  identical(owner, origin)
+}
+
+.inspect_legacy_param_set_shadow = function(x) {
+  if (!is.environment(x) ||
+      !identical(attr(x, "class", exact = TRUE),
+        c("ParamSetShadow", "ParamSet", "R6"))) {
+    stop("Malformed legacy miesmuschel ParamSetShadow")
+  }
+  enclosure = .legacy_shadow_binding(x, ".__enclos_env__")
+  private = .legacy_shadow_binding(enclosure, "private")
+  origin = .legacy_shadow_binding(private, ".set")
+  shadowed = .legacy_shadow_binding(private, ".shadowed")
+  if (!is.environment(enclosure) || !is.environment(private) ||
+      !is.environment(origin) || !inherits(origin, "ParamSet") ||
+      !is.character(shadowed) || anyNA(shadowed)) {
+    stop("Malformed legacy miesmuschel ParamSetShadow state")
+  }
+  # The Paradox 1 implementation copied the visible schema into the shadow at
+  # construction, so a serialized shadow may report tags and an extra
+  # transformation that differ from its origin's. Tags are carried along and
+  # become the rebuilt view's own answer. A differing transformation cannot be
+  # represented: a Paradox 2 ParamSetShadow always applies the origin's, so
+  # refuse the upgrade instead of silently dropping it.
+  params = .legacy_shadow_binding(private, ".params")
+  if (!is.data.frame(params) || !is.character(params[["id"]])) {
+    stop("Malformed legacy miesmuschel ParamSetShadow parameter table")
+  }
+  extra_trafo = .legacy_shadow_binding(private, ".extra_trafo")
+  if (!.legacy_shadow_extra_trafo_matches(extra_trafo, origin)) {
+    stop(paste0(
+      "The legacy ParamSetShadow has an `extra_trafo` that differs from its ",
+      "origin's. A Paradox 2 ParamSetShadow always applies the origin's ",
+      "`extra_trafo`, so this object cannot be upgraded automatically. ",
+      "Upgrade the origin, construct a new ParamSetShadow on it, and set the ",
+      "transformation where it should live."
+    ))
+  }
+  tags = .legacy_shadow_tag_list(
+    .legacy_shadow_binding(private, ".tags"),
+    params[["id"]]
+  )
+  list(
+    state = list(shadowed = shadowed, tags = tags),
+    dependencies = list(origin = origin)
+  )
+}
+
+.rebuild_legacy_param_set_shadow = function(base, state, dependencies) {
+  shadow = getExportedValue("paradox", "ParamSetShadow")$new(
+    dependencies$origin,
+    state$shadowed
+  )
+  legacy_tags = state$tags
+  current_tags = shadow$tags
+  unknown = setdiff(names(legacy_tags), names(current_tags))
+  if (length(unknown)) {
+    stop(sprintf(
+      "The legacy ParamSetShadow tagged parameters its origin does not have: %s",
+      paste(unknown, collapse = ", ")
+    ))
+  }
+  unchanged = vapply(names(legacy_tags), function(id) {
+    identical(sort(unique(current_tags[[id]])), legacy_tags[[id]])
+  }, logical(1L))
+  # Paradox 1 froze a shadow's tags at construction. Paradox 2 reads the
+  # origin's tags live but lets a view pin its own answer, so when the
+  # serialized tags differ from the origin's, pin the serialized ones. The
+  # upgraded view then keeps reporting what the serialized object did. A tag
+  # assignment must name every visible parameter, so all of them are pinned.
+  if (!all(unchanged)) {
+    shadow$tags = legacy_tags
+  }
+  shadow
+}
+
+.register_paradox_shadow_upgrader = function() {
+  if (!"register_paradox_object_upgrader" %in%
+      getNamespaceExports("paradox")) {
+    return(invisible(FALSE))
+  }
+  getExportedValue("paradox", "register_paradox_object_upgrader")(
+    owner_package = "miesmuschel",
+    legacy_class = c("ParamSetShadow", "ParamSet", "R6"),
+    migration_kind = "replacement",
+    inspector = ".inspect_legacy_param_set_shadow",
+    rebuilder = ".rebuild_legacy_param_set_shadow",
+    retired_bindings = c("params_unid", "set_id")
+  )
+  invisible(TRUE)
+}
+
+# Whether `self` is backed by a current Paradox 2 capsule, which current shells
+# keep in the private field `.core`. A serialized Paradox 1 shell has no such
+# field.
+.legacy_shadow_is_current = function(self) {
+  enclosure = tryCatch(
+    .legacy_shadow_binding(self, ".__enclos_env__"),
+    error = function(e) NULL
+  )
+  private = if (is.environment(enclosure)) {
+    tryCatch(
+      .legacy_shadow_binding(enclosure, "private"),
+      error = function(e) NULL
+    )
+  }
+  is.environment(private) && exists(".core", envir = private, inherits = FALSE)
+}
+
+# Migration entry shared by the gateways below. A current object passes
+# through; a serialized Paradox 1 object is upgraded in place when the user
+# opted in and reported otherwise.
+.legacy_shadow_require_current = function(self, target) {
+  if (.legacy_shadow_is_current(self)) return(invisible(TRUE))
+  action = getOption("paradox.legacy_object_action", "error")
+  if (!identical(action, "upgrade")) {
+    stop(
+      sprintf(
+        paste0(
+          "A serialized Paradox 1 object tried to call ",
+          "`miesmuschel::%s`. Upgrade the containing object with ",
+          "`upgrade_paradox_object_graph(x)`. To perform this migration ",
+          "silently on first use, set ",
+          "`options(paradox.legacy_object_action = \"upgrade\")`."
+        ),
+        target
+      ),
+      call. = FALSE
+    )
+  }
+  getExportedValue("paradox", "upgrade_paradox_object_graph")(self)
+  invisible(TRUE)
+}
+
+# The current active binding `member` of `self`, after migration if needed.
+# Paradox installs the retired bindings `params_unid` and `set_id` as
+# informative errors on an upgraded shell; a binding that is absent altogether
+# is reported here.
+.legacy_shadow_active_binding = function(self, member, target) {
+  .legacy_shadow_require_current(self, target)
+  if (!exists(member, envir = self, inherits = FALSE) ||
+      !bindingIsActive(member, self)) {
+    stop(
+      sprintf(
+        "The legacy ParamSetShadow binding `%s` was retired by Paradox 2",
+        member
+      ),
+      call. = FALSE
+    )
+  }
+  activeBindingFunction(member, self)
+}
+
+# Historical miesmuschel releases leanified their own ParamSetShadow at package
+# load, so the method stubs of a serialized object call these exact namespace
+# names with `self`, `private` and `super` prepended. On Paradox 2 they are
+# gateways: they upgrade the serialized object on first use, or report it, and
+# replay the requested operation on the upgraded shell; a current object
+# passes straight through. The stub's `private` and `super` belong to the
+# retired shell and are never used. On Paradox 1, leanification of the local
+# implementation overwrites these definitions with its own method bodies at
+# package load.
+#
+# The public methods keep their argument names in Paradox 2, so their
+# arguments are forwarded as they are. The active bindings named their
+# argument differently from the current ones, so they replay by position.
+.__ParamSetShadow__initialize = function(self, private, super, set, shadowed) {
+  stop(
+    paste0(
+      "A serialized Paradox 1 ParamSetShadow cannot be initialized again ",
+      "through `miesmuschel::.__ParamSetShadow__initialize`. Upgrade it with ",
+      "`upgrade_paradox_object_graph(x)`; new objects are created with ",
+      "`ParamSetShadow$new()`."
+    ),
+    call. = FALSE
+  )
+}
+
+.__ParamSetShadow__test_constraint = function(self, private, super, x, ...) {
+  .legacy_shadow_require_current(self, ".__ParamSetShadow__test_constraint")
+  self$test_constraint(x, ...)
+}
+
+.__ParamSetShadow__add_dep = function(
+    self, private, super, id, on, cond,
+    allow_dangling_dependencies = FALSE, ...) {
+  .legacy_shadow_require_current(self, ".__ParamSetShadow__add_dep")
+  self$add_dep(
+    id, on, cond,
+    allow_dangling_dependencies = allow_dangling_dependencies,
+    ...
+  )
+}
+
+.__ParamSetShadow__clone = function(self, private, super, deep = FALSE) {
+  .legacy_shadow_require_current(self, ".__ParamSetShadow__clone")
+  self$clone(deep = deep)
+}
+
+.__ParamSetShadow__constraint = function(self, private, super, f) {
+  binding = .legacy_shadow_active_binding(
+    self, "constraint", ".__ParamSetShadow__constraint"
+  )
+  if (missing(f)) binding() else binding(f)
+}
+
+.__ParamSetShadow__deps = function(self, private, super, rhs) {
+  binding = .legacy_shadow_active_binding(
+    self, "deps", ".__ParamSetShadow__deps"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
+}
+
+.__ParamSetShadow__origin = function(self, private, super, rhs) {
+  binding = .legacy_shadow_active_binding(
+    self, "origin", ".__ParamSetShadow__origin"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
+}
+
+.__ParamSetShadow__params = function(self, private, super, rhs) {
+  binding = .legacy_shadow_active_binding(
+    self, "params", ".__ParamSetShadow__params"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
+}
+
+.__ParamSetShadow__params_unid = function(self, private, super, rhs) {
+  binding = .legacy_shadow_active_binding(
+    self, "params_unid", ".__ParamSetShadow__params_unid"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
+}
+
+.__ParamSetShadow__set_id = function(self, private, super, v) {
+  binding = .legacy_shadow_active_binding(
+    self, "set_id", ".__ParamSetShadow__set_id"
+  )
+  if (missing(v)) binding() else binding(v)
+}
+
+.__ParamSetShadow__values = function(self, private, super, rhs) {
+  binding = .legacy_shadow_active_binding(
+    self, "values", ".__ParamSetShadow__values"
+  )
+  if (missing(rhs)) binding() else binding(rhs)
+}
